@@ -1,473 +1,277 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV ONLINE STREAMING</title>
-    <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
-    <script>
-        jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
-    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>เว็บดูทีวี - Premium Channel Grid</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-    	
+      body {    margin: 0;    background: #121212;    color: #eee;    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  }
+      header {    background-color: #111;    padding: 12px 24px;    display: flex;    align-items: center;    box-shadow: 0 2px 8px rgba(0,0,0,0.7);    gap: 16px;  }  header a.logo-link img {    height: 48px;    filter: drop-shadow(0 0 3px #0f62fe);    transition: transform 0.3s ease;  }  header a.logo-link:hover img {    transform: scale(1.1);  }
+      .running-text-container {    flex: 1;    overflow: hidden;    white-space: nowrap;    position: relative;    height: 48px;  }  .running-text {  	    display: inline-block;    padding-left: 100%;    animation: marquee 15s linear infinite;    font-size: 20px;    font-weight: 600;    color: #ffffff;    user-select: none;    text-shadow: 0 0 5px #0f62fe99;    line-height: 48px;  }  @keyframes marquee {    0% { transform: translateX(0); }    100% { transform: translateX(-100%); }  }
+      #horizontalMenu {    background-color: #222;    padding: 8px 16px;    display: flex;    gap: 16px;    justify-content: center;    align-items: center;  }  #horizontalMenu a.icon-link img {    width: 32px;    height: 32px;    object-fit: contain;    transition: transform 0.3s ease, filter 0.3s ease;    filter: none;  }  #horizontalMenu a.icon-link:hover img {    transform: scale(1.1);    filter: drop-shadow(0 0 5px #1e90ff);  }
+      #videoPlayer {    width: 90%;    max-width: 900px;    height: 506px;    margin: 20px auto 10px;    display: block;    border-radius: 8px;    background: black;    box-shadow: 0 0 20px #0f62fe99;  }
+      /* ปรับเป็นกริด 4 คอลัมน์สำหรับช่องรายการ */  #channelList {    width: 90%;    max-width: 900px;    margin: 0 auto 30px;    display: grid;    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));    gap: 16px;  }  .channel-item {    cursor: pointer;    background: #222;    border-radius: 8px;    padding: 12px;    display: flex;    align-items: center;    gap: 12px;    box-shadow: inset 0 0 5px transparent;    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;    user-select: none;    outline-offset: 4px;  }  .channel-item:hover,  .channel-item:focus {    background-color: #0f62fe;    box-shadow: 0 0 15px #1e90ff;    transform: scale(1.05);    outline: none;  }  .channel-item.active {    background-color: #005fcc;    box-shadow: 0 0 20px #3ea0ff;    transform: scale(1.07);  }  .channel-item img {    width: 70px;    height: 40px;    object-fit: contain;    border-radius: 6px;    box-shadow: 0 0 8px rgba(0,0,0,0.5);  }  .channel-name {    font-size: 18px;    font-weight: 700;    color: #eee;    white-space: nowrap;    overflow: hidden;    text-overflow: ellipsis;  }
+    #slideShow {  width: 90%;  max-width: 900px;  margin: 0 auto 50px;  display: flex;  gap: 16px;  overflow-x: auto;  padding: 16px;  border-radius: 12px;  background: rgba(18, 18, 18, 0.4);  backdrop-filter: blur(5px);}
+    #slideShow a {  display: block;  width: 220px;  height: 124px;  border-radius: 10px;  overflow: hidden;  flex-shrink: 0;  position: relative;}
+    #slideShow a img {  position: absolute;  width: 100%;  height: 100%;  object-fit: fit; /* สำคัญ: ตัดภาพให้พอดี */  border-radius: 10px;  transition: transform 0.3s ease, box-shadow 0.3s ease;  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);}
+    #slideShow a img:hover {  transform: scale(1.05);  box-shadow: 0 0 20px #1e90ff;}
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            font-size: 8px; /* ขนาดฟอนต์เริ่มต้น */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #player {
-            width: 100%;
-            max-width: 800px;
-            aspect-ratio: 16/9;
-        }
-        #channel-list {
-            margin: 10px auto;
-            max-width: 800px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            justify-content: center;
-        }
-        .channel {
-            cursor: pointer;
-            padding: 5px;
-            background: #fff;
-            border: 1px solid #444;
-            border-radius: 5px;
-            text-align: center;
-            width: 50px;
-        }
-        .channel img {
-            width: 50px;
-            height: 50px;
-            margin-bottom: 5px;
-        }
-        .channel:hover {
-            background: #000;
-        }
-        /* ซ่อนโค้ดวิดีโอจาก view-source */
-        script:not([type]) {
-            display: none;
-        }
+      #channelList::-webkit-scrollbar,  #slideShow::-webkit-scrollbar {    height: 8px;  }  #channelList::-webkit-scrollbar-thumb,  #slideShow::-webkit-scrollbar-thumb {    background-color: #0f62fe99;    border-radius: 4px;  }  #channelList::-webkit-scrollbar-track,  #slideShow::-webkit-scrollbar-track {    background-color: transparent;  }
+      @media (max-width: 600px) {    #videoPlayer {      width: 100%;      height: 280px;    }    .channel-item {      padding: 10px;      gap: 8px;    }    .channel-item img {      width: 50px;      height: 28px;    }    .channel-name {      font-size: 16px;    }    #slideShow a {      width: 150px;      height: 85px;    }    #slideShow a img {      width: 150px;      height: 85px;    }  }
     </style>
-    <script type="text/javascript">
-        (function() {
-            document.addEventListener("contextmenu", function(event) {
-                event.preventDefault();
-            });
-            document.addEventListener("keydown", function(event) {
-                if (event.ctrlKey && (event.key === 'u' || event.key === 'U')) {
-                    event.preventDefault();
-                }
-            });
-        })();
-    </script>
 </head>
 <body>
-    <div id="player"></div>
-    <div id="channel-list"></div>
-    <script type="text/javascript">
+
+<header>
+  <a href="/" class="logo-link" title="Home">
+    <img src="/logo/dotvzaa/Picsart_25-04-21_14-32-15-772.png" alt="โลโก้เว็บ" />
+  </a>
+  <div class="running-text-container" aria-label="ข้อความวิ่ง">
+    <div class="running-text">รับสมาชิก ตลอดชีพ ชมได้ 2 อุปกรณ์พร้อมกัน ราคา850 บาท  สนใจ แอดไลน์ @680salib</div>
+  </div>
+</header>
+
+<div id="horizontalMenu">
+  <a href="http://tvzaa.myftp.org" target="_blank" class="icon-link" title="TVZAA">
+    <img src="https://cdn-icons-png.flaticon.com/128/1946/1946436.png" alt="TVZAA Logo" />
+  </a>
+  <a href="https://www.google.com" target="_blank" class="icon-link" title="Google">
+    <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google Logo" />
+  </a>
+  <a href="https://www.youtube.com" target="_blank" class="icon-link" title="YouTube">
+    <img src="https://cdn-icons-png.flaticon.com/128/1384/1384060.png" alt="YouTube Logo" />
+  </a>
+  <a href="https://line.me/ti/p/@680salib" target="_blank" class="icon-link" title="LINE">
+    <img src="logo/header/17461166145122510042015147482419.png" alt="LINE Logo" />
+  </a>
+  <a href="https://www.facebook.com/profile.php?id=61554952649144" target="_blank" class="icon-link" title="Facebook">
+    <img src="logo/header/17461166410103915598820082461503.png" alt="Facebook Logo" />
+  </a>
+</div>
+
+<video id="videoPlayer" controls autoplay playsinline></video>
+
+<div id="channelList" aria-label="รายการช่อง"></div>
+
+<div id="slideShow" aria-label="ภาพสไลด์"></div>
+
+<script>
+  const m3uData = `#EXTM3U
+#EXTINF:-1 tvg-chno="1" ch-number="1" tvg-id="MVTV ท้องถิ่นไทย (75).th" tvg-name="MVTV ท้องถิ่นไทย (75)" tvg-logo="/logo/vbtv1.png" group-title="Digital TV", VBTV 1
+http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2F_fFIe4C7xjX_opxPplasA/m3u8
+#EXTINF:-1 tvg-chno="1" ch-number="1" tvg-id="MVTV ท้องถิ่นไทย (75).th" tvg-name="MVTV ท้องถิ่นไทย (75)" tvg-logo="/logo/vbtv2.png" group-title="Digital TV", VBTV 2
+http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2GWk7jgFdGl1hfeZKznSlgg/m3u8
+#EXTINF:-1 xui-id="15855" tvg-id="" tvg-name="หนังฝรั่ง" tvg-logo="http://45.144.165.223/logo/ent/intermovie.png" group-title="DIGITAL",หนังฝรั่ง
+http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2GNXaNwzV0aoBpkJ1W6O9P8/m3u8
+#EXTINF:-1 xui-id="15856" tvg-id="" tvg-name="หนังเอเชีย" tvg-logo="http://45.144.165.223/logo/ent/asianmovie.png" group-title="DIGITAL",หนังเอเชีย
+http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2GE65zCy46pi5iwqJBQAWkV/m3u8
+#EXTINF:-1 xui-id="15857" tvg-id="" tvg-name="หนังไทย" tvg-logo="http://45.144.165.223/logo/ent/thaimovie.png" group-title="DIGITAL",หนังไทย
+http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2FcjXqcX-KxE_l4-JqcfFrc/m3u8
+#EXTINF:-1 tvg-chno="2" ch-number="2" tvg-id="NBT.th" tvg-name="NBT" tvg-logo="https://media-mvtv.imgix.net/channel/115_y_fFG0J46IoYNzUjVKatsbL7vZByxiMqTm.png" group-title="Digital TV", NBT
+https://lb1-live-mv.v2h-cdn.com/hls/fffe/nbt/nbt.m3u8
+#EXTINF:-1 tvg-chno="3" ch-number="3" tvg-id="TPBS.th" tvg-name="TPBS" tvg-logo="https://media-mvtv.imgix.net/channel/116_y_cze67bhJwH8CIOaqnULfg0kKPAs2TQW1.png" group-title="Digital TV", TPBS
+https://lb1-live-mv.v2h-cdn.com/hls/fffd/tpbs/tpbs.m3u8
+#EXTINF:-1 tvg-chno="4" ch-number="4" tvg-id="ALTV.th" tvg-name="ALTV" tvg-logo="https://media-mvtv.imgix.net/channel/117_y_8JTfbUnwW9t2kuVh6ZpONEqv7MeBIsQR.png" group-title="Digital TV", ALTV
+https://lb1-live-mv.v2h-cdn.com/hls/fffc/altv/altv.m3u8
+#EXTINF:-1 tvg-chno="5" ch-number="5" tvg-id="5HD.th" tvg-name="5HD" tvg-logo="https://media-mvtv.imgix.net/channel/118_y_0kEyP9Yrw5jTWflXevIZ1Dqhoa2mi4QO.png" group-title="Digital TV", 5HD
+https://lb1-live-mv.v2h-cdn.com/hls/fffb/5hd/5hd.m3u8
+#EXTINF:-1 tvg-chno="7" ch-number="7" tvg-id="T SPORT.th" tvg-name="T SPORT" tvg-logo="https://media-mvtv.imgix.net/channel/119_y_OhjxHr9fqS2i0NJvPUlcL85mn6e4FoIu.png" group-title="Digital TV", T SPORT
+https://lb1-live-mv.v2h-cdn.com/hls/ffef/tsport/tsport.m3u8
+#EXTINF:-1 tvg-chno="10" ch-number="10" tvg-id="TPTV.th" tvg-name="TPTV" tvg-logo="https://media-mvtv.imgix.net/channel/120_y_VSgE7P9GiDCxrhFWUALYpvzfM12cdqmH.png" group-title="Digital TV", TPTV
+https://lb1-live-mv.v2h-cdn.com/hls/ffec/tptv/tptv.m3u8
+#EXTINF:-1 tvg-chno="16" ch-number="16" tvg-id="TNN.th" tvg-name="TNN" tvg-logo="https://media-mvtv.imgix.net/channel/121_y_uQNBde5zrpo4TKm9kOZPx6iRbGaACfFE.png" group-title="Digital TV", TNN
+https://lb1-live-mv.v2h-cdn.com/hls/ffdc/tnn/tnn.m3u8
+#EXTINF:-1 tvg-chno="18" ch-number="18" tvg-id="JKN18.th" tvg-name="JKN18" tvg-logo="https://media-mvtv.imgix.net/channel/122_y_bzfht4O5uRNHylcq1D6nV9TvxmdXWaQP.png" group-title="Digital TV", JKN18
+https://lb1-live-mv.v2h-cdn.com/hls/ffda/jkn18/jkn18.m3u8
+#EXTINF:-1 tvg-chno="22" ch-number="22" tvg-id="Nation.th" tvg-name="Nation" tvg-logo="https://media-mvtv.imgix.net/channel/123_y_3vyW276UFjIStew9DHJNs8AGKfdmZXpu.png" group-title="Digital TV", Nation
+https://lb1-live-mv.v2h-cdn.com/hls/ffcc/nation/nation.m3u8
+#EXTINF:-1 tvg-chno="23" ch-number="23" tvg-id="Workpoint.th" tvg-name="Workpoint" tvg-logo="https://media-mvtv.imgix.net/channel/124_y_1PI2djLbMJpXO0n5oywKiNDzsWfTuFg4.png" group-title="Digital TV", Workpoint
+https://lb1-live-mv.v2h-cdn.com/hls/ffcb/workpoint/workpoint.m3u8
+#EXTINF:-1 tvg-chno="24" ch-number="24" tvg-id="True24.th" tvg-name="True24" tvg-logo="https://media-mvtv.imgix.net/channel/125_y_vQwogyPUC1FsRhK9TmzSWqb8YI6aktcM.png" group-title="Digital TV", True24
+https://lb1-live-mv.v2h-cdn.com/hls/ffca/true24/true24.m3u8
+#EXTINF:-1 tvg-chno="25" ch-number="25" tvg-id="GMM25.th" tvg-name="GMM25" tvg-logo="https://media-mvtv.imgix.net/channel/126_y_6PH49bDqlg1aSxGoNUdT83R5Jkeyf2mB.png" group-title="Digital TV", GMM25
+https://lb1-live-mv.v2h-cdn.com/hls/ffbf/gmm25/gmm25.m3u8
+#EXTINF:-1 tvg-chno="27" ch-number="27" tvg-id="ช่อง 8.th" tvg-name="ช่อง 8" tvg-logo="https://media-mvtv.imgix.net/channel/127_y_uhsXzFBxYD6Wq2mpZeIUb4M7RK1ECkn8.png" group-title="Digital TV", ช่อง 8
+https://lb1-live-mv.v2h-cdn.com/hls/ffbe/ch8/ch8.m3u8
+#EXTINF:-1 tvg-chno="29" ch-number="29" tvg-id="MONO 29.th" tvg-name="MONO 29" tvg-logo="https://media-mvtv.imgix.net/channel/128_y_KUvdGmb2hpV41ni5rCk9OlFoXePMA80Q.png" group-title="Digital TV", MONO 29
+https://lb1-live-mv.v2h-cdn.com/hls/ffbc/mono29/mono29.m3u8
+#EXTINF:-1 tvg-chno="30" ch-number="30" tvg-id="MCOT.th" tvg-name="MCOT" tvg-logo="https://media-mvtv.imgix.net/channel/129_y_hG7Nj2qWnldBu0fkMDyvT8CwYXLI649F.png" group-title="Digital TV", MCOT
+https://lb1-live-mv.v2h-cdn.com/hls/ffbb/mcot/mcot.m3u8
+#EXTINF:-1 tvg-chno="31" ch-number="31" tvg-id="ONE.th" tvg-name="ONE" tvg-logo="https://media-mvtv.imgix.net/channel/130_y_3Lx4j6ZzpIidKPqChaF2QRYeWorw79Jv.png" group-title="Digital TV", ONE
+https://lb1-live-mv.v2h-cdn.com/hls/ffba/one/one.m3u8
+#EXTINF:-1 tvg-chno="32" ch-number="32" tvg-id="Thairath.th" tvg-name="Thairath" tvg-logo="https://media-mvtv.imgix.net/channel/131_y_iJmHlFadZ0G8EhIYMw2A3OfbN1Qpzgou.png" group-title="Digital TV", Thairath
+https://lb1-live-mv.v2h-cdn.com/hls/ffaf/thairath/thairath.m3u8
+#EXTINF:-1 tvg-chno="33" ch-number="33" tvg-id="3HD.th" tvg-name="3HD" tvg-logo="https://media-mvtv.imgix.net/channel/132_y_TFYiXWvrUf4s8tbIwJ29S3zMNeqghGmB.png" group-title="Digital TV", 3HD
+https://lb1-live-mv.v2h-cdn.com/hls/ffae/3hd/3hd.m3u8
+#EXTINF:-1 tvg-chno="34" ch-number="34" tvg-id="Amarin.th" tvg-name="Amarin" tvg-logo="https://media-mvtv.imgix.net/channel/133_y_kLIyaJt3VoGD8sqrHnhKPjZUQ0RE6mu4.png" group-title="Digital TV", Amarin
+https://lb1-live-mv.v2h-cdn.com/hls/ffad/amarin/amarin.m3u8
+#EXTINF:-1 tvg-chno="35" ch-number="35" tvg-id="7HD.th" tvg-name="7HD" tvg-logo="https://media-mvtv.imgix.net/channel/134_y_YTkIZJDsbmX26owPRpAFSfW0eyz95vn4.png" group-title="Digital TV", 7HD
+https://lb1-live-mv.v2h-cdn.com/hls/ffac/7hd/7hd.m3u8
+#EXTINF:-1 tvg-chno="36" ch-number="36" tvg-id="PPTV.th" tvg-name="PPTV" tvg-logo="https://media-mvtv.imgix.net/channel/135_y_7hl4KHdwBqS0VGNCskrDLyci538zY2Qx.png" group-title="Digital TV", PPTV
+https://lb1-live-mv.v2h-cdn.com/hls/ffab/pptv/pptv.m3u8
+#EXTINF:-1 tvg-chno="28" ch-number="28" tvg-id="Boom Cartoon.th" tvg-name="Boom Cartoon" tvg-logo="https://media-mvtv.imgix.net/channel/188_y_SHbpOor8a2ClM0g3LFcsT5I4GkRmu6q9.jpg" group-title="Digital TV", Boom Cartoon
+https://lb1-live-mv.v2h-cdn.com/hls/ffbd/boomanime/boomanime.m3u8
+#EXTINF:-1 tvg-chno="6" ch-number="6" tvg-id="Boomerang.th" tvg-name="Boomerang" tvg-logo="https://media-mvtv.imgix.net/channel/153_y_Agyp2nEebLvC9tWa5xBcY1J038OuTzFD.png" group-title="Digital TV", Boomerang
+https://lb1-live-mv.v2h-cdn.com/hls/fffa/boomerang/boomerang.m3u8
+#EXTINF:-1 tvg-chno="104" ch-number="104" tvg-id="France 24.th" tvg-name="France 24" tvg-logo="https://media-mvtv.imgix.net/channel/151_y_YrFS8xk32BmplLV4NcHgdXRsuU7TvWZ5.png" group-title="Digital TV", France 24
+https://lb1-live-mv.v2h-cdn.com/hls/fecd/france24/france24.m3u8
+#EXTINF:-1 tvg-chno="105" ch-number="105" tvg-id="CNA.th" tvg-name="CNA" tvg-logo="https://media-mvtv.imgix.net/channel/152_y_zynZw6RpjUoxHbGMh28eCKk9BlqIXJAa.png" group-title="Digital TV", CNA
+https://d2e1asnsl7br7b.cloudfront.net/4e4e0baa3d7b4c129b4f5655219e083d/index.m3u8
+#EXTINF:-1 tvg-chno="106" ch-number="106" tvg-id="NHK WORLD.th" tvg-name="NHK WORLD" tvg-logo="https://media-mvtv.imgix.net/channel/155_y_ERge294wz1fsLvyCjX3DStPGcMmYFIKo.jpg" group-title="Digital TV", NHK WORLD
+https://nhkworld-tv.akamaized.net/hls/live/2115640/nhkworld-tv/index_1M.m3u8
+#EXTINF:-1 tvg-chno="107" ch-number="107" tvg-id="CCTV4.th" tvg-name="CCTV4" tvg-logo="https://media-mvtv.imgix.net/channel/154_y_lIpB1wRXh7vQUYcAkzxLd8EVbg9Gsa0u.png" group-title="Digital TV", CCTV4
+http://edge2a.v2h-cdn.com/cctv4/cctv4.stream/playlist.m3u8
+#EXTINF:-1 tvg-chno="201" ch-number="201" tvg-id="DLTV1.th" tvg-name="DLTV1" tvg-logo="https://media-mvtv.imgix.net/channel/136_y_tPkVabFhc7iUGQdmlEDC5IxvJZj4326M.png" group-title="Digital TV", DLTV1
+https://cdn-live.dltv.ac.th/dltv01.m3u8
+#EXTINF:-1 tvg-chno="202" ch-number="202" tvg-id="DLTV2.th" tvg-name="DLTV2" tvg-logo="https://media-mvtv.imgix.net/channel/137_y_yQOMjhFVupi8I1oal5TScnbkfAYtJC2v.png" group-title="Digital TV", DLTV2
+https://cdn-live.dltv.ac.th/dltv02.m3u8
+#EXTINF:-1 tvg-chno="203" ch-number="203" tvg-id="DLTV3.th" tvg-name="DLTV3" tvg-logo="https://media-mvtv.imgix.net/channel/138_y_NrPWRcyIBzbd5kJ3n8MqHDOmoVpA19fS.png" group-title="Digital TV", DLTV3
+https://cdn-live.dltv.ac.th/dltv03.m3u8
+#EXTINF:-1 tvg-chno="204" ch-number="204" tvg-id="DLTV4.th" tvg-name="DLTV4" tvg-logo="https://media-mvtv.imgix.net/channel/139_y_gx6RdEWuPqjBnAwoCI2mrltX5vJU4bDO.png" group-title="Digital TV", DLTV4
+https://cdn-live.dltv.ac.th/dltv04.m3u8
+#EXTINF:-1 tvg-chno="205" ch-number="205" tvg-id="DLTV5.th" tvg-name="DLTV5" tvg-logo="https://media-mvtv.imgix.net/channel/140_y_0NYqGlHdDfQeZFoSUcMWsx1rtOyTXb78.png" group-title="Digital TV", DLTV5
+https://cdn-live.dltv.ac.th/dltv05.m3u8
+#EXTINF:-1 tvg-chno="206" ch-number="206" tvg-id="DLTV6.th" tvg-name="DLTV6" tvg-logo="https://media-mvtv.imgix.net/channel/141_y_gIp8YiEP6MQsdeb9hjKcBFmUHVw1kNxy.png" group-title="Digital TV", DLTV6
+https://cdn-live.dltv.ac.th/dltv06.m3u8
+#EXTINF:-1 tvg-chno="207" ch-number="207" tvg-id="DLTV7.th" tvg-name="DLTV7" tvg-logo="https://media-mvtv.imgix.net/channel/142_y_U53zK2mOiFQ9xsCMS7AJrvTtoEf6dpIc.png" group-title="Digital TV", DLTV7
+https://cdn-live.dltv.ac.th/dltv07.m3u8
+#EXTINF:-1 tvg-chno="208" ch-number="208" tvg-id="DLTV8.th" tvg-name="DLTV8" tvg-logo="https://media-mvtv.imgix.net/channel/143_y_k4YNqBSgRW1OndxQuU6Pac0CMJVKIf57.png" group-title="Digital TV", DLTV8
+https://cdn-live.dltv.ac.th/dltv08.m3u8
+#EXTINF:-1 tvg-chno="209" ch-number="209" tvg-id="DLTV9.th" tvg-name="DLTV9" tvg-logo="https://media-mvtv.imgix.net/channel/144_y_9yo8mDwnI5OLgCHKvfsZ42BMXTzEbrSe.png" group-title="Digital TV", DLTV9
+https://cdn-live.dltv.ac.th/dltv09.m3u8
+#EXTINF:-1 tvg-chno="210" ch-number="210" tvg-id="DLTV10.th" tvg-name="DLTV10" tvg-logo="https://media-mvtv.imgix.net/channel/145_y_9Fkli2DoLIP0EX56AHW74MhquQKfng1a.png" group-title="Digital TV", DLTV10
+https://cdn-live.dltv.ac.th/dltv10.m3u8
+#EXTINF:-1 tvg-chno="211" ch-number="211" tvg-id="DLTV11.th" tvg-name="DLTV11" tvg-logo="https://media-mvtv.imgix.net/channel/146_y_5LVm0hDdr2N19IOlU3MAtqscKSk6xgZe.png" group-title="Digital TV", DLTV11
+https://cdn-live.dltv.ac.th/dltv11.m3u8
+#EXTINF:-1 tvg-chno="212" ch-number="212" tvg-id="DLTV12.th" tvg-name="DLTV12" tvg-logo="https://media-mvtv.imgix.net/channel/147_y_Uel5LZmKGoutv2PJiFIx60jayQbpnzqT.png" group-title="Digital TV", DLTV12
+https://cdn-live.dltv.ac.th/dltv12.m3u8
+#EXTINF:-1 tvg-chno="213" ch-number="213" tvg-id="DLTV13.th" tvg-name="DLTV13" tvg-logo="https://media-mvtv.imgix.net/channel/148_y_23K7iaWFMTnyxjfH5NIhUpCgZc8SB4s9.png" group-title="Digital TV", DLTV13
+https://cdn-live.dltv.ac.th/dltv13.m3u8
+#EXTINF:-1 tvg-chno="214" ch-number="214" tvg-id="DLTV14.th" tvg-name="DLTV14" tvg-logo="https://media-mvtv.imgix.net/channel/149_y_EzhGev4MFkQUOR08CdZisfP5Lnw9Jx6A.png" group-title="Digital TV", DLTV14
+https://cdn-live.dltv.ac.th/dltv14.m3u8
+#EXTINF:-1 tvg-chno="215" ch-number="215" tvg-id="DLTV15.th" tvg-name="DLTV15" tvg-logo="https://media-mvtv.imgix.net/channel/150_y_eUWs21cyV38ARS0OZmtgILodzKiJqfaD.png" group-title="Digital TV", DLTV15
+https://cdn-live.dltv.ac.th/dltv15.m3u8
+`;
+
+  function parseM3U(data) {
+    const lines = data.trim().split('\n');
+    const channels = [];
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('#EXTINF')) {
+        const infoLine = lines[i];
+        // แก้ไขให้รองรับ URL ที่อาจจะอยู่ในบรรทัดเดียวกัน
+        const urlLine = (lines[i+1] && !lines[i+1].startsWith('#EXT')) ? lines[i + 1] : infoLine.substring(infoLine.lastIndexOf(',') + 1);
+        const channel = {};
         
+        const logoMatch = infoLine.match(/tvg-logo="([^"]+)"/);
+        channel.logo = logoMatch ? logoMatch[1] : '';
         
-        const channels = [
-           
-           {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/30_y_6j8hFgB9MRvUswTeCySxbJf3k74NQloE.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/mvtv/mvtv/playlist.m3u8"
-            },
-
-            {
-                name: "NBT",
-                logo: "https://media-mvtv-app.imgix.net/channel/115_y_fFG0J46IoYNzUjVKatsbL7vZByxiMqTm.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/nbt/nbt.stream?type=m3u8"
-            },
-
-            {
-                name: "TPBS",
-                logo: "https://media-mvtv-app.imgix.net/channel/116_y_cze67bhJwH8CIOaqnULfg0kKPAs2TQW1.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/tpbs/tpbs.stream?type=m3u8"
-            },
-
-            {
-                name: "ALTV",
-                logo: "https://media-mvtv-app.imgix.net/channel/117_y_8JTfbUnwW9t2kuVh6ZpONEqv7MeBIsQR.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/altv2/altv.stream?type=m3u8"
-            },
-            
-              {
-                name: "5HD",
-                logo: "https://media-mvtv-app.imgix.net/channel/118_y_0kEyP9Yrw5jTWflXevIZ1Dqhoa2mi4QO.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/tv5hd/tv5hd.stream?type=m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://cms.dmpcdn.com/livetv/2024/03/14/170b8d90-e1d9-11ee-9da1-192fdd9d9955_webp_original.webp",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/boomerang/boomerang.stream?type=m3u8"
-            },
-
-            {
-                name: "TSPORT",
-                logo: "https://media-mvtv-app.imgix.net/channel/119_y_OhjxHr9fqS2i0NJvPUlcL85mn6e4FoIu.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/t_sport/t_sport.stream?type=m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGH9n6Ds62VcRoYElpN7HH97Fz_tBebo3_Rg&usqp=CAU",
-                file: "https://n-edge-1-th.v2h-cdn.com/tvb_m/tvb_thai/playlist.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/32_y_B1QfWmDNsgnKI7xCzkrYeTt4LR8EGqy6.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/vtv_m/vtv/playlist.m3u8"
-            },
-     {
-                name: "TPTV",
-                logo: "https://media-mvtv-app.imgix.net/channel/120_y_VSgE7P9GiDCxrhFWUALYpvzfM12cdqmH.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/tptv/tptv.stream?type=m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/36_y_LzOCkoTG95mZhJ6IrADcMafyPQ1qVBE4.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/mixmajor_m/mixmajor/playlist.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRb0iHGqHRYB2AAGpxyQGsPcGOy73whBlr9phX-aBo3-1hOoaw7wPMleGU&s=10",
-                file: "https://n-edge-1-th.v2h-cdn.com/rama_m/rama/playlist.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/112_y_2uKgIhyzBtmJCVlqGTaX16b9A3HenR0D.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/mvnews/mvnews/playlist.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfZZhs30fo6tqNKP_qJF2sygE80xGK6J1MgSvyMoESnG-usrkLEn_JC522&s=10",
-                file: "https://n-edge-1-th.v2h-cdn.com/mvtvseries_m/mvtvseries/playlist.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/171_y_XOJ6qMirnDGuk01TLQjlWho5PtKSa9Ud.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/ttd14/ttd14.stream?type=m3u8"
-            },
-
-            {
-                name: "TNN",
-                logo: "https://media-mvtv-app.imgix.net/channel/121_y_uQNBde5zrpo4TKm9kOZPx6iRbGaACfFE.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/tnn24/tnn24.stream?type=m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/107_y_aNzHOm07eZL1nc5MkpIUTBfPGit2qE4y.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/mvmall_ttd12/mvmall_ttd12.stream?type=m3u8"
-            },
-
-            {
-                name: "JKN",
-                logo: "https://media-mvtv-app.imgix.net/channel/122_y_bzfht4O5uRNHylcq1D6nV9TvxmdXWaQP.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/new/new.stream?type=m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/113_y_MZJpu9AhykldsP1STHq08LYG47ebWwnB.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/mvmall2/mvmall2.stream?type=m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/158_y_BTH9jWXAwLVh8poaGxueUkc73N6PKZn0.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/happy/happy/playlist.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/35_y_V2hcyg7xD4BpCIPSJT0un8zWYL6bAqfi.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/thaiban/thaiban/playlist.m3u8"
-            },       
-		
-            {
-                name: "NATION",
-                logo: "https://media-mvtv-app.imgix.net/channel/123_y_3vyW276UFjIStew9DHJNs8AGKfdmZXpu.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/nation_1/nation_1.stream?type=m3u8"
-            },
-
-            {
-                name: "WORKPOINT",
-                logo: "https://media-mvtv-app.imgix.net/channel/124_y_1PI2djLbMJpXO0n5oywKiNDzsWfTuFg4.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/workpointmyStream.m3u8"
-            },
-
-            {
-                name: "TURE4U",
-                logo: "https://media-mvtv-app.imgix.net/channel/125_y_vQwogyPUC1FsRhK9TmzSWqb8YI6aktcM.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/true4umyStream.m3u8"
-            },
-
-            {
-                name: "GMM",
-                logo: "https://media-mvtv-app.imgix.net/channel/126_y_6PH49bDqlg1aSxGoNUdT83R5Jkeyf2mB.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/gmm25myStream.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/187_y_O07IcMfWXzK1n4qD6YSswUxrv5btZJmk.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/mvtv/mvtv/playlist.m3u8"
-            },
-            
-            {
-                name: "CH8",
-                logo: "https://media-mvtv-app.imgix.net/channel/127_y_uhsXzFBxYD6Wq2mpZeIUb4M7RK1ECkn8.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/ch8myStream.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/188_y_agUT0o6Vh3t87iAyQEf2nFbGKBk1JN9p.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/boom_anime/boom_anime.stream?type=m3u8"
-            },
-
-            {
-                name: "MONO",
-                logo: "https://media-mvtv-app.imgix.net/channel/128_y_KUvdGmb2hpV41ni5rCk9OlFoXePMA80Q.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/MonomyStream.m3u8"
-            },
-
-            {
-                name: "MCOT",
-                logo: "https://media-mvtv-app.imgix.net/channel/129_y_hG7Nj2qWnldBu0fkMDyvT8CwYXLI649F.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/mcothd/mcothd.stream?type=m3u8"
-            },
-
-            {
-                name: "ONE",
-                logo: "https://media-mvtv-app.imgix.net/channel/130_y_3Lx4j6ZzpIidKPqChaF2QRYeWorw79Jv.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/onemyStream.m3u8"
-            },
-
-            {
-                name: "THAIRATH",
-                logo: "https://media-mvtv-app.imgix.net/channel/131_y_iJmHlFadZ0G8EhIYMw2A3OfbN1Qpzgou.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/thairathmyStream.m3u8"
-            },
-
-            {
-                name: "3HD",
-                logo: "https://media-mvtv-app.imgix.net/channel/132_y_TFYiXWvrUf4s8tbIwJ29S3zMNeqghGmB.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/ch3myStream.m3u8"
-            },
-
-            {
-                name: "AMARIN",
-                logo: "https://media-mvtv-app.imgix.net/channel/133_y_kLIyaJt3VoGD8sqrHnhKPjZUQ0RE6mu4.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/amarinmyStream.m3u8"
-            },
-
-            {
-                name: "7HD",
-                logo: "https://media-mvtv-app.imgix.net/channel/134_y_YTkIZJDsbmX26owPRpAFSfW0eyz95vn4.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/ch7myStream.m3u8"
-            },
-
-            {
-                name: "PPTV",
-                logo: "https://media-mvtv-app.imgix.net/channel/135_y_7hl4KHdwBqS0VGNCskrDLyci538zY2Qx.png",
-                file: "https://hls-nginx.v2h-cdn.com/hls/pptvmyStream.m3u8"
-            },
-            
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/33_y_H4Rw5iJ7py10NvGAPEhWbYD6SgfarXOc.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/mvlao/mvlao/playlist.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/34_y_PNWygduIqYU4DxtCrMoRzp60JFbkAGHO.png",
-                file: "https://n-edge-1-th.v2h-cdn.com/mvm/mvm/playlist.m3u8"
-            },
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/151_y_YrFS8xk32BmplLV4NcHgdXRsuU7TvWZ5.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/france24/france24.stream?type=m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/152_y_zynZw6RpjUoxHbGMh28eCKk9BlqIXJAa.png",
-                file: "https://d2e1asnsl7br7b.cloudfront.net/4e4e0baa3d7b4c129b4f5655219e083d/index.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/155_y_ERge294wz1fsLvyCjX3DStPGcMmYFIKo.jpg",
-                file: "https://nhkwlive-ojp.akamaized.net/hls/live/2003459/nhkwlive-ojp-en/index.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/154_y_lIpB1wRXh7vQUYcAkzxLd8EVbg9Gsa0u.png",
-                file: "https://lb-mvtv-live.v2h-cdn.com/redirect/cctv4/cctv4.stream?type=m3u8"
-            },
-            
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/136_y_tPkVabFhc7iUGQdmlEDC5IxvJZj4326M.png",
-                file: "https://cdn-live.dltv.ac.th/dltv01.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/137_y_yQOMjhFVupi8I1oal5TScnbkfAYtJC2v.png",
-                file: "https://cdn-live.dltv.ac.th/dltv02.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/138_y_NrPWRcyIBzbd5kJ3n8MqHDOmoVpA19fS.png",
-                file: "https://cdn-live.dltv.ac.th/dltv03.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/139_y_gx6RdEWuPqjBnAwoCI2mrltX5vJU4bDO.png",
-                file: "https://cdn-live.dltv.ac.th/dltv04.m3u8"
-            },
-            
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/140_y_0NYqGlHdDfQeZFoSUcMWsx1rtOyTXb78.png",
-                file: "https://cdn-live.dltv.ac.th/dltv05.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/141_y_gIp8YiEP6MQsdeb9hjKcBFmUHVw1kNxy.png",
-                file: "https://cdn-live.dltv.ac.th/dltv06.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/142_y_U53zK2mOiFQ9xsCMS7AJrvTtoEf6dpIc.png",
-                file: "https://cdn-live.dltv.ac.th/dltv07.m3u8"
-            },
-            
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/143_y_k4YNqBSgRW1OndxQuU6Pac0CMJVKIf57.png",
-                file: "https://cdn-live.dltv.ac.th/dltv08.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/144_y_9yo8mDwnI5OLgCHKvfsZ42BMXTzEbrSe.png",
-                file: "https://cdn-live.dltv.ac.th/dltv09.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/145_y_9Fkli2DoLIP0EX56AHW74MhquQKfng1a.png",
-                file: "https://cdn-live.dltv.ac.th/dltv10.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/146_y_5LVm0hDdr2N19IOlU3MAtqscKSk6xgZe.png",
-                file: "https://cdn-live.dltv.ac.th/dltv11.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/147_y_Uel5LZmKGoutv2PJiFIx60jayQbpnzqT.png",
-                file: "https://cdn-live.dltv.ac.th/dltv12.m3u8"
-            },
-            
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/148_y_23K7iaWFMTnyxjfH5NIhUpCgZc8SB4s9.png",
-                file: "https://cdn-live.dltv.ac.th/dltv13.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/149_y_EzhGev4MFkQUOR08CdZisfP5Lnw9Jx6A.png",
-                file: "https://cdn-live.dltv.ac.th/dltv14.m3u8"
-            },
-
-            {
-                name: "",
-                logo: "https://media-mvtv-app.imgix.net/channel/150_y_eUWs21cyV38ARS0OZmtgILodzKiJqfaD.png",
-                file: "https://cdn-live.dltv.ac.th/dltv15.m3u8"
-            },
-            
-        ];
+        const nameMatch = infoLine.match(/,\s*(.*)/);
+        channel.name = nameMatch ? nameMatch[1].trim() : 'Unknown';
         
-        function loadPlayer(channel) {
-            let adIndex = 0;
-            function playAdThenChannel() {
-                if (adIndex < adVideos.length) {
-                    jwplayer("player").setup({
-                        file: adVideos[adIndex],
-                        width: "100%",
-                        aspectratio: "16:9",
-                        autostart: true,
-                        mute: false,
-                        events: {
-                            complete: function() {
-                                adIndex++;
-                                playAdThenChannel();
-                            },
-                            error: function() {
-                                adIndex++;
-                                playAdThenChannel();
-                            }
-                        }
-                    });
-                } else {
-                    jwplayer("player").setup({
-                        file: channel.file,
-                        width: "100%",
-                        aspectratio: "16:9",
-                        autostart: true,
-                        mute: false
-                    });
-                    jwplayer("player").play();
-                }
-            }
-            playAdThenChannel();
+        channel.url = urlLine.trim();
+
+        if (channel.url) {
+            channels.push(channel);
         }
-        
-        const channelList = document.getElementById("channel-list");
-        channels.forEach(channel => {
-            const div = document.createElement("div");
-            div.className = "channel";
-            div.innerHTML = `<img src="${channel.logo}" alt="${channel.name}"><br>${channel.name}`;
-            div.onclick = () => loadPlayer(channel);
-            channelList.appendChild(div);
+      }
+    }
+    return channels;
+  }
+
+  const channels = parseM3U(m3uData);
+  const videoPlayer = document.getElementById('videoPlayer');
+  const channelList = document.getElementById('channelList');
+
+  let hls = new Hls(); // สร้าง instance ของ Hls.js ไว้ใช้งาน
+  let currentChannelIndex = 0;
+
+  function selectChannel(index) {
+    if (index < 0 || index >= channels.length) return;
+    
+    currentChannelIndex = index;
+    const channelUrl = channels[index].url;
+
+    // --- ส่วนที่แก้ไข ---
+    // ตรวจสอบว่าเบราว์เซอร์รองรับ Hls.js และ URL เป็น m3u8 หรือไม่
+    if (Hls.isSupported() && channelUrl.includes('.m3u8')) {
+        // หากมี instance ของ Hls อยู่แล้วให้ทำลายทิ้งก่อน
+        if (hls) {
+            hls.destroy();
+        }
+        hls = new Hls(); // สร้างใหม่
+        hls.loadSource(channelUrl); // โหลด URL ของช่องใหม่
+        hls.attachMedia(videoPlayer); // เชื่อม Hls.js กับ video element
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            videoPlayer.play().catch(e => console.log("Autoplay was prevented.", e)); // เล่นวิดีโอ
         });
-        
-        if (channels.length > 0) {
-            loadPlayer(channels[0]);
-        }
-    </script>
+    } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+        // สำหรับ Safari หรือเบราว์เซอร์ที่รองรับ HLS โดยตรง
+        videoPlayer.src = channelUrl;
+        videoPlayer.addEventListener('loadedmetadata', function() {
+            videoPlayer.play().catch(e => console.log("Autoplay was prevented.", e));
+        });
+    } else {
+        // กรณีอื่นๆ ที่ไม่รองรับ
+        console.error("This browser does not support HLS playback.");
+    }
+    // --- สิ้นสุดส่วนที่แก้ไข ---
+
+    // อัปเดตไฮไลต์ช่องที่เล่น
+    document.querySelectorAll('.channel-item').forEach((el, i) => {
+      el.classList.toggle('active', i === index);
+    });
+  }
+
+  channels.forEach((ch, index) => {
+    const div = document.createElement('div');
+    div.classList.add('channel-item');
+    div.setAttribute('tabindex', '0');
+    div.setAttribute('role', 'button');
+    div.setAttribute('aria-label', `ช่อง ${ch.name}`);
+    div.innerHTML = `
+      <img src="${ch.logo}" alt="${ch.name} logo" onerror="this.style.display='none'" />
+      <div class="channel-name">${ch.name}</div>
+    `;
+    div.onclick = () => selectChannel(index);
+    div.onkeypress = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        selectChannel(index);
+        e.preventDefault();
+      }
+    };
+    channelList.appendChild(div);
+  });
+
+  if (channels.length > 0) {
+    selectChannel(0); // เลือกเล่นช่องแรกเมื่อโหลดหน้าเว็บ
+  }
+
+  // ภาพสไลด์ (เหมือนเดิม)
+  const slideItems = [
+    { src: '/logo/movie.png', link: '/dootvzaa.html' },
+    { src: '/logo/49c8ab8f-05c2-4ab2-8526-aca18fd57c6f.png', link: 'https://line.me/ti/p/@680salib' },
+    { src: '/logo/images.jpeg', link: 'https://example.com/page3' },
+    { src: '/logo/images.jpeg', link: 'https://example.com/page4' },
+  ];
+
+  const slideShow = document.getElementById('slideShow');
+  slideItems.forEach(item => {
+    const a = document.createElement('a');
+    a.href = item.link;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.setAttribute('aria-label', 'ลิงก์ภาพสไลด์');
+
+    const img = document.createElement('img');
+    img.src = item.src;
+    img.alt = "Slide image";
+    
+    a.appendChild(img);
+    slideShow.appendChild(a);
+  });
+</script>
+
 </body>
 </html>
