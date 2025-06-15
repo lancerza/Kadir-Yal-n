@@ -14,199 +14,251 @@
   }
 
   header {
-    background-color: #111;
-    padding: 12px 24px;
+    background-color: #161b22; /* Darker header */
+    padding: 15px 25px; /* Slightly more padding */
     display: flex;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.7);
-    gap: 16px;
-  }
-  header a.logo-link img {
-    height: 48px;
-    filter: drop-shadow(0 0 3px #0f62fe);
-    transition: transform 0.3s ease;
-  }
-  header a.logo-link:hover img {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.8); /* Stronger shadow */
+    gap: 20px; /* Increased gap */
+}
+header a.logo-link img {
+    height: 52px; /* Slightly larger logo */
+    filter: drop-shadow(0 0 4px #386ad1); /* Brighter shadow */
+    transition: transform 0.2s ease-in-out; /* Smoother transition */
+}
+header a.logo-link:hover img {
     transform: scale(1.1);
-  }
+}
 
-  .running-text-container {
+.running-text-container {
     flex: 1;
     overflow: hidden;
     white-space: nowrap;
     position: relative;
-    height: 48px;
-  }
-  .running-text {
-  	
+    height: 52px; /* Match logo height */
+}
+.running-text {
     display: inline-block;
     padding-left: 100%;
-    animation: marquee 15s linear infinite;
-    font-size: 20px;
+    animation: marquee 18s linear infinite; /* Slightly slower */
+    font-size: 22px; /* Slightly larger text */
     font-weight: 600;
-    color: #ffffff;
+    color: #f0f8ff; /* Even lighter text */
     user-select: none;
-    text-shadow: 0 0 5px #0f62fe99;
-    line-height: 48px;
-  }
-  @keyframes marquee {
+    text-shadow: 0 0 6px #386ad1; /* Brighter shadow */
+    line-height: 52px; /* Match container height */
+}
+@keyframes marquee {
     0% { transform: translateX(0); }
     100% { transform: translateX(-100%); }
-  }
+}
 
-  #horizontalMenu {
-    background-color: #222;
-    padding: 8px 16px;
+#horizontalMenu {
+    background-color: #1c2128; /* Darker menu */
+    padding: 10px 20px; /* Slightly more padding */
     display: flex;
-    gap: 16px;
+    gap: 20px; /* Increased gap */
     justify-content: center;
     align-items: center;
-  }
-  #horizontalMenu a.icon-link img {
-    width: 32px;
-    height: 32px;
+    border-bottom: 1px solid #2e3440; /* Subtle bottom border */
+}
+#horizontalMenu a.icon-link img {
+    width: 36px; /* Slightly larger icons */
+    height: 36px;
     object-fit: contain;
-    transition: transform 0.3s ease, filter 0.3s ease;
-    filter: none;
-  }
-  #horizontalMenu a.icon-link:hover img {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 5px #1e90ff);
-  }
+    transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out; /* Smoother transitions */
+    filter: grayscale(30%); /* Slightly desaturated */
+}
+#horizontalMenu a.icon-link:hover img {
+    transform: scale(1.15); /* More pronounced hover */
+    filter: grayscale(0%) drop-shadow(0 0 6px #5e81ac); /* Brighter, full color shadow */
+}
 
-  #videoPlayer {
+#videoPlayer {
     width: 90%;
     max-width: 900px;
-    height: 506px;
-    margin: 20px auto 10px;
+    height: auto; /* Maintain aspect ratio */
+    aspect-ratio: 16 / 9; /* Standard aspect ratio */
+    margin: 25px auto 15px; /* Increased top and bottom margin */
     display: block;
-    border-radius: 8px;
-    background: black;
-    box-shadow: 0 0 20px #0f62fe99;
-  }
+    border-radius: 10px; /* More rounded */
+    background: #000;
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6); /* More vibrant shadow */
+    border: 1px solid #2e3440; /* Subtle border */
+}
 
-  /* ปรับเป็นกริด 4 คอลัมน์สำหรับช่องรายการ */
-  #channelList {
+/* ปรับเป็นกริด 4 คอลัมน์สำหรับช่องรายการ */
+#channelList {
     width: 90%;
     max-width: 900px;
-    margin: 0 auto 30px;
+    margin: 0 auto 40px; /* Increased bottom margin */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-  }
-  .channel-item {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Slightly wider min width */
+    gap: 20px; /* Increased gap */
+    padding: 10px; /* Add some padding around the grid */
+}
+.channel-item {
     cursor: pointer;
-    background: #222;
-    border-radius: 8px;
-    padding: 12px;
+    background: #1c2128; /* Darker channel item */
+    border-radius: 10px; /* More rounded */
+    padding: 15px; /* Increased padding */
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: inset 0 0 5px transparent;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    gap: 15px; /* Increased gap */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3); /* Subtle shadow */
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out; /* Smoother transitions */
     user-select: none;
-    outline-offset: 4px;
-  }
-  .channel-item:hover,
-  .channel-item:focus {
-    background-color: #0f62fe;
-    box-shadow: 0 0 15px #1e90ff;
+    outline: none; /* Remove default focus outline */
+}
+.channel-item:hover,
+.channel-item:focus {
+    background-color: #3b82f6; /* Brighter hover color */
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.7); /* Stronger hover shadow */
+    transform: scale(1.02); /* Slight scale on hover */
+}
+.channel-item.active {
+    background-color: #2563eb; /* Active color */
+    box-shadow: 0 0 20px #60a5fa; /* Vibrant active shadow */
     transform: scale(1.05);
-    outline: none;
-  }
-  .channel-item.active {
-    background-color: #005fcc;
-    box-shadow: 0 0 20px #3ea0ff;
-    transform: scale(1.07);
-  }
-  .channel-item img {
-    width: 70px;
-    height: 40px;
+}
+.channel-item img {
+    width: 80px; /* Slightly larger logo */
+    height: 45px; /* Adjust height */
     object-fit: contain;
-    border-radius: 6px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.5);
-  }
-  .channel-name {
-    font-size: 18px;
-    font-weight: 700;
-    color: #eee;
+    border-radius: 8px; /* More rounded logo */
+    box-shadow: 0 0 10px rgba(0,0,0,0.4); /* Subtle logo shadow */
+}
+.channel-name {
+    font-size: 19px; /* Slightly larger font */
+    font-weight: 500; /* Slightly lighter weight */
+    color: #e0e6ed; /* Lighter text */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
+}
 
 #slideShow {
-  width: 90%;
-  max-width: 900px;
-  margin: 0 auto 50px;
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding: 16px;
-  border-radius: 12px;
-  background: rgba(18, 18, 18, 0.4);
-  backdrop-filter: blur(5px);
+    width: 90%;
+    max-width: 900px;
+    margin: 0 auto 60px; /* Increased bottom margin */
+    display: flex;
+    gap: 20px; /* Increased gap */
+    overflow-x: auto;
+    padding: 20px; /* More padding */
+    border-radius: 12px;
+    background: rgba(22, 27, 34, 0.7); /* Slightly darker, more opaque */
+    backdrop-filter: blur(8px); /* More blur */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* More pronounced shadow */
 }
 
 #slideShow a {
-  display: block;
-  width: 220px;
-  height: 124px;
-  border-radius: 10px;
-  overflow: hidden;
-  flex-shrink: 0;
-  position: relative;
+    display: block;
+    width: 240px; /* Slightly wider slides */
+    height: 135px; /* Maintain aspect ratio */
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for each slide */
 }
 
 #slideShow a img {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: fit; /* สำคัญ: ตัดภาพให้พอดี */
-  border-radius: 10px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Fill the container, may crop */
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smoother transitions */
+    box-shadow: none; /* Remove individual image shadow */
 }
 
-#slideShow a img:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px #1e90ff;
+#slideShow a:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #5e81ac; /* Hover shadow */
 }
 
 
-  #channelList::-webkit-scrollbar,
-  #slideShow::-webkit-scrollbar {
-    height: 8px;
-  }
-  #channelList::-webkit-scrollbar-thumb,
-  #slideShow::-webkit-scrollbar-thumb {
-    background-color: #0f62fe99;
-    border-radius: 4px;
-  }
-  #channelList::-webkit-scrollbar-track,
-  #slideShow::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
+#channelList::-webkit-scrollbar,
+#slideShow::-webkit-scrollbar {
+    height: 10px; /* Slightly thicker scrollbar */
+}
+#channelList::-webkit-scrollbar-thumb,
+#slideShow::-webkit-scrollbar-thumb {
+    background-color: #3b82f6; /* Brighter scrollbar thumb */
+    border-radius: 5px;
+}
+#channelList::-webkit-scrollbar-track,
+#slideShow::-webkit-scrollbar-track {
+    background-color: #161b22; /* Darker scrollbar track */
+}
 
-  @media (max-width: 600px) {
+@media (max-width: 600px) {
+    header {
+        padding: 10px 15px;
+        gap: 10px;
+    }
+    header a.logo-link img {
+        height: 40px;
+    }
+    .running-text-container {
+        height: 40px;
+    }
+    .running-text {
+        font-size: 18px;
+        line-height: 40px;
+    }
+    #horizontalMenu {
+        padding: 8px 10px;
+        gap: 10px;
+    }
+    #horizontalMenu a.icon-link img {
+        width: 28px;
+        height: 28px;
+    }
     #videoPlayer {
-      width: 100%;
-      height: 280px;
+        margin: 15px auto 10px;
+        border-radius: 8px;
+    }
+    #channelList {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Smaller min width for smaller screens */
+        gap: 10px;
+        padding: 5px;
     }
     .channel-item {
-      padding: 10px;
-      gap: 8px;
+        padding: 10px;
+        gap: 8px;
+        border-radius: 8px;
     }
     .channel-item img {
-      width: 50px;
-      height: 28px;
+        width: 60px;
+        height: 34px;
+        border-radius: 6px;
     }
     .channel-name {
-      font-size: 16px;
+        font-size: 16px;
+    }
+    #slideShow {
+        gap: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 40px;
+    }
+    #slideShow a {
+        width: 160px;
+        height: 90px;
+        border-radius: 8px;
     }
     #slideShow a img {
-      width: 150px;
-      height: 85px;
+        border-radius: 8px;
+    }
+    #channelList::-webkit-scrollbar,
+    #slideShow::-webkit-scrollbar {
+        height: 6px;
+    }
+    #channelList::-webkit-scrollbar-thumb,
+    #slideShow::-webkit-scrollbar-thumb {
+        border-radius: 3px;
+
     }
   }
 </style>
