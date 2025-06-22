@@ -40,8 +40,6 @@
             color: #FFFFFF;
             font-family: 'Poppins', sans-serif;
         }
-
-        /* --- CSS ใหม่สำหรับวันและเวลา --- */
         #datetime-container {
             margin-top: 5px;
             color: #aaa;
@@ -57,8 +55,6 @@
             font-size: 1em;
             color: #888;
         }
-        /* -------------------------------- */
-
         #player {
             width: 100%;
             aspect-ratio: 16/9;
@@ -108,7 +104,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
-            justify-content: center; /* ปรับเป็น center ให้สวยงาม */
+            justify-content: center;
         }
         .channel {
             cursor: pointer;
@@ -158,35 +154,29 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- JavaScript ใหม่สำหรับแสดงวันและเวลา ---
             const timeDisplay = document.getElementById('time-display');
             const dateDisplay = document.getElementById('date-display');
 
             function updateDateTime() {
                 const now = new Date();
                 
-                // ตั้งค่าเวลา
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
 
-                // ตั้งค่าวันที่ภาษาไทย
                 const thaiDays = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
                 const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
                 const day = thaiDays[now.getDay()];
                 const date = now.getDate();
                 const month = thaiMonths[now.getMonth()];
-                const year = now.getFullYear() + 543; // แปลงเป็น พ.ศ.
+                const year = now.getFullYear() + 543;
                 dateDisplay.textContent = `${day}ที่ ${date} ${month} พ.ศ. ${year}`;
             }
             
-            // เรียกใช้ฟังก์ชันครั้งแรกเพื่อให้แสดงผลทันที
             updateDateTime();
-            // ตั้งให้เรียกใช้ฟังก์ชันทุกๆ 1 วินาที
             setInterval(updateDateTime, 1000);
             
-            // --- โค้ดเดิมสำหรับ Player และช่องรายการ ---
             const channels = [
                  { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
                 { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/2/2.mpd", keyId: "ca20a93cf8e3421dafbd5bdb1990081b", key: "86ae86a7391c481ea93eecdb740f0a14" },
