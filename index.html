@@ -1,302 +1,57 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
+    <title>Wiseplay</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Online Player</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
-    <script>
-        jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.1, maximum-scale=10, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #121212;
-            color: #E0E0E0;
-            font-family: 'Sarabun', 'Poppins', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        header {
-            width: 100%;
-            text-align: center;
-            padding: 10px 0;
-            margin-bottom: 20px;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 2.5em;
-            color: #FFFFFF;
-            font-family: 'Poppins', sans-serif;
-        }
-        #datetime-container {
-            margin-top: 5px;
-            color: #aaa;
-        }
-        #time-display {
-            font-family: 'Poppins', sans-serif;
-            font-size: 2em;
-            font-weight: 600;
-            color: #f5f5f5;
-            letter-spacing: 2px;
-        }
-        #date-display {
-            font-size: 1em;
-            color: #888;
-        }
-        #player {
-            width: 100%;
-            aspect-ratio: 16/9;
-            margin-bottom: 30px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
             background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.2em;
-        }
-        #channel-section {
-            width: 100%;
-            max-width: 1000px;
-            margin: 10px auto;
-        }
-        #category-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 25px;
-            justify-content: center;
-        }
-        .category-button {
-            padding: 8px 16px;
-            border: 1px solid #444;
-            background-color: #222;
-            color: #E0E0E0;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .category-button:hover {
-            background-color: #333;
-            border-color: #555;
-        }
-        .category-button.active {
-            background-color: #1E90FF;
-            border-color: #1E90FF;
-            color: #FFFFFF;
-            font-weight: 700;
-        }
-        .channel-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-        }
-        .channel {
-            background: #1E1E1E;
-            border: 2px solid #333;
-            border-radius: 10px;
+            color: #fff;
+            margin: 0;
             text-align: center;
-            padding: 10px;
-            transition: transform 0.2s ease, border-color 0.2s ease;
-            width: 110px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative; /* เพิ่ม position เพื่อให้วางไอคอนได้ */
+            font-family: Arial, sans-serif;
+            display: flex; /* ใช้ flexbox เพื่อจัดกึ่งกลางเนื้อหาแนวตั้ง */
+            justify-content: center; /* จัดกึ่งกลางเนื้อหาแนวนอน */
+            align-items: center; /* จัดกึ่งกลางเนื้อหาแนวตั้ง */
+            min-height: 100vh; /* กำหนดความสูงขั้นต่ำให้เต็ม viewport */
         }
-        .channel-main-area {
-            cursor: pointer;
+        img {
+            border-radius: 20px;
+            border: 1px solid #87CEFA;
+            padding: 2px;
+            margin: 3px;
+            height: 80px;
+            width: 80px;
+            cursor: pointer; /* เพิ่ม cursor pointer เพื่อบ่งบอกว่าคลิกได้ */
+            transition: transform 0.2s; /* เพิ่ม transition สำหรับ animation */
         }
-        .channel img {
-            width: 70px;
-            height: 70px;
-            margin-bottom: 8px;
-            border-radius: 5px;
-            background-color: #2c2c2c;
-            pointer-events: none;
+        img:hover {
+            transform: scale(1.05); /* ทำให้รูปภาพขยายเล็กน้อยเมื่อ hover */
         }
-        .channel:hover {
-            background: #282828;
-            border-color: #1E90FF;
-            transform: scale(1.05);
-        }
-        .channel-name {
-            font-size: 0.8em;
-            color: #ccc;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
-        }
-        /* --- CSS ใหม่สำหรับปุ่ม Wiseplay --- */
-        .wiseplay-link {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 1.2em;
-            text-decoration: none;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-        .wiseplay-link:hover {
-            opacity: 1;
+        /* ซ่อนองค์ประกอบที่เกี่ยวข้องกับโฆษณาตามคลาสหรือ ID */
+        .popup, .overlay, [id*="ad"], [class*="ad"], [src*="ads"] {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1>TV Online</h1>
-        <div id="datetime-container">
-            <div id="time-display"></div>
-            <div id="date-display"></div>
-        </div>
-    </header>
-
-    <div class="container">
-        <div id="player">
-            <span>กรุณาเลือกช่องเพื่อรับชม</span>
-        </div>
-
-        <section id="channel-section">
-            <div id="category-buttons"></div>
-            <div id="channel-grid" class="channel-grid"></div>
-        </section>
-    </div>
+    <a href="intent://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa.smil/chunklist_w1579257356_b2128000.m3u8#Intent;package=com.wiseplay;S.userAgent=exo_player;S.title=Live%20Program;S.referer=;scheme=https;type=video/mp4;end">
+        <img
+            class="channel"
+            src="https://upload.wikimedia.org/wikipedia/commons/9/9d/NBT_Logo.png"
+            alt="NBT Logo"
+            onerror="this.onerror=null; this.src='https://as2.ftcdn.net/jpg/03/53/54/91/1000_F_353549130_ahtWCQjjJzhzP8ocg1qR3s2E3Cz1VR3w.jpg';">
+    </a>
 
     <script>
+        // เมื่อ DOM โหลดเสร็จสมบูรณ์ (ดีกว่า window.onload สำหรับการจัดการ DOM)
         document.addEventListener('DOMContentLoaded', function() {
-            const timeDisplay = document.getElementById('time-display');
-            const dateDisplay = document.getElementById('date-display');
-
-            function updateDateTime() {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                timeDisplay.textContent = `${hours}:${minutes}`;
-                const thaiDays = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
-                const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-                const day = thaiDays[now.getDay()];
-                const date = now.getDate();
-                const month = thaiMonths[now.getMonth()];
-                const year = now.getFullYear() + 543;
-                dateDisplay.textContent = `${day}ที่ ${date} ${month} พ.ศ. ${year}`;
-            }
-            
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-            
-            const channels = [
-                 // --- หมวดหมู่ FIFA ---
-                 { name: "FIFA Live-A", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/club.png", file: "https://cdn1.googlecdnforstreaming.live/live/trt-spor/playlist.m3u8?wmsAuth="},
-                { name: "FIFA Live-B", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/club.png", file: "https://slave02.appball.vip/hls/ch11.m3u8"},
-                { name: "FIFA Live-C", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/club.png", file: "https://dolive.thaim3u.com/doolive4k-tv/football-play-2/chunks.m3u8"},
-                { name: "FIFA Live-D", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/club.png", file: "https://cdn1.googlecdnforstreaming.live/live/dklsport1/playlist.m3u8"},
-                { name: "Mono29", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.pic.in.th/pic/mono29977274214da259a2.png", file: "https://monomax-uiripn.cdn.byteark.com/plain/th/1080p/index.m3u8"},
-                { name: "Mono29 (3BB)", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.pic.in.th/pic/mono29977274214da259a2.png", file: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/29/29.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34"},
-                { name: "DAZN 1 🇩🇪", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/daza1doo.png", file: "https://cdn1.googlecdnforstreaming.live/live/dazn1/playlist.m3u8"},
-
-                // --- หมวดหมู่ ทีวีดิจิทัล ---
-                { name: "ช่อง 5", category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { name: "ช่อง 7", category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/2/2.mpd", keyId: "ca20a93cf8e3421dafbd5bdb1990081b", key: "86ae86a7391c481ea93eecdb740f0a14" },
-                { name: "ช่อง 3", category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/LOGO3HD.PNG", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd", keyId: "9d76aea451d441a4913d4d70c4e586ab", key: "051027a6ff54494b949ba792928e9008" },
-                { name: "Workpoint", category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/R2_0053.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/16/16.mpd", keyId: "9ebedc957e934d2b9023e4e60b97af73", key: "7bcb4363df74457bbafedec1a864e6b6" },
-                { name: "MCOT", category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/MCOT_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/30/30.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                
-                // --- หมวดหมู่ กีฬา ---
-                { name: "T-Sports 7", category: "กีฬา", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/T-SPorts_7_Final.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/7/7.mpd", keyId: "6187523f92b9475bb5b192f70cef1342", key: "5119311f482144d58dacabc5bc1fa4ba" }
-            ];
-            
-            const categoryButtonsContainer = document.getElementById('category-buttons');
-            const channelGridContainer = document.getElementById('channel-grid');
-
-            function loadPlayer(channel) {
-                const playerDiv = document.getElementById("player");
-                playerDiv.innerHTML = "";
-                jwplayer("player").setup({
-                    file: channel.file,
-                    drm: channel.keyId ? { clearkey: { keyId: channel.keyId, key: channel.key } } : null,
-                    width: "100%",
-                    aspectratio: "16:9",
-                    autostart: true,
-                    playbackRateControls: true
-                });
-            }
-
-            const groupedChannels = channels.reduce((acc, channel) => {
-                const category = channel.category;
-                if (!acc[category]) acc[category] = [];
-                acc[category].push(channel);
-                return acc;
-            }, {});
-
-            // --- แก้ไขฟังก์ชัน displayChannels ---
-            function displayChannels(category) {
-                channelGridContainer.innerHTML = '';
-                const channelsToDisplay = groupedChannels[category];
-                if (!channelsToDisplay) return;
-
-                channelsToDisplay.forEach(channel => {
-                    const div = document.createElement("div");
-                    div.className = "channel";
-
-                    // ส่วนหลักที่คลิกแล้วเล่นในเว็บ
-                    const mainArea = document.createElement("div");
-                    mainArea.className = "channel-main-area";
-                    mainArea.innerHTML = `<img src="${channel.logo}" alt="${channel.name}"><span class="channel-name">${channel.name}</span>`;
-                    mainArea.onclick = () => loadPlayer(channel);
-                    
-                    // สร้างลิงก์สำหรับ Wiseplay
-                    const wiseplayLink = document.createElement("a");
-                    wiseplayLink.className = "wiseplay-link";
-                    const encodedUrl = encodeURIComponent(channel.file);
-                    wiseplayLink.href = `wiseplay://play?url=${encodedUrl}`;
-                    wiseplayLink.innerHTML = "📲"; // ไอคอน
-                    wiseplayLink.target = "_blank"; // เพื่อความปลอดภัย
-                    
-                    div.appendChild(mainArea);
-                    div.appendChild(wiseplayLink);
-                    channelGridContainer.appendChild(div);
-                });
-            }
-
-            const categories = Object.keys(groupedChannels);
-            categories.forEach(category => {
-                const button = document.createElement('button');
-                button.className = 'category-button';
-                button.textContent = category;
-                button.dataset.category = category;
-
-                button.onclick = function() {
-                    document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    displayChannels(this.dataset.category);
-                };
-                categoryButtonsContainer.appendChild(button);
+            var adElements = document.querySelectorAll('[id*="ad"], [class*="ad"], [src*="ads"]');
+            adElements.forEach(function(element) {
+                element.style.display = 'none';
             });
-
-            if (categories.length > 0) {
-                const initialCategory = categories.includes("FIFA Club World Cup 2025🏆🥇") ? "FIFA Club World Cup 2025🏆🥇" : categories[0];
-                const initialButton = Array.from(categoryButtonsContainer.children).find(btn => btn.dataset.category === initialCategory);
-                if(initialButton) {
-                    initialButton.click();
-                }
-            }
         });
     </script>
 </body>
