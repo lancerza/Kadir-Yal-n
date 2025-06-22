@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV Online Player (Debug Mode)</title>
+    <title>TV Online Player</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
@@ -57,22 +57,37 @@
             max-width: 1000px;
             margin: 10px auto;
         }
-        #channel-section h2 {
-            text-align: center;
-            margin-bottom: 20px;
+        
+        /* --- CSS ใหม่สำหรับปุ่มหมวดหมู่ --- */
+        #category-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        .category-button {
+            padding: 8px 16px;
+            border: 1px solid #444;
+            background-color: #222;
+            color: #E0E0E0;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .category-button:hover {
+            background-color: #333;
+            border-color: #555;
+        }
+        .category-button.active {
+            background-color: #1E90FF;
+            border-color: #1E90FF;
             color: #FFFFFF;
-        }
-        .category-container {
-            margin-bottom: 30px;
-        }
-        .category-title {
-            color: #1E90FF;
-            font-size: 1.5em;
             font-weight: 700;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #333;
         }
+        /* ------------------------------- */
+
         .channel-grid {
             display: flex;
             flex-wrap: wrap;
@@ -116,18 +131,16 @@
         </div>
 
         <section id="channel-section">
-            <h2>ช่องรายการ</h2>
-            <div id="channel-list-container"></div>
+            <div id="category-buttons"></div>
+            <div id="channel-grid" class="channel-grid"></div>
         </section>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM Loaded: Script starting...");
-
             const channels = [
-                // --- หมวดหมู่: ทีวีดิจิทัล ---
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
+                 // --- หมวดหมู่: ทีวีดิจิทัล ---
+                 { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
                 { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/2/2.mpd", keyId: "ca20a93cf8e3421dafbd5bdb1990081b", key: "86ae86a7391c481ea93eecdb740f0a14" },
                 { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0014.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/3/3.mpd", keyId: "4d4426a505f64382a9841155d721cee6", key: "0f4770219ccb4be5836a7517057e51c3" },
                 { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/R2_0053.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/16/16.mpd", keyId: "9ebedc957e934d2b9023e4e60b97af73", key: "7bcb4363df74457bbafedec1a864e6b6" },
@@ -153,76 +166,80 @@
                 { category: "กีฬา", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBsports1_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/401/401.mpd", keyId: "678bbba596584ad895d2923fb0255e82", key: "c55471086c824112b217743a31abdf8f" },
                 { category: "การศึกษา", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ALTV.PNG", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/4/4.mpd", keyId: "1e98456bcbea44b7ad05831387e364ef", key: "3d14fd4f9d3149a79b35a7124fccbd67" },
             ];
-            console.log("Channels array is ready. Total channels:", channels.length);
 
-            try {
-                function loadPlayer(channel) {
-                    console.log("Loading player for channel:", channel.logo);
-                    const playerDiv = document.getElementById("player");
-                    playerDiv.innerHTML = "";
-                    jwplayer("player").setup({
-                        file: channel.file,
-                        type: "dash",
-                        drm: {
-                            clearkey: {
-                                keyId: channel.keyId,
-                                key: channel.key
-                            }
-                        },
-                        width: "100%",
-                        aspectratio: "16:9",
-                        autostart: true,
-                        mute: false
-                    });
-                }
+            // --- ส่วนควบคุมหลัก ---
 
-                const channelListContainer = document.getElementById("channel-list-container");
-                if (!channelListContainer) {
-                    console.error("Error: channel-list-container not found!");
-                    return;
-                }
-                console.log("Found channel-list-container element.");
+            const categoryButtonsContainer = document.getElementById('category-buttons');
+            const channelGridContainer = document.getElementById('channel-grid');
 
-                const groupedChannels = channels.reduce((acc, channel) => {
-                    const category = channel.category;
-                    if (!acc[category]) {
-                        acc[category] = [];
-                    }
-                    acc[category].push(channel);
-                    return acc;
-                }, {});
-                console.log("Channels grouped successfully.", groupedChannels);
-
-                console.log("Starting to build channel list HTML...");
-                for (const category in groupedChannels) {
-                    console.log("Creating category:", category);
-                    const categoryContainer = document.createElement("div");
-                    categoryContainer.className = "category-container";
-
-                    const categoryTitle = document.createElement("h3");
-                    categoryTitle.className = "category-title";
-                    categoryTitle.textContent = category;
-                    categoryContainer.appendChild(categoryTitle);
-                    
-                    const channelGrid = document.createElement("div");
-                    channelGrid.className = "channel-grid";
-
-                    groupedChannels[category].forEach(channel => {
-                        const div = document.createElement("div");
-                        div.className = "channel";
-                        div.innerHTML = `<img src="${channel.logo}" alt="Logo ${category}">`;
-                        div.onclick = () => loadPlayer(channel);
-                        channelGrid.appendChild(div);
-                    });
-
-                    categoryContainer.appendChild(channelGrid);
-                    channelListContainer.appendChild(categoryContainer);
-                }
-                console.log("Finished building channel list HTML.");
-
-            } catch (error) {
-                console.error("A critical error occurred:", error);
+            function loadPlayer(channel) {
+                const playerDiv = document.getElementById("player");
+                playerDiv.innerHTML = "";
+                jwplayer("player").setup({
+                    file: channel.file,
+                    type: "dash",
+                    drm: { clearkey: { keyId: channel.keyId, key: channel.key } },
+                    width: "100%",
+                    aspectratio: "16:9",
+                    autostart: true,
+                    playbackRateControls: true
+                });
             }
+
+            // จัดกลุ่มช่องตามหมวดหมู่
+            const groupedChannels = channels.reduce((acc, channel) => {
+                const category = channel.category;
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(channel);
+                return acc;
+            }, {});
+
+            // ฟังก์ชันสำหรับแสดงช่องตามหมวดหมู่ที่เลือก
+            function displayChannels(category) {
+                // ล้างช่องเก่าออกก่อน
+                channelGridContainer.innerHTML = '';
+
+                const channelsToDisplay = groupedChannels[category];
+                if (!channelsToDisplay) return;
+
+                channelsToDisplay.forEach(channel => {
+                    const div = document.createElement("div");
+                    div.className = "channel";
+                    div.innerHTML = `<img src="${channel.logo}" alt="Logo ${channel.category}">`;
+                    div.onclick = () => loadPlayer(channel);
+                    channelGridContainer.appendChild(div);
+                });
+            }
+
+            // สร้างปุ่มหมวดหมู่ทั้งหมด
+            const categories = Object.keys(groupedChannels);
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.className = 'category-button';
+                button.textContent = category;
+                button.dataset.category = category; // เก็บชื่อหมวดหมู่ไว้ในปุ่ม
+
+                button.onclick = function() {
+                    // เอา class 'active' ออกจากปุ่มเก่าทั้งหมด
+                    document.querySelectorAll('.category-button').forEach(btn => btn.classList.remove('active'));
+                    // เพิ่ม class 'active' ให้ปุ่มที่ถูกคลิก
+                    this.classList.add('active');
+                    // แสดงช่องของหมวดหมู่นี้
+                    displayChannels(this.dataset.category);
+                };
+
+                categoryButtonsContainer.appendChild(button);
+            });
+
+            // --- ทำให้หมวดหมู่แรกแสดงผลเป็นค่าเริ่มต้น ---
+            if (categories.length > 0) {
+                // หาปุ่มแรกและ "คลิก"
+                const firstButton = categoryButtonsContainer.querySelector('.category-button');
+                if (firstButton) {
+                    firstButton.click();
+                }
+            }
+
         });
     </script>
 </body>
