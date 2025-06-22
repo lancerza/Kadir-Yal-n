@@ -114,13 +114,17 @@
             text-align: center;
             padding: 10px;
             transition: transform 0.2s ease, border-color 0.2s ease;
-            width: 90px;
+            width: 110px; /* ขยายความกว้างเพื่อรองรับชื่อช่อง */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .channel img {
             width: 70px;
             height: 70px;
             margin-bottom: 8px;
-            border-radius: 5px;
+
+border-radius: 5px;
             background-color: #2c2c2c;
             pointer-events: none;
         }
@@ -128,6 +132,15 @@
             background: #282828;
             border-color: #1E90FF;
             transform: scale(1.05);
+        }
+        /* --- CSS ใหม่สำหรับชื่อช่อง --- */
+        .channel-name {
+            font-size: 0.8em;
+            color: #ccc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
     </style>
 </head>
@@ -159,51 +172,42 @@
 
             function updateDateTime() {
                 const now = new Date();
-                
-                // ตั้งค่าเวลา (นำวินาทีออก)
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-                timeDisplay.textContent = `${hours}:${minutes}`;
-
-                // ตั้งค่าวันที่ภาษาไทย
+                timeDisplay.textContent = ${hours}:${minutes};
                 const thaiDays = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
                 const thaiMonths = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
                 const day = thaiDays[now.getDay()];
                 const date = now.getDate();
                 const month = thaiMonths[now.getMonth()];
                 const year = now.getFullYear() + 543;
-                dateDisplay.textContent = `${day}ที่ ${date} ${month} พ.ศ. ${year}`;
+                dateDisplay.textContent = ${day}ที่ ${date} ${month} พ.ศ. ${year};
             }
             
             updateDateTime();
-            setInterval(updateDateTime, 1000); // ยังคงอัปเดตทุกวินาทีเพื่อให้เวลาเปลี่ยนนาทีตรงเวลา
+            setInterval(updateDateTime, 1000);
             
+            // --- อัปเดตรายการช่องทั้งหมดที่นี่ ---
             const channels = [
-                 { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/2/2.mpd", keyId: "ca20a93cf8e3421dafbd5bdb1990081b", key: "86ae86a7391c481ea93eecdb740f0a14" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0014.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/3/3.mpd", keyId: "4d4426a505f64382a9841155d721cee6", key: "0f4770219ccb4be5836a7517057e51c3" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/R2_0053.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/16/16.mpd", keyId: "9ebedc957e934d2b9023e4e60b97af73", key: "7bcb4363df74457bbafedec1a864e6b6" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/JKN18.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/18/18.mpd", keyId: "333de6034a1d45fe91c829539caf1149", key: "2710efc048ca44bba4c2b57397989a26" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0015_R.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/23/23.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0054.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/24/24.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0006.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/27/27.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/MCOT_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/30/30.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0012.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/31/31.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/LOGO3HD.PNG", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd", keyId: "9d76aea451d441a4913d4d70c4e586ab", key: "051027a6ff54494b949ba792928e9008" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/AmarinTV_NEW512.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/34/34.mpd", keyId: "4d4426a505f64382a9841155d721cee6", key: "0f4770219ccb4be5836a7517057e51c3" },
-                { category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/PPTV_2024e.jpg", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/36/36.mpd", keyId: "4d4426a505f64382a9841155d721cee6", key: "0f4770219ccb4be5836a7517057e51c3" },
-                { category: "ข่าว", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0019.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/25/25.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { category: "ข่าว", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0016.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/29/29.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
-                { category: "ภาพยนตร์และซีรีส์", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBAsian_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/101/101.mpd", keyId: "dac6cbd9d17a451bb76386f52469e0e9", key: "2e2ac52cadf843459915eaa1a9b95e48" },
-                { category: "ภาพยนตร์และซีรีส์", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//Mono29Plus_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/109/109.mpd", keyId: "072eeb02f6744f838fcc8f0ef36b312e", key: "b797c12f2dd64728aae23fd3c8ef275c" },
-                { category: "ภาพยนตร์และซีรีส์", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/R_0148.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/103/103.mpd", keyId: "9c5735afb4fd402580360aed8364469c", key: "128d55d9ac2b47ad85f86b5d08320179" },
-                { category: "ภาพยนตร์และซีรีส์", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0149.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/104/104.mpd", keyId: "0db89bae851440a5994f5893ad480494", key: "d88ef77eaedf4451a65be2e0bf6eabde" },
-                { category: "การ์ตูน", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//Cartoonito.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/302/302.mpd", keyId: "ad2371259d34404cb89d54a4dc88dcd3", key: "1ba155e345c4456ba891cbee9b3e1c4c" },
-                { category: "การ์ตูน", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/LOGO_Nickelodeon2.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/303/303.mpd", keyId: "9130a6448a74430794d355b48b56a64c", key: "c2f4d3288cdb43cf81e519ceb414dd6f" },
-                { category: "การ์ตูน", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/Nickjr_2024.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/304/304.mpd", keyId: "641c3f0e676d49d18c2082e093380e69", key: "e06f3a2e327643249c3831ab199c4015" },
-                { category: "กีฬา", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/T-SPorts_7_Final.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/7/7.mpd", keyId: "6187523f92b9475bb5b192f70cef1342", key: "5119311f482144d58dacabc5bc1fa4ba" },
-                { category: "กีฬา", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBsports1_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/401/401.mpd", keyId: "678bbba596584ad895d2923fb0255e82", key: "c55471086c824112b217743a31abdf8f" },
-                { category: "การศึกษา", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ALTV.PNG", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/4/4.mpd", keyId: "1e98456bcbea44b7ad05831387e364ef", key: "3d14fd4f9d3149a79b35a7124fccbd67" },
+                // --- หมวดหมู่ใหม่ FIFA ---
+                { name: "FIFA Live-A", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/club.png", file: "https://cdn1.googlecdnforstreaming.live/live/trt-spor/playlist.m3u8?wmsAuth="},
+                { name: "FIFA Live-B", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/club.png", file: "https://slave02.appball.vip/hls/ch11.m3u8"},
+                { name: "FIFA Live-C", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/club.png", file: "https://dolive.thaim3u.com/doolive4k-tv/football-play-2/chunks.m3u8"},
+                { name: "FIFA Live-D", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/club.png", file: "https://cdn1.googlecdnforstreaming.live/live/dklsport1/playlist.m3u8"},
+                { name: "Mono29-A", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.pic.in.th/pic/mono29977274214da259a2.png", file: "https://monomax-uiripn.cdn.byteark.com/plain/th/1080p/index.m3u8"},
+                { name: "Mono29-D", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.pic.in.th/pic/mono29977274214da259a2.png", file: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/29/29.mpd"},
+                { name: "Mono29-E", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.pic.in.th/pic/mono29977274214da259a2.png", file: "https://cdnsv1.bunnycdncloud.com/andaman888th/mono29/playlist.m3u8"},
+
+{ name: "DAZN 1-B🇩🇪", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/daza1doo.png", file: "https://cdn1.googlecdnforstreaming.live/live/dazn1/playlist.m3u8"},
+                { name: "DAZN 1-C🇩🇪", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/daza1doo.png", file: "http://tbtv.me:2095/play/live.php?mac=00:1A:79:E7:32:0C&stream=374410&extension=ts"},
+                { name: "DAZN 1-D🇩🇪", category: "FIFA Club World Cup 2025🏆🥇", logo: "https://img2.imgbiz.com/imgbiz/daza1doo.png", file: "https://cdnsv1.bunnycdncloud.com/andaman888th/dazn1de/playlist.m3u8"},
+
+                // --- ช่องเดิม ---
+                { name: "ช่อง 5", category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },
+                { name: "ช่อง 7", category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/2/2.mpd", keyId: "ca20a93cf8e3421dafbd5bdb1990081b", key: "86ae86a7391c481ea93eecdb740f0a14" },
+                { name: "ช่อง 3", category: "ทีวีดิจิทัล", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/LOGO3HD.PNG", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd", keyId: "9d76aea451d441a4913d4d70c4e586ab", key: "051027a6ff54494b949ba792928e9008" },
+                { name: "ALTV", category: "การศึกษา", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ALTV.PNG", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/4/4.mpd", keyId: "1e98456bcbea44b7ad05831387e364ef", key: "3d14fd4f9d3149a79b35a7124fccbd67" },
+                { name: "T-Sports 7", category: "กีฬา", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/T-SPorts_7_Final.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/7/7.mpd", keyId: "6187523f92b9475bb5b192f70cef1342", key: "5119311f482144d58dacabc5bc1fa4ba" }
             ];
             
             const categoryButtonsContainer = document.getElementById('category-buttons');
@@ -214,8 +218,7 @@
                 playerDiv.innerHTML = "";
                 jwplayer("player").setup({
                     file: channel.file,
-                    type: "dash",
-                    drm: { clearkey: { keyId: channel.keyId, key: channel.key } },
+                    drm: channel.keyId ? { clearkey: { keyId: channel.keyId, key: channel.key } } : null,
                     width: "100%",
                     aspectratio: "16:9",
                     autostart: true,
@@ -238,13 +241,14 @@
                 channelsToDisplay.forEach(channel => {
                     const div = document.createElement("div");
                     div.className = "channel";
-                    div.innerHTML = `<img src="${channel.logo}" alt="Logo ${channel.category}">`;
+                    // --- อัปเดตให้แสดงชื่อช่อง ---
+                    div.innerHTML = <img src="${channel.logo}" alt="${channel.name}"><span class="channel-name">${channel.name}</span>;
                     div.onclick = () => loadPlayer(channel);
                     channelGridContainer.appendChild(div);
                 });
             }
 
-            const categories = Object.keys(groupedChannels);
+const categories = Object.keys(groupedChannels);
             categories.forEach(category => {
                 const button = document.createElement('button');
                 button.className = 'category-button';
@@ -260,9 +264,11 @@
             });
 
             if (categories.length > 0) {
-                const firstButton = categoryButtonsContainer.querySelector('.category-button');
-                if (firstButton) {
-                    firstButton.click();
+                // ทำให้หมวดหมู่ "FIFA" แสดงผลเป็นค่าเริ่มต้นถ้ามี
+                const initialCategory = categories.includes("FIFA Club World Cup 2025🏆🥇") ? "FIFA Club World Cup 2025🏆🥇" : categories[0];
+                const initialButton = Array.from(categoryButtonsContainer.children).find(btn => btn.dataset.category === initialCategory);
+                if(initialButton) {
+                    initialButton.click();
                 }
             }
         });
