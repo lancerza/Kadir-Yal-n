@@ -1,538 +1,176 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>เว็บดูทีวี - Premium Channel Grid</title>
-<style>
-  body {
-    margin: 0;
-    background: #121212;
-    color: #eee;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-
-  header {
-    background-color: #161b22; /* Darker header */
-    padding: 15px 25px; /* Slightly more padding */
-    display: flex;
-    align-items: center;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.8); /* Stronger shadow */
-    gap: 20px; /* Increased gap */
-}
-header a.logo-link img {
-    height: 52px; /* Slightly larger logo */
-    filter: drop-shadow(0 0 4px #386ad1); /* Brighter shadow */
-    transition: transform 0.2s ease-in-out; /* Smoother transition */
-}
-header a.logo-link:hover img {
-    transform: scale(1.1);
-}
-
-.running-text-container {
-    flex: 1;
-    overflow: hidden;
-    white-space: nowrap;
-    position: relative;
-    height: 52px; /* Match logo height */
-}
-.running-text {
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee 18s linear infinite; /* Slightly slower */
-    font-size: 22px; /* Slightly larger text */
-    font-weight: 600;
-    color: #f0f8ff; /* Even lighter text */
-    user-select: none;
-    text-shadow: 0 0 6px #386ad1; /* Brighter shadow */
-    line-height: 52px; /* Match container height */
-}
-@keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
-}
-
-#horizontalMenu {
-    background-color: #1c2128; /* Darker menu */
-    padding: 10px 20px; /* Slightly more padding */
-    display: flex;
-    gap: 20px; /* Increased gap */
-    justify-content: center;
-    align-items: center;
-    border-bottom: 1px solid #2e3440; /* Subtle bottom border */
-}
-#horizontalMenu a.icon-link img {
-    width: 36px; /* Slightly larger icons */
-    height: 36px;
-    object-fit: contain;
-    transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out; /* Smoother transitions */
-    filter: grayscale(30%); /* Slightly desaturated */
-}
-#horizontalMenu a.icon-link:hover img {
-    transform: scale(1.15); /* More pronounced hover */
-    filter: grayscale(0%) drop-shadow(0 0 6px #5e81ac); /* Brighter, full color shadow */
-}
-
-#videoPlayer {
-    width: 90%;
-    max-width: 900px;
-    height: auto; /* Maintain aspect ratio */
-    aspect-ratio: 16 / 9; /* Standard aspect ratio */
-    margin: 25px auto 15px; /* Increased top and bottom margin */
-    display: block;
-    border-radius: 10px; /* More rounded */
-    background: #000;
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.6); /* More vibrant shadow */
-    border: 1px solid #2e3440; /* Subtle border */
-}
-
-/* ปรับเป็นกริด 4 คอลัมน์สำหรับช่องรายการ */
-#channelList {
-    width: 90%;
-    max-width: 900px;
-    margin: 0 auto 40px; /* Increased bottom margin */
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Slightly wider min width */
-    gap: 20px; /* Increased gap */
-    padding: 10px; /* Add some padding around the grid */
-}
-.channel-item {
-    cursor: pointer;
-    background: #1c2128; /* Darker channel item */
-    border-radius: 10px; /* More rounded */
-    padding: 15px; /* Increased padding */
-    display: flex;
-    align-items: center;
-    gap: 15px; /* Increased gap */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3); /* Subtle shadow */
-    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out; /* Smoother transitions */
-    user-select: none;
-    outline: none; /* Remove default focus outline */
-}
-.channel-item:hover,
-.channel-item:focus {
-    background-color: #3b82f6; /* Brighter hover color */
-    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.7); /* Stronger hover shadow */
-    transform: scale(1.02); /* Slight scale on hover */
-}
-.channel-item.active {
-    background-color: #2563eb; /* Active color */
-    box-shadow: 0 0 20px #60a5fa; /* Vibrant active shadow */
-    transform: scale(1.05);
-}
-.channel-item img {
-    width: 80px; /* Slightly larger logo */
-    height: 45px; /* Adjust height */
-    object-fit: contain;
-    border-radius: 8px; /* More rounded logo */
-    box-shadow: 0 0 10px rgba(0,0,0,0.4); /* Subtle logo shadow */
-}
-.channel-name {
-    font-size: 19px; /* Slightly larger font */
-    font-weight: 500; /* Slightly lighter weight */
-    color: #e0e6ed; /* Lighter text */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#slideShow {
-    width: 90%;
-    max-width: 900px;
-    margin: 0 auto 60px; /* Increased bottom margin */
-    display: flex;
-    gap: 20px; /* Increased gap */
-    overflow-x: auto;
-    padding: 20px; /* More padding */
-    border-radius: 12px;
-    background: rgba(22, 27, 34, 0.7); /* Slightly darker, more opaque */
-    backdrop-filter: blur(8px); /* More blur */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* More pronounced shadow */
-}
-
-#slideShow a {
-    display: block;
-    width: 240px; /* Slightly wider slides */
-    height: 135px; /* Maintain aspect ratio */
-    border-radius: 10px;
-    overflow: hidden;
-    flex-shrink: 0;
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for each slide */
-}
-
-#slideShow a img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Fill the container, may crop */
-    border-radius: 10px;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smoother transitions */
-    box-shadow: none; /* Remove individual image shadow */
-}
-
-#slideShow a:hover img {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px #5e81ac; /* Hover shadow */
-}
-
-
-#channelList::-webkit-scrollbar,
-#slideShow::-webkit-scrollbar {
-    height: 10px; /* Slightly thicker scrollbar */
-}
-#channelList::-webkit-scrollbar-thumb,
-#slideShow::-webkit-scrollbar-thumb {
-    background-color: #3b82f6; /* Brighter scrollbar thumb */
-    border-radius: 5px;
-}
-#channelList::-webkit-scrollbar-track,
-#slideShow::-webkit-scrollbar-track {
-    background-color: #161b22; /* Darker scrollbar track */
-}
-
-@media (max-width: 600px) {
-    header {
-        padding: 10px 15px;
-        gap: 10px;
-    }
-    header a.logo-link img {
-        height: 40px;
-    }
-    .running-text-container {
-        height: 40px;
-    }
-    .running-text {
-        font-size: 18px;
-        line-height: 40px;
-    }
-    #horizontalMenu {
-        padding: 8px 10px;
-        gap: 10px;
-    }
-    #horizontalMenu a.icon-link img {
-        width: 28px;
-        height: 28px;
-    }
-    #videoPlayer {
-        margin: 15px auto 10px;
-        border-radius: 8px;
-    }
-    #channelList {
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Smaller min width for smaller screens */
-        gap: 10px;
-        padding: 5px;
-    }
-    .channel-item {
-        padding: 10px;
-        gap: 8px;
-        border-radius: 8px;
-    }
-    .channel-item img {
-        width: 60px;
-        height: 34px;
-        border-radius: 6px;
-    }
-    .channel-name {
-        font-size: 16px;
-    }
-    #slideShow {
-        gap: 10px;
-        padding: 10px;
-        border-radius: 10px;
-        margin-bottom: 40px;
-    }
-    #slideShow a {
-        width: 160px;
-        height: 90px;
-        border-radius: 8px;
-    }
-    #slideShow a img {
-        border-radius: 8px;
-    }
-    #channelList::-webkit-scrollbar,
-    #slideShow::-webkit-scrollbar {
-        height: 6px;
-    }
-    #channelList::-webkit-scrollbar-thumb,
-    #slideShow::-webkit-scrollbar-thumb {
-        border-radius: 3px;
-
-    }
-  }
-</style>
+    [span_0](start_span)<meta charset="UTF-8">[span_0](end_span)
+    [span_1](start_span)<meta name="viewport" content="width=device-width, initial-scale=1.0">[span_1](end_span)
+    <title>TV Online Player</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    [span_2](start_span)<script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>[span_2](end_span)
+    <script>
+        [span_3](start_span)jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';[span_3](end_span)
+    </script>
+    <style>
+        body {
+            [span_4](start_span)margin: 0;[span_4](end_span)
+            [span_5](start_span)padding: 0;[span_5](end_span)
+            background-color: #121212; /* เปลี่ยนสีพื้นหลังให้ดูสบายตาขึ้น */
+            color: #E0E0E0;
+            font-family: 'Poppins', sans-serif; /* ใช้ฟอนต์ใหม่ */
+            [span_6](start_span)display: flex;[span_6](end_span)
+            [span_7](start_span)flex-direction: column;[span_7](end_span)
+            [span_8](start_span)align-items: center;[span_8](end_span)
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px; /* กำหนดความกว้างสูงสุดของเนื้อหา */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            color: #FFFFFF;
+        }
+        #player {
+            [span_9](start_span)width: 100%;[span_9](end_span)
+            [span_10](start_span)max-width: 100%;[span_10](end_span)
+            [span_11](start_span)aspect-ratio: 16/9;[span_11](end_span)
+            margin-bottom: 30px;
+            border-radius: 10px; /* เพิ่มขอบมน */
+            overflow: hidden; /* ทำให้วิดีโอมีขอบมนตาม */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); /* เพิ่มเงาให้ดูมีมิติ */
+        }
+        #channel-section {
+            width: 100%;
+            [span_12](start_span)max-width: 1000px;[span_12](end_span)
+            [span_13](start_span)margin: 10px auto;[span_13](end_span)
+        }
+        #channel-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+        }
+        #channel-list {
+            [span_14](start_span)display: flex;[span_14](end_span)
+            [span_15](start_span)flex-wrap: wrap;[span_15](end_span)
+            gap: 15px; /* เพิ่มระยะห่างระหว่างช่อง */
+            [span_16](start_span)justify-content: center;[span_16](end_span)
+        }
+        .channel {
+            [span_17](start_span)cursor: pointer;[span_17](end_span)
+            background: #1E1E1E;
+            border: 2px solid #333;
+            [span_18](start_span)border-radius: 10px;[span_18](end_span)
+            [span_19](start_span)text-align: center;[span_19](end_span)
+            [span_20](start_span)padding: 10px;[span_20](end_span)
+            transition: transform 0.2s ease, border-color 0.2s ease; /* เพิ่ม transition */
+            width: 90px; /* ขยายขนาดปุ่ม */
+        }
+        .channel img {
+            [span_21](start_span)width: 70px;[span_21](end_span)
+            [span_22](start_span)height: 70px;[span_22](end_span)
+            [span_23](start_span)margin-bottom: 8px;[span_23](end_span)
+            border-radius: 5px;
+            background-color: #2c2c2c;
+        }
+        .channel:hover {
+            [span_24](start_span)background: #282828;[span_24](end_span)
+            border-color: #1E90FF; /* เปลี่ยนสีขอบเมื่อ hover */
+            transform: scale(1.05); /* ขยายขนาดเมื่อ hover */
+        }
+    </style>
 </head>
 <body>
 
-<header>
-  <a href="/" class="logo-link" title="Home">
-    <img src="/logo/dotvzaa/Picsart_25-04-21_14-32-15-772.png" alt="โลโก้เว็บ" />
-  </a>
-  <div class="running-text-container" aria-label="ข้อความวิ่ง">
-    <div class="running-text">รับสมาชิก ตลอดชีพ ชมได้ 2 อุปกรณ์พร้อมกัน ราคา850 บาท  สนใจ แอดไลน์ @680salib</div>
-  </div>
-</header>
-
-<div id="horizontalMenu">
-  <a href="http://tvzaa.myftp.org" target="_blank" class="icon-link" title="TVZAA">
-    <img src="https://cdn-icons-png.flaticon.com/128/1946/1946436.png" alt="TVZAA Logo" />
-  </a>
-  <a href="https://www.google.com" target="_blank" class="icon-link" title="Google">
-    <img src="https://cdn-icons-png.flaticon.com/128/300/300221.png" alt="Google Logo" />
-  </a>
-  <a href="https://www.youtube.com" target="_blank" class="icon-link" title="YouTube">
-    <img src="https://cdn-icons-png.flaticon.com/128/1384/1384060.png" alt="YouTube Logo" />
-  </a>
-  <a href="https://line.me/ti/p/@680salib" target="_blank" class="icon-link" title="LINE">
-    <img src="logo/header/17461166145122510042015147482419.png" alt="LINE Logo" />
-  </a>
-  <a href="https://www.facebook.com/profile.php?id=61554952649144" target="_blank" class="icon-link" title="Facebook">
-    <img src="logo/header/17461166410103915598820082461503.png" alt="Facebook Logo" />
-  </a>
-</div>
-
-<video id="videoPlayer" controls autoplay playsinline></video>
-
-<div id="channelList" aria-label="รายการช่อง"></div>
-
-<div id="slideShow" aria-label="ภาพสไลด์"></div>
-
-<script>
-  const m3uData = `
-#EXTM3U
-
-#EXTINF:-1 tvg-chno="1" ch-number="1" tvg-id="MVTV ท้องถิ่นไทย (75).th" tvg-name="MVTV ท้องถิ่นไทย (75)" tvg-logo="/logo/vbtv1.png" group-title="Digital TV", VBTV 1
-http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2F_fFIe4C7xjX_opxPplasA/m3u8
-
-#EXTINF:-1 tvg-chno="1" ch-number="1" tvg-id="MVTV ท้องถิ่นไทย (75).th" tvg-name="MVTV ท้องถิ่นไทย (75)" tvg-logo="/logo/vbtv2.png" group-title="Digital TV", VBTV 2
-http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2GWk7jgFdGl1hfeZKznSlgg/m3u8
-
-#EXTINF:-1 xui-id="15855" tvg-id="" tvg-name="หนังฝรั่ง" tvg-logo="http://45.144.165.223/logo/ent/intermovie.png" group-title="DIGITAL",หนังฝรั่ง
-http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2GNXaNwzV0aoBpkJ1W6O9P8/m3u8
-
-#EXTINF:-1 xui-id="15856" tvg-id="" tvg-name="หนังเอเชีย" tvg-logo="http://45.144.165.223/logo/ent/asianmovie.png" group-title="DIGITAL",หนังเอเชีย
-http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2GE65zCy46pi5iwqJBQAWkV/m3u8
-
-#EXTINF:-1 xui-id="15857" tvg-id="" tvg-name="หนังไทย" tvg-logo="http://45.144.165.223/logo/ent/thaimovie.png" group-title="DIGITAL",หนังไทย
-http://43.229.132.25:80/play/lXczR7gX0aqSTYtv3UCQtvVgcONLEEy13ZjHiCaTs2FcjXqcX-KxE_l4-JqcfFrc/m3u8
-
-#EXTINF:-1 tvg-chno="2" ch-number="2" tvg-id="NBT.th" tvg-name="NBT" tvg-logo="https://media-mvtv.imgix.net/channel/115_y_fFG0J46IoYNzUjVKatsbL7vZByxiMqTm.png" group-title="Digital TV", NBT
-https://lb1-live-mv.v2h-cdn.com/hls/fffe/nbt/nbt.m3u8
-
-#EXTINF:-1 tvg-chno="3" ch-number="3" tvg-id="TPBS.th" tvg-name="TPBS" tvg-logo="https://media-mvtv.imgix.net/channel/116_y_cze67bhJwH8CIOaqnULfg0kKPAs2TQW1.png" group-title="Digital TV", TPBS
-https://lb1-live-mv.v2h-cdn.com/hls/fffd/tpbs/tpbs.m3u8
-
-#EXTINF:-1 tvg-chno="4" ch-number="4" tvg-id="ALTV.th" tvg-name="ALTV" tvg-logo="https://media-mvtv.imgix.net/channel/117_y_8JTfbUnwW9t2kuVh6ZpONEqv7MeBIsQR.png" group-title="Digital TV", ALTV
-https://lb1-live-mv.v2h-cdn.com/hls/fffc/altv/altv.m3u8
-
-#EXTINF:-1 tvg-chno="5" ch-number="5" tvg-id="5HD.th" tvg-name="5HD" tvg-logo="https://media-mvtv.imgix.net/channel/118_y_0kEyP9Yrw5jTWflXevIZ1Dqhoa2mi4QO.png" group-title="Digital TV", 5HD
-https://lb1-live-mv.v2h-cdn.com/hls/fffb/5hd/5hd.m3u8
-
-#EXTINF:-1 tvg-chno="7" ch-number="7" tvg-id="T SPORT.th" tvg-name="T SPORT" tvg-logo="https://media-mvtv.imgix.net/channel/119_y_OhjxHr9fqS2i0NJvPUlcL85mn6e4FoIu.png" group-title="Digital TV", T SPORT
-https://lb1-live-mv.v2h-cdn.com/hls/ffef/tsport/tsport.m3u8
-
-#EXTINF:-1 tvg-chno="10" ch-number="10" tvg-id="TPTV.th" tvg-name="TPTV" tvg-logo="https://media-mvtv.imgix.net/channel/120_y_VSgE7P9GiDCxrhFWUALYpvzfM12cdqmH.png" group-title="Digital TV", TPTV
-https://lb1-live-mv.v2h-cdn.com/hls/ffec/tptv/tptv.m3u8
-
-#EXTINF:-1 tvg-chno="16" ch-number="16" tvg-id="TNN.th" tvg-name="TNN" tvg-logo="https://media-mvtv.imgix.net/channel/121_y_uQNBde5zrpo4TKm9kOZPx6iRbGaACfFE.png" group-title="Digital TV", TNN
-https://lb1-live-mv.v2h-cdn.com/hls/ffdc/tnn/tnn.m3u8
-
-#EXTINF:-1 tvg-chno="18" ch-number="18" tvg-id="JKN18.th" tvg-name="JKN18" tvg-logo="https://media-mvtv.imgix.net/channel/122_y_bzfht4O5uRNHylcq1D6nV9TvxmdXWaQP.png" group-title="Digital TV", JKN18
-https://lb1-live-mv.v2h-cdn.com/hls/ffda/jkn18/jkn18.m3u8
-
-#EXTINF:-1 tvg-chno="22" ch-number="22" tvg-id="Nation.th" tvg-name="Nation" tvg-logo="https://media-mvtv.imgix.net/channel/123_y_3vyW276UFjIStew9DHJNs8AGKfdmZXpu.png" group-title="Digital TV", Nation
-https://lb1-live-mv.v2h-cdn.com/hls/ffcc/nation/nation.m3u8
-
-#EXTINF:-1 tvg-chno="23" ch-number="23" tvg-id="Workpoint.th" tvg-name="Workpoint" tvg-logo="https://media-mvtv.imgix.net/channel/124_y_1PI2djLbMJpXO0n5oywKiNDzsWfTuFg4.png" group-title="Digital TV", Workpoint
-https://lb1-live-mv.v2h-cdn.com/hls/ffcb/workpoint/workpoint.m3u8
-
-#EXTINF:-1 tvg-chno="24" ch-number="24" tvg-id="True24.th" tvg-name="True24" tvg-logo="https://media-mvtv.imgix.net/channel/125_y_vQwogyPUC1FsRhK9TmzSWqb8YI6aktcM.png" group-title="Digital TV", True24
-https://lb1-live-mv.v2h-cdn.com/hls/ffca/true24/true24.m3u8
-
-#EXTINF:-1 tvg-chno="25" ch-number="25" tvg-id="GMM25.th" tvg-name="GMM25" tvg-logo="https://media-mvtv.imgix.net/channel/126_y_6PH49bDqlg1aSxGoNUdT83R5Jkeyf2mB.png" group-title="Digital TV", GMM25
-https://lb1-live-mv.v2h-cdn.com/hls/ffbf/gmm25/gmm25.m3u8
-
-#EXTINF:-1 tvg-chno="27" ch-number="27" tvg-id="ช่อง 8.th" tvg-name="ช่อง 8" tvg-logo="https://media-mvtv.imgix.net/channel/127_y_uhsXzFBxYD6Wq2mpZeIUb4M7RK1ECkn8.png" group-title="Digital TV", ช่อง 8
-https://lb1-live-mv.v2h-cdn.com/hls/ffbe/ch8/ch8.m3u8
-
-#EXTINF:-1 tvg-chno="29" ch-number="29" tvg-id="MONO 29.th" tvg-name="MONO 29" tvg-logo="https://media-mvtv.imgix.net/channel/128_y_KUvdGmb2hpV41ni5rCk9OlFoXePMA80Q.png" group-title="Digital TV", MONO 29
-https://lb1-live-mv.v2h-cdn.com/hls/ffbc/mono29/mono29.m3u8
-
-#EXTINF:-1 tvg-chno="30" ch-number="30" tvg-id="MCOT.th" tvg-name="MCOT" tvg-logo="https://media-mvtv.imgix.net/channel/129_y_hG7Nj2qWnldBu0fkMDyvT8CwYXLI649F.png" group-title="Digital TV", MCOT
-https://lb1-live-mv.v2h-cdn.com/hls/ffbb/mcot/mcot.m3u8
-
-#EXTINF:-1 tvg-chno="31" ch-number="31" tvg-id="ONE.th" tvg-name="ONE" tvg-logo="https://media-mvtv.imgix.net/channel/130_y_3Lx4j6ZzpIidKPqChaF2QRYeWorw79Jv.png" group-title="Digital TV", ONE
-https://lb1-live-mv.v2h-cdn.com/hls/ffba/one/one.m3u8
-
-#EXTINF:-1 tvg-chno="32" ch-number="32" tvg-id="Thairath.th" tvg-name="Thairath" tvg-logo="https://media-mvtv.imgix.net/channel/131_y_iJmHlFadZ0G8EhIYMw2A3OfbN1Qpzgou.png" group-title="Digital TV", Thairath
-https://lb1-live-mv.v2h-cdn.com/hls/ffaf/thairath/thairath.m3u8
-
-#EXTINF:-1 tvg-chno="33" ch-number="33" tvg-id="3HD.th" tvg-name="3HD" tvg-logo="https://media-mvtv.imgix.net/channel/132_y_TFYiXWvrUf4s8tbIwJ29S3zMNeqghGmB.png" group-title="Digital TV", 3HD
-https://lb1-live-mv.v2h-cdn.com/hls/ffae/3hd/3hd.m3u8
-
-#EXTINF:-1 tvg-chno="34" ch-number="34" tvg-id="Amarin.th" tvg-name="Amarin" tvg-logo="https://media-mvtv.imgix.net/channel/133_y_kLIyaJt3VoGD8sqrHnhKPjZUQ0RE6mu4.png" group-title="Digital TV", Amarin
-https://lb1-live-mv.v2h-cdn.com/hls/ffad/amarin/amarin.m3u8
-
-#EXTINF:-1 tvg-chno="35" ch-number="35" tvg-id="7HD.th" tvg-name="7HD" tvg-logo="https://media-mvtv.imgix.net/channel/134_y_YTkIZJDsbmX26owPRpAFSfW0eyz95vn4.png" group-title="Digital TV", 7HD
-https://lb1-live-mv.v2h-cdn.com/hls/ffac/7hd/7hd.m3u8
-
-#EXTINF:-1 tvg-chno="36" ch-number="36" tvg-id="PPTV.th" tvg-name="PPTV" tvg-logo="https://media-mvtv.imgix.net/channel/135_y_7hl4KHdwBqS0VGNCskrDLyci538zY2Qx.png" group-title="Digital TV", PPTV
-https://lb1-live-mv.v2h-cdn.com/hls/ffab/pptv/pptv.m3u8
-
-#EXTINF:-1 tvg-chno="28" ch-number="28" tvg-id="Boom Cartoon.th" tvg-name="Boom Cartoon" tvg-logo="https://media-mvtv.imgix.net/channel/188_y_SHbpOor8a2ClM0g3LFcsT5I4GkRmu6q9.jpg" group-title="Digital TV", Boom Cartoon
-https://lb1-live-mv.v2h-cdn.com/hls/ffbd/boomanime/boomanime.m3u8
-
-#EXTINF:-1 tvg-chno="6" ch-number="6" tvg-id="Boomerang.th" tvg-name="Boomerang" tvg-logo="https://media-mvtv.imgix.net/channel/153_y_Agyp2nEebLvC9tWa5xBcY1J038OuTzFD.png" group-title="Digital TV", Boomerang
-https://lb1-live-mv.v2h-cdn.com/hls/fffa/boomerang/boomerang.m3u8
-
-#EXTINF:-1 tvg-chno="104" ch-number="104" tvg-id="France 24.th" tvg-name="France 24" tvg-logo="https://media-mvtv.imgix.net/channel/151_y_YrFS8xk32BmplLV4NcHgdXRsuU7TvWZ5.png" group-title="Digital TV", France 24
-https://lb1-live-mv.v2h-cdn.com/hls/fecd/france24/france24.m3u8
-
-#EXTINF:-1 tvg-chno="105" ch-number="105" tvg-id="CNA.th" tvg-name="CNA" tvg-logo="https://media-mvtv.imgix.net/channel/152_y_zynZw6RpjUoxHbGMh28eCKk9BlqIXJAa.png" group-title="Digital TV", CNA
-https://d2e1asnsl7br7b.cloudfront.net/4e4e0baa3d7b4c129b4f5655219e083d/index.m3u8
-
-#EXTINF:-1 tvg-chno="106" ch-number="106" tvg-id="NHK WORLD.th" tvg-name="NHK WORLD" tvg-logo="https://media-mvtv.imgix.net/channel/155_y_ERge294wz1fsLvyCjX3DStPGcMmYFIKo.jpg" group-title="Digital TV", NHK WORLD
-https://nhkworld-tv.akamaized.net/hls/live/2115640/nhkworld-tv/index_1M.m3u8
-
-#EXTINF:-1 tvg-chno="107" ch-number="107" tvg-id="CCTV4.th" tvg-name="CCTV4" tvg-logo="https://media-mvtv.imgix.net/channel/154_y_lIpB1wRXh7vQUYcAkzxLd8EVbg9Gsa0u.png" group-title="Digital TV", CCTV4
-http://edge2a.v2h-cdn.com/cctv4/cctv4.stream/playlist.m3u8
-
-#EXTINF:-1 tvg-chno="201" ch-number="201" tvg-id="DLTV1.th" tvg-name="DLTV1" tvg-logo="https://media-mvtv.imgix.net/channel/136_y_tPkVabFhc7iUGQdmlEDC5IxvJZj4326M.png" group-title="Digital TV", DLTV1
-https://cdn-live.dltv.ac.th/dltv01.m3u8
-
-#EXTINF:-1 tvg-chno="202" ch-number="202" tvg-id="DLTV2.th" tvg-name="DLTV2" tvg-logo="https://media-mvtv.imgix.net/channel/137_y_yQOMjhFVupi8I1oal5TScnbkfAYtJC2v.png" group-title="Digital TV", DLTV2
-https://cdn-live.dltv.ac.th/dltv02.m3u8
-
-#EXTINF:-1 tvg-chno="203" ch-number="203" tvg-id="DLTV3.th" tvg-name="DLTV3" tvg-logo="https://media-mvtv.imgix.net/channel/138_y_NrPWRcyIBzbd5kJ3n8MqHDOmoVpA19fS.png" group-title="Digital TV", DLTV3
-https://cdn-live.dltv.ac.th/dltv03.m3u8
-
-#EXTINF:-1 tvg-chno="204" ch-number="204" tvg-id="DLTV4.th" tvg-name="DLTV4" tvg-logo="https://media-mvtv.imgix.net/channel/139_y_gx6RdEWuPqjBnAwoCI2mrltX5vJU4bDO.png" group-title="Digital TV", DLTV4
-https://cdn-live.dltv.ac.th/dltv04.m3u8
-
-#EXTINF:-1 tvg-chno="205" ch-number="205" tvg-id="DLTV5.th" tvg-name="DLTV5" tvg-logo="https://media-mvtv.imgix.net/channel/140_y_0NYqGlHdDfQeZFoSUcMWsx1rtOyTXb78.png" group-title="Digital TV", DLTV5
-https://cdn-live.dltv.ac.th/dltv05.m3u8
-
-#EXTINF:-1 tvg-chno="206" ch-number="206" tvg-id="DLTV6.th" tvg-name="DLTV6" tvg-logo="https://media-mvtv.imgix.net/channel/141_y_gIp8YiEP6MQsdeb9hjKcBFmUHVw1kNxy.png" group-title="Digital TV", DLTV6
-https://cdn-live.dltv.ac.th/dltv06.m3u8
-
-#EXTINF:-1 tvg-chno="207" ch-number="207" tvg-id="DLTV7.th" tvg-name="DLTV7" tvg-logo="https://media-mvtv.imgix.net/channel/142_y_U53zK2mOiFQ9xsCMS7AJrvTtoEf6dpIc.png" group-title="Digital TV", DLTV7
-https://cdn-live.dltv.ac.th/dltv07.m3u8
-
-#EXTINF:-1 tvg-chno="208" ch-number="208" tvg-id="DLTV8.th" tvg-name="DLTV8" tvg-logo="https://media-mvtv.imgix.net/channel/143_y_k4YNqBSgRW1OndxQuU6Pac0CMJVKIf57.png" group-title="Digital TV", DLTV8
-https://cdn-live.dltv.ac.th/dltv08.m3u8
-
-#EXTINF:-1 tvg-chno="209" ch-number="209" tvg-id="DLTV9.th" tvg-name="DLTV9" tvg-logo="https://media-mvtv.imgix.net/channel/144_y_9yo8mDwnI5OLgCHKvfsZ42BMXTzEbrSe.png" group-title="Digital TV", DLTV9
-https://cdn-live.dltv.ac.th/dltv09.m3u8
-
-#EXTINF:-1 tvg-chno="210" ch-number="210" tvg-id="DLTV10.th" tvg-name="DLTV10" tvg-logo="https://media-mvtv.imgix.net/channel/145_y_9Fkli2DoLIP0EX56AHW74MhquQKfng1a.png" group-title="Digital TV", DLTV10
-https://cdn-live.dltv.ac.th/dltv10.m3u8
-
-#EXTINF:-1 tvg-chno="211" ch-number="211" tvg-id="DLTV11.th" tvg-name="DLTV11" tvg-logo="https://media-mvtv.imgix.net/channel/146_y_5LVm0hDdr2N19IOlU3MAtqscKSk6xgZe.png" group-title="Digital TV", DLTV11
-https://cdn-live.dltv.ac.th/dltv11.m3u8
-
-#EXTINF:-1 tvg-chno="212" ch-number="212" tvg-id="DLTV12.th" tvg-name="DLTV12" tvg-logo="https://media-mvtv.imgix.net/channel/147_y_Uel5LZmKGoutv2PJiFIx60jayQbpnzqT.png" group-title="Digital TV", DLTV12
-https://cdn-live.dltv.ac.th/dltv12.m3u8
-
-#EXTINF:-1 tvg-chno="213" ch-number="213" tvg-id="DLTV13.th" tvg-name="DLTV13" tvg-logo="https://media-mvtv.imgix.net/channel/148_y_23K7iaWFMTnyxjfH5NIhUpCgZc8SB4s9.png" group-title="Digital TV", DLTV13
-https://cdn-live.dltv.ac.th/dltv13.m3u8
-
-#EXTINF:-1 tvg-chno="214" ch-number="214" tvg-id="DLTV14.th" tvg-name="DLTV14" tvg-logo="https://media-mvtv.imgix.net/channel/149_y_EzhGev4MFkQUOR08CdZisfP5Lnw9Jx6A.png" group-title="Digital TV", DLTV14
-https://cdn-live.dltv.ac.th/dltv14.m3u8
-
-#EXTINF:-1 tvg-chno="215" ch-number="215" tvg-id="DLTV15.th" tvg-name="DLTV15" tvg-logo="https://media-mvtv.imgix.net/channel/150_y_eUWs21cyV38ARS0OZmtgILodzKiJqfaD.png" group-title="Digital TV", DLTV15
-https://cdn-live.dltv.ac.th/dltv15.m3u8
-
-
-
-`;
-
-  function parseM3U(data) {
-    const lines = data.trim().split('\n');
-    const channels = [];
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith('#EXTINF')) {
-        const infoLine = lines[i];
-        const urlLine = lines[i + 1] || '';
-        const channel = {};
-        const logoMatch = infoLine.match(/tvg-logo="([^"]+)"/);
-        channel.logo = logoMatch ? logoMatch[1] : '';
-        const nameMatch = infoLine.match(/,\s*(.*)/);
-        channel.name = nameMatch ? nameMatch[1] : 'Unknown';
-        channel.url = urlLine.trim();
-        channels.push(channel);
-      }
-    }
-    return channels;
-  }
-
-  const channels = parseM3U(m3uData);
-
-  const videoPlayer = document.getElementById('videoPlayer');
-  const channelList = document.getElementById('channelList');
-
-  let currentChannelIndex = 0;
-
-  function selectChannel(index) {
-    if (index < 0 || index >= channels.length) return;
-    currentChannelIndex = index;
-    videoPlayer.src = channels[index].url;
-    videoPlayer.play().catch(() => { /* บล็อก autoplay ไม่แสดง error */ });
-
-    // อัปเดตไฮไลต์ช่องที่เล่น
-    document.querySelectorAll('.channel-item').forEach((el, i) => {
-      el.classList.toggle('active', i === index);
-    });
-  }
-
-  channels.forEach((ch, index) => {
-    const div = document.createElement('div');
-    div.classList.add('channel-item');
-    div.setAttribute('tabindex', '0');
-    div.setAttribute('role', 'button');
-    div.setAttribute('aria-label', `ช่อง ${ch.name}`);
-    div.innerHTML = `
-      <img src="${ch.logo}" alt="${ch.name} logo" />
-      <div class="channel-name">${ch.name}</div>
-    `;
-    div.onclick = () => selectChannel(index);
-    div.onkeypress = (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        selectChannel(index);
-        e.preventDefault();
-      }
-    };
-    channelList.appendChild(div);
-  });
-
-  if (channels.length > 0) {
-    selectChannel(0);
-  }
-
-  // ภาพสไลด์ (ตัวอย่าง)
-  const slideItems = [
-    { src: '/logo/movie.png', link: '/dootvzaa.html' },
-    { src: '/logo/49c8ab8f-05c2-4ab2-8526-aca18fd57c6f.png', link: 'https://line.me/ti/p/@680salib' },
-    { src: '/logo/images.jpeg', link: 'https://example.com/page3' },
-    { src: '/logo/images.jpeg', link: 'https://example.com/page4' },
-  ];
-
-  const slideShow = document.getElementById('slideShow');
-  slideItems.forEach(item => {
-    const a = document.createElement('a');
-    a.href = item.link;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.setAttribute('aria-label', 'ลิงก์ภาพสไลด์');
-
-    const img = document.createElement('img');
-    img.src = item.src;
-    img.alt = "Slide image";
-
-    a.appendChild(img);
-    slideShow.appendChild(a);
-  });
-</script>
-
+    <header>
+        <h1>TV Online</h1>
+    </header>
+
+    <div class="container">
+        <div id="player"></div>
+
+        <section id="channel-section">
+            <h2>เลือกช่องรายการ</h2>
+            <div id="channel-list"></div>
+        </section>
+    </div>
+
+    <script>
+        const channels = [
+            // ข้อมูลช่องรายการทั้งหมดจากไฟล์เดิม...
+            [span_25](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_25](end_span)
+            [span_26](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/2/2.mpd", keyId: "ca20a93cf8e3421dafbd5bdb1990081b", key: "86ae86a7391c481ea93eecdb740f0a14" },[span_26](end_span)
+            [span_27](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0014.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/3/3.mpd", keyId: "4d4426a505f64382a9841155d721cee6", key: "0f4770219ccb4be5836a7517057e51c3" },[span_27](end_span)
+            [span_28](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ALTV.PNG", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/4/4.mpd", keyId: "1e98456bcbea44b7ad05831387e364ef", key: "3d14fd4f9d3149a79b35a7124fccbd67" },[span_28](end_span)
+            [span_29](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/T-SPorts_7_Final.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/7/7.mpd", keyId: "6187523f92b9475bb5b192f70cef1342", key: "5119311f482144d58dacabc5bc1fa4ba" },[span_29](end_span)
+            [span_30](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0048.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/10/10.mpd", keyId: "5da46688fd1e4ed5b085a12519b9dc4e", key: "fd07bcf33823447180f53f6540f74ccb" },[span_30](end_span)
+            [span_31](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/R2_0053.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/16/16.mpd", keyId: "9ebedc957e934d2b9023e4e60b97af73", key: "7bcb4363df74457bbafedec1a864e6b6" },[span_31](end_span)
+            [span_32](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/JKN18.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/18/18.mpd", keyId: "333de6034a1d45fe91c829539caf1149", key: "2710efc048ca44bba4c2b57397989a26" },[span_32](end_span)
+            [span_33](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0021.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/22/22.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_33](end_span)
+            [span_34](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0015_R.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/23/23.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_34](end_span)
+            [span_35](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0054.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/24/24.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_35](end_span)
+            [span_36](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0019.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/25/25.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_36](end_span)
+            [span_37](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0006.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/27/27.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_37](end_span)
+            [span_38](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0016.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/29/29.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_38](end_span)
+            [span_39](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/MCOT_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/30/30.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_39](end_span)
+            [span_40](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0012.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/31/31.mpd", keyId: "87db4361f7894655a4656e9c8b935a02", key: "b025a4b950df41158a87cfc8d6f2ac34" },[span_40](end_span)
+            [span_41](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0013_R.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/32/32.mpd", keyId: "9d76aea451d441a4913d4d70c4e586ab", key: "051027a6ff54494b949ba792928e9008" },[span_41](end_span)
+            [span_42](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/LOGO3HD.PNG", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd", keyId: "9d76aea451d441a4913d4d70c4e586ab", key: "051027a6ff54494b949ba792928e9008" },[span_42](end_span)
+            [span_43](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0018.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/35/35.mpd", keyId: "4d4426a505f64382a9841155d721cee6", key: "0f4770219ccb4be5836a7517057e51c3" },[span_43](end_span)
+            [span_44](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/AmarinTV_NEW512.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/34/34.mpd", keyId: "4d4426a505f64382a9841155d721cee6", key: "0f4770219ccb4be5836a7517057e51c3" },[span_44](end_span)
+            [span_45](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/PPTV_2024e.jpg", file: "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/36/36.mpd", keyId: "4d4426a505f64382a9841155d721cee6", key: "0f4770219ccb4be5836a7517057e51c3" },[span_45](end_span)
+            [span_46](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//Cartoonito.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/302/302.mpd", keyId: "ad2371259d34404cb89d54a4dc88dcd3", key: "1ba155e345c4456ba891cbee9b3e1c4c" },[span_46](end_span)
+            [span_47](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/LOGO_Nickelodeon2.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/303/303.mpd", keyId: "9130a6448a74430794d355b48b56a64c", key: "c2f4d3288cdb43cf81e519ceb414dd6f" },[span_47](end_span)
+            [span_48](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/Nickjr_2024.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/304/304.mpd", keyId: "641c3f0e676d49d18c2082e093380e69", key: "e06f3a2e327643249c3831ab199c4015" },[span_48](end_span)
+            [span_49](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBAsian_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/101/101.mpd", keyId: "dac6cbd9d17a451bb76386f52469e0e9", key: "2e2ac52cadf843459915eaa1a9b95e48" },[span_49](end_span)
+            [span_50](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//Mono29Plus_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/109/109.mpd", keyId: "072eeb02f6744f838fcc8f0ef36b312e", key: "b797c12f2dd64728aae23fd3c8ef275c" },[span_50](end_span)
+            [span_51](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/R_0148.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/103/103.mpd", keyId: "9c5735afb4fd402580360aed8364469c", key: "128d55d9ac2b47ad85f86b5d08320179" },[span_51](end_span)
+            [span_52](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0149.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/104/104.mpd", keyId: "0db89bae851440a5994f5893ad480494", key: "d88ef77eaedf4451a65be2e0bf6eabde" },[span_52](end_span)
+            [span_53](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0151.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/105/105.mpd", keyId: "7c04b8e7aa524afea879b2ed1aef8242", key: "91e72b75fcb94c3bb36cceb741afd621" },[span_53](end_span)
+            [span_54](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0150.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/106/106.mpd", keyId: "07b138f30ad3441ca5a2f476e550af25", key: "826ee4deef4b45cfafd5f79a591b15c6" },[span_54](end_span)
+            [span_55](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0147.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/107/107.mpd", keyId: "f48caba466394e93b50780f21798787a", key: "9a074a10db4342e7937076b3e52f6029" },[span_55](end_span)
+            [span_56](start_span){ name: "", logo: "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBsports1_new.png", file: "https://cri-streamer3.cdn.3bbtv.com:8443/ais/play/401/401.mpd", keyId: "678bbba596584ad895d2923fb0255e82", key: "c55471086c824112b217743a31abdf8f" },[span_56](end_span)
+        ];
+
+        function loadPlayer(channel) {
+            jwplayer("player").setup({
+                [span_57](start_span)file: channel.file,[span_57](end_span)
+                [span_58](start_span)type: "dash",[span_58](end_span)
+                drm: {
+                    clearkey: {
+                        [span_59](start_span)keyId: channel.keyId,[span_59](end_span)
+                        [span_60](start_span)key: channel.key[span_60](end_span)
+                    }
+                },
+                [span_61](start_span)width: "100%",[span_61](end_span)
+                [span_62](start_span)aspectratio: "16:9",[span_62](end_span)
+                [span_63](start_span)autostart: true,[span_63](end_span)
+                [span_64](start_span)mute: false[span_64](end_span)
+            });
+        }
+
+        [span_65](start_span)const channelList = document.getElementById("channel-list");[span_65](end_span)
+        channels.forEach(channel => {
+            [span_66](start_span)const div = document.createElement("div");[span_66](end_span)
+            [span_67](start_span)div.className = "channel";[span_67](end_span)
+            // เนื่องจาก name ใน data เป็นค่าว่าง จึงไม่แสดงผลชื่อช่อง
+            [span_68](start_span)div.innerHTML = `<img src="${channel.logo}" alt="Channel Logo">`;[span_68](end_span)
+            [span_69](start_span)div.onclick = () => loadPlayer(channel);[span_69](end_span)
+            [span_70](start_span)channelList.appendChild(div);[span_70](end_span)
+        });
+
+        // โหลดช่องแรกเมื่อหน้าเว็บโหลดเสร็จ
+        if (channels.length > 0) {
+            [span_71](start_span)loadPlayer(channels[0]);[span_71](end_span)
+        }
+    </script>
 </body>
 </html>
