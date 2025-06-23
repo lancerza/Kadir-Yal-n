@@ -121,7 +121,6 @@
         }
 
         /* สไตล์สำหรับกลุ่มไลน์ */
-        /* ลิงก์ LINE นี้จะถูกจัดการด้วย JS เพื่อซ่อน URL และให้คลิกได้ */
         #line-group-info {
             font-family: 'Kanit', sans-serif;
             font-size: clamp(14px, 2.5vw, 20px); /* ขนาดตัวอักษรเท่ากับเวลา/วันที่ */
@@ -308,7 +307,7 @@
         </div>
         <h1>ทีวีออนไลน์</h1>
         <div id="current-datetime"></div>
-        <a href="javascript:void(0);" id="line-group-info" class="line-link" data-url="https://line.me/ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank">
+        <a href="https://line.me/ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" id="line-group-info" target="_blank">
             <i class="fa-brands fa-line left-icon"></i> เข้ากลุ่มไลน์อัพเดทต่างๆ
             <i class="fa-brands fa-line right-icon"></i> </a>
 
@@ -330,7 +329,8 @@
                 <a href="#" class="channel-link" data-url="intent://cdn1.googlecdnforstreaming.live/live/trueballthai1/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://cms.dmpcdn.com/livetv/2023/08/02/89262f60-30e1-11ee-b445-3703761d6f4d_webp_original.webp" border="1px" alt="Trueball Thai 1"></a>
                 <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/skysportsgolf#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTydoiYuJmSJkTH21Gio4spyaBHTROsdQI3uA&usqp=CAU" border="1px" alt="Sky Sports Golf"></a>
                 <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/3bbsports1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBsports1_new.png" border="1px" alt="3BB Sports 1"></a>
-            </div>
+                <a href="#" class="channel-link" data-url="intent://45.144.165.223/city-liverpool.html?fbclid=IwY2xjawIoWbpleHRuA2FlbQIxMQABHTj8VMiFdtD8IMzkL1qKsrlG1A5mCo1pKcNESuvQ8RI4UrhuXvDaa9ulsQ_aem_o1XpUV-gDYS5w-JHFxzOGA#Intent;package=com.wiseplay;S.userAgent=exo_player;S.title=Liverpool%20Live;S.referer=;scheme=http;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTdn5cxkscld7r0ESSshOmsa2W29EtvGUqWAonVdgNl-f4k02D74jGEVE8&s=10" border="1px" alt="liverpool"></a>
+			</div>
         </div>
 
         <div class="category">
@@ -352,7 +352,6 @@
             const datetimeDisplay = document.getElementById('current-datetime');
             const channelLinks = document.querySelectorAll('.channel-link');
             // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ # หรือเป็น channel-link หรือ line-group-info
-            // โค้ดนี้จะใช้จัดการลิงก์อื่นๆ ที่คุณต้องการซ่อน URL เมื่อโฮเวอร์ แต่ยังคงคลิกได้ (ยกเว้น line-group-info)
             const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link):not(#line-group-info)');
 
             // ใช้ Map เพื่อเก็บ original href และ title ของลิงก์ที่ต้องการซ่อน URL (ยกเว้น Line group)
@@ -414,25 +413,8 @@
                 });
             });
 
-            // เพิ่ม Event Listener สำหรับลิงก์ LINE Group (ที่ต้องการซ่อน URL แต่ยังคลิกได้)
-            const lineGroupLink = document.getElementById('line-group-info');
-            if (lineGroupLink) {
-                lineGroupLink.addEventListener('click', function(event) {
-                    event.preventDefault(); // ป้องกันการทำงานของลิงก์เริ่มต้น
-                    const url = this.dataset.url; // ดึง URL จริงจาก data-url attribute
-                    if (url) {
-                        window.open(url, '_blank'); // เปิด URL ในแท็บใหม่
-                    }
-
-                    // คุณสามารถเพิ่ม Event Tracking สำหรับ GA4 ที่นี่ได้เช่นกัน (ถ้าต้องการ)
-                    if (typeof gtag === 'function') {
-                        gtag('event', 'line_group_click', {
-                            'link_url': url
-                        });
-                    }
-                });
-            }
-
+            // ไม่ต้องเพิ่ม Event Listener แยกสำหรับลิงก์ LINE Group เพื่อการคลิก
+            // เพราะตอนนี้มันกลับมาใช้ href ปกติแล้ว และจะทำงานตามเบราว์เซอร์
 
             // ฟังก์ชันสำหรับปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
             function closeAccordion(contentElement) {
