@@ -184,14 +184,14 @@
             align-items: center;
             border: 1px solid #1a1a1a;
             height: auto;
-            box-shadow: none;
+            box-shadow: none; /* ยืนยันว่าไม่มีเงาในสถานะปกติ */
         }
 
         .category:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            box-shadow: none; /* ลบเงาเมื่อ hover */
         }
-        
+
         /* Media Queries สำหรับ Responsive Design */
         @media (max-width: 768px) { /* สำหรับแท็บเล็ตและมือถือ */
             .categories-container {
@@ -230,7 +230,7 @@
             transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, border-color 0.3s ease; /* เพิ่ม border-color ใน transition */
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
             box-sizing: border-box;
-            
+
             /* เปลี่ยนขอบและเพิ่มเงา */
             border: 1px solid #FFFFFF; /* ขอบสีขาวบางลง */
             box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); /* เงาสีขาว */
@@ -250,10 +250,10 @@
             padding-bottom: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
-            
+
             display: none; /* ซ่อนเริ่มต้น */
             opacity: 0;
-            
+
             width: 100%;
             flex-wrap: wrap;
             justify-content: center;
@@ -276,16 +276,14 @@
             width: 50px;
             object-fit: cover;
             vertical-align: middle;
-            transition: transform 0.2s ease, box-shadow 0.2s ease; /* เพิ่ม transition สำหรับ box-shadow */
+            transition: transform 0.2s ease; /* ลบ box-shadow ออกจาก transition */
             cursor: pointer;
-            /* ** ลบ box-shadow ออกจากที่นี่ ** */
-            /* box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); */
+            box-shadow: none; /* ลบ box-shadow ออกจากที่นี่ */
         }
 
         main img:hover {
             transform: scale(1.05);
-            /* ** ลบ box-shadow ออกจากที่นี่ ** */
-            /* box-shadow: 0 0 10px rgba(255, 255, 255, 0.6); */
+            box-shadow: none; /* ลบ box-shadow ออกจากที่นี่ */
         }
 
         footer {
@@ -355,7 +353,7 @@
             const channelLinks = document.querySelectorAll('.channel-link');
             // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ # หรือเป็น channel-link (ซึ่งมี data-url อยู่แล้ว)
             const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link)');
-            
+
             // ใช้ Map เพื่อเก็บ original href และ title ของลิงก์ที่ต้องการซ่อน URL
             const originalLinkData = new Map();
             allClickableLinks.forEach(link => {
@@ -392,7 +390,7 @@
                     const url = this.dataset.url; // ดึง URL จาก data-url attribute
                     const imgElement = this.querySelector('img');
                     const channelName = imgElement ? imgElement.alt : 'Unknown Channel'; // ดึงชื่อช่องจาก alt attribute
-                    
+
                     // ดึงชื่อหมวดหมู่จากปุ่ม accordion ที่อยู่ก่อนหน้า
                     const categoryElement = this.closest('.category');
                     const categoryName = categoryElement ? categoryElement.querySelector('.accordion-button').textContent : 'Unknown Category';
@@ -454,7 +452,7 @@
                         contentElement.classList.add('show');
                         const actualContentHeight = contentElement.scrollHeight;
                         let totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
-                        
+
                         contentElement.style.maxHeight = (actualContentHeight + totalContentPadding) + 'px';
                         contentElement.style.paddingTop = '8px';
                         contentElement.style.paddingBottom = '8px';
@@ -483,7 +481,7 @@
                     categoryElement.style.height = initialHeight;
                     categoryElement.style.transition = 'height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease';
                 }
-                
+
                 button.addEventListener('click', function() {
                     allAccordionButtons.forEach(otherButton => {
                         const otherContent = otherButton.nextElementSibling;
@@ -535,16 +533,10 @@
                 });
 
                 link.addEventListener('mouseout', function() {
-                    // คืนค่า href attribute กลับไปเมื่อเมาส์ออก
-                    this.setAttribute('href', originalData.href);
-                    if (originalData.title) {
-                        this.setAttribute('title', originalData.title); // คืนค่า title กลับไป
-                    }
+                    // คืนค่า href และ title เดิมเมื่อเมาส์ออกจากลิงก์
+                    this.href = originalData.href;
+                    this.setAttribute('title', originalData.title); // คืนค่า tooltip เดิม
                 });
-
-                // ไม่จำเป็นต้องเพิ่ม click listener แยกสำหรับ allClickableLinks
-                // เพราะ href จะถูกคืนค่าใน mouseout หรือ browser จะจัดการเอง
-                // และลิงก์เหล่านี้ไม่ได้มี event.preventDefault() เหมือน channel-link
             });
         });
     </script>
