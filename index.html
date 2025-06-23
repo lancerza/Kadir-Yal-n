@@ -38,15 +38,14 @@
             min-height: 100vh; /* กำหนดความสูงขั้นต่ำของ body ให้เต็ม viewport height */
             display: flex; /* ทำให้ body เป็น Flex container */
             flex-direction: column; /* จัดเรียงลูกๆ ในแนวตั้ง */
-            /* สิ้นสุดสำหรับ Sticky Footer */
+            align-items: center; /* จัดกึ่งกลางเนื้อหาใน body */
+            justify-content: flex-start; /* แก้ไขการพิมพ์ผิดและรวมกับ html, body */
 
             overflow-x: hidden;
             background-color: #1a1a1a; /* สีพื้นหลังดำเข้ม */
             color: #f0f0f0; /* สีข้อความหลักเป็นสีขาวอมเทา */
             font-family: 'Arial', sans-serif;
             text-align: center;
-            align-items: center; /* จัดกึ่งกลางเนื้อหาใน body */
-            justify-content: flex-start; /* แก้ไขการพิมพ์ผิด */
 
             /* CSS สำหรับป้องกันการเลือกข้อความ */
             -webkit-user-select: none;  /* Safari */
@@ -184,7 +183,7 @@
             align-items: center;
             border: 1px solid #1a1a1a;
             height: auto;
-            box-shadow: none; /* ยืนยันว่าไม่มีเงาในสถานะปกติ */
+            box-shadow: none; /* ไม่มีเงาในสถานะปกติ */
         }
 
         .category:hover {
@@ -351,8 +350,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             const datetimeDisplay = document.getElementById('current-datetime');
             const channelLinks = document.querySelectorAll('.channel-link');
-            // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ # หรือเป็น channel-link (ซึ่งมี data-url อยู่แล้ว)
-            const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link)');
+            // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ # หรือเป็น channel-link หรือ line-group-info
+            const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link):not(#line-group-info)');
 
             // ใช้ Map เพื่อเก็บ original href และ title ของลิงก์ที่ต้องการซ่อน URL
             const originalLinkData = new Map();
@@ -405,7 +404,6 @@
                     }
 
                     // หน่วงเวลาเล็กน้อยเพื่อให้ Event ส่งออกไปก่อนที่จะเปลี่ยนหน้า
-                    // เนื่องจากเราไม่ได้แก้ไข href โดยตรงสำหรับ channel-link แล้ว จึงไม่น่ามีปัญหา
                     setTimeout(() => {
                         if (url) {
                             window.location.href = url; // เปิดลิงก์
@@ -520,7 +518,7 @@
             });
 
             // ปรับปรุง Event Listener สำหรับลิงก์ทั้งหมด เพื่อซ่อน/แสดง URL เมื่อ hover
-            // โค้ดนี้จะใช้กับลิงก์ที่ไม่ใช่ channel-link เท่านั้น
+            // โค้ดนี้จะใช้กับลิงก์ที่ไม่ใช่ channel-link หรือ line-group-info เท่านั้น
             allClickableLinks.forEach(link => {
                 // ดึงข้อมูล href และ title เดิมจาก Map
                 const originalData = originalLinkData.get(link);
