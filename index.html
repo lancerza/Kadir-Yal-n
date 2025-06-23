@@ -10,13 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA4_MEASUREMENT_ID"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KBRV24KW7F"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-      gtag('config', 'G-KBRV24KW7F');
+    gtag('config', 'G-KBRV24KW7F');
     </script>
 
     <style>
@@ -46,22 +46,29 @@
             color: #f0f0f0; /* สีข้อความหลักเป็นสีขาวอมเทา */
             font-family: 'Arial', sans-serif;
             text-align: center;
+
+            /* CSS สำหรับป้องกันการเลือกข้อความ */
+            -webkit-user-select: none;  /* Safari */
+            -moz-user-select: none;     /* Firefox */
+            -ms-user-select: none;      /* IE 10+ */
+            user-select: none;          /* Standard */
         }
 
         body { /* ซ้ำซ้อน แต่เพื่อให้แน่ใจว่า padding ไม่ถูก override */
             padding: 0 10px;
             align-items: center; /* จัดกึ่งกลางเนื้อหาใน body */
-            justify-content: flex-start;
+            justify-content.flex-start;
         }
 
         header {
             background-color: #1a1a1a; /* เปลี่ยนเป็นสีเดียวกับพื้นหลัง body */
             color: #FFFFFF; /* ข้อความสีขาว */
-            padding: 2vw 4vw;
+            padding: 2vw 4vw; /* ปรับ padding ให้ responsive */
             border-radius: 8px;
-            margin: 5vh 0 2vh 0; /* ปรับ margin-bottom ให้มีที่ว่างด้านล่าง header */
+            margin: 5vh auto 2vh auto; /* จัดกึ่งกลาง header */
             animation: fadeIn 3s ease-out;
             width: 100%;
+            max-width: 800px; /* จำกัดความกว้างสูงสุดของ header */
             box-sizing: border-box;
             border: 2px solid #1a1a1a; /* เปลี่ยนเป็นสีเดียวกับพื้นหลัง body */
             box-shadow: none; /* ลบเงาออก */
@@ -89,6 +96,11 @@
             top: 0;
             left: 0;
             min-width: 100%; /* ให้ข้อความวิ่งครอบคลุมความกว้าง */
+        }
+
+        /* เมื่อชี้เมาส์ไปที่ข้อความวิ่ง จะหยุด */
+        #running-text:hover {
+            animation-play-state: paused;
         }
 
 
@@ -150,19 +162,6 @@
             margin-left: 8px; /* ระยะห่างจากข้อความด้านขวา */
         }
 
-        /* ลบสไตล์ทั้งหมดที่เกี่ยวข้องกับ warning-accordion-container ออกไป */
-        /*
-        .warning-accordion-container { ... }
-        .warning-accordion-container .accordion-button { ... }
-        .warning-accordion-container .accordion-button:hover { ... }
-        #wiseplay-warning-content { ... }
-        #wiseplay-warning-content.show { ... }
-        #wiseplay-warning-content .wiseplay-buttons { ... }
-        #wiseplay-warning-content .wiseplay-button { ... }
-        #wiseplay-warning-content span.wiseplay-button.highlight-yes-button { ... }
-        #wiseplay-warning-content span.wiseplay-button.highlight-yes-button:hover { ... }
-        */
-
         /* Container สำหรับหมวดหมู่ทั้งหมด */
         main.categories-container { /* เพิ่ม class main.categories-container เพื่อความแม่นยำ */
             display: flex; /* ใช้ Flexbox */
@@ -170,7 +169,7 @@
             justify-content: center; /* จัดกึ่งกลาง */
             gap: 15px; /* ระยะห่างระหว่างหมวดหมู่ */
             width: 100%;
-            max-width: 1200px; /* ความกว้างสูงสุด (สำหรับ Desktop) */
+            max-width: 1000px; /* ปรับความกว้างสูงสุดของ container หลัก */
             margin-top: 20px; /* ปรับ margin-top ให้เชื่อมกับ line-group-info */
             overflow-x: hidden; /* ซ่อน scrollbar แนวนอนเมื่อ flex-wrap ทำงาน */
             padding-bottom: 10px;
@@ -181,9 +180,16 @@
         .category { /* สไตล์สำหรับกล่องหมวดหมู่ปกติ */
             background-color: #1a1a1a;
             border-radius: 8px;
-            padding: 5px;
+            padding: 5px; /* 5px all around */
             flex: 0 0 auto;
-            width: 220px; /* กำหนดความกว้างคงที่ */
+            /* **สำคัญมาก:** ปรับความกว้างของ category เพื่อให้มีที่ว่างพอสำหรับ 3 คอลัมน์ของไอคอน
+               คำนวณ: 3 ช่อง * 60px (width ของแต่ละ channel-link) + 2 ช่อง * 8px (gap) = 180px + 16px = 196px */
+            /* บวก padding ของ category 5px * 2 = 10px */
+            /* บวก border ของ category 1px * 2 = 2px */
+            /* รวม: 196px (สำหรับเนื้อหา) + 10px (padding) + 2px (border) = 208px */
+            width: 208px; /* กำหนดความกว้างคงที่ที่เหมาะสม */
+            min-width: 208px; /* ป้องกันไม่ให้หดตัวในหน้าจอปกติ */
+            max-width: calc(100% - 20px); /* เพื่อให้ responsive บนหน้าจอที่เล็กกว่า 208px */
             box-sizing: border-box;
             transition: all 0.3s ease;
             display: flex;
@@ -191,21 +197,26 @@
             align-items: center;
             border: 1px solid #1a1a1a;
             height: auto;
+            /* ลบเงาดำของ category ออก */
             box-shadow: none;
         }
 
+        /* ลบเงาดำของ category เมื่อ hover ออก */
         .category:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            box-shadow: none; /* ลบเงาออก */
         }
-        
-        /* Media Queries สำหรับ Responsive Design */
+
+        /* ปรับปรุง Media Queries สำหรับ .category width อย่างละเอียด */
         @media (max-width: 768px) { /* สำหรับแท็บเล็ตและมือถือ */
             .categories-container {
                 gap: 10px; /* ลดระยะห่าง */
             }
             .category {
-                width: calc(50% - 15px); /* 2 กล่องต่อแถวบนแท็บเล็ตเล็ก */
+                /* 2 ช่อง: 2 * 60px (width) + 1 * 10px (gap) = 120 + 10 = 130px */
+                /* บวก padding 10px, border 2px = 142px (สำหรับเนื้อหา) */
+                width: calc(50% - 10px); /* 2 กล่องต่อแถวบนแท็บเล็ตเล็ก */
+                min-width: 142px; /* ป้องกันไม่ให้เล็กเกินไป */
                 max-width: unset; /* ลบ max-width เดิมออก */
             }
         }
@@ -216,35 +227,42 @@
                 padding: 0 5px 10px 5px; /* เพิ่ม padding ด้านข้างเล็กน้อย */
             }
             .category {
+                /* 1 ช่อง: 1 * 60px (width) = 60px */
+                /* บวก padding 10px, border 2px = 72px (สำหรับเนื้อหา) */
                 width: calc(100% - 10px); /* 1 กล่องต่อแถวบนมือถือ */
+                min-width: 72px; /* ป้องกันไม่ให้เล็กเกินไป */
                 margin-left: auto; /* จัดกึ่งกลาง */
                 margin-right: auto;
             }
         }
 
+
         /* สไตล์ของปุ่มชื่อหมวดหมู่ (Accordion Button) - ทั่วไป */
         .accordion-button {
-            background-color: #42A5F5; /* สีฟ้าอ่อนลงอีก (Material Design Blue 400) */
+            background-color: #424242; /* สีเทาอ่อนลง (Material Design Grey 800) */
             color: #FFFFFF; /* ข้อความสีขาว */
             font-size: 1.3em;
             font-weight: bold;
             padding: 7px 14px;
-            border: 2px solid #1976D2; /* ขอบสีฟ้าเข้มขึ้นเล็กน้อย (ใช้สีเดิมเพื่อตัดกัน) */
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
             text-align: center;
             margin-bottom: 0;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, border-color 0.3s ease; /* เพิ่ม border-color ใน transition */
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
             box-sizing: border-box;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* เงาของปุ่ม */
+
+            /* เปลี่ยนขอบและเพิ่มเงา */
+            border: 1px solid #FFFFFF; /* ขอบสีขาวบางลง */
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); /* เงาสีขาว */
         }
 
         .accordion-button:hover {
-            background-color: #2196F3; /* สีฟ้า Material Design Blue 500 เมื่อ hover */
+            background-color: #616161; /* สีเทาเข้มขึ้น (Material Design Grey 700) เมื่อ hover */
             transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.6); /* เงาเข้มขึ้นเมื่อ hover */
+            border-color: #FFFFFF; /* ขอบยังคงเป็นสีขาวเมื่อ hover */
         }
 
         /* สไตล์สำหรับเนื้อหาที่ซ่อน/แสดงได้ (Accordion Content) - ทั่วไป */
@@ -254,19 +272,21 @@
             padding-bottom: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
-            
-            display: none;
-            opacity: 0;
-            
-            width: 100%;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
+
+            /* **สำคัญ:** ตั้งค่า display เป็น none; เป็นค่าเริ่มต้น */
+            display: none; /* ซ่อนเริ่มต้น */
+            flex-wrap: wrap; /* ให้ขึ้นบรรทัดใหม่เมื่อเนื้อหาเยอะ */
+            justify-content: center; /* จัดกึ่งกลางรายการช่อง */
+            align-items: center; /* จัดกึ่งกลางในแนวตั้ง (ถ้ามีองค์ประกอบสูงไม่เท่ากัน) */
+            gap: 8px; /* ระยะห่างระหว่างรายการช่อง */
+
+            opacity: 0; /* ซ่อนเริ่มต้น */
         }
 
         .accordion-content.show {
-            display: flex;
-            max-height: 2000px;
+            /* **สำคัญ:** กำหนด display เป็น flex; ที่นี่เท่านั้น เพื่อให้ Flexbox ทำงานเมื่อแสดง */
+            display: flex; /* แสดงเมื่อถูกเปิด */
+            max-height: 2000px; /* ต้องมากพอที่จะแสดงเนื้อหาทั้งหมด */
             padding-top: 8px;
             padding-bottom: 8px;
             opacity: 1;
@@ -275,19 +295,41 @@
         /* สไตล์สำหรับรูปภาพ TV/กีฬา/หนัง */
         main img {
             border-radius: 8px;
-            border: 1px solid #1e88e5; /* ยังคงเป็นสีน้ำเงินเข้ม */
+            border: 1px solid #FFFFFF; /* เปลี่ยนเป็นสีขาว */
             padding: 3px;
             margin: 0;
             height: 50px;
             width: 50px;
             object-fit: cover;
-            vertical-align: middle;
-            transition: transform 0.2s ease;
-            cursor: pointer; 
+            /* ลบ vertical-align ออก ไม่จำเป็นใน Flexbox */
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* เพิ่ม transition สำหรับ box-shadow */
+            cursor: pointer;
+            /* **สำคัญ:** เปลี่ยนเงาจาก rgba(0,0,0,x) เป็น rgba(255,255,255,x) สำหรับเงาขาว */
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); /* เพิ่มเงาสีขาว */
+            box-sizing: border-box; /* **สำคัญ:** ทำให้ padding และ border นับรวมใน width/height */
+            line-height: 0; /* แก้ไขปัญหาช่องว่างใต้รูปภาพในบางเบราว์เซอร์ */
         }
+
+        /* กำหนดสไตล์สำหรับลิงก์แต่ละช่องภายใน accordion-content อย่างละเอียด */
+        .accordion-content a.channel-link {
+            display: flex; /* ทำให้ลิงก์เป็น flex item */
+            flex-direction: column; /* จัดเนื้อหาภายในลิงก์ (รูปภาพ) เป็นแนวตั้ง */
+            align-items: center; /* จัดกึ่งกลางรูปภาพภายในลิงก์ */
+            justify-content: center;
+            /* ความกว้างของแต่ละช่อง: 50px (img) + 2*3px (img padding) + 2*1px (img border) = 60px */
+            width: 60px; /* กำหนดความกว้างของแต่ละช่องที่แน่นอน */
+            height: 60px; /* กำหนดความสูงของแต่ละช่องให้เท่ากัน */
+            box-sizing: border-box; /* รวม padding และ border ใน width/height */
+            text-decoration: none; /* ไม่มีขีดเส้นใต้ */
+            margin: 0; /* ลบ margin เดิมออก เพื่อให้ gap: 8px ทำงานได้ดี */
+            flex-shrink: 0; /* ป้องกันไม่ให้ลิงก์หดตัวเมื่อพื้นที่น้อยลง */
+            flex-grow: 0; /* ป้องกันไม่ให้ลิงก์ขยายตัวเมื่อพื้นที่มาก */
+        }
+
 
         main img:hover {
             transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.6); /* เงาเข้มขึ้นเมื่อ hover */
         }
 
         footer {
@@ -312,37 +354,105 @@
         </div>
         <h1>ทีวีออนไลน์</h1>
         <div id="current-datetime"></div>
-        <a href="YOUR_LINE_GROUP_LINK" id="line-group-info" target="_blank">
+        <a href="https://line.me/ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" id="line-group-info" target="_blank">
             <i class="fa-brands fa-line left-icon"></i> เข้ากลุ่มไลน์อัพเดทต่างๆ
             <i class="fa-brands fa-line right-icon"></i> </a>
 
-        </header>
+    </header>
 
     <main class="categories-container">
         <div class="category">
             <button class="accordion-button">ทีวีดิจิตอลไทย</button>
             <div class="accordion-content">
-                <a href="#" class="channel-link" data-url="intent://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8#Intent;package=com.wiseplay;S.referer=https://ais-vidnt.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png" border="1px"></a>
-                <a href="#" class="channel-link" data-url="intent://thaipbs-live.cdn.byteark.com/live/playlist_1080p/index.m3u8#Intent;package=com.wiseplay;S.userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0014.png" border="1px"></a>
-                <a href="#" class="channel-link" data-url="intent://tv.kgtv.vn/live/kgtv1/kgtv1.m3u8#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsUd8JPlLJ92zYIYKjDV-5zz1PJXKRD4XKHQ&s" border="1px"></a>
+                <a href="#" class="channel-link" data-url="intent://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8#Intent;package=com.wiseplay;S.referer=https://ais-vidnt.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png" alt="ช่อง 1"></a>
+                <a href="#" class="channel-link" data-url="intent://thaipbs-live.cdn.byteark.com/live/playlist_1080p/index.m3u8#Intent;package=com.wiseplay;S.userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0014.png" alt="Thai PBS"></a>
+                <a href="#" class="channel-link" data-url="intent://tv.kgtv.vn/live/kgtv1/kgtv1.m3338#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsUd8JPlLJ92zYIYKjDV-5zz1PJXKRD4XKHQ&s" alt="KTV"></a>
             </div>
         </div>
 
         <div class="category">
             <button class="accordion-button">กีฬา</button>
             <div class="accordion-content">
-                <a href="#" class="channel-link" data-url="intent://cdn1.googlecdnforstreaming.live/live/trueballthai1/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://cms.dmpcdn.com/livetv/2023/08/02/89262f60-30e1-11ee-b445-3703761d6f4d_webp_original.webp" border="1px"></a>
-                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/skysportsgolf#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTydoiYuJmSJkTH21Gio4spyaBHTROsdQI3uA&usqp=CAU" border="1px"></a>
-                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/3bbsports1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBsports1_new.png" border="1px"></a>
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai1/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/08/02/89262f60-30e1-11ee-b445-3703761d6f4d_webp_original.webp" alt="Trueball Thai 1"></a>
+                <a href="intent://goal-th.com/%E0%B8%94%E0%B8%B9%E0%B8%9B%E0%B8%AD%E0%B8%A5%E0%B8%AA%E0%B8%94/?id=313356&team=Atlanta-vs-Brown+DE+Adrogue#Intent;package=com.wiseplay;S.referer=https://goal-th.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/08/02/8a0c49a0-30e1-11ee-b220-4544ede97b74_webp_original.webp" alt="Trueball Thai 2"></a>
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai2/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/08/02/8a0c49a0-30e1-11ee-b220-4544ede97b74_webp_original.webp" alt="Trueball Thai 2"></a>
+                <a href="intent://goal-th.com/%E0%B8%94%E0%B8%B9%E0%B8%9B%E0%B8%AD%E0%B8%A5%E0%B8%AA%E0%B8%94/?id=313355&team=Atlanta-vs-Brown+DE+Adrogue#Intent;package=com.wiseplay;S.referer=https://goal-th.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/08/02/8a3b21d0-30e1-11ee-a53e-b3f87dc8ba1e_webp_original.webp" alt="Trueball Thai 3"></a>
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai3/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2024/02/01/e3adbba0-c0ed-11ee-9f09-d517c2f32137_webp_original.webp" alt="Trueball Thai 3"></a>
+                <a href="intent://dookeela.live/football/match/325144#Intent;package=com.wiseplay;S.referer=dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2024/02/01/e3adbba0-c0ed-11ee-9f09-d517c2f32137_webp_original.webp" alt="Football Match"></a>
+
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai5/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2024/08/14/df6a7110-5a16-11ef-ae6e-398d852551da_webp_original.webp" alt="Trueball Thai 5"></a>
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai6/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2024/08/14/e0a6c1a0-5a16-11ef-8743-87a41cdc0568_webp_original.webp" alt="Trueball Thai 6"></a>
+
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai7/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2024/08/14/e1334a30-5a16-11ef-9c43-a93aeb33b0e5_webp_original.webp" alt="Trueball Thai 7"></a>
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai8/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2024/08/14/e1c15960-5a16-11ef-9de9-af1b25c2ed4f_webp_original.webp" alt="Trueball Thai 8"></a>
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai9/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2024/08/14/e2346680-5a16-11ef-8c60-b76aa0302695_webp_original.webp" border="1px" alt="Trueball Thai 9"></a>
+                <a href="intent://cdn1.googlecdnforstreaming.live/live/trueballthai10/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://warpdooball.net/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2024/08/14/e249c340-5a16-11ef-a30f-0d36085b5b8b_webp_original.webp" border="1px" alt="Trueball Thai 10"></a>
+
+                <a href="intent://dookeela.live/live-tv/siamsport1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//SIAMSPORT1.png" border="1px" alt="Siam Sport 1"></a>
+                <a href="intent://dookeela.live/live-tv/siamsport2#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//SIAMSPORT2.png" border="1px" alt="Siam Sport 2"></a>
+
+                <a href="intent://dookeela.live/live-tv/siamsport3#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//SIAMSPORT3.png" border="1px" alt="Siam Sport 3"></a>
+
+                <a href="intent://dookeela.live/live-tv/siamsport4#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//SIAMSPORT4.png" border="1px" alt="Siam Sport 4"></a>
+                <a href="intent://dookeela.live/live-tv/bein1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//beIN_SPORTS_1.png" border="1px" alt="beIN Sports 1"></a>
+
+                <a href="intent://dookeela.live/live-tv/bein2#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//beIN_SPORTS_2.png" border="1px" alt="beIN Sports 2"></a>
+
+                <a href="intent://dookeela.live/live-tv/bein3#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//beIN_SPORTS_3.png" border="1px" alt="beIN Sports 3"></a>
+
+                <a href="intent://dookeela.live/live-tv/epl1_sd#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/05/03/ba425a00-e966-11ed-be07-cbff4c6d2c94_webp_original.webp" border="1px" alt="EPL 1 SD"></a>
+
+                <a href="intent://dookeela.live/live-tv/epl2#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/05/03/ba4c4510-e966-11ed-896e-69ce273284a6_webp_original.webp" border="1px" alt="EPL 2"></a>
+
+                <a href="intent://dookeela.live/live-tv/epl3#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/05/03/baf9ea30-e966-11ed-a3d3-f3f98ac7a1a1_webp_original.webp" border="1px" alt="EPL 3"></a>
+
+
+                <a href="intent://dookeela.live/live-tv/epl4#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/05/03/bb0beb90-e966-11ed-993c-b59183950f79_webp_original.webp" border="1px" alt="EPL 4"></a>
+
+
+                <a href="intent://dookeela.live/live-tv/epl5#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/05/03/bbea1690-e966-11ed-935b-df134f58d288_webp_original.webp" border="1px" alt="EPL 5"></a>
+
+
+                <a href="intent://dookeela.live/live-tv/tsp1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/12/15/74b619a0-9aea-11ee-a6ba-8b5bcfefee63_webp_original.webp" border="1px" alt="True Sports 1"></a>
+
+                <a href="intent://dookeela.live/live-tv/tsp2#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/12/15/74b6b5e0-9aea-11ee-ba6c-fd47adcb0961_webp_original.webp" border="1px" alt="True Sports 2"></a>
+
+                <a href="intent://dooball2you.com/live/truesport3#Intent;package=com.wiseplay;S.referer=https://dooball2you.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/12/15/75877360-9aea-11ee-a6ba-8b5bcfefee63_webp_original.webp" border="1px" alt="True Sports 3"></a>
+
+                <a href="intent://wacthstream.com/stream_live/669_Ts_HD4/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9OC8xOC8yMDI0IDg6MTY6MjkgUE0maGFzaF92YWx1ZT1UQVdzUS9CdDhPY3ZjZndWWUkrYnZnPT0mdmFsaWRtaW51dGVzPTg2NDAwMDAwJnN0cm1fbGVuPTAmaWQ9Y2hfNTgzMjE=#Intent;package=com.wiseplay;S.title=KTV;S.referer=https://wacth.tv/;scheme=https;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/12/15/759492c0-9aea-11ee-a6e1-935fb41ffad5_webp_original.webp" border="1px" alt="True Sports HD4"></a>
+
+                <a href="intent://dooball2you.com/live/truesport5#Intent;package=com.wiseplay;S.referer=https://dooball2you.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/12/15/764f3030-9aea-11ee-b1e6-1fd23e73ab60_webp_original.webp" border="1px" alt="True Sports 5"></a>
+
+                <a href="intent://dooball2you.com/live/truesport7#Intent;package=com.wiseplay;S.referer=https://dooball2you.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/12/15/76797480-9aea-11ee-a6e1-935fb41ffad5_webp_original.webp" border="1px" alt="True Sports 7"></a>
+
+                <a href="intent://dookeela.live/live-tv/spotv#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://img2.pic.in.th/pic/oie_h6l1cRZaFf44.png" border="1px" alt="SpotV"></a>
+
+                <a href="intent://dookeela.live/live-tv/spotv2#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://img2.pic.in.th/pic/oie_3ZkbVyGR0FqL.png" border="1px" alt="SpotV 2"></a>
+
+                <a href="intent://wacthstream.com/stream_live/670_Tennis/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9Ni8yMy8yMDI0IDc6MTg6MTQgUE0maGFzaF92YWx1ZT1BRkVWdFJveS8xOXRiM2M3VFMzK1NnPT0mdmFsaWRtaW51dGVzPTg2NDAwMDAwJnN0cm1fbGVuPTAmaWQ9Y2hfNzA0NDc=#Intent;package=com.wiseplay;S.title=KTV;S.referer=https://wacth.tv/;scheme=https;end" class="channel-link"><img src="https://cms.dmpcdn.com/livetv/2023/04/28/f65ea900-e595-11ed-86b8-bb40638e3c49_webp_original.png" border="1px" alt="Tennis"></a>
+
+                <a href="intent://dookeela.live/live-tv/nfl#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://img2.pic.in.th/pic/oie_auj4QSmdoooa.png" border="1px" alt="NFL"></a>
+
+                <a href="intent://dookeela.live/live-tv/nba#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://img5.pic.in.th/file/secure-sv1/oie_uuHkdZiLUn9l.png" border="1px" alt="NBA"></a>
+
+                <a href="intent://dookeela.live/live-tv/golf#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//GolfChannelThailand.png" border="1px" alt="Golf Channel Thailand"></a>
+                <a href="intent://wacthstream.com/stream_live/676_golfplus/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9Ni8yMy8yMDI0IDc6MTg6MTQgUE0maGFzaF92YWx1ZT1BRkVWdFJveS8xOXRiM2M3VFMzK1NnPT0mdmFsaWRtaW51dGVzPTg2NDAwMDAwJnN0cm1fbGVuPTAmaWQ9Y2hfNzA0NDc=#Intent;package=com.wiseplay;S.title=KTV;S.referer=https://wacth.tv/;scheme=https;end" class="channel-link"><img src="https://img2.pic.in.th/pic/6057ad50-29cc-11ee-846b-a1c4e5181c87_webp_original.webp" border="1px" alt="Golf Plus"></a>
+
+
+                <a href="intent://dookeela.live/live-tv/mlb#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end" class="channel-link"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRK4zqZTnPttY1AunGpBlH2h5M3ameqv9qmmQ&s" border="1px" alt="MLB"></a>
+
+                <a href="intent://dookeela.live/live-tv/skysportsgolf#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTydoiYuJmSJkTH21Gio4spyaBHTROsdQI3uA&usqp=CAU" border="1px" alt="Sky Sports Golf"></a>
+
+                <a href="intent://dookeela.live/live-tv/3bbsports1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end" class="channel-link"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBsports1_new.png" border="1px" alt="3BB Sports 1"></a>
             </div>
         </div>
 
         <div class="category">
             <button class="accordion-button">หนังทีวี</button>
             <div class="accordion-content">
-                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/ccm#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://img5.pic.in.th/file/secure-sv1/oie_d6nHaoquYtAK-1.png" border="1px"></a>
-                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/kbsworld#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://img5.pic.in.th/file/secure-sv1/kbs6a7bcdea887ed4d0.png" border="1px"></a>
-                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/mtv#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://img5.pic.in.th/file/secure-sv1/images-406af7e9bac362e51.jpeg" border="1px"></a>
+                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/ccm#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://img5.pic.in.th/file/secure-sv1/oie_d6nHaoquYtAK-1.png" border="1px" alt="CCM"></a>
+                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/kbsworld#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://img5.pic.in.th/file/secure-sv1/kbs6a7bcdea887ed4d0.png" border="1px" alt="KBS World"></a>
+                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/mtv#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://img5.pic.in.th/file/secure-sv1/images-406af7e9bac362e51.jpeg" border="1px" alt="MTV"></a>
             </div>
         </div>
     </main>
@@ -376,50 +486,63 @@
             // ตั้งค่าให้อัปเดตเวลาทุกวินาที
             setInterval(updateDateTime, 1000);
 
-            // เพิ่ม Event Listener สำหรับ channel links
+            // เพิ่ม Event Listener สำหรับ channel links พร้อม Event Tracking
             channelLinks.forEach(link => {
                 link.addEventListener('click', function(event) {
                     event.preventDefault(); // ป้องกันการทำงานของลิงก์เริ่มต้น
                     const url = this.dataset.url; // ดึง URL จาก data-url attribute
-                    if (url) {
-                        window.location.href = url; // เปิดลิงก์
+                    const imgElement = this.querySelector('img');
+                    const channelName = imgElement ? imgElement.alt : 'Unknown Channel'; // ดึงชื่อช่องจาก alt attribute
+                    
+                    // ดึงชื่อหมวดหมู่จากปุ่ม accordion ที่อยู่ก่อนหน้า
+                    const categoryElement = this.closest('.category');
+                    const categoryName = categoryElement ? categoryElement.querySelector('.accordion-button').textContent : 'Unknown Category';
+
+                    // ส่ง Event ไปยัง Google Analytics 4
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'channel_click', {
+                            'channel_name': channelName,
+                            'category': categoryName,
+                            'link_url': url
+                        });
                     }
+
+                    // หน่วงเวลาเล็กน้อยเพื่อให้ Event ส่งออกไปก่อนที่จะเปลี่ยนหน้า
+                    setTimeout(() => {
+                        if (url) {
+                            window.location.href = url; // เปิดลิงก์
+                        }
+                    }, 200); // หน่วง 200 มิลลิวินาที (สามารถปรับได้)
                 });
             });
 
             // ฟังก์ชันสำหรับปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
             function closeAccordion(contentElement) {
-                const parentCategory = contentElement.closest('.category'); // หา parent .category
-                
                 contentElement.classList.remove('show');
                 contentElement.style.maxHeight = '0';
                 contentElement.style.paddingTop = '0';
                 contentElement.style.paddingBottom = '0';
                 contentElement.style.opacity = '0';
+                // เมื่อซ่อน ให้ตั้งค่า display เป็น none หลังจาก transition เสร็จสิ้น
+                contentElement.addEventListener('transitionend', function handler() {
+                    contentElement.style.display = 'none';
+                    contentElement.removeEventListener('transitionend', handler);
+                }, { once: true }); // ใช้ { once: true } เพื่อให้ listener ทำงานเพียงครั้งเดียว
 
-                // ตั้งค่าความสูงของ category ให้กลับไปเป็นความสูงเริ่มต้น (เท่ากับแค่ปุ่ม)
+                const parentCategory = contentElement.closest('.category');
                 if (parentCategory && parentCategory.querySelector('.accordion-button')) {
                     const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
                     const categoryPadding = 5 * 2; // 5px top/bottom padding
                     const categoryBorder = 1 * 2; // 1px top/bottom border
                     parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder) + 'px';
                 }
-
-                const transitionEndHandler = function() {
-                    if (!contentElement.classList.contains('show')) {
-                        contentElement.style.display = 'none';
-                    }
-                    contentElement.removeEventListener('transitionend', transitionEndHandler);
-                };
-                contentElement.addEventListener('transitionend', transitionEndHandler);
             }
 
             // ฟังก์ชันสำหรับเปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
             function openAccordion(contentElement) {
-                const parentCategory = contentElement.closest('.category'); // หา parent .category
-
-                contentElement.style.display = 'flex'; // แสดง display ก่อนเริ่ม transition
-                contentElement.style.maxHeight = '0'; // ตั้งค่าเริ่มต้นให้เป็น 0 ก่อนคำนวณ scrollHeight
+                // เมื่อเปิด ให้ตั้งค่า display เป็น flex ทันที เพื่อให้ Flexbox ทำงาน
+                contentElement.style.display = 'flex'; 
+                contentElement.style.maxHeight = '0'; // ตั้งค่าเริ่มต้นก่อนการเปลี่ยนผ่าน
                 contentElement.style.paddingTop = '0';
                 contentElement.style.paddingBottom = '0';
                 contentElement.style.opacity = '0';
@@ -427,17 +550,16 @@
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         contentElement.classList.add('show');
-                        // คำนวณความสูงที่แท้จริงของเนื้อหา + padding
-                        // ใช้ setTimeout เล็กน้อยเพื่อให้เบราว์เซอร์มีเวลา render layout ก่อนคำนวณ scrollHeight
                         setTimeout(() => {
                             const actualContentHeight = contentElement.scrollHeight; 
-                            const totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
+                            let totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
                             
                             contentElement.style.maxHeight = (actualContentHeight + totalContentPadding) + 'px';
                             contentElement.style.paddingTop = '8px';
                             contentElement.style.paddingBottom = '8px';
                             contentElement.style.opacity = '1';
 
+                            const parentCategory = contentElement.closest('.category');
                             if (parentCategory && parentCategory.querySelector('.accordion-button')) {
                                 const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
                                 const categoryPadding = 5 * 2;
@@ -453,18 +575,16 @@
             const allAccordionButtons = document.querySelectorAll('.accordion-button');
 
             allAccordionButtons.forEach(button => {
+                const content = button.nextElementSibling; // เนื้อหาที่ตามหลังปุ่ม
+
                 const categoryElement = button.closest('.category');
-                // กำหนดความสูงเริ่มต้นของ category เมื่อ DOM โหลดเสร็จ
                 if (categoryElement && button) {
-                    // ตอนนี้ไม่มี warning-accordion-container แล้ว จึงใช้ initialHeight เดิมได้เลย
                     const initialHeight = (button.offsetHeight + (5 * 2) + 2) + 'px';
                     categoryElement.style.height = initialHeight;
                     categoryElement.style.transition = 'height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease';
                 }
-
+                
                 button.addEventListener('click', function() {
-                    const content = this.nextElementSibling;
-                    
                     // ปิด accordion อื่นๆ ทั้งหมด
                     allAccordionButtons.forEach(otherButton => {
                         const otherContent = otherButton.nextElementSibling;
@@ -475,12 +595,34 @@
 
                     // สลับการแสดงผลของเนื้อหาปัจจุบัน
                     if (content && content.classList.contains('show')) {
-                        closeAccordion(content);
+                        closeAccordion(content); // ถ้ากำลังแสดงอยู่ ให้ปิด
                     } else if (content) {
-                        openAccordion(content);
+                        openAccordion(content); // ถ้าซ่อนอยู่ ให้เปิด
                     }
                 });
             });
+
+
+            // โค้ดป้องกันการคัดลอกและคลิกขวา
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault(); // ป้องกันการคลิกขวา
+            });
+
+            document.addEventListener('keydown', function(e) {
+                // ตรวจสอบว่าไม่ได้กด Spacebar หรือ Enter
+                if (e.key === ' ' || e.key === 'Enter') {
+                    return; // อนุญาตให้ปุ่ม Spacebar และ Enter ทำงานได้ตามปกติ
+                }
+
+                // ป้องกัน Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+U, F12
+                if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 'v' || e.key === 'u')) {
+                    e.preventDefault();
+                }
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                }
+            });
+
         });
     </script>
 </body>
