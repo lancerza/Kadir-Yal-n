@@ -121,6 +121,7 @@
         }
 
         /* สไตล์สำหรับกลุ่มไลน์ */
+        /* ลิงก์ LINE นี้จะถูกจัดการด้วย JS เพื่อซ่อน URL และให้คลิกได้ */
         #line-group-info {
             font-family: 'Kanit', sans-serif;
             font-size: clamp(14px, 2.5vw, 20px); /* ขนาดตัวอักษรเท่ากับเวลา/วันที่ */
@@ -307,7 +308,7 @@
         </div>
         <h1>ทีวีออนไลน์</h1>
         <div id="current-datetime"></div>
-        <a href="https://line.me/ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" id="line-group-info" target="_blank">
+        <a href="javascript:void(0);" id="line-group-info" class="line-link" data-url="https://line.me/ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank">
             <i class="fa-brands fa-line left-icon"></i> เข้ากลุ่มไลน์อัพเดทต่างๆ
             <i class="fa-brands fa-line right-icon"></i> </a>
 
@@ -351,9 +352,10 @@
             const datetimeDisplay = document.getElementById('current-datetime');
             const channelLinks = document.querySelectorAll('.channel-link');
             // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ # หรือเป็น channel-link หรือ line-group-info
+            // โค้ดนี้จะใช้จัดการลิงก์อื่นๆ ที่คุณต้องการซ่อน URL เมื่อโฮเวอร์ แต่ยังคงคลิกได้ (ยกเว้น line-group-info)
             const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link):not(#line-group-info)');
 
-            // ใช้ Map เพื่อเก็บ original href และ title ของลิงก์ที่ต้องการซ่อน URL
+            // ใช้ Map เพื่อเก็บ original href และ title ของลิงก์ที่ต้องการซ่อน URL (ยกเว้น Line group)
             const originalLinkData = new Map();
             allClickableLinks.forEach(link => {
                 originalLinkData.set(link, {
@@ -411,6 +413,26 @@
                     }, 200); // หน่วง 200 มิลลิวินาที (สามารถปรับได้)
                 });
             });
+
+            // เพิ่ม Event Listener สำหรับลิงก์ LINE Group (ที่ต้องการซ่อน URL แต่ยังคลิกได้)
+            const lineGroupLink = document.getElementById('line-group-info');
+            if (lineGroupLink) {
+                lineGroupLink.addEventListener('click', function(event) {
+                    event.preventDefault(); // ป้องกันการทำงานของลิงก์เริ่มต้น
+                    const url = this.dataset.url; // ดึง URL จริงจาก data-url attribute
+                    if (url) {
+                        window.open(url, '_blank'); // เปิด URL ในแท็บใหม่
+                    }
+
+                    // คุณสามารถเพิ่ม Event Tracking สำหรับ GA4 ที่นี่ได้เช่นกัน (ถ้าต้องการ)
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'line_group_click', {
+                            'link_url': url
+                        });
+                    }
+                });
+            }
+
 
             // ฟังก์ชันสำหรับปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
             function closeAccordion(contentElement) {
