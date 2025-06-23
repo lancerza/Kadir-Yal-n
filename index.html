@@ -33,7 +33,7 @@
 
         html, body {
             margin: 0;
-            padding: 0;
+            padding: 0 10px; /* รวม padding ที่นี่ */
             /* สำคัญสำหรับ Sticky Footer */
             min-height: 100vh; /* กำหนดความสูงขั้นต่ำของ body ให้เต็ม viewport height */
             display: flex; /* ทำให้ body เป็น Flex container */
@@ -45,18 +45,14 @@
             color: #f0f0f0; /* สีข้อความหลักเป็นสีขาวอมเทา */
             font-family: 'Arial', sans-serif;
             text-align: center;
+            align-items: center; /* จัดกึ่งกลางเนื้อหาใน body */
+            justify-content: flex-start; /* แก้ไขการพิมพ์ผิด */
 
             /* CSS สำหรับป้องกันการเลือกข้อความ */
             -webkit-user-select: none;  /* Safari */
             -moz-user-select: none;     /* Firefox */
             -ms-user-select: none;      /* IE 10+ */
             user-select: none;          /* Standard */
-        }
-
-        body { /* ซ้ำซ้อน แต่เพื่อให้แน่ใจว่า padding ไม่ถูก override */
-            padding: 0 10px;
-            align-items: center; /* จัดกึ่งกลางเนื้อหาใน body */
-            justify-content.flex-start;
         }
 
         header {
@@ -266,10 +262,8 @@
 
         .accordion-content.show {
             display: flex; /* แสดงเมื่อถูกเปิด */
-            max-height: 2000px; /* ต้องมากพอที่จะแสดงเนื้อหาทั้งหมด */
-            padding-top: 8px;
-            padding-bottom: 8px;
-            opacity: 1;
+            /* max-height, padding, opacity จะถูกควบคุมด้วย JS เพื่อให้ smooth transition */
+            opacity: 1; /* กำหนดไว้ใน CSS เพื่อให้ง่ายต่อการเห็น transition */
         }
 
         /* สไตล์สำหรับรูปภาพ TV/กีฬา/หนัง */
@@ -326,7 +320,7 @@
             <div class="accordion-content">
                 <a href="#" class="channel-link" data-url="intent://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8#Intent;package=com.wiseplay;S.referer=https://ais-vidnt.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png" border="1px" alt="ช่อง 1"></a>
                 <a href="#" class="channel-link" data-url="intent://thaipbs-live.cdn.byteark.com/live/playlist_1080p/index.m3u8#Intent;package=com.wiseplay;S.userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0014.png" border="1px" alt="Thai PBS"></a>
-                <a href="#" class="channel-link" data-url="intent://tv.kgtv.vn/live/kgtv1/kgtv1.m3338#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsUd8JPlLJ92zYIYKjDV-5zz1PJXKRD4XKHQ&s" border="1px" alt="KTV"></a>
+                <a href="#" class="channel-link" data-url="intent://tv.kgtv.vn/live/kgtv1/kgtv1.m3338#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsUd8JPlLJ92zYIYKQDV-5zz1PJXKRD4XKHQ&s" border="1px" alt="KTV"></a>
             </div>
         </div>
 
@@ -357,11 +351,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             const datetimeDisplay = document.getElementById('current-datetime');
             const channelLinks = document.querySelectorAll('.channel-link');
-            // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ #
-            const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"])'); 
+            // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ # หรือเป็น channel-link (ซึ่งมี data-url อยู่แล้ว)
+            const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link)');
             
-            // ใช้ Map เพื่อเก็บ original href และ title ของลิงก์
+            // ใช้ Map เพื่อเก็บ original href และ title ของลิงก์ที่ต้องการซ่อน URL
             const originalLinkData = new Map();
+            allClickableLinks.forEach(link => {
+                originalLinkData.set(link, {
+                    href: link.href,
+                    title: link.getAttribute('title') || ''
+                });
+            });
 
             // ฟังก์ชันสำหรับฟอร์แมตวันที่และเวลา
             function formatDateTime(date) {
@@ -450,23 +450,21 @@
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         contentElement.classList.add('show');
-                        setTimeout(() => {
-                            const actualContentHeight = contentElement.scrollHeight; 
-                            let totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
-                            
-                            contentElement.style.maxHeight = (actualContentHeight + totalContentPadding) + 'px';
-                            contentElement.style.paddingTop = '8px';
-                            contentElement.style.paddingBottom = '8px';
-                            contentElement.style.opacity = '1';
+                        const actualContentHeight = contentElement.scrollHeight;
+                        let totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
+                        
+                        contentElement.style.maxHeight = (actualContentHeight + totalContentPadding) + 'px';
+                        contentElement.style.paddingTop = '8px';
+                        contentElement.style.paddingBottom = '8px';
+                        contentElement.style.opacity = '1';
 
-                            const parentCategory = contentElement.closest('.category');
-                            if (parentCategory && parentCategory.querySelector('.accordion-button')) {
-                                const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
-                                const categoryPadding = 5 * 2;
-                                const categoryBorder = 1 * 2;
-                                parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder + actualContentHeight + totalContentPadding) + 'px';
-                            }
-                        }, 50); // ดีเลย์ 50ms (สามารถปรับได้)
+                        const parentCategory = contentElement.closest('.category');
+                        if (parentCategory && parentCategory.querySelector('.accordion-button')) {
+                            const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
+                            const categoryPadding = 5 * 2;
+                            const categoryBorder = 1 * 2;
+                            parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder + actualContentHeight + totalContentPadding) + 'px';
+                        }
                     });
                 });
             }
@@ -521,39 +519,31 @@
                 }
             });
 
-            // ปรับปรุง Event Listener สำหรับลิงก์ทั้งหมด เพื่อซ่อน/แสดง URL เมื่อ hover โดยไม่กระทบการคลิก
+            // ปรับปรุง Event Listener สำหรับลิงก์ทั้งหมด เพื่อซ่อน/แสดง URL เมื่อ hover
+            // โค้ดนี้จะใช้กับลิงก์ที่ไม่ใช่ channel-link เท่านั้น
             allClickableLinks.forEach(link => {
-                // เก็บ href เดิมไว้ใน data attribute ตั้งแต่ต้น
-                const originalHref = link.href;
-                const originalTitle = link.getAttribute('title') || '';
+                // ดึงข้อมูล href และ title เดิมจาก Map
+                const originalData = originalLinkData.get(link);
+                if (!originalData) return; // ควรมีข้อมูลเสมอ แต่ใส่ไว้เพื่อความปลอดภัย
 
                 link.addEventListener('mouseover', function() {
                     // ลบ href attribute เมื่อเมาส์ชี้ เพื่อซ่อน URL ในแถบสถานะ
-                    // แต่เราเก็บค่าเดิมไว้แล้ว และจะคืนค่าเมื่อเมาส์ออก
                     this.removeAttribute('href');
                     this.removeAttribute('title'); // ซ่อน tooltip ถ้ามี
                 });
 
                 link.addEventListener('mouseout', function() {
                     // คืนค่า href attribute กลับไปเมื่อเมาส์ออก
-                    this.setAttribute('href', originalHref);
-                    if (originalTitle) {
-                        this.setAttribute('title', originalTitle); // คืนค่า title กลับไป
+                    this.setAttribute('href', originalData.href);
+                    if (originalData.title) {
+                        this.setAttribute('title', originalData.title); // คืนค่า title กลับไป
                     }
                 });
 
-                // เพิ่ม Event Listener สำหรับ click เพื่อให้แน่ใจว่าลิงก์ทำงานได้
-                // ในกรณีที่เบราว์เซอร์อาจจะยังไม่คืนค่า href ทันที
-                link.addEventListener('click', function(event) {
-                    // ตรวจสอบให้แน่ใจว่า href ถูกตั้งค่าไว้ก่อนที่จะเปลี่ยนหน้า
-                    if (!this.href || this.href === window.location.href + '#') {
-                        this.setAttribute('href', originalHref); // ตั้งค่า href กลับไป
-                    }
-                    // ไม่ต้อง event.preventDefault() เพราะต้องการให้ลิงก์ทำงานตามปกติ
-                });
+                // ไม่จำเป็นต้องเพิ่ม click listener แยกสำหรับ allClickableLinks
+                // เพราะ href จะถูกคืนค่าใน mouseout หรือ browser จะจัดการเอง
+                // และลิงก์เหล่านี้ไม่ได้มี event.preventDefault() เหมือน channel-link
             });
-
-
         });
     </script>
 </body>
