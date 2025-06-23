@@ -141,13 +141,13 @@
         /* Container สำหรับหมวดหมู่ทั้งหมด */
         .categories-container {
             display: flex; /* ใช้ Flexbox */
-            flex-wrap: nowrap; /* สำคัญ: บังคับให้อยู่ในแถวเดียวกัน */
+            flex-wrap: wrap; /* สำคัญ: อนุญาตให้ขึ้นบรรทัดใหม่บนหน้าจอเล็ก */
             justify-content: center; /* จัดกึ่งกลาง */
             gap: 15px; /* ระยะห่างระหว่างหมวดหมู่ */
             width: 100%;
-            max-width: 1200px; /* ความกว้างสูงสุด */
+            max-width: 1200px; /* ความกว้างสูงสุด (สำหรับ Desktop) */
             margin-top: 20px;
-            overflow-x: auto; /* เพิ่ม scrollbar ถ้าเนื้อหาเกินหน้าจอ */
+            overflow-x: hidden; /* ซ่อน scrollbar แนวนอนเมื่อ flex-wrap ทำงาน */
             padding-bottom: 10px;
         }
 
@@ -157,7 +157,7 @@
             border-radius: 8px;
             padding: 5px;
             flex: 0 0 auto;
-            width: 220px;
+            width: 220px; /* กำหนดความกว้างคงที่ */
             box-sizing: border-box;
             transition: all 0.3s ease;
             display: flex;
@@ -173,6 +173,29 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
         }
         
+        /* Media Queries สำหรับ Responsive Design */
+        @media (max-width: 768px) { /* สำหรับแท็บเล็ตและมือถือ */
+            .categories-container {
+                gap: 10px; /* ลดระยะห่าง */
+            }
+            .category {
+                width: calc(50% - 15px); /* 2 กล่องต่อแถวบนแท็บเล็ตเล็ก */
+                max-width: unset; /* ลบ max-width เดิมออก */
+            }
+        }
+
+        @media (max-width: 480px) { /* สำหรับมือถือขนาดเล็ก */
+            .categories-container {
+                gap: 10px;
+                padding: 0 5px 10px 5px; /* เพิ่ม padding ด้านข้างเล็กน้อย */
+            }
+            .category {
+                width: calc(100% - 10px); /* 1 กล่องต่อแถวบนมือถือ */
+                margin-left: auto; /* จัดกึ่งกลาง */
+                margin-right: auto;
+            }
+        }
+
         /* สไตล์ของปุ่มชื่อหมวดหมู่ (Accordion Button) */
         .accordion-button {
             background-color: #42A5F5; /* สีฟ้าอ่อนลงอีก (Material Design Blue 400) */
@@ -234,7 +257,6 @@
             object-fit: cover;
             vertical-align: middle;
             transition: transform 0.2s ease;
-            /* เพิ่ม cursor: pointer เพื่อบอกว่าคลิกได้ */
             cursor: pointer; 
         }
 
