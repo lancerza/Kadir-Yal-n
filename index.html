@@ -10,6 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA4_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-KBRV24KW7F');
+    </script>
+
     <style>
         /* อนิเมชั่นสำหรับ header (Fade in) */
         @keyframes fadeIn {
@@ -26,7 +35,12 @@
         html, body {
             margin: 0;
             padding: 0;
-            min-height: 100%;
+            /* สำคัญสำหรับ Sticky Footer */
+            min-height: 100vh; /* กำหนดความสูงขั้นต่ำของ body ให้เต็ม viewport height */
+            display: flex; /* ทำให้ body เป็น Flex container */
+            flex-direction: column; /* จัดเรียงลูกๆ ในแนวตั้ง */
+            /* สิ้นสุดสำหรับ Sticky Footer */
+
             overflow-x: hidden;
             background-color: #1a1a1a; /* สีพื้นหลังดำเข้ม */
             color: #f0f0f0; /* สีข้อความหลักเป็นสีขาวอมเทา */
@@ -34,12 +48,10 @@
             text-align: center;
         }
 
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+        body { /* ซ้ำซ้อน แต่เพื่อให้แน่ใจว่า padding ไม่ถูก override */
             padding: 0 10px;
+            align-items: center; /* จัดกึ่งกลางเนื้อหาใน body */
+            justify-content: flex-start;
         }
 
         header {
@@ -138,21 +150,35 @@
             margin-left: 8px; /* ระยะห่างจากข้อความด้านขวา */
         }
 
+        /* ลบสไตล์ทั้งหมดที่เกี่ยวข้องกับ warning-accordion-container ออกไป */
+        /*
+        .warning-accordion-container { ... }
+        .warning-accordion-container .accordion-button { ... }
+        .warning-accordion-container .accordion-button:hover { ... }
+        #wiseplay-warning-content { ... }
+        #wiseplay-warning-content.show { ... }
+        #wiseplay-warning-content .wiseplay-buttons { ... }
+        #wiseplay-warning-content .wiseplay-button { ... }
+        #wiseplay-warning-content span.wiseplay-button.highlight-yes-button { ... }
+        #wiseplay-warning-content span.wiseplay-button.highlight-yes-button:hover { ... }
+        */
+
         /* Container สำหรับหมวดหมู่ทั้งหมด */
-        .categories-container {
+        main.categories-container { /* เพิ่ม class main.categories-container เพื่อความแม่นยำ */
             display: flex; /* ใช้ Flexbox */
             flex-wrap: wrap; /* สำคัญ: อนุญาตให้ขึ้นบรรทัดใหม่บนหน้าจอเล็ก */
             justify-content: center; /* จัดกึ่งกลาง */
             gap: 15px; /* ระยะห่างระหว่างหมวดหมู่ */
             width: 100%;
             max-width: 1200px; /* ความกว้างสูงสุด (สำหรับ Desktop) */
-            margin-top: 20px;
+            margin-top: 20px; /* ปรับ margin-top ให้เชื่อมกับ line-group-info */
             overflow-x: hidden; /* ซ่อน scrollbar แนวนอนเมื่อ flex-wrap ทำงาน */
             padding-bottom: 10px;
+            flex-grow: 1; /* ทำให้ main ขยายตัวเพื่อกินพื้นที่ว่างทั้งหมด */
         }
 
         /* สไตล์สำหรับแต่ละหมวดหมู่ */
-        .category {
+        .category { /* สไตล์สำหรับกล่องหมวดหมู่ปกติ */
             background-color: #1a1a1a;
             border-radius: 8px;
             padding: 5px;
@@ -196,7 +222,7 @@
             }
         }
 
-        /* สไตล์ของปุ่มชื่อหมวดหมู่ (Accordion Button) */
+        /* สไตล์ของปุ่มชื่อหมวดหมู่ (Accordion Button) - ทั่วไป */
         .accordion-button {
             background-color: #42A5F5; /* สีฟ้าอ่อนลงอีก (Material Design Blue 400) */
             color: #FFFFFF; /* ข้อความสีขาว */
@@ -221,7 +247,7 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
         }
 
-        /* สไตล์สำหรับเนื้อหาที่ซ่อน/แสดงได้ */
+        /* สไตล์สำหรับเนื้อหาที่ซ่อน/แสดงได้ (Accordion Content) - ทั่วไป */
         .accordion-content {
             max-height: 0;
             padding-top: 0;
@@ -265,7 +291,9 @@
         }
 
         footer {
-            margin-top: 50px;
+            /* สำหรับ Sticky Footer */
+            margin-top: auto; /* ทำให้ footer ถูกดันไปอยู่ด้านล่างสุด */
+            /* สิ้นสุดสำหรับ Sticky Footer */
             padding: 20px;
             color: #f0f0f0;
             background-color: #1a1a1a; /* เปลี่ยนเป็นสีเดียวกับพื้นหลัง body */
@@ -287,7 +315,8 @@
         <a href="YOUR_LINE_GROUP_LINK" id="line-group-info" target="_blank">
             <i class="fa-brands fa-line left-icon"></i> เข้ากลุ่มไลน์อัพเดทต่างๆ
             <i class="fa-brands fa-line right-icon"></i> </a>
-    </header>
+
+        </header>
 
     <main class="categories-container">
         <div class="category">
@@ -316,16 +345,6 @@
                 <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/mtv#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://img5.pic.in.th/file/secure-sv1/images-406af7e9bac362e51.jpeg" border="1px"></a>
             </div>
         </div>
-
-        <div class="category">
-            <button class="accordion-button">สารคดี&ทีวีเด็ก</button>
-            <div class="accordion-content">
-                <a href="#" class="channel-link" data-url="intent://edge2a.v2h-cdn.com/boomerang/boomerang.stream/playlist.m3u8#Intent;package=com.wiseplay;S.userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/Boomerang2024.png" border="1px" alt="Boomerang"></a>
-                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/nat-geo-wild#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwZHhaP0XzailxJ-DiF_sJoDNHUQl3gzRD6g&usqp=CAU" border="1px"></a>
-                <a href="#" class="channel-link" data-url="intent://dookeela.live/live-tv/global-trekker-channel#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRme29zMVh_xTpLstIcr9eM6Q-zF-6TzBw-7CG-65dDyMkkgZ9IPR0pRlE&s=10" border="1px"></a>
-                <a href="#" class="channel-link" data-url="intent://www.inwiptv.com/player_demo.php?channel=91303#Intent;package=com.wiseplay;S.userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end"><img src="https://img.inwiptv.net/postor/20240617204638FWDoc.jpg" border="1px"></a>
-            </div>
-        </div>
     </main>
 
     <footer>
@@ -334,9 +353,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const accordionButtons = document.querySelectorAll('.accordion-button');
             const datetimeDisplay = document.getElementById('current-datetime');
-            const channelLinks = document.querySelectorAll('.channel-link'); // เลือก channel links ทั้งหมด
+            const channelLinks = document.querySelectorAll('.channel-link');
 
             // ฟังก์ชันสำหรับฟอร์แมตวันที่และเวลา
             function formatDateTime(date) {
@@ -369,9 +387,9 @@
                 });
             });
 
-            // ฟังก์ชันสำหรับปิด Accordion Content
+            // ฟังก์ชันสำหรับปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
             function closeAccordion(contentElement) {
-                const categoryElement = contentElement.closest('.category');
+                const parentCategory = contentElement.closest('.category'); // หา parent .category
                 
                 contentElement.classList.remove('show');
                 contentElement.style.maxHeight = '0';
@@ -379,7 +397,13 @@
                 contentElement.style.paddingBottom = '0';
                 contentElement.style.opacity = '0';
 
-                categoryElement.style.height = (categoryElement.querySelector('.accordion-button').offsetHeight + (5 * 2) + 2) + 'px';
+                // ตั้งค่าความสูงของ category ให้กลับไปเป็นความสูงเริ่มต้น (เท่ากับแค่ปุ่ม)
+                if (parentCategory && parentCategory.querySelector('.accordion-button')) {
+                    const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
+                    const categoryPadding = 5 * 2; // 5px top/bottom padding
+                    const categoryBorder = 1 * 2; // 1px top/bottom border
+                    parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder) + 'px';
+                }
 
                 const transitionEndHandler = function() {
                     if (!contentElement.classList.contains('show')) {
@@ -390,12 +414,12 @@
                 contentElement.addEventListener('transitionend', transitionEndHandler);
             }
 
-            // ฟังก์ชันสำหรับเปิด Accordion Content
+            // ฟังก์ชันสำหรับเปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
             function openAccordion(contentElement) {
-                const categoryElement = contentElement.closest('.category');
-                
-                contentElement.style.display = 'flex';
-                contentElement.style.maxHeight = '0';
+                const parentCategory = contentElement.closest('.category'); // หา parent .category
+
+                contentElement.style.display = 'flex'; // แสดง display ก่อนเริ่ม transition
+                contentElement.style.maxHeight = '0'; // ตั้งค่าเริ่มต้นให้เป็น 0 ก่อนคำนวณ scrollHeight
                 contentElement.style.paddingTop = '0';
                 contentElement.style.paddingBottom = '0';
                 contentElement.style.opacity = '0';
@@ -403,39 +427,56 @@
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         contentElement.classList.add('show');
-                        const totalContentHeight = contentElement.scrollHeight + 8 + 8;
-                        contentElement.style.maxHeight = totalContentHeight + 'px';
-                        contentElement.style.paddingTop = '8px';
-                        contentElement.style.paddingBottom = '8px';
-                        contentElement.style.opacity = '1';
+                        // คำนวณความสูงที่แท้จริงของเนื้อหา + padding
+                        // ใช้ setTimeout เล็กน้อยเพื่อให้เบราว์เซอร์มีเวลา render layout ก่อนคำนวณ scrollHeight
+                        setTimeout(() => {
+                            const actualContentHeight = contentElement.scrollHeight; 
+                            const totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
+                            
+                            contentElement.style.maxHeight = (actualContentHeight + totalContentPadding) + 'px';
+                            contentElement.style.paddingTop = '8px';
+                            contentElement.style.paddingBottom = '8px';
+                            contentElement.style.opacity = '1';
 
-                        const buttonHeight = categoryElement.querySelector('.accordion-button').offsetHeight;
-                        const categoryPadding = 5 * 2;
-                        const categoryBorder = 1 * 2;
-                        categoryElement.style.height = (buttonHeight + categoryPadding + categoryBorder + totalContentHeight) + 'px';
+                            if (parentCategory && parentCategory.querySelector('.accordion-button')) {
+                                const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
+                                const categoryPadding = 5 * 2;
+                                const categoryBorder = 1 * 2;
+                                parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder + actualContentHeight + totalContentPadding) + 'px';
+                            }
+                        }, 50); // ดีเลย์ 50ms (สามารถปรับได้)
                     });
                 });
             }
 
-            accordionButtons.forEach(button => {
+            // เลือกปุ่ม Accordion ทั้งหมดในหน้า
+            const allAccordionButtons = document.querySelectorAll('.accordion-button');
+
+            allAccordionButtons.forEach(button => {
                 const categoryElement = button.closest('.category');
-                const initialHeight = (button.offsetHeight + (5 * 2) + 2) + 'px';
-                categoryElement.style.height = initialHeight;
-                categoryElement.style.transition = 'height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease';
+                // กำหนดความสูงเริ่มต้นของ category เมื่อ DOM โหลดเสร็จ
+                if (categoryElement && button) {
+                    // ตอนนี้ไม่มี warning-accordion-container แล้ว จึงใช้ initialHeight เดิมได้เลย
+                    const initialHeight = (button.offsetHeight + (5 * 2) + 2) + 'px';
+                    categoryElement.style.height = initialHeight;
+                    categoryElement.style.transition = 'height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease';
+                }
 
                 button.addEventListener('click', function() {
                     const content = this.nextElementSibling;
                     
-                    accordionButtons.forEach(otherButton => {
+                    // ปิด accordion อื่นๆ ทั้งหมด
+                    allAccordionButtons.forEach(otherButton => {
                         const otherContent = otherButton.nextElementSibling;
-                        if (otherButton !== this && otherContent.classList.contains('show')) {
+                        if (otherButton !== this && otherContent && otherContent.classList.contains('show')) {
                             closeAccordion(otherContent);
                         }
                     });
 
-                    if (content.classList.contains('show')) {
+                    // สลับการแสดงผลของเนื้อหาปัจจุบัน
+                    if (content && content.classList.contains('show')) {
                         closeAccordion(content);
-                    } else {
+                    } else if (content) {
                         openAccordion(content);
                     }
                 });
