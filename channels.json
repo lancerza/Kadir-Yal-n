@@ -288,13 +288,6 @@
   },
   {
     "category": "IPTV",
-    "name": "FWMov",
-    "img_src": "https://www.fileinw.com/postor/20240429213309FWMOV.jpg",
-    "data_url": "intent://freelive2.inwstream.com:1936/freelive-edge/fwmov_fw-iptv.stream/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://inwiptv.com/demo.php/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
-    "aria_label": "ดูช่อง FWMov"
-  },
-  {
-    "category": "IPTV",
     "name": "FWSOV",
     "img_src": "https://www.fileinw.com/postor/20240429213326FWSOV.jpg",
     "data_url": "intent://freelive2.inwstream.com:1936/freelive-edge/fwsov_fw-iptv.stream/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
