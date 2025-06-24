@@ -264,7 +264,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: var(--spacing-sm);
-            position: relative; /* สำหรับตำแหน่ง loading/no-channels message */
+            position: relative;
         }
 
         .accordion-content.show {
@@ -311,15 +311,15 @@
             color: rgba(255, 255, 255, 0.7);
             font-family: 'Kanit', sans-serif;
             font-size: clamp(14px, 2.5vw, 18px);
-            display: none; /* ซ่อนโดยค่าเริ่มต้น */
+            display: none;
         }
 
         .loading-indicator.active, .no-channels-message.active {
-            display: block; /* แสดงเมื่อถูกเปิดใช้งาน */
+            display: block;
         }
 
         .loading-indicator i.fa-spinner {
-            animation: spin 1s linear infinite; /* แอนิเมชันหมุน */
+            animation: spin 1s linear infinite;
             margin-right: var(--spacing-xs);
         }
 
@@ -335,8 +335,7 @@
     <header>
         <div id="running-text-container">
             <div id="running-text">
-                แอปดูฟรี ไม่เสียรายเดือน! อนุญาตให้ใช้เพื่อความบันเทิงในที่พักอาศัยเท่านั้น ห้ามนำไปหลอกขายคนอื่น !!!
-            </div>
+                </div>
         </div>
         <h1>เชิญดูฟรีไม่เสียรายเดือน</h1>
         <time id="current-datetime" aria-live="polite"></time>
@@ -389,12 +388,15 @@
     </main>
 
     <footer>
-        <p>© Copyright 2025 DonOk Co Ltd.</p>
+        <p id="footer-text">
+            </p>
     </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const datetimeDisplay = document.getElementById('current-datetime');
+            const runningTextElement = document.getElementById('running-text'); // เข้าถึง element ข้อความวิ่ง
+            const footerTextElement = document.getElementById('footer-text'); // เข้าถึง element ข้อความท้าย
             const categoryContentMap = {
                 "ทีวีดิจิตอล": document.getElementById('content-thai-tv'),
                 "กีฬา": document.getElementById('content-sport'),
@@ -402,12 +404,14 @@
                 "IPTV": document.getElementById('content-iptv')
             };
             let channelsData = null; // เก็บข้อมูลช่องที่โหลดมาแล้ว
+            let textsData = null; // เก็บข้อมูลข้อความที่โหลดมาแล้ว
+
+            const redAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--red-accent').trim();
 
             // ฟังก์ชันแสดง/ซ่อน loading indicator และ no channels message
             function showLoading(container) {
                 container.querySelector('.loading-indicator').classList.add('active');
                 container.querySelector('.no-channels-message').classList.remove('active');
-                // ลบช่องเดิมออกก่อนเพื่อไม่ให้ซ้ำซ้อน
                 Array.from(container.children).forEach(child => {
                     if (!child.classList.contains('loading-indicator') && !child.classList.contains('no-channels-message')) {
                         child.remove();
@@ -429,15 +433,14 @@
                 container.querySelector('.no-channels-message').classList.remove('active');
             }
 
-            // ฟังก์ชันโหลดและแสดงช่อง
-            async function loadChannelsAndDisplay() {
-                if (channelsData) return; // ถ้าโหลดแล้ว ไม่ต้องโหลดซ้ำ
-
+            // ฟังก์ชันโหลด channels.json
+            async function loadChannelsData() {
+                if (channelsData) return;
                 try {
                     const response = await fetch('channels.json');
                     if (!response.ok) {
                         const errorText = response.status === 404
-                            ? `channels.json not found (HTTP 404). Please ensure the file exists at the root of your server.`
+                            ? `channels.json not found (HTTP 404). Please ensure the file exists at the root of your server.)`
                             : `Failed to load channels.json: HTTP error! status: ${response.status}`;
                         throw new Error(errorText);
                     }
@@ -445,21 +448,53 @@
                     if (!Array.isArray(data)) {
                         throw new Error('Fetched data from channels.json is not an array. Please ensure the JSON is an array of channel objects.');
                     }
-                    channelsData = data; // เก็บข้อมูลไว้
+                    channelsData = data;
                 } catch (error) {
                     console.error('Error loading or parsing channels.json:', error);
                     // แสดงข้อความผิดพลาดในทุก accordion content
                     Object.values(categoryContentMap).forEach(container => {
-                        container.innerHTML = `<div class="no-channels-message active" style="color: ${getComputedStyle(document.documentElement).getPropertyValue('--red-accent').trim()};">
+                        container.innerHTML = `<div class="no-channels-message active" style="color: ${redAccentColor};">
                                                     เกิดข้อผิดพลาดในการโหลดช่อง: ${error.message}<br>โปรดลองใหม่อีกครั้งในภายหลัง
                                                 </div>`;
                     });
-                    channelsData = []; // ป้องกันการพยายามโหลดซ้ำ
+                    channelsData = [];
                 }
             }
 
-            // โหลด channels.json ทันทีเมื่อหน้าเว็บโหลดเสร็จ (แต่ยังไม่แสดงจนกว่าจะคลิก)
-            loadChannelsAndDisplay();
+            // ฟังก์ชันโหลด texts.json
+            async function loadTextsData() {
+                if (textsData) return;
+                try {
+                    const response = await fetch('texts.json');
+                    if (!response.ok) {
+                        const errorText = response.status === 404
+                            ? `texts.json not found (HTTP 404). Please ensure the file exists at the root of your server.)`
+                            : `Failed to load texts.json: HTTP error! status: ${response.status}`;
+                        throw new Error(errorText);
+                    }
+                    const data = await response.json();
+                    if (typeof data !== 'object' || data === null) {
+                        throw new Error('Fetched data from texts.json is not a valid object.');
+                    }
+                    textsData = data;
+                    // นำข้อความไปใส่ใน element ที่เกี่ยวข้อง
+                    if (runningTextElement && textsData.runningText) {
+                        runningTextElement.textContent = textsData.runningText;
+                    }
+                    if (footerTextElement && textsData.footerText) {
+                        footerTextElement.textContent = textsData.footerText;
+                    }
+                } catch (error) {
+                    console.error('Error loading or parsing texts.json:', error);
+                    // Fallback to default text if loading fails
+                    if (runningTextElement) runningTextElement.textContent = "Error loading running text!";
+                    if (footerTextElement) footerTextElement.textContent = "Error loading footer text!";
+                }
+            }
+
+            // โหลดข้อมูลทั้งหมดเมื่อ DOM พร้อม
+            loadChannelsData();
+            loadTextsData(); // โหลดข้อความด้วย
 
             document.querySelector('main.categories-container').addEventListener('click', function(event) {
                 const link = event.target.closest('.channel-link');
@@ -516,17 +551,14 @@
                 contentElement.style.display = 'flex';
                 buttonElement.setAttribute('aria-expanded', 'true');
 
-                // แสดง loading indicator ทันที
                 showLoading(contentElement);
 
-                // รอให้ channelsData พร้อม (ถ้ายังไม่พร้อม)
                 if (!channelsData) {
-                    await loadChannelsAndDisplay(); // รอให้โหลดเสร็จ
+                    await loadChannelsData(); // ใช้ loadChannelsData() แทน
                 }
 
-                clearMessages(contentElement); // ล้าง loading/no-channels message ก่อนเพิ่มช่องใหม่
+                clearMessages(contentElement);
 
-                // กรองและแสดงช่องสำหรับหมวดหมู่นี้
                 const categoryText = buttonElement.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').trim();
                 const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
 
@@ -548,7 +580,6 @@
                     });
                 }
 
-                // ปรับ max-height หลังเพิ่มช่องแล้ว
                 requestAnimationFrame(() => {
                     const actualContentHeight = contentElement.scrollHeight;
                     contentElement.style.maxHeight = (actualContentHeight + 16) + 'px';
