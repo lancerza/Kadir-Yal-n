@@ -17,11 +17,25 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-KBRV24KW7F');
     </script>
 
     <style>
+        :root {
+            --dark-bg: #1a1a1a;
+            --light-text: #f0f0f0;
+            --white: #FFFFFF;
+            --red-accent: #ff4d4d;
+            --line-blue: #2196F3;
+            --line-green: #00B900;
+            --border-radius: 8px;
+            --spacing-xs: 5px;
+            --spacing-sm: 8px;
+            --spacing-md: 10px;
+            --spacing-lg: 15px;
+            --spacing-xl: 20px;
+        }
+
         /* อนิเมชั่นสำหรับ header (Fade in) */
         @keyframes fadeIn {
             0% { opacity: 0; }
@@ -36,191 +50,178 @@
 
         html, body {
             margin: 0;
-            padding: 0 10px; /* รวม padding ที่นี่ */
-            /* สำคัญสำหรับ Sticky Footer */
-            min-height: 100vh; /* กำหนดความสูงขั้นต่ำของ body ให้เต็ม viewport height */
-            display: flex; /* ทำให้ body เป็น Flex container */
-            flex-direction: column; /* จัดเรียงลูกๆ ในแนวตั้ง */
-            align-items: center; /* จัดกึ่งกลางเนื้อหาใน body */
-            justify-content: flex-start; /* แก้ไขการพิมพ์ผิดและรวมกับ html, body */
-
+            padding: 0 var(--spacing-md);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
             overflow-x: hidden;
-            background-color: #1a1a1a; /* สีพื้นหลังดำเข้ม */
-            color: #f0f0f0; /* สีข้อความหลักเป็นสีขาวอมเทา */
+            background-color: var(--dark-bg);
+            color: var(--light-text);
             font-family: 'Arial', sans-serif;
             text-align: center;
-
-            /* CSS สำหรับป้องกันการเลือกข้อความ */
-            -webkit-user-select: none;  /* Safari */
-            -moz-user-select: none;     /* Firefox */
-            -ms-user-select: none;      /* IE 10+ */
-            user-select: none;          /* Standard */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         header {
-            background-color: #1a1a1a; /* เปลี่ยนเป็นสีเดียวกับพื้นหลัง body */
-            color: #FFFFFF; /* ข้อความสีขาว */
+            background-color: var(--dark-bg);
+            color: var(--white);
             padding: 2vw 4vw;
-            border-radius: 8px;
-            margin: 5vh 0 2vh 0; /* ปรับ margin-bottom ให้มีที่ว่างด้านล่าง header */
+            border-radius: var(--border-radius);
+            margin: 5vh 0 2vh 0;
             animation: fadeIn 3s ease-out;
             width: 100%;
             box-sizing: border-box;
-            border: 2px solid #1a1a1a; /* เปลี่ยนเป็นสีเดียวกับพื้นหลัง body */
-            box-shadow: none; /* ลบเงาออก */
-            overflow: hidden; /* สำคัญ: ซ่อนส่วนที่เกินของข้อความวิ่ง */
+            border: 2px solid var(--dark-bg);
+            box-shadow: none;
+            overflow: hidden;
         }
 
-        /* สไตล์สำหรับข้อความวิ่ง */
         #running-text-container {
             width: 100%;
-            margin-bottom: 5px; /* ระยะห่างจาก h1 */
-            position: relative; /* สำหรับให้ running-text วิ่งได้ */
-            height: 20px; /* กำหนดความสูงเพื่อให้ข้อความวิ่งมีที่อยู่ */
-            overflow: hidden; /* ซ่อนข้อความที่อยู่นอก container */
+            margin-bottom: var(--spacing-xs);
+            position: relative;
+            height: 20px;
+            overflow: hidden;
         }
 
         #running-text {
-            display: inline-block; /* ทำให้ข้อความอยู่บนบรรทัดเดียว */
-            white-space: nowrap; /* ป้องกันไม่ให้ข้อความขึ้นบรรทัดใหม่ */
-            color: #ff4d4d; /* สีแดงสด */
+            display: inline-block;
+            white-space: nowrap;
+            color: var(--red-accent);
             font-family: 'Kanit', sans-serif;
-            font-size: clamp(12px, 2vw, 16px); /* ขนาดตัวอักษรเล็กและ responsive */
-            font-weight: 700; /* ตัวหนา */
-            animation: marquee 15s linear infinite; /* 15s คือความเร็ว, linear คือความสม่ำเสมอ, infinite คือวนซ้ำ */
+            font-size: clamp(12px, 2vw, 16px);
+            font-weight: 700;
+            animation: marquee 15s linear infinite;
             position: absolute;
             top: 0;
             left: 0;
-            min-width: 100%; /* ให้ข้อความวิ่งครอบคลุมความกว้าง */
-            cursor: default; /* เพิ่ม: แสดงว่าไม่สามารถคลิกได้ */
+            min-width: 100%;
+            cursor: default;
         }
 
         h1 {
-            color: #FFFFFF;
+            color: var(--white);
             text-align: center;
             font-family: 'Kanit', sans-serif;
             font-size: clamp(24px, 5vw, 40px);
             font-weight: 900;
             letter-spacing: 2px;
-            /* ปรับ text-shadow ให้ดูนุ่มนวลและทันสมัยขึ้น */
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 12px rgba(255, 255, 255, 0.2);
             margin-top: 1px;
-            margin-bottom: 10px; /* เพิ่ม margin-bottom เพื่อให้มีที่ว่างจากเวลา/วันที่ */
+            margin-bottom: var(--spacing-md);
         }
 
-        /* สไตล์สำหรับแสดงเวลาและวันที่ */
-        #current-datetime { /* ใช้กับ time tag แล้ว */
+        #current-datetime {
             font-family: 'Kanit', sans-serif;
-            font-size: clamp(14px, 2.5vw, 20px); /* ขนาด responsive สำหรับเวลา/วันที่ */
-            color: rgba(255, 255, 255, 0.8); /* สีขาวจางๆ */
-            margin-top: 10px;
-            margin-bottom: 10px; /* ลด margin-bottom เพื่อให้มีที่สำหรับไลน์กลุ่ม */
+            font-size: clamp(14px, 2.5vw, 20px);
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-            font-weight: 400; /* น้ำหนักตัวอักษรปกติ */
+            font-weight: 400;
         }
 
-        /* สไตล์สำหรับกลุ่มไลน์ */
         #line-group-info {
             font-family: 'Kanit', sans-serif;
-            font-size: clamp(14px, 2.5vw, 20px); /* ขนาดตัวอักษรเท่ากับเวลา/วันที่ */
-            color: #2196F3; /* สีฟ้าไลน์ (ข้อความ) */
-            margin-top: 10px; /* ระยะห่างจากเวลา/วันที่ */
-            margin-bottom: 20px; /* ระยะห่างจากส่วน categories */
+            font-size: clamp(14px, 2.5vw, 20px);
+            color: var(--line-blue);
+            margin-top: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
             text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-            font-weight: 700; /* ตัวหนา */
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer; /* แสดงว่าคลิกได้ */
-            text-decoration: none; /* ลบขีดเส้นใต้ลิงก์ */
+            cursor: pointer;
+            text-decoration: none;
         }
 
         #line-group-info:hover {
-            color: #1976D2; /* สีฟ้าเข้มขึ้นเมื่อ hover */
+            color: #1976D2;
         }
 
-        /* สไตล์สำหรับไอคอน Font Awesome */
         #line-group-info i {
-            font-size: 25px; /* ขนาดไอคอน */
+            font-size: 25px;
             vertical-align: middle;
-            color: #00B900; /* เปลี่ยนสีไอคอน LINE เป็นสีเขียว */
+            color: var(--line-green);
         }
 
         #line-group-info i.fa-brands.fa-line.left-icon {
-            margin-right: 8px; /* ระยะห่างจากข้อความด้านซ้าย */
+            margin-right: var(--spacing-sm);
         }
 
         #line-group-info i.fa-brands.fa-line.right-icon {
-            margin-left: 8px; /* ระยะห่างจากข้อความด้านขวา */
+            margin-left: var(--spacing-sm);
         }
 
-        /* Container สำหรับหมวดหมู่ทั้งหมด */
         main.categories-container {
-            display: flex; /* ใช้ Flexbox */
-            flex-wrap: wrap; /* สำคัญ: อนุญาตให้ขึ้นบรรทัดใหม่บนหน้าจอเล็ก */
-            justify-content: center; /* จัดกึ่งกลาง */
-            gap: 15px; /* ระยะห่างระหว่างหมวดหมู่ */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: var(--spacing-lg);
             width: 100%;
-            max-width: 1200px; /* ความกว้างสูงสุด (สำหรับ Desktop) */
-            margin-top: 20px; /* ปรับ margin-top ให้เชื่อมกับ line-group-info */
-            padding-bottom: 10px;
-            flex-grow: 1; /* ทำให้ main ขยายตัวเพื่อกินพื้นที่ว่างทั้งหมด */
+            max-width: 1200px;
+            margin-top: var(--spacing-xl);
+            padding-bottom: var(--spacing-md);
+            flex-grow: 1;
         }
 
-        /* สไตล์สำหรับแต่ละหมวดหมู่ */
         .category {
-            background-color: #1a1a1a;
-            border-radius: 8px;
-            padding: 5px;
+            background-color: var(--dark-bg);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-xs);
             flex: 0 0 auto;
-            width: 220px; /* กำหนดความกว้างคงที่ */
+            width: 220px;
             box-sizing: border-box;
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
-            border: 1px solid #1a1a1a;
+            border: 1px solid var(--dark-bg);
             height: auto;
-            box-shadow: none; /* ไม่มีเงาในสถานะปกติ */
+            box-shadow: none;
         }
 
         .category:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* เพิ่มเงาเมื่อ hover */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Media Queries สำหรับ Responsive Design */
-        @media (max-width: 768px) { /* สำหรับแท็บเล็ตและมือถือ */
+        @media (max-width: 768px) {
             .categories-container {
-                gap: 10px; /* ลดระยะห่าง */
+                gap: var(--spacing-md);
             }
             .category {
-                width: calc(50% - 15px); /* 2 กล่องต่อแถวบนแท็บเล็ตเล็ก */
-                max-width: unset; /* ลบ max-width เดิมออก */
+                width: calc(50% - 15px);
+                max-width: unset;
             }
         }
 
-        @media (max-width: 480px) { /* สำหรับมือถือขนาดเล็ก */
+        @media (max-width: 480px) {
             .categories-container {
-                gap: 10px;
-                padding: 0 5px 10px 5px; /* เพิ่ม padding ด้านข้างเล็กน้อย */
+                gap: var(--spacing-md);
+                padding: 0 var(--spacing-xs) var(--spacing-md) var(--spacing-xs);
             }
             .category {
-                width: calc(100% - 10px); /* 1 กล่องต่อแถวบนมือถือ */
-                margin-left: auto; /* จัดกึ่งกลาง */
+                width: calc(100% - 10px);
+                margin-left: auto;
                 margin-right: auto;
             }
         }
 
-        /* สไตล์ของปุ่มชื่อหมวดหมู่ (Accordion Button) */
         .accordion-button {
-            background: linear-gradient(145deg, #424242, #333333); /* ใช้ gradient */
-            color: #FFFFFF;
-            font-family: 'Kanit', sans-serif; /* ใช้ Font Kanit */
+            background: linear-gradient(145deg, #424242, #333333);
+            color: var(--white);
+            font-family: 'Kanit', sans-serif;
             font-size: 1.3em;
             font-weight: bold;
             padding: 7px 14px;
-            border-radius: 8px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             width: 100%;
             text-align: center;
@@ -228,87 +229,79 @@
             transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
             box-sizing: border-box;
-            border: 1px solid #FFFFFF;
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3); /* เงาปกติ */
-            display: flex; /* ใช้ flexbox เพื่อจัดไอคอนและข้อความให้อยู่ตรงกลาง */
+            border: 1px solid var(--white);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .accordion-button:hover {
-            background: linear-gradient(145deg, #616161, #505050); /* เปลี่ยน gradient เมื่อ hover */
+            background: linear-gradient(145deg, #616161, #505050);
             transform: translateY(-3px);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6); /* เอฟเฟกต์เรืองแสง */
-            border-color: #FFFFFF;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6);
+            border-color: var(--white);
         }
 
         .accordion-button:active {
-            transform: translateY(0); /* ดันปุ่มกลับลงไปเล็กน้อย เหมือนถูกกด */
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5); /* เงาด้านในเพื่อจำลองการกด */
-            background: #333333; /* ทำให้สีเข้มขึ้นเล็กน้อยเมื่อกด */
-            border-color: #AAAAAA; /* เปลี่ยนขอบเล็กน้อย */
+            transform: translateY(0);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+            background: #333333;
+            border-color: #AAAAAA;
         }
 
-        /* สไตล์สำหรับไอคอนภายในปุ่มหมวดหมู่ */
         .accordion-button i {
-            margin-right: 8px; /* ระยะห่างระหว่างไอคอนกับข้อความ */
-            color: rgba(255, 255, 255, 0.8); /* สีของไอคอน */
+            margin-right: var(--spacing-sm);
+            color: rgba(255, 255, 255, 0.8);
         }
 
-        /* สไตล์สำหรับเนื้อหาที่ซ่อน/แสดงได้ (Accordion Content) - ทั่วไป */
         .accordion-content {
             max-height: 0;
-            padding-top: 0;
-            padding-bottom: 0;
+            padding: 0; /* จะถูกควบคุมด้วย JS เมื่อเปิด */
             overflow: hidden;
             transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
-
-            display: none; /* ซ่อนเริ่มต้น */
+            display: none;
             opacity: 0;
-
             width: 100%;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
+            gap: var(--spacing-sm);
         }
 
         .accordion-content.show {
-            display: flex; /* แสดงเมื่อถูกเปิด */
-            opacity: 1; /* กำหนดไว้ใน CSS เพื่อให้ง่ายต่อการเห็น transition */
+            display: flex;
+            opacity: 1;
+            padding-top: var(--spacing-sm); /* กำหนด padding เมื่อแสดง */
+            padding-bottom: var(--spacing-sm); /* กำหนด padding เมื่อแสดง */
         }
 
-        /* สไตล์สำหรับรูปภาพ TV/กีฬา/หนัง */
         main img {
-            border-radius: 8px;
-            border: 1px solid #FFFFFF; /* เปลี่ยนเป็นสีขาว */
+            border-radius: var(--border-radius);
+            border: 1px solid var(--white);
             padding: 3px;
             margin: 0;
             height: 50px;
             width: 50px;
             object-fit: cover;
             vertical-align: middle;
-            /* เพิ่ม transition สำหรับ border-color ด้วย */
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
             cursor: pointer;
         }
 
         main img:hover {
             transform: scale(1.05);
-            /* เปลี่ยนเป็นสีขาวเรืองแสงและเงาที่สอดคล้องกับโทนรวม */
-            border-color: #FFFFFF;
+            border-color: var(--white);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.5);
         }
 
         footer {
-            /* สำหรับ Sticky Footer */
-            margin-top: auto; /* ทำให้ footer ถูกดันไปอยู่ด้านล่างสุด */
-            /* สิ้นสุดสำหรับ Sticky Footer */
-            padding: 20px;
-            color: #f0f0f0;
-            background-color: #1a1a1a; /* เปลี่ยนเป็นสีเดียวกับพื้นหลัง body */
+            margin-top: auto;
+            padding: var(--spacing-xl);
+            color: var(--light-text);
+            background-color: var(--dark-bg);
             width: 100%;
             text-align: center;
-            border-top: none; /* ลบเส้นขอบด้านบนออก */
+            border-top: none;
         }
     </style>
 </head>
@@ -320,46 +313,45 @@
             </div>
         </div>
         <h1>ดูฟรีไม่เสียรายเดือน</h1>
-        <time id="current-datetime"></time>
-        <a href="https://line.me/ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" id="line-group-info" target="_blank">
+        <time id="current-datetime" aria-live="polite"></time>
+        <a href="https://line.me/ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" id="line-group-info" target="_blank" rel="noopener noreferrer">
             <i class="fa-brands fa-line left-icon"></i> เข้ากลุ่มไลน์อัพเดทต่างๆ
-            <i class="fa-brands fa-line right-icon"></i> </a>
-
+            <i class="fa-brands fa-line right-icon"></i>
+        </a>
     </header>
 
     <main class="categories-container">
         <div class="category">
-            <button class="accordion-button">
+            <button class="accordion-button" aria-expanded="false" aria-controls="content-thai-tv">
                 <i class="fas fa-tv"></i> ทีวีดิจิตอลไทย
             </button>
-            <div class="accordion-content">
-                </div>
+            <div id="content-thai-tv" class="accordion-content">
+            </div>
         </div>
 
         <div class="category">
-            <button class="accordion-button">
+            <button class="accordion-button" aria-expanded="false" aria-controls="content-sport">
                 <i class="fas fa-running"></i> กีฬา
             </button>
-            <div class="accordion-content">
-                </div>
+            <div id="content-sport" class="accordion-content">
+            </div>
         </div>
 
         <div class="category">
-            <button class="accordion-button">
+            <button class="accordion-button" aria-expanded="false" aria-controls="content-movies">
                 <i class="fas fa-film"></i> หนังทีวี
             </button>
-            <div class="accordion-content">
-                </div>
+            <div id="content-movies" class="accordion-content">
+            </div>
         </div>
-        
+
         <div class="category">
-            <button class="accordion-button">
+            <button class="accordion-button" aria-expanded="false" aria-controls="content-iptv">
                 <i class="fas fa-network-wired"></i> IPTV
             </button>
-            <div class="accordion-content">
-                </div>
+            <div id="content-iptv" class="accordion-content">
+            </div>
         </div>
-        
     </main>
 
     <footer>
@@ -369,16 +361,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const datetimeDisplay = document.getElementById('current-datetime');
-            
-            // Mapping ระหว่างชื่อหมวดหมู่ใน JSON กับ element ของ accordion-content
+
             const categoryContentMap = {
-                "ทีวีดิจิตอลไทย": document.querySelector('.category:nth-child(1) .accordion-content'),
-                "กีฬา": document.querySelector('.category:nth-child(2) .accordion-content'),
-                "หนังทีวี": document.querySelector('.category:nth-child(3) .accordion-content'),
-                "IPTV": document.querySelector('.category:nth-child(4) .accordion-content')
+                "ทีวีดิจิตอลไทย": document.getElementById('content-thai-tv'),
+                "กีฬา": document.getElementById('content-sport'),
+                "หนังทีวี": document.getElementById('content-movies'),
+                "IPTV": document.getElementById('content-iptv')
             };
 
-            // ดึงข้อมูลช่องจาก channels.json
             fetch('channels.json')
                 .then(response => {
                     if (!response.ok) {
@@ -391,37 +381,34 @@
                         const contentContainer = categoryContentMap[channel.category];
                         if (contentContainer) {
                             const link = document.createElement('a');
-                            link.href = "#"; // ยังคงใช้ # เพื่อให้ JS จัดการ
+                            link.href = "#";
                             link.classList.add('channel-link');
                             link.dataset.url = channel.data_url;
                             link.setAttribute('aria-label', channel.aria_label);
 
                             const img = document.createElement('img');
                             img.src = channel.img_src;
-                            img.alt = channel.name; // ใช้ channel.name เป็น alt
-                            img.loading = "lazy"; // เพิ่ม loading="lazy"
+                            img.alt = channel.name;
+                            img.loading = "lazy";
 
                             link.appendChild(img);
                             contentContainer.appendChild(link);
                         }
                     });
 
-                    // *** สำคัญ: ต้องเรียก channelLinks ใหม่หลังจากสร้าง HTML แล้ว ***
-                    const updatedChannelLinks = document.querySelectorAll('.channel-link');
-                    updatedChannelLinks.forEach(link => {
-                        link.addEventListener('click', function(event) {
-                            event.preventDefault(); // ป้องกันการทำงานของลิงก์เริ่มต้น
-                            const url = this.dataset.url; // ดึง URL จาก data-url attribute
-                            const imgElement = this.querySelector('img');
-                            const channelName = imgElement ? imgElement.alt : 'Unknown Channel'; // ดึงชื่อช่องจาก alt attribute
+                    // Event Delegation for channel links
+                    document.querySelector('main.categories-container').addEventListener('click', function(event) {
+                        const link = event.target.closest('.channel-link');
+                        if (link) {
+                            event.preventDefault();
+                            const url = link.dataset.url;
+                            const imgElement = link.querySelector('img');
+                            const channelName = imgElement ? imgElement.alt : 'Unknown Channel';
 
-                            const categoryElement = this.closest('.category');
-                            // ดึงชื่อหมวดหมู่จากปุ่ม accordion โดยไม่ต้องลบ icon ออก
-                            // ใช้ textContent.replace เพื่อลบส่วน <i> และช่องว่างที่ไม่จำเป็นออกอย่างแม่นยำ
-                            const categoryButtonText = categoryElement ? categoryElement.querySelector('.accordion-button').textContent : 'Unknown Category';
-                            const categoryName = categoryButtonText.replace(/(^\s*<i[^>]*><\/i>\s*|\s*<i[^>]*><\/i>\s*$)/g, '').trim();
+                            const categoryElement = link.closest('.category');
+                            const categoryButton = categoryElement ? categoryElement.querySelector('.accordion-button') : null;
+                            const categoryName = categoryButton ? categoryButton.innerText.trim() : 'Unknown Category';
 
-                            // ส่ง Event ไปยัง Google Analytics 4
                             if (typeof gtag === 'function') {
                                 gtag('event', 'channel_click', {
                                     'channel_name': channelName,
@@ -430,68 +417,41 @@
                                 });
                             }
 
-                            // หน่วงเวลาเล็กน้อยเพื่อให้ Event ส่งออกไปก่อนที่จะเปลี่ยนหน้า
                             setTimeout(() => {
                                 if (url) {
-                                    window.location.href = url; // เปิดลิงก์
+                                    window.location.href = url;
                                 }
-                            }, 200); // หน่วง 200 มิลลิวินาที (สามารถปรับได้)
-                        });
+                            }, 200);
+                        }
                     });
-
                 })
                 .catch(error => console.error('Error loading channels:', error));
 
-            // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ # หรือเป็น channel-link หรือ line-group-info
-            const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link):not(#line-group-info)');
-
-            // ใช้ Map เพื่อเก็บ original href และ title ของลิงก์ที่ต้องการซ่อน URL (ยกเว้น Line group)
-            const originalLinkData = new Map();
-            allClickableLinks.forEach(link => {
-                originalLinkData.set(link, {
-                    href: link.href,
-                    title: link.getAttribute('title') || ''
-                });
-            });
-
-
-            // ฟังก์ชันสำหรับฟอร์แมตวันที่และเวลา
             function formatDateTime(date) {
                 const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                 const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
                 const datePart = date.toLocaleDateString('th-TH', optionsDate);
                 const timePart = date.toLocaleTimeString('th-TH', optionsTime);
-                
-                // คืนค่าเป็น Object ที่มีทั้ง text สำหรับแสดงผลและ ISO string สำหรับ datetime attribute
                 return {
                     display: `${datePart} ${timePart} น.`,
                     iso: date.toISOString()
                 };
             }
 
-            // ฟังก์ชันสำหรับอัปเดตเวลาและวันที่
             function updateDateTime() {
                 const now = new Date();
                 const formatted = formatDateTime(now);
                 datetimeDisplay.textContent = formatted.display;
-                datetimeDisplay.setAttribute('datetime', formatted.iso); // ตั้งค่า datetime attribute
+                datetimeDisplay.setAttribute('datetime', formatted.iso);
             }
 
-            // อัปเดตเวลาทันทีเมื่อโหลดหน้า
             updateDateTime();
-            // ตั้งค่าให้อัปเดตเวลาทุกวินาที
             setInterval(updateDateTime, 1000);
 
-            // ไม่ต้องเพิ่ม Event Listener แยกสำหรับลิงก์ LINE Group เพื่อการคลิก
-            // เพราะตอนนี้มันกลับมาใช้ href ปกติแล้ว และจะทำงานตามเบราว์เซอร์
-
-            // ฟังก์ชันสำหรับปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
-            function closeAccordion(contentElement) {
+            function closeAccordion(contentElement, buttonElement) {
                 contentElement.classList.remove('show');
                 contentElement.style.maxHeight = '0';
-                contentElement.style.paddingTop = '0';
-                contentElement.style.paddingBottom = '0';
-                contentElement.style.opacity = '0';
+                buttonElement.setAttribute('aria-expanded', 'false');
 
                 const transitionEndHandler = function() {
                     if (!contentElement.classList.contains('show')) {
@@ -502,49 +462,37 @@
                 contentElement.addEventListener('transitionend', transitionEndHandler);
 
                 const parentCategory = contentElement.closest('.category');
-                if (parentCategory && parentCategory.querySelector('.accordion-button')) {
-                    const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
-                    const categoryPadding = 5 * 2; // 5px top/bottom padding
-                    const categoryBorder = 1 * 2; // 1px top/bottom border
+                if (parentCategory && buttonElement) {
+                    const buttonHeight = buttonElement.offsetHeight;
+                    const categoryPadding = 5 * 2;
+                    const categoryBorder = 1 * 2;
                     parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder) + 'px';
                 }
             }
 
-            // ฟังก์ชันสำหรับเปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
-            function openAccordion(contentElement) {
-                contentElement.style.display = 'flex'; // แสดง display ก่อนเริ่ม transition
-                contentElement.style.maxHeight = '0'; // ตั้งค่าเริ่มต้นให้เป็น 0 ก่อนคำนวณ scrollHeight
-                contentElement.style.paddingTop = '0';
-                contentElement.style.paddingBottom = '0';
-                contentElement.style.opacity = '0';
+            function openAccordion(contentElement, buttonElement) {
+                contentElement.style.display = 'flex';
+                buttonElement.setAttribute('aria-expanded', 'true');
 
                 requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        contentElement.classList.add('show');
-                        const actualContentHeight = contentElement.scrollHeight;
-                        let totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
+                    const actualContentHeight = contentElement.scrollHeight;
+                    contentElement.style.maxHeight = (actualContentHeight + 16) + 'px'; // 16px for 8px top/bottom padding
+                    contentElement.classList.add('show');
 
-                        contentElement.style.maxHeight = (actualContentHeight + totalContentPadding) + 'px';
-                        contentElement.style.paddingTop = '8px';
-                        contentElement.style.paddingBottom = '8px';
-                        contentElement.style.opacity = '1';
-
-                        const parentCategory = contentElement.closest('.category');
-                        if (parentCategory && parentCategory.querySelector('.accordion-button')) {
-                            const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
-                            const categoryPadding = 5 * 2;
-                            const categoryBorder = 1 * 2;
-                            parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder + actualContentHeight + totalContentPadding) + 'px';
-                        }
-                    });
+                    const parentCategory = contentElement.closest('.category');
+                    if (parentCategory && buttonElement) {
+                        const buttonHeight = buttonElement.offsetHeight;
+                        const categoryPadding = 5 * 2;
+                        const categoryBorder = 1 * 2;
+                        parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder + actualContentHeight + 16) + 'px';
+                    }
                 });
             }
 
-            // เลือกปุ่ม Accordion ทั้งหมดในหน้า
             const allAccordionButtons = document.querySelectorAll('.accordion-button');
 
             allAccordionButtons.forEach(button => {
-                const content = button.nextElementSibling; // เนื้อหาที่ตามหลังปุ่ม
+                const content = button.nextElementSibling;
 
                 const categoryElement = button.closest('.category');
                 if (categoryElement && button) {
@@ -557,31 +505,26 @@
                     allAccordionButtons.forEach(otherButton => {
                         const otherContent = otherButton.nextElementSibling;
                         if (otherButton !== this && otherContent && otherContent.classList.contains('show')) {
-                            closeAccordion(otherContent);
+                            closeAccordion(otherContent, otherButton);
                         }
                     });
 
                     if (content && content.classList.contains('show')) {
-                        closeAccordion(content);
+                        closeAccordion(content, this);
                     } else if (content) {
-                        openAccordion(content);
+                        openAccordion(content, this);
                     }
                 });
             });
 
-
-            // โค้ดป้องกันการคัดลอกและคลิกขวา
             document.addEventListener('contextmenu', function(e) {
-                e.preventDefault(); // ป้องกันการคลิกขวา
+                e.preventDefault();
             });
 
             document.addEventListener('keydown', function(e) {
-                // ตรวจสอบว่าไม่ได้กด Spacebar หรือ Enter
                 if (e.key === ' ' || e.key === 'Enter') {
-                    return; // อนุญาตให้ปุ่ม Spacebar และ Enter ทำงานได้ตามปกติ
+                    return;
                 }
-
-                // ป้องกัน Ctrl+C, Ctrl+X, Ctrl+V, Ctrl+U, F12
                 if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 'v' || e.key === 'u')) {
                     e.preventDefault();
                 }
@@ -590,26 +533,8 @@
                 }
             });
 
-            // ปรับปรุง Event Listener สำหรับลิงก์ทั้งหมด เพื่อซ่อน/แสดง URL เมื่อ hover
-            // โค้ดนี้จะใช้กับลิงก์ที่ไม่ใช่ channel-link หรือ line-group-info เท่านั้น
-            const allClickableLinksAfterDynamicLoad = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link):not(#line-group-info)');
-            allClickableLinksAfterDynamicLoad.forEach(link => {
-                // ดึงข้อมูล href และ title เดิมจาก Map
-                const originalData = originalLinkData.get(link);
-                if (!originalData) return; // ควรมีข้อมูลเสมอ แต่ใส่ไว้เพื่อความปลอดภัย
-
-                link.addEventListener('mouseover', function() {
-                    // ลบ href attribute เมื่อเมาส์ชี้ เพื่อซ่อน URL ในแถบสถานะ
-                    this.removeAttribute('href');
-                    this.removeAttribute('title'); // ซ่อน tooltip ถ้ามี
-                });
-
-                link.addEventListener('mouseout', function() {
-                    // คืนค่า href และ title เดิมเมื่อเมาส์ออกจากลิงก์
-                    this.href = originalData.href;
-                    this.setAttribute('title', originalData.title); // คืนค่า tooltip เดิม
-                });
-            });
+            // Removed the hover/mouseout URL obfuscation as it's not a standard practice and can cause issues.
+            // If you still need this for specific reasons, consider server-side solutions or more robust JS obfuscation.
         });
     </script>
 </body>
