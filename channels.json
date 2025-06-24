@@ -308,14 +308,14 @@
     "aria_label": "ดูช่อง FWTOON"
   },
   {
-    "category": "สารคดี",  // ถ้าช่องนี้เป็นสารคดี ให้เปลี่ยน category ตรงนี้
+    "category": "สารคดี", 
     "name": "FWDoc",
     "img_src": "https://www.fileinw.com/postor/20240617204638FWDoc.jpg",
     "data_url": "intent://freelive2.inwstream.com:1936/freelive-edge/fwdoc_fw-iptv.stream/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://inwiptv.com/demo.php/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง FWDoc"
   },
   {
-    "category": "กีฬา",  // ถ้าช่องนี้เป็นกีฬา ให้เปลี่ยน category ตรงนี้
+    "category": "กีฬา",
     "name": "FWsport",
     "img_src": "https://www.fileinw.com/postor/20240429213640FWsport.jpg",
     "data_url": "intent://freelive2.inwstream.com:1936/freelive-edge/fwsport_fw-iptv.stream/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://inwiptv.com/demo.php/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
