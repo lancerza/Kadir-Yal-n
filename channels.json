@@ -1,0 +1,58 @@
+[
+  {
+    "category": "ทีวีดิจิตอลไทย",
+    "name": "NBT2 HD",
+    "img_src": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png",
+    "data_url": "intent://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8#Intent;package=com.wiseplay;S.referer=https://ais-vidnt.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง NBT2 HD"
+  },
+  {
+    "category": "ทีวีดิจิตอลไทย",
+    "name": "ALTV4",
+    "img_src": "https://dookeela.live/uploads/1725896083.png",
+    "data_url": "intent://dookeela.live/live-tv/altv4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง ALTV4"
+  },
+  {
+    "category": "กีฬา",
+    "name": "LFC TV",
+    "img_src": "https://dookeela.live/uploads/1669940282.png",
+    "data_url": "intent://dookeela.live/live-tv/lfctv#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู LFC TV"
+  },
+  {
+    "category": "กีฬา",
+    "name": "True Tennis",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/04/28/f65ea900-e595-11ed-86b8-bb40638e3c49_webp_original.png",
+    "data_url": "intent://dookeela.live/live-tv/truetennis#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู True Tennis"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "CCM",
+    "img_src": "https://img5.pic.in.th/file/secure-sv1/oie_d6nHaoquYtAK-1.png",
+    "data_url": "intent://dookeela.live/live-tv/ccm#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง CCM"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "MTV",
+    "img_src": "https://img5.pic.in.th/file/secure-sv1/images-406af7e9bac362e51.jpeg",
+    "data_url": "intent://dookeela.live/live-tv/mtv#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง MTV"
+  },
+  {
+    "category": "IPTV",
+    "name": "FWMov",
+    "img_src": "https://www.fileinw.com/postor/20240429213309FWMOV.jpg",
+    "data_url": "intent://freelive2.inwstream.com:1936/freelive-edge/fwmov_fw-iptv.stream/chunks.m3u8#Intent;package=com.wiseplay;S.referer=https://inwiptv.com/demo.php/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง FWMov"
+  },
+  {
+    "category": "IPTV",
+    "name": "DLTV 15",
+    "img_src": "https://www.fileinw.com/postor/20240422004500DLTV15.jpg",
+    "data_url": "intent://cdn-live.dltv.ac.th/smil:origin03-dltv-15-adaptive.smil/chunklist_w2016410619_b878000_slth.m3u8#Intent;package=com.wiseplay;S.referer=https://inwiptv.com/demo.php/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง DLTV 15"
+  }
+]
