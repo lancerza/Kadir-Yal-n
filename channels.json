@@ -26,6 +26,118 @@
     "img_src": "https://cms.dmpcdn.com/livetv/2023/04/28/f65ea900-e595-11ed-86b8-bb40638e3c49_webp_original.png",
     "data_url": "intent://dookeela.live/live-tv/truetennis#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดู True Tennis"
+    },
+  {
+    "category": "กีฬา",
+    "name": "True Tennis",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/04/28/f65ea900-e595-11ed-86b8-bb40638e3c49_webp_original.png",
+    "data_url": "intent://dookeela.live/live-tv/truetennis#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู True Tennis"
+    },
+  {
+    "category": "กีฬา",
+    "name": "True Tennis",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/04/28/f65ea900-e595-11ed-86b8-bb40638e3c49_webp_original.png",
+    "data_url": "intent://dookeela.live/live-tv/truetennis#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู True Tennis"
+  },
+  {
+    "category": "กีฬา",
+    "name": "Trueball Thai 9",
+    "img_src": "https://cms.dmpcdn.com/livetv/2024/08/14/e2346680-5a16-11ef-8c60-b76aa0302695_webp_original.webp",
+    "data_url": "intent://dookeela.live/live-tv/trueballthai9#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู Trueball Thai 9"
+  },
+  {
+    "category": "กีฬา",
+    "name": "Sky Sports Football UK",
+    "img_src": "https://dookeela.live/uploads/1664576894.png",
+    "data_url": "intent://dookeela.live/live-tv/skysportfootball#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู Sky Sports Football UK"
+  },
+  {
+    "category": "กีฬา",
+    "name": "Sky Sports Golf",
+    "img_src": "https://dookeela.live/uploads/1712888702.png",
+    "data_url": "intent://dookeela.live/live-tv/skysportsgolf#Intent;package=com.wiseplay;S.referer=https://dookeela.live/no&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู Sky Sports Golf"
+  },
+  {
+    "category": "กีฬา",
+    "name": "3BB Sports 1",
+    "img_src": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBsports1_new.png",
+    "data_url": "intent://dookeela.live/live-tv/3bbsports1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู 3BB Sports 1"
+  },
+  {
+    "category": "กีฬา",
+    "name": "beIN SPORTS 1",
+    "img_src": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//beIN_SPORTS_1.png",
+    "data_url": "intent://dookeela.live/live-tv/bein1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end",
+    "aria_label": "ดู beIN SPORTS 1"
+  },
+  {
+    "category": "กีฬา",
+    "name": "beIN SPORTS 2",
+    "img_src": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//beIN_SPORTS_2.png",
+    "data_url": "intent://dookeela.live/live-tv/bein2#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end",
+    "aria_label": "ดู beIN SPORTS 2"
+  },
+  {
+    "category": "กีฬา",
+    "name": "beIN SPORTS 3",
+    "img_src": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//beIN_SPORTS_3.png",
+    "data_url": "intent://dookeela.live/live-tv/bein3#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end",
+    "aria_label": "ดู beIN SPORTS 3"
+  },
+  {
+    "category": "กีฬา",
+    "name": "truesports 1",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/12/15/74b619a0-9aea-11ee-a6ba-8b5bcfefee63_webp_original.webp",
+    "data_url": "intent://dookeela.live/live-tv/tsp1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end",
+    "aria_label": "ดู truesports 1"
+  },
+  {
+    "category": "กีฬา",
+    "name": "truesports 2",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/12/15/74b6b5e0-9aea-11ee-ba6c-fd47adcb0961_webp_original.webp",
+    "data_url": "intent://dookeela.live/live-tv/tsp2#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=http;type=video/mp4;end",
+    "aria_label": "ดู truesports 2"
+  },
+  {
+    "category": "กีฬา",
+    "name": "truesports 3",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/12/15/75877360-9aea-11ee-a6ba-8b5bcfefee63_webp_original.webp",
+    "data_url": "intent://dookeela.live/live-tv/tsp3#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู truesports 3"
+  },
+  {
+    "category": "กีฬา",
+    "name": "truesports 4",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/12/15/759492c0-9aea-11ee-a6e1-935fb41ffad5_webp_original.webp",
+    "data_url": "intent://dookeela.live/live-tv/tsp4#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู truesports 4"
+  },
+  {
+    "category": "กีฬา",
+    "name": "truesports 5",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/12/15/764f3030-9aea-11ee-b1e6-1fd23e73ab60_webp_original.webp",
+    "data_url": "intent://dookeela.live/live-tv/tsp5#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู truesports 5"
+  },
+  {
+    "category": "กีฬา",
+    "name": "truesports 7",
+    "img_src": "https://cms.dmpcdn.com/livetv/2023/12/15/76797480-9aea-11ee-a6e1-935fb41ffad5_webp_original.webp",
+    "data_url": "intent://dookeela.live/live-tv/tsp7#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู truesports 7"
+  },
+  {
+    "category": "กีฬา",
+    "name": "trueid sports",
+    "img_src": "https://cms.dmpcdn.com/livetv/2024/03/14/29e0bc80-e1d2-11ee-8422-eff39415c030_webp_original.webp",
+    "data_url": "intent://dookeela.live/live-tv/trueidsports1#Intent;package=com.wiseplay;S.referer=https://dookeela.live/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดู trueid sports"
   },
   {
     "category": "หนังทีวี",
