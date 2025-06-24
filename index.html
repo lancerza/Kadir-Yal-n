@@ -166,7 +166,8 @@
             gap: var(--spacing-lg);
             width: 100%;
             max-width: 1200px;
-            margin-top: var(--spacing-xl);
+            /* Adjusted: Use clamp for responsive margin-top */
+            margin-top: clamp(30px, 6vw, 50px);
             padding-bottom: var(--spacing-md);
             flex-grow: 1;
             align-items: flex-start; /* Ensure items align to the top */
@@ -179,7 +180,8 @@
             flex: 0 0 auto;
             width: 220px;
             box-sizing: border-box;
-            transition: all 0.3s ease;
+            /* Removed unnecessary 'all' transition if only certain properties change on hover */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -493,8 +495,6 @@
                 contentElement.classList.remove('show'); // Remove 'show' class to trigger CSS transition
                 contentElement.style.maxHeight = '0'; // Set max-height to 0 to collapse
                 buttonElement.setAttribute('aria-expanded', 'false'); // Update ARIA attribute for accessibility
-
-                // Removed manual height calculation for parentCategory, relying on CSS Flexbox
             }
 
             // Function to open an accordion content panel
@@ -510,8 +510,6 @@
                     contentElement.style.maxHeight = (actualContentHeight + 16) + 'px';
                     contentElement.classList.add('show'); // Add 'show' class to apply final styles
                 });
-
-                // Removed manual height calculation for parentCategory, relying on CSS Flexbox
             }
 
             // Get all accordion buttons on the page
@@ -522,7 +520,6 @@
 
                 const categoryElement = button.closest('.category');
                 if (categoryElement) {
-                    // Removed initialHeight setting for categoryElement.style.height
                     // Adjusted transition to only include properties that are dynamically changed via CSS/JS
                     categoryElement.style.transition = 'background-color 0.3s ease, border-color 0.3s ease';
                 }
