@@ -36,16 +36,16 @@
             --spacing-xl: 20px;
         }
 
-        /* อนิเมชั่นสำหรับ header (Fade in) */
+        /* Animation for header (Fade in) */
         @keyframes fadeIn {
             0% { opacity: 0; }
             100% { opacity: 1; }
         }
 
-        /* อนิเมชั่นสำหรับข้อความวิ่ง */
+        /* Animation for running text */
         @keyframes marquee {
-            0% { transform: translateX(100%); } /* เริ่มจากขวา */
-            100% { transform: translateX(-100%); } /* ไปซ้ายสุด */
+            0% { transform: translateX(100%); } /* Start from right */
+            100% { transform: translateX(-100%); } /* Go to far left */
         }
 
         html, body {
@@ -169,6 +169,7 @@
             margin-top: var(--spacing-xl);
             padding-bottom: var(--spacing-md);
             flex-grow: 1;
+            align-items: flex-start; /* Ensure items align to the top */
         }
 
         .category {
@@ -257,7 +258,7 @@
 
         .accordion-content {
             max-height: 0;
-            padding: 0; /* จะถูกควบคุมด้วย JS เมื่อเปิด */
+            padding: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
             display: none;
@@ -271,8 +272,8 @@
         .accordion-content.show {
             display: flex;
             opacity: 1;
-            padding-top: var(--spacing-sm); /* กำหนด padding เมื่อแสดง */
-            padding-bottom: var(--spacing-sm); /* กำหนด padding เมื่อแสดง */
+            padding-top: var(--spacing-sm);
+            padding-bottom: var(--spacing-sm);
         }
 
         main img {
@@ -360,15 +361,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Get the element to display current date and time
             const datetimeDisplay = document.getElementById('current-datetime');
 
+            // Map category names to their respective accordion content elements
+            // IMPORTANT: Ensure these keys match the 'category' property in your channels.json
+            // and the innerText of your accordion buttons.
             const categoryContentMap = {
-                "ทีวีดิจิตอลไทย": document.getElementById('content-thai-tv'),
+                "ทีวีดิจิตอล": document.getElementById('content-thai-tv'),
                 "กีฬา": document.getElementById('content-sport'),
                 "หนังทีวี": document.getElementById('content-movies'),
                 "IPTV": document.getElementById('content-iptv')
             };
 
+            // Fetch channel data from channels.json
             fetch('channels.json')
                 .then(response => {
                     if (!response.ok) {
@@ -377,38 +383,54 @@
                     return response.json();
                 })
                 .then(channels => {
+                    // Validate that the fetched data is an array
+                    if (!Array.isArray(channels)) {
+                        console.error('Error: Fetched data from channels.json is not an array.');
+                        return;
+                    }
+
                     channels.forEach(channel => {
+                        // Validate essential properties for each channel
+                        if (!channel.category || !channel.data_url || !channel.img_src || !channel.name || !channel.aria_label) {
+                            console.warn('Skipping malformed or incomplete channel data:', channel);
+                            return; // Skip this channel if data is incomplete
+                        }
+
                         const contentContainer = categoryContentMap[channel.category];
                         if (contentContainer) {
                             const link = document.createElement('a');
-                            link.href = "#";
+                            link.href = "#"; // Use '#' and let JS handle the navigation
                             link.classList.add('channel-link');
-                            link.dataset.url = channel.data_url;
+                            link.dataset.url = channel.data_url; // Store the actual URL in a data attribute
                             link.setAttribute('aria-label', channel.aria_label);
 
                             const img = document.createElement('img');
                             img.src = channel.img_src;
-                            img.alt = channel.name;
-                            img.loading = "lazy";
+                            img.alt = channel.name; // Use channel.name for alt text for accessibility
+                            img.loading = "lazy"; // Optimize image loading
 
                             link.appendChild(img);
                             contentContainer.appendChild(link);
+                        } else {
+                            console.warn(`No content container found for category: "${channel.category}" for channel: "${channel.name}"`);
                         }
                     });
 
-                    // Event Delegation for channel links
+                    // Use Event Delegation for channel links for better performance
+                    // This attaches one listener to the parent instead of many to individual links
                     document.querySelector('main.categories-container').addEventListener('click', function(event) {
-                        const link = event.target.closest('.channel-link');
+                        const link = event.target.closest('.channel-link'); // Find the closest ancestor with class 'channel-link'
                         if (link) {
-                            event.preventDefault();
-                            const url = link.dataset.url;
+                            event.preventDefault(); // Prevent default link behavior (e.g., navigating to #)
+                            const url = link.dataset.url; // Get the URL from data-url attribute
                             const imgElement = link.querySelector('img');
-                            const channelName = imgElement ? imgElement.alt : 'Unknown Channel';
+                            const channelName = imgElement ? imgElement.alt : 'Unknown Channel'; // Get channel name from alt text
 
                             const categoryElement = link.closest('.category');
                             const categoryButton = categoryElement ? categoryElement.querySelector('.accordion-button') : null;
-                            const categoryName = categoryButton ? categoryButton.innerText.trim() : 'Unknown Category';
+                            const categoryName = categoryButton ? categoryButton.innerText.trim() : 'Unknown Category'; // Use innerText to get visible text without icons
 
+                            // Send an event to Google Analytics 4 (GA4)
                             if (typeof gtag === 'function') {
                                 gtag('event', 'channel_click', {
                                     'channel_name': channelName,
@@ -417,91 +439,97 @@
                                 });
                             }
 
+                            // Delay navigation slightly to allow GA4 event to be sent
                             setTimeout(() => {
                                 if (url) {
-                                    window.location.href = url;
+                                    window.location.href = url; // Navigate to the channel URL
                                 }
-                            }, 200);
+                            }, 200); // 200 milliseconds delay (can be adjusted)
                         }
                     });
                 })
-                .catch(error => console.error('Error loading channels:', error));
+                .catch(error => console.error('Error loading channels or processing data:', error));
 
+            // Function to format current date and time
             function formatDateTime(date) {
                 const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-                const datePart = date.toLocaleDateString('th-TH', optionsDate);
-                const timePart = date.toLocaleTimeString('th-TH', optionsTime);
+                const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }; // 24-hour format
+                const datePart = date.toLocaleDateString('th-TH', optionsDate); // Format date for Thai locale
+                const timePart = date.toLocaleTimeString('th-TH', optionsTime); // Format time for Thai locale
+
                 return {
-                    display: `${datePart} ${timePart} น.`,
-                    iso: date.toISOString()
+                    display: `${datePart} ${timePart} น.`, // Display format
+                    iso: date.toISOString() // ISO format for datetime attribute
                 };
             }
 
+            // Function to update the date and time display
             function updateDateTime() {
                 const now = new Date();
                 const formatted = formatDateTime(now);
                 datetimeDisplay.textContent = formatted.display;
-                datetimeDisplay.setAttribute('datetime', formatted.iso);
+                datetimeDisplay.setAttribute('datetime', formatted.iso); // Set datetime attribute for machine readability
             }
 
+            // Update date and time immediately on page load
             updateDateTime();
+            // Update date and time every second
             setInterval(updateDateTime, 1000);
 
-            function closeAccordion(contentElement, buttonElement) {
-                contentElement.classList.remove('show');
-                contentElement.style.maxHeight = '0';
-                buttonElement.setAttribute('aria-expanded', 'false');
-
-                const transitionEndHandler = function() {
-                    if (!contentElement.classList.contains('show')) {
-                        contentElement.style.display = 'none';
-                    }
-                    contentElement.removeEventListener('transitionend', transitionEndHandler);
-                };
-                contentElement.addEventListener('transitionend', transitionEndHandler);
-
-                const parentCategory = contentElement.closest('.category');
-                if (parentCategory && buttonElement) {
-                    const buttonHeight = buttonElement.offsetHeight;
-                    const categoryPadding = 5 * 2;
-                    const categoryBorder = 1 * 2;
-                    parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder) + 'px';
-                }
-            }
-
-            function openAccordion(contentElement, buttonElement) {
-                contentElement.style.display = 'flex';
-                buttonElement.setAttribute('aria-expanded', 'true');
-
-                requestAnimationFrame(() => {
-                    const actualContentHeight = contentElement.scrollHeight;
-                    contentElement.style.maxHeight = (actualContentHeight + 16) + 'px'; // 16px for 8px top/bottom padding
-                    contentElement.classList.add('show');
-
-                    const parentCategory = contentElement.closest('.category');
-                    if (parentCategory && buttonElement) {
-                        const buttonHeight = buttonElement.offsetHeight;
-                        const categoryPadding = 5 * 2;
-                        const categoryBorder = 1 * 2;
-                        parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder + actualContentHeight + 16) + 'px';
+            // Attach a single 'transitionend' listener to each accordion-content element
+            // to manage display property after transitions
+            document.querySelectorAll('.accordion-content').forEach(contentElement => {
+                contentElement.addEventListener('transitionend', function() {
+                    // Hide the content completely (display: none) only if it's supposed to be closed
+                    // and its maxHeight has transitioned to 0
+                    if (!this.classList.contains('show') && this.style.maxHeight === '0px') {
+                        this.style.display = 'none';
                     }
                 });
+            });
+
+            // Function to close an accordion content panel
+            function closeAccordion(contentElement, buttonElement) {
+                contentElement.classList.remove('show'); // Remove 'show' class to trigger CSS transition
+                contentElement.style.maxHeight = '0'; // Set max-height to 0 to collapse
+                buttonElement.setAttribute('aria-expanded', 'false'); // Update ARIA attribute for accessibility
+
+                // Removed manual height calculation for parentCategory, relying on CSS Flexbox
             }
 
+            // Function to open an accordion content panel
+            function openAccordion(contentElement, buttonElement) {
+                contentElement.style.display = 'flex'; // Make content visible for scrollHeight calculation
+                buttonElement.setAttribute('aria-expanded', 'true'); // Update ARIA attribute for accessibility
+
+                // Use requestAnimationFrame to ensure CSS display property has been applied
+                // before calculating scrollHeight for smooth transition
+                requestAnimationFrame(() => {
+                    const actualContentHeight = contentElement.scrollHeight; // Get the full height of content
+                    // Set max-height to the actual content height plus padding (8px top + 8px bottom = 16px)
+                    contentElement.style.maxHeight = (actualContentHeight + 16) + 'px';
+                    contentElement.classList.add('show'); // Add 'show' class to apply final styles
+                });
+
+                // Removed manual height calculation for parentCategory, relying on CSS Flexbox
+            }
+
+            // Get all accordion buttons on the page
             const allAccordionButtons = document.querySelectorAll('.accordion-button');
 
             allAccordionButtons.forEach(button => {
-                const content = button.nextElementSibling;
+                const content = button.nextElementSibling; // The content panel immediately following the button
 
                 const categoryElement = button.closest('.category');
-                if (categoryElement && button) {
-                    const initialHeight = (button.offsetHeight + (5 * 2) + 2) + 'px';
-                    categoryElement.style.height = initialHeight;
-                    categoryElement.style.transition = 'height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease';
+                if (categoryElement) {
+                    // Removed initialHeight setting for categoryElement.style.height
+                    // Adjusted transition to only include properties that are dynamically changed via CSS/JS
+                    categoryElement.style.transition = 'background-color 0.3s ease, border-color 0.3s ease';
                 }
 
+                // Add click event listener to each accordion button
                 button.addEventListener('click', function() {
+                    // Close other open accordions
                     allAccordionButtons.forEach(otherButton => {
                         const otherContent = otherButton.nextElementSibling;
                         if (otherButton !== this && otherContent && otherContent.classList.contains('show')) {
@@ -509,6 +537,7 @@
                         }
                     });
 
+                    // Toggle the clicked accordion
                     if (content && content.classList.contains('show')) {
                         closeAccordion(content, this);
                     } else if (content) {
@@ -517,24 +546,26 @@
                 });
             });
 
+            // Prevent right-click context menu
             document.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
             });
 
+            // Prevent certain keyboard shortcuts (e.g., Ctrl+C, Ctrl+V, F12)
             document.addEventListener('keydown', function(e) {
+                // Allow Spacebar and Enter to function normally (for accessibility)
                 if (e.key === ' ' || e.key === 'Enter') {
                     return;
                 }
+                // Prevent common copy/paste/view source shortcuts
                 if (e.ctrlKey && (e.key === 'c' || e.key === 'x' || e.key === 'v' || e.key === 'u')) {
                     e.preventDefault();
                 }
+                // Prevent F12 (developer tools)
                 if (e.key === 'F12') {
                     e.preventDefault();
                 }
             });
-
-            // Removed the hover/mouseout URL obfuscation as it's not a standard practice and can cause issues.
-            // If you still need this for specific reasons, consider server-side solutions or more robust JS obfuscation.
         });
     </script>
 </body>
