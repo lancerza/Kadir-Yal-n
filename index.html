@@ -166,7 +166,6 @@
             gap: var(--spacing-lg);
             width: 100%;
             max-width: 1200px;
-            /* Adjusted: Use clamp for responsive margin-top */
             margin-top: clamp(30px, 6vw, 50px);
             padding-bottom: var(--spacing-md);
             flex-grow: 1;
@@ -180,7 +179,6 @@
             flex: 0 0 auto;
             width: 220px;
             box-sizing: border-box;
-            /* Removed unnecessary 'all' transition if only certain properties change on hover */
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
@@ -455,12 +453,14 @@
             // Function to format current date and time
             function formatDateTime(date) {
                 const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }; // 24-hour format
+                // Removed 'second: '2-digit'' and 'น.' from display part
+                const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false }; // 24-hour format
                 const datePart = date.toLocaleDateString('th-TH', optionsDate); // Format date for Thai locale
                 const timePart = date.toLocaleTimeString('th-TH', optionsTime); // Format time for Thai locale
 
+                // Removed 'น.' from the display string
                 return {
-                    display: `${datePart} ${timePart} น.`, // Display format
+                    display: `${datePart} ${timePart}`, // Display format without 'น.'
                     iso: date.toISOString() // ISO format for datetime attribute
                 };
             }
