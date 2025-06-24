@@ -12,6 +12,146 @@
     "img_src": "https://dookeela.live/uploads/1725896083.png",
     "data_url": "intent://dookeela.live/live-tv/altv4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง ALTV4"
+  },  
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "NBT2 HD",
+    "img_src": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png",
+    "data_url": "intent://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8#Intent;package=com.wiseplay;S.referer=https://ais-vidnt.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง NBT2 HD"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Thai PBS",
+    "img_src": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0014.png",
+    "data_url": "intent://thaipbs-live.cdn.byteark.com/live/playlist_1080p/index.m3u8#Intent;package=com.wiseplay;S.userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Thai PBS"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Thairath TV",
+    "img_src": "https://dookeela.live/uploads/1686800227.png",
+    "data_url": "intent://dookeela.live/live-tv/thairathtv#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Thairath TV"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Ch8",
+    "img_src": "https://dookeela.live/uploads/1704117313.png",
+    "data_url": "intent://dookeela.live/live-tv/ch8#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Ch8"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Ch7HD",
+    "img_src": "https://dookeela.live/uploads/1688059473.png",
+    "data_url": "intent://dookeela.live/live-tv/ch7hd/thairathtv#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Ch7HD"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Ch5HD",
+    "img_src": "https://dookeela.live/uploads/1664574997.png",
+    "data_url": "intent://dookeela.live/live-tv/ch5hd#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Ch5HD"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Ch3HD",
+    "img_src": "https://dookeela.live/uploads/1685812254.png",
+    "data_url": "intent://dookeela.live/live-tv/ch3hd#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Ch3HD"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "One31",
+    "img_src": "https://dookeela.live/uploads/1683394005.png",
+    "data_url": "intent://dookeela.live/live-tv/one31#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง One31"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "PPTV",
+    "img_src": "https://dookeela.live/uploads/1664499074.png",
+    "data_url": "intent://dookeela.live/live-tv/pptv#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง PPTV"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Mono29",
+    "img_src": "https://dookeela.live/uploads/1703787713.png",
+    "data_url": "intent://dookeela.live/live-tv/mono29#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Mono29"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "MCOT HD",
+    "img_src": "https://dookeela.live/uploads/1671966260.png",
+    "data_url": "intent://dookeela.live/live-tv/mcothd#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง MCOT HD"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Workpoint TV",
+    "img_src": "https://dookeela.live/uploads/1725896683.png",
+    "data_url": "intent://dookeela.live/live-tv/workpointtv#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Workpoint TV"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "TNN",
+    "img_src": "https://dookeela.live/uploads/1725896332.png",
+    "data_url": "intent://dookeela.live/live-tv/tnn#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง TNN"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Nation TV",
+    "img_src": "https://dookeela.live/uploads/1725896561.png",
+    "data_url": "intent://dookeela.live/live-tv/nationtv#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Nation TV"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "True4U",
+    "img_src": "https://dookeela.live/uploads/1725896844.png",
+    "data_url": "intent://dookeela.live/live-tv/true4u#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True4U"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Mono29 Music Station",
+    "img_src": "https://dookeela.live/uploads/1742428538.png",
+    "data_url": "intent://dookeela.live/live-tv/mono-29-music-station#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Mono29 Music Station"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Mono29 Plus",
+    "img_src": "https://dookeela.live/uploads/1703787733.png",
+    "data_url": "intent://dookeela.live/live-tv/mono29plus#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Mono29 Plus"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "JKN18",
+    "img_src": "https://dookeela.live/uploads/1725896425.png",
+    "data_url": "intent://dookeela.live/live-tv/jkn18#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง JKN18"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "GMM25",
+    "img_src": "https://dookeela.live/uploads/1725896937.png",
+    "data_url": "intent://dookeela.live/live-tv/gmm25#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง GMM25"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Amarin TV",
+    "img_src": "https://dookeela.live/uploads/1704117706.png",
+    "data_url": "intent://dookeela.live/live-tv/amarintv#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Amarin TV" 
   },
   {
     "category": "กีฬา",
