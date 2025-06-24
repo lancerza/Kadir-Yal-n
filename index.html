@@ -371,23 +371,12 @@
             const datetimeDisplay = document.getElementById('current-datetime');
             
             // Mapping ระหว่างชื่อหมวดหมู่ใน JSON กับ element ของ accordion-content
-            // และเก็บอ้างอิงถึง category element หลักด้วย
-            const categoryElements = document.querySelectorAll('.category');
-            const categoryContentMap = {}; // เพื่อเก็บ { "ทีวีดิจิตอลไทย": { button: element, content: element, categoryDiv: element } }
-
-            categoryElements.forEach(catDiv => {
-                const button = catDiv.querySelector('.accordion-button');
-                const content = catDiv.querySelector('.accordion-content');
-                // ต้องลบ icon ออกเพื่อให้ได้ชื่อ category ที่ตรงกับใน JSON
-                const categoryButtonText = button.textContent; // ดึง textContent ดิบ
-                const categoryName = categoryButtonText.replace(/(^\s*<i[^>]*><\/i>\s*|\s*<i[^>]*><\/i>\s*$)/g, '').trim(); // ลบแท็ก <i> และช่องว่างที่ไม่จำเป็น
-
-                categoryContentMap[categoryName] = {
-                    button: button,
-                    content: content,
-                    categoryDiv: catDiv // อ้างอิงถึง div.category ทั้งหมด
-                };
-            });
+            const categoryContentMap = {
+                "ทีวีดิจิตอลไทย": document.querySelector('.category:nth-child(1) .accordion-content'),
+                "กีฬา": document.querySelector('.category:nth-child(2) .accordion-content'),
+                "หนังทีวี": document.querySelector('.category:nth-child(3) .accordion-content'),
+                "IPTV": document.querySelector('.category:nth-child(4) .accordion-content')
+            };
 
             // ดึงข้อมูลช่องจาก channels.json
             fetch('channels.json')
@@ -399,8 +388,8 @@
                 })
                 .then(channels => {
                     channels.forEach(channel => {
-                        const categoryData = categoryContentMap[channel.category];
-                        if (categoryData && categoryData.content) {
+                        const contentContainer = categoryContentMap[channel.category];
+                        if (contentContainer) {
                             const link = document.createElement('a');
                             link.href = "#"; // ยังคงใช้ # เพื่อให้ JS จัดการ
                             link.classList.add('channel-link');
@@ -413,96 +402,11 @@
                             img.loading = "lazy"; // เพิ่ม loading="lazy"
 
                             link.appendChild(img);
-                            categoryData.content.appendChild(link);
+                            contentContainer.appendChild(link);
                         }
                     });
 
-                    // *** หลังจากการสร้างเนื้อหาช่องทั้งหมดแล้ว ***
-                    // *** เราจะผูก Event Listener ของ Accordion Buttons และ Channel Links ที่นี่ ***
-
-                    // ฟังก์ชันสำหรับปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
-                    function closeAccordion(contentElement, categoryDiv, buttonElement) {
-                        contentElement.classList.remove('show');
-                        contentElement.style.maxHeight = '0';
-                        contentElement.style.paddingTop = '0';
-                        contentElement.style.paddingBottom = '0';
-                        contentElement.style.opacity = '0';
-
-                        const transitionEndHandler = function() {
-                            if (!contentElement.classList.contains('show')) {
-                                contentElement.style.display = 'none';
-                            }
-                            contentElement.removeEventListener('transitionend', transitionEndHandler);
-                        };
-                        contentElement.addEventListener('transitionend', transitionEndHandler);
-
-                        if (categoryDiv && buttonElement) {
-                            const buttonHeight = buttonElement.offsetHeight;
-                            const categoryPadding = 5 * 2; // 5px top/bottom padding
-                            const categoryBorder = 1 * 2; // 1px top/bottom border
-                            categoryDiv.style.height = (buttonHeight + categoryPadding + categoryBorder) + 'px';
-                        }
-                    }
-
-                    // ฟังก์ชันสำหรับเปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
-                    function openAccordion(contentElement, categoryDiv, buttonElement) {
-                        contentElement.style.display = 'flex'; // แสดง display ก่อนเริ่ม transition
-                        contentElement.style.maxHeight = '0'; // ตั้งค่าเริ่มต้นให้เป็น 0 ก่อนคำนวณ scrollHeight
-                        contentElement.style.paddingTop = '0';
-                        contentElement.style.paddingBottom = '0';
-                        contentElement.style.opacity = '0';
-
-                        requestAnimationFrame(() => {
-                            requestAnimationFrame(() => {
-                                contentElement.classList.add('show');
-                                const actualContentHeight = contentElement.scrollHeight;
-                                let totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
-
-                                contentElement.style.maxHeight = (actualContentHeight + totalContentPadding) + 'px';
-                                contentElement.style.paddingTop = '8px';
-                                contentElement.style.paddingBottom = '8px';
-                                contentElement.style.opacity = '1';
-
-                                if (categoryDiv && buttonElement) {
-                                    const buttonHeight = buttonElement.offsetHeight;
-                                    const categoryPadding = 5 * 2;
-                                    const categoryBorder = 1 * 2;
-                                    categoryDiv.style.height = (buttonHeight + categoryPadding + categoryBorder + actualContentHeight + totalContentPadding) + 'px';
-                                }
-                            });
-                        });
-                    }
-
-                    // ผูก Event Listener สำหรับปุ่ม Accordion ทั้งหมด
-                    const allAccordionButtons = document.querySelectorAll('.accordion-button');
-                    allAccordionButtons.forEach(button => {
-                        const content = button.nextElementSibling; // เนื้อหาที่ตามหลังปุ่ม
-                        const categoryDiv = button.closest('.category'); // div.category หลัก
-
-                        if (categoryDiv && button) {
-                            const initialHeight = (button.offsetHeight + (5 * 2) + 2) + 'px';
-                            categoryDiv.style.height = initialHeight;
-                            categoryDiv.style.transition = 'height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease';
-                        }
-
-                        button.addEventListener('click', function() {
-                            allAccordionButtons.forEach(otherButton => {
-                                const otherContent = otherButton.nextElementSibling;
-                                const otherCategoryDiv = otherButton.closest('.category');
-                                if (otherButton !== this && otherContent && otherContent.classList.contains('show')) {
-                                    closeAccordion(otherContent, otherCategoryDiv, otherButton);
-                                }
-                            });
-
-                            if (content && content.classList.contains('show')) {
-                                closeAccordion(content, categoryDiv, button);
-                            } else if (content) {
-                                openAccordion(content, categoryDiv, button);
-                            }
-                        });
-                    });
-
-                    // ผูก Event Listener สำหรับ channel links ทั้งหมดที่ถูกสร้างขึ้นใหม่
+                    // *** สำคัญ: ต้องเรียก channelLinks ใหม่หลังจากสร้าง HTML แล้ว ***
                     const updatedChannelLinks = document.querySelectorAll('.channel-link');
                     updatedChannelLinks.forEach(link => {
                         link.addEventListener('click', function(event) {
@@ -538,8 +442,6 @@
                 })
                 .catch(error => console.error('Error loading channels:', error));
 
-            // โค้ดส่วนอื่นๆ ที่ไม่เกี่ยวข้องกับการโหลดช่องโดยตรง (datetime, anti-copy)
-            
             // เลือก anchor tag ทั้งหมดในหน้า ยกเว้น anchor ที่เป็นลิงก์ # หรือเป็น channel-link หรือ line-group-info
             const allClickableLinks = document.querySelectorAll('a[href]:not([href="#"]):not(.channel-link):not(#line-group-info)');
 
@@ -579,6 +481,94 @@
             updateDateTime();
             // ตั้งค่าให้อัปเดตเวลาทุกวินาที
             setInterval(updateDateTime, 1000);
+
+            // ไม่ต้องเพิ่ม Event Listener แยกสำหรับลิงก์ LINE Group เพื่อการคลิก
+            // เพราะตอนนี้มันกลับมาใช้ href ปกติแล้ว และจะทำงานตามเบราว์เซอร์
+
+            // ฟังก์ชันสำหรับปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
+            function closeAccordion(contentElement) {
+                contentElement.classList.remove('show');
+                contentElement.style.maxHeight = '0';
+                contentElement.style.paddingTop = '0';
+                contentElement.style.paddingBottom = '0';
+                contentElement.style.opacity = '0';
+
+                const transitionEndHandler = function() {
+                    if (!contentElement.classList.contains('show')) {
+                        contentElement.style.display = 'none';
+                    }
+                    contentElement.removeEventListener('transitionend', transitionEndHandler);
+                };
+                contentElement.addEventListener('transitionend', transitionEndHandler);
+
+                const parentCategory = contentElement.closest('.category');
+                if (parentCategory && parentCategory.querySelector('.accordion-button')) {
+                    const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
+                    const categoryPadding = 5 * 2; // 5px top/bottom padding
+                    const categoryBorder = 1 * 2; // 1px top/bottom border
+                    parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder) + 'px';
+                }
+            }
+
+            // ฟังก์ชันสำหรับเปิด Accordion Content (ทั่วไปสำหรับทุก Accordion)
+            function openAccordion(contentElement) {
+                contentElement.style.display = 'flex'; // แสดง display ก่อนเริ่ม transition
+                contentElement.style.maxHeight = '0'; // ตั้งค่าเริ่มต้นให้เป็น 0 ก่อนคำนวณ scrollHeight
+                contentElement.style.paddingTop = '0';
+                contentElement.style.paddingBottom = '0';
+                contentElement.style.opacity = '0';
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        contentElement.classList.add('show');
+                        const actualContentHeight = contentElement.scrollHeight;
+                        let totalContentPadding = 8 + 8; // padding-top + padding-bottom ของ Accordion Content ทั่วไป
+
+                        contentElement.style.maxHeight = (actualContentHeight + totalContentPadding) + 'px';
+                        contentElement.style.paddingTop = '8px';
+                        contentElement.style.paddingBottom = '8px';
+                        contentElement.style.opacity = '1';
+
+                        const parentCategory = contentElement.closest('.category');
+                        if (parentCategory && parentCategory.querySelector('.accordion-button')) {
+                            const buttonHeight = parentCategory.querySelector('.accordion-button').offsetHeight;
+                            const categoryPadding = 5 * 2;
+                            const categoryBorder = 1 * 2;
+                            parentCategory.style.height = (buttonHeight + categoryPadding + categoryBorder + actualContentHeight + totalContentPadding) + 'px';
+                        }
+                    });
+                });
+            }
+
+            // เลือกปุ่ม Accordion ทั้งหมดในหน้า
+            const allAccordionButtons = document.querySelectorAll('.accordion-button');
+
+            allAccordionButtons.forEach(button => {
+                const content = button.nextElementSibling; // เนื้อหาที่ตามหลังปุ่ม
+
+                const categoryElement = button.closest('.category');
+                if (categoryElement && button) {
+                    const initialHeight = (button.offsetHeight + (5 * 2) + 2) + 'px';
+                    categoryElement.style.height = initialHeight;
+                    categoryElement.style.transition = 'height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease';
+                }
+
+                button.addEventListener('click', function() {
+                    allAccordionButtons.forEach(otherButton => {
+                        const otherContent = otherButton.nextElementSibling;
+                        if (otherButton !== this && otherContent && otherContent.classList.contains('show')) {
+                            closeAccordion(otherContent);
+                        }
+                    });
+
+                    if (content && content.classList.contains('show')) {
+                        closeAccordion(content);
+                    } else if (content) {
+                        openAccordion(content);
+                    }
+                });
+            });
+
 
             // โค้ดป้องกันการคัดลอกและคลิกขวา
             document.addEventListener('contextmenu', function(e) {
