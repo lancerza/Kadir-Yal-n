@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         "ทีวีดิจิตอล": document.getElementById('content-thai-tv'),
         "กีฬา": document.getElementById('content-sport'),
         "หนังทีวี": document.getElementById('content-movies'),
+        "สารคดี": document.getElementById('content-documentary'), // ******** เพิ่มตรงนี้ครับ ********
         "IPTV": document.getElementById('content-iptv')
     };
     let channelsData = null;
@@ -177,8 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 link.setAttribute('aria-label', channel.aria_label);
 
                 const img = document.createElement('img');
-                // กลับไปใช้ img.src เพียงอย่างเดียว
-                img.src = channel.img_src; // สมมติว่า channels.json มี property ชื่อ img_src
+                img.src = channel.img_src; // ใช้ img_src เพียงอย่างเดียว
                 img.alt = channel.name;
                 img.loading = "lazy";
                 link.appendChild(img);
