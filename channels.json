@@ -1253,6 +1253,454 @@
     "aria_label": "ดูช่อง บีอินสปอตส์ 9"
   },
   {
+    "category": "หนังทีวี",
+    "name": "AMC | USA",
+    "img_src": "https://dookeela.live/uploads/1716339097.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=386&tv=AMC|USA#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง AMC | USA"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "ANIPLUS Channel",
+    "img_src": "https://dookeela.live/uploads/1749743199.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=600&tv=ANIPLUSChannel#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง ANIPLUS Channel"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "AXN HD",
+    "img_src": "https://dookeela.live/uploads/1719897010.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=413&tv=AXNHD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง AXN HD"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Alure Channel",
+    "img_src": "https://dookeela.live/uploads/1731057748.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=554&tv=AlureChannel#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Alure Channel"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Animal Planet",
+    "img_src": "https://dookeela.live/uploads/1706112700.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=300&tv=AnimalPlanet#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Animal Planet"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Animal Show",
+    "img_src": "https://dookeela.live/uploads/1705537126.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=294&tv=AnimalShow#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Animal Show"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Animax | Singapore",
+    "img_src": "https://dookeela.live/uploads/1704038567.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=284&tv=Animax|Singapore#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Animax | Singapore"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Asian Food Network",
+    "img_src": "https://dookeela.live/uploads/1717696078.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=398&tv=AsianFoodNetwork#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Asian Food Network"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Asian Hits",
+    "img_src": "https://dookeela.live/uploads/1703829940.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=281&tv=AsianHits#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Asian Hits"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Astro Ceria",
+    "img_src": "https://dookeela.live/uploads/1721687988.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=428&tv=AstroCeria#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Astro Ceria"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "BBC Lifestyle",
+    "img_src": "https://dookeela.live/uploads/1727766790.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=527&tv=BBCLifestyle#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง BBC Lifestyle"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Boomerang",
+    "img_src": "https://dookeela.live/uploads/1705504202.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=291&tv=Boomerang#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Boomerang"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "CBeebies",
+    "img_src": "https://dookeela.live/uploads/1709573298.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=324&tv=CBeebies#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง CBeebies"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "CCM",
+    "img_src": "https://dookeela.live/uploads/1719803240.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=411&tv=CCM#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง CCM"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "CINEMAX",
+    "img_src": "https://dookeela.live/uploads/1703786799.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=278&tv=CINEMAX#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง CINEMAX"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Cartoon Network",
+    "img_src": "https://dookeela.live/uploads/1708344243.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=314&tv=CartoonNetwork#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Cartoon Network"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Crime + Investigation",
+    "img_src": "https://dookeela.live/uploads/1714101661.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=359&tv=Crime+Investigation#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Crime + Investigation"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "DMAX",
+    "img_src": "https://dookeela.live/uploads/1714101765.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=360&tv=DMAX#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง DMAX"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Disney Channel",
+    "img_src": "https://dookeela.live/uploads/1716361978.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=387&tv=DisneyChannel#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Disney Channel"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Disney Junior",
+    "img_src": "https://dookeela.live/uploads/1716362497.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=388&tv=DisneyJunior#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Disney Junior"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Disney XD",
+    "img_src": "https://dookeela.live/uploads/1716362753.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=389&tv=DisneyXD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Disney XD"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "DreamWorks",
+    "img_src": "https://dookeela.live/uploads/1723200736.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=460&tv=DreamWorks#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง DreamWorks"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Fashion TV",
+    "img_src": "https://dookeela.live/uploads/1731888593.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=557&tv=FashionTV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Fashion TV"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Food Network",
+    "img_src": "https://dookeela.live/uploads/1717696062.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=397&tv=FoodNetwork#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Food Network"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "HBO",
+    "img_src": "https://dookeela.live/uploads/1703686191.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=274&tv=HBO#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง HBO"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "HBO Family",
+    "img_src": "https://dookeela.live/uploads/1703786776.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=277&tv=HBOFamily#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง HBO Family"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "HBO Hits",
+    "img_src": "https://dookeela.live/uploads/1703786599.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=276&tv=HBOHits#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง HBO Hits"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "HBO Signature",
+    "img_src": "https://dookeela.live/uploads/1703786305.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=275&tv=HBOSignature#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง HBO Signature"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "HITS",
+    "img_src": "https://dookeela.live/uploads/1706112791.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=304&tv=HITS#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง HITS"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "HITS MOVIES",
+    "img_src": "https://dookeela.live/uploads/1714100677.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=356&tv=HITSMOVIES#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง HITS MOVIES"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "HITS NOW",
+    "img_src": "https://dookeela.live/uploads/1733772007.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=569&tv=HITSNOW#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง HITS NOW"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Lifetime",
+    "img_src": "https://dookeela.live/uploads/1720781589.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=422&tv=Lifetime#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Lifetime"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "MTV",
+    "img_src": "https://dookeela.live/uploads/1721687257.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=426&tv=MTV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง MTV"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Mono 29 Music station",
+    "img_src": "https://dookeela.live/uploads/1742428538.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=593&tv=Mono29Musicstation#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Mono 29 Music station"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Moodeng NOW",
+    "img_src": "https://dookeela.live/uploads/1731671306.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=555&tv=MoodengNOW#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Moodeng NOW"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Moonbug",
+    "img_src": "https://dookeela.live/uploads/1721687729.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=427&tv=Moonbug#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Moonbug"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "MySci",
+    "img_src": "https://dookeela.live/uploads/1705536991.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=293&tv=MySci#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง MySci"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Nick Jr.",
+    "img_src": "https://dookeela.live/uploads/1708344362.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=316&tv=NickJr.#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Nick Jr."
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Nickelodeon",
+    "img_src": "https://dookeela.live/uploads/1708344306.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=315&tv=Nickelodeon#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Nickelodeon"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "PBS KIDS",
+    "img_src": "https://dookeela.live/uploads/1730064747.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีवी/?id=540&tv=PBSKIDS#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง PBS KIDS"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Paramount Network",
+    "img_src": "https://dookeela.live/uploads/1706112779.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=303&tv=ParamountNetwork#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Paramount Network"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "ROCK Action",
+    "img_src": "https://dookeela.live/uploads/1718690264.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=402&tv=ROCKAction#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง ROCK Action"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "ROCK ENTERTAINMENT",
+    "img_src": "https://dookeela.live/uploads/1718690283.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=403&tv=ROCKENTERTAINMENT#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง ROCK ENTERTAINMENT"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Sony Movies",
+    "img_src": "https://dookeela.live/uploads/1730064952.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=541&tv=SonyMovies#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Sony Movies"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "STARZ ENCORE | USA",
+    "img_src": "https://dookeela.live/uploads/1705582013.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=295&tv=STARZENCORE|USA#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง STARZ ENCORE | USA"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Thainess",
+    "img_src": "https://dookeela.live/uploads/1742428803.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=594&tv=Thainess#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Thainess"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True Asian More",
+    "img_src": "https://dookeela.live/uploads/1719205850.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=405&tv=TrueAsianMore#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True Asian More"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True Film 1",
+    "img_src": "https://dookeela.live/uploads/1720380229.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=418&tv=TrueFilm1#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True Film 1"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True Film 2",
+    "img_src": "https://dookeela.live/uploads/1720723122.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=420&tv=TrueFilm2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True Film 2"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True Film Asia",
+    "img_src": "https://dookeela.live/uploads/1719205705.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=404&tv=TrueFilmAsia#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True Film Asia"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True Movie Hits",
+    "img_src": "https://dookeela.live/uploads/1719803882.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=412&tv=TrueMovieHits#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True Movie Hits"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True Series",
+    "img_src": "https://dookeela.live/uploads/1719205991.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=406&tv=TrueSeries#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True Series"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True Spark Play",
+    "img_src": "https://dookeela.live/uploads/1720723541.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=421&tv=TrueSparkPlay#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True Spark Play"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True Thai Film",
+    "img_src": "https://dookeela.live/uploads/1706539896.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=307&tv=TrueThaiFilm#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True Thai Film"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "True X-Zyte",
+    "img_src": "https://dookeela.live/uploads/1719206155.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=407&tv=TrueX-Zyte#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง True X-Zyte"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "TNT USA",
+    "img_src": "https://dookeela.live/uploads/1694456079.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=205&tv=TNTUSA#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง TNT USA"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "TVB CLASSIC HD",
+    "img_src": "https://dookeela.live/uploads/1719898154.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=415&tv=TVBCLASSICHD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง TVB CLASSIC HD"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "Warner TV",
+    "img_src": "https://dookeela.live/uploads/1703832225.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=282&tv=WarnerTV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Warner TV"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "cartoonito",
+    "img_src": "https://dookeela.live/uploads/1704039063.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=285&tv=cartoonito#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง cartoonito"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "iQIYI",
+    "img_src": "https://dookeela.live/uploads/1706405008.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=306&tv=iQIYI#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง iQIYI"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "nicktoons | Germany",
+    "img_src": "https://dookeela.live/uploads/1713282303.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=351&tv=nicktoons|Germany#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง nicktoons | Germany"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "tvN MOVIES",
+    "img_src": "https://dookeela.live/uploads/1714100840.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=357&tv=tvNMOVIES#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง tvN MOVIES"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "tvN | Indonesia",
+    "img_src": "https://dookeela.live/uploads/1703833429.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=283&tv=tvN|Indonesia#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง tvN | Indonesia"
+  },
+  {
+    "category": "หนังทีวี",
+    "name": "ทรูไอดีเอเชียนซีรีส์",
+    "img_src": "https://dookeela.live/uploads/1741551484.png",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=590&tv=ทรูไอดีเอเชียนซีรีส์#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง ทรูไอดีเอเชียนซีรีส์"
+  },
+  {
     "category": "IPTV",
     "name": "Gags",
     "img_src": "https://www.fileinw.com/postor/20240429213343just_for_laughs_gags.jpg",
