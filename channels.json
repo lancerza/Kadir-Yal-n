@@ -152,1104 +152,1104 @@
     "img_src": "https://dookeela.live/uploads/1704117706.png",
     "data_url": "intent://dookeela.live/live-tv/amarintv#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Amarin TV" 
-  },
+  [
   {
     "category": "กีฬา",
     "name": "ASTRO CRICKET HD | Malaysia",
     "img_src": "//dookeela.live/uploads/1720166377.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=416&tv=ASTROCRICKETHD|Malaysia",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=416&tv=ASTROCRICKETHD|Malaysia#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง ASTRO CRICKET HD | Malaysia"
   },
   {
     "category": "กีฬา",
     "name": "Astro Arena",
     "img_src": "//dookeela.live/uploads/1697812603.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=257&tv=AstroArena",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=257&tv=AstroArena#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Arena"
   },
   {
     "category": "กีฬา",
     "name": "Astro Arena 2",
     "img_src": "//dookeela.live/uploads/1719768111.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=409&tv=AstroArena2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=409&tv=AstroArena2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Arena 2"
   },
   {
     "category": "กีฬา",
     "name": "Astro Arena Bola",
     "img_src": "//dookeela.live/uploads/1700012376.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=273&tv=AstroArenaBola",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=273&tv=AstroArenaBola#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Arena Bola"
   },
   {
     "category": "กีฬา",
     "name": "Astro Arena Bola 2",
     "img_src": "//dookeela.live/uploads/1698351468.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=265&tv=AstroArenaBola2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=265&tv=AstroArenaBola2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Arena Bola 2"
   },
   {
     "category": "กีฬา",
     "name": "Astro Badminton",
     "img_src": "//dookeela.live/uploads/1729385788.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=538&tv=AstroBadminton",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=538&tv=AstroBadminton#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Badminton"
   },
   {
     "category": "กีฬา",
     "name": "Astro Football",
     "img_src": "//dookeela.live/uploads/1729384406.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=534&tv=AstroFootball",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=534&tv=AstroFootball#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Football"
   },
   {
     "category": "กีฬา",
     "name": "Astro Grandstand",
     "img_src": "//dookeela.live/uploads/1729384448.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=535&tv=AstroGrandstand",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=535&tv=AstroGrandstand#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Grandstand"
   },
   {
     "category": "กีฬา",
     "name": "Astro Premier League",
     "img_src": "//dookeela.live/uploads/1729384542.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=537&tv=AstroPremierLeague",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=537&tv=AstroPremierLeague#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Premier League"
   },
   {
     "category": "กีฬา",
     "name": "Astro Premier League 2",
     "img_src": "//dookeela.live/uploads/1729384502.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=536&tv=AstroPremierLeague2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=536&tv=AstroPremierLeague2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Premier League 2"
   },
   {
     "category": "กีฬา",
     "name": "Astro Sports Plus",
     "img_src": "//dookeela.live/uploads/1729385809.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=539&tv=AstroSportsPlus",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=539&tv=AstroSportsPlus#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Sports Plus"
   },
   {
     "category": "กีฬา",
     "name": "Astro Sports Plus 2",
     "img_src": "//dookeela.live/uploads/1733771622.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=568&tv=AstroSportsPlus2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=568&tv=AstroSportsPlus2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Astro Sports Plus 2"
   },
   {
     "category": "กีฬา",
     "name": "BT Sport 1 UK",
     "img_src": "//dookeela.live/uploads/1664577275.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=65&tv=BTSport1UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=65&tv=BTSport1UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง BT Sport 1 UK"
   },
   {
     "category": "กีฬา",
     "name": "BT Sport 2 UK",
     "img_src": "//dookeela.live/uploads/1664577284.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=66&tv=BTSport2UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=66&tv=BTSport2UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง BT Sport 2 UK"
   },
   {
     "category": "กีฬา",
     "name": "BT Sport 3 UK",
     "img_src": "//dookeela.live/uploads/1664577293.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=67&tv=BTSport3UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=67&tv=BTSport3UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง BT Sport 3 UK"
   },
   {
     "category": "กีฬา",
     "name": "BT Sport 4 UK",
     "img_src": "//dookeela.live/uploads/1667415893.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=98&tv=BTSport4UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=98&tv=BTSport4UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง BT Sport 4 UK"
   },
   {
     "category": "กีฬา",
     "name": "CBS Sports Network [USA]",
     "img_src": "//dookeela.live/uploads/1697707418.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=255&tv=CBSSportsNetwork[USA]",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=255&tv=CBSSportsNetwork[USA]#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง CBS Sports Network [USA]"
   },
   {
     "category": "กีฬา",
     "name": "Canal 11 Protugal",
     "img_src": "//dookeela.live/uploads/1663979533.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=1&tv=Canal11Protugal",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=1&tv=Canal11Protugal#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Canal 11 Protugal"
   },
   {
     "category": "กีฬา",
     "name": "DAZN 1 Germany",
     "img_src": "//dookeela.live/uploads/1679423986.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=160&tv=DAZN1Germany",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=160&tv=DAZN1Germany#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN 1 Germany"
   },
   {
     "category": "กีฬา",
     "name": "DAZN 1 | Spain",
     "img_src": "//dookeela.live/uploads/1715571844.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=375&tv=DAZN1|Spain",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=375&tv=DAZN1|Spain#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN 1 | Spain"
   },
   {
     "category": "กีฬา",
     "name": "DAZN 2 Germany",
     "img_src": "//dookeela.live/uploads/1694286704.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=204&tv=DAZN2Germany",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=204&tv=DAZN2Germany#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN 2 Germany"
   },
   {
     "category": "กีฬา",
     "name": "DAZN 2 | Spain",
     "img_src": "//dookeela.live/uploads/1715571857.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=376&tv=DAZN2|Spain",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=376&tv=DAZN2|Spain#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN 2 | Spain"
   },
   {
     "category": "กีฬา",
     "name": "DAZN 3 | Spain",
     "img_src": "//dookeela.live/uploads/1737512608.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=577&tv=DAZN3|Spain",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=577&tv=DAZN3|Spain#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN 3 | Spain"
   },
   {
     "category": "กีฬา",
     "name": "DAZN 4 | Spain",
     "img_src": "//dookeela.live/uploads/1737512619.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=578&tv=DAZN4|Spain",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=578&tv=DAZN4|Spain#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN 4 | Spain"
   },
   {
     "category": "กีฬา",
     "name": "DAZN F1 (Spain)",
     "img_src": "//dookeela.live/uploads/1696279327.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=239&tv=DAZNF1(Spain)",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=239&tv=DAZNF1(Spain)#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN F1 (Spain)"
   },
   {
     "category": "กีฬา",
     "name": "DAZN Laliga",
     "img_src": "//dookeela.live/uploads/1711566401.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=335&tv=DAZNLaliga",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=335&tv=DAZNLaliga#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN Laliga"
   },
   {
     "category": "กีฬา",
     "name": "DAZN Unbeaten",
     "img_src": "//dookeela.live/uploads/1704685964.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=288&tv=DAZNUnbeaten",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=288&tv=DAZNUnbeaten#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง DAZN Unbeaten"
   },
   {
     "category": "กีฬา",
     "name": "Diema Sport",
     "img_src": "//dookeela.live/uploads/1664315169.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=34&tv=DiemaSport",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=34&tv=DiemaSport#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Diema Sport"
   },
   {
     "category": "กีฬา",
     "name": "Digi Sport 1 Romania",
     "img_src": "//dookeela.live/uploads/1664126175.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=14&tv=DigiSport1Romania",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=14&tv=DigiSport1Romania#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Digi Sport 1 Romania"
   },
   {
     "category": "กีฬา",
     "name": "Digi Sport 2 Romania",
     "img_src": "//dookeela.live/uploads/1667654703.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=118&tv=DigiSport2Romania",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=118&tv=DigiSport2Romania#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Digi Sport 2 Romania"
   },
   {
     "category": "กีฬา",
     "name": "ESPN 1 Netherlands",
     "img_src": "//dookeela.live/uploads/1664501652.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=51&tv=ESPN1Netherlands",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=51&tv=ESPN1Netherlands#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง ESPN 1 Netherlands"
   },
   {
     "category": "กีฬา",
     "name": "ESPN 2 Netherlands",
     "img_src": "//dookeela.live/uploads/1664501662.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=52&tv=ESPN2Netherlands",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=52&tv=ESPN2Netherlands#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง ESPN 2 Netherlands"
   },
   {
     "category": "กีฬา",
     "name": "ESPN 3 Netherlands",
     "img_src": "//dookeela.live/uploads/1664501676.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=53&tv=ESPN3Netherlands",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=53&tv=ESPN3Netherlands#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง ESPN 3 Netherlands"
   },
   {
     "category": "กีฬา",
     "name": "ESPN 4 Netherlands",
     "img_src": "//dookeela.live/uploads/1664501687.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=54&tv=ESPN4Netherlands",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=54&tv=ESPN4Netherlands#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง ESPN 4 Netherlands"
   },
   {
     "category": "กีฬา",
     "name": "Eleven Pro League 1",
     "img_src": "//dookeela.live/uploads/1722089133.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=455&tv=ElevenProLeague1",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=455&tv=ElevenProLeague1#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Eleven Pro League 1"
   },
   {
     "category": "กีฬา",
     "name": "Eurosport 1 | Spain",
     "img_src": "//dookeela.live/uploads/1711566124.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=332&tv=Eurosport1|Spain",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=332&tv=Eurosport1|Spain#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Eurosport 1 | Spain"
   },
   {
     "category": "กีฬา",
     "name": "Eurosport 2 | Spain",
     "img_src": "//dookeela.live/uploads/1711566136.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=333&tv=Eurosport2|Spain",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=333&tv=Eurosport2|Spain#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Eurosport 2 | Spain"
   },
   {
     "category": "กีฬา",
     "name": "FIFA Plus",
     "img_src": "//dookeela.live/uploads/1739094315.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=583&tv=FIFAPlus",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=583&tv=FIFAPlus#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง FIFA Plus"
   },
   {
     "category": "กีฬา",
     "name": "FOX Sports 1 USA",
     "img_src": "//dookeela.live/uploads/1664219664.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=21&tv=FOXSports1USA",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=21&tv=FOXSports1USA#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง FOX Sports 1 USA"
   },
   {
     "category": "กีฬา",
     "name": "FOX Sports 2 USA",
     "img_src": "//dookeela.live/uploads/1673668104.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=138&tv=FOXSports2USA",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=138&tv=FOXSports2USA#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง FOX Sports 2 USA"
   },
   {
     "category": "กีฬา",
     "name": "Fight Sports",
     "img_src": "//dookeela.live/uploads/1708490904.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=317&tv=FightSports",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=317&tv=FightSports#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Fight Sports"
   },
   {
     "category": "กีฬา",
     "name": "Golf Channel Thailand HD",
     "img_src": "//dookeela.live/uploads/1664801941.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=71&tv=GolfChannelThailandHD",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=71&tv=GolfChannelThailandHD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Golf Channel Thailand HD"
   },
   {
     "category": "กีฬา",
     "name": "HUB Sports 2",
     "img_src": "//dookeela.live/uploads/1725050242.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=510&tv=HUBSports2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=510&tv=HUBSports2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง HUB Sports 2"
   },
   {
     "category": "กีฬา",
     "name": "L1Max",
     "img_src": "//dookeela.live/uploads/1723923355.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=490&tv=L1Max",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=490&tv=L1Max#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง L1Max"
   },
   {
     "category": "กีฬา",
     "name": "LFCTV",
     "img_src": "//dookeela.live/uploads/1669940282.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=130&tv=LFCTV",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=130&tv=LFCTV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง LFCTV"
   },
   {
     "category": "กีฬา",
     "name": "LaLiga Hypermotion TV",
     "img_src": "//dookeela.live/uploads/1718320056.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=399&tv=LaLigaHypermotionTV",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=399&tv=LaLigaHypermotionTV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง LaLiga Hypermotion TV"
   },
   {
     "category": "กีฬา",
     "name": "LaLiga Hypermotion TV 2",
     "img_src": "//dookeela.live/uploads/1718320112.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=400&tv=LaLigaHypermotionTV2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=400&tv=LaLigaHypermotionTV2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง LaLiga Hypermotion TV 2"
   },
   {
     "category": "กีฬา",
     "name": "LaLiga Hypermotion TV 3",
     "img_src": "//dookeela.live/uploads/1718320120.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=401&tv=LaLigaHypermotionTV3",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=401&tv=LaLigaHypermotionTV3#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง LaLiga Hypermotion TV 3"
   },
   {
     "category": "กีฬา",
     "name": "MAX Sport 1 | Croatia",
     "img_src": "//dookeela.live/uploads/1731005824.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=553&tv=MAXSport1|Croatia",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=553&tv=MAXSport1|Croatia#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง MAX Sport 1 | Croatia"
   },
   {
     "category": "กีฬา",
     "name": "MLB",
     "img_src": "//dookeela.live/uploads/1695548172.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=232&tv=MLB",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=232&tv=MLB#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง MLB"
   },
   {
     "category": "กีฬา",
     "name": "MUTV",
     "img_src": "//dookeela.live/uploads/1665106261.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=84&tv=MUTV",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=84&tv=MUTV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง MUTV"
   },
   {
     "category": "กีฬา",
     "name": "NBA TV",
     "img_src": "//dookeela.live/uploads/1664532126.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=61&tv=NBATV",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=61&tv=NBATV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง NBA TV"
   },
   {
     "category": "กีฬา",
     "name": "NFL Network",
     "img_src": "//dookeela.live/uploads/1694909293.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=219&tv=NFLNetwork",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=219&tv=NFLNetwork#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง NFL Network"
   },
   {
     "category": "กีฬา",
     "name": "O2 TV Fotbal",
     "img_src": "//dookeela.live/uploads/1699205062.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=271&tv=O2TVFotbal",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=271&tv=O2TVFotbal#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง O2 TV Fotbal"
   },
   {
     "category": "กีฬา",
     "name": "PREMIER SPORTS 1 | UK",
     "img_src": "//dookeela.live/uploads/1715565710.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=365&tv=PREMIERSPORTS1|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=365&tv=PREMIERSPORTS1|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง PREMIER SPORTS 1 | UK"
   },
   {
     "category": "กีฬา",
     "name": "PREMIER SPORTS 2 | UK",
     "img_src": "//dookeela.live/uploads/1715565724.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=366&tv=PREMIERSPORTS2|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=366&tv=PREMIERSPORTS2|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง PREMIER SPORTS 2 | UK"
   },
   {
     "category": "กีฬา",
     "name": "Polsat Sport 1 | Poland",
     "img_src": "//dookeela.live/uploads/1721182604.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=423&tv=PolsatSport1|Poland",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=423&tv=PolsatSport1|Poland#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Polsat Sport 1 | Poland"
   },
   {
     "category": "กีฬา",
     "name": "Polsat Sport 2 | Poland",
     "img_src": "//dookeela.live/uploads/1723569749.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=463&tv=PolsatSport2|Poland",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=463&tv=PolsatSport2|Poland#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Polsat Sport 2 | Poland"
   },
   {
     "category": "กีฬา",
     "name": "Polsat Sport 3 | Poland",
     "img_src": "//dookeela.live/uploads/1722964013.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=459&tv=PolsatSport3|Poland",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=459&tv=PolsatSport3|Poland#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Polsat Sport 3 | Poland"
   },
   {
     "category": "กีฬา",
     "name": "Polsat Sport Premium 1 | Poland",
     "img_src": "//dookeela.live/uploads/1721584784.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=425&tv=PolsatSportPremium1|Poland",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=425&tv=PolsatSportPremium1|Poland#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Polsat Sport Premium 1 | Poland"
   },
   {
     "category": "กีฬา",
     "name": "Polsat Sport Premium 2 | Poland",
     "img_src": "//dookeela.live/uploads/1724779203.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=498&tv=PolsatSportPremium2|Poland",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=498&tv=PolsatSportPremium2|Poland#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Polsat Sport Premium 2 | Poland"
   },
   {
     "category": "กีฬา",
     "name": "Premiere",
     "img_src": "//dookeela.live/uploads/1663980176.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=4&tv=Premiere",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=4&tv=Premiere#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Premiere"
   },
   {
     "category": "กีฬา",
     "name": "Premiere 2",
     "img_src": "//dookeela.live/uploads/1667412226.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=92&tv=Premiere2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=92&tv=Premiere2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Premiere 2"
   },
   {
     "category": "กีฬา",
     "name": "Premiere 5",
     "img_src": "//dookeela.live/uploads/1723400121.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=461&tv=Premiere5",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=461&tv=Premiere5#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Premiere 5"
   },
   {
     "category": "กีฬา",
     "name": "Premiere 6",
     "img_src": "//dookeela.live/uploads/1723400340.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=462&tv=Premiere6",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=462&tv=Premiere6#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Premiere 6"
   },
   {
     "category": "กีฬา",
     "name": "Premiere 7",
     "img_src": "//dookeela.live/uploads/1724434820.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=497&tv=Premiere7",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=497&tv=Premiere7#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Premiere 7"
   },
   {
     "category": "กีฬา",
     "name": "Prima Sport 1",
     "img_src": "//dookeela.live/uploads/1694689157.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=211&tv=PrimaSport1",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=211&tv=PrimaSport1#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Prima Sport 1"
   },
   {
     "category": "กีฬา",
     "name": "Prima Sport 2",
     "img_src": "//dookeela.live/uploads/1695249914.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=228&tv=PrimaSport2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=228&tv=PrimaSport2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Prima Sport 2"
   },
   {
     "category": "กีฬา",
     "name": "Prima Sport 3",
     "img_src": "//dookeela.live/uploads/1695604346.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=233&tv=PrimaSport3",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=233&tv=PrimaSport3#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Prima Sport 3"
   },
   {
     "category": "กีฬา",
     "name": "Prima Sport 4",
     "img_src": "//dookeela.live/uploads/1695398839.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=231&tv=PrimaSport4",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=231&tv=PrimaSport4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Prima Sport 4"
   },
   {
     "category": "กีฬา",
     "name": "Prima Sport 5",
     "img_src": "//dookeela.live/uploads/1696610104.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=245&tv=PrimaSport5",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=245&tv=PrimaSport5#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Prima Sport 5"
   },
   {
     "category": "กีฬา",
     "name": "Red Bull TV",
     "img_src": "//dookeela.live/uploads/1711566263.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=334&tv=RedBullTV",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=334&tv=RedBullTV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Red Bull TV"
   },
   {
     "category": "กีฬา",
     "name": "SPL01",
     "img_src": "//dookeela.live/uploads/1726225121.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=524&tv=SPL01",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=524&tv=SPL01#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SPL01"
   },
   {
     "category": "กีฬา",
     "name": "SPL02",
     "img_src": "//dookeela.live/uploads/1726225130.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=525&tv=SPL02",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=525&tv=SPL02#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SPL02"
   },
   {
     "category": "กีฬา",
     "name": "SPOTV",
     "img_src": "//dookeela.live/uploads/1664529562.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=59&tv=SPOTV",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=59&tv=SPOTV#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SPOTV"
   },
   {
     "category": "กีฬา",
     "name": "SPOTV 2",
     "img_src": "//dookeela.live/uploads/1664529575.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=60&tv=SPOTV2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=60&tv=SPOTV2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SPOTV 2"
   },
   {
     "category": "กีฬา",
     "name": "SSC 1 HD",
     "img_src": "//dookeela.live/uploads/1691933533.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=193&tv=SSC1HD",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=193&tv=SSC1HD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC 1 HD"
   },
   {
     "category": "กีฬา",
     "name": "SSC EXTRA 1",
     "img_src": "//dookeela.live/uploads/1691948780.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=198&tv=SSCEXTRA1",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=198&tv=SSCEXTRA1#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC EXTRA 1"
   },
   {
     "category": "กีฬา",
     "name": "SSC EXTRA 2",
     "img_src": "//dookeela.live/uploads/1692334268.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=199&tv=SSCEXTRA2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=199&tv=SSCEXTRA2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC EXTRA 2"
   },
   {
     "category": "กีฬา",
     "name": "SSC EXTRA 3",
     "img_src": "//dookeela.live/uploads/1716487143.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=393&tv=SSCEXTRA3",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=393&tv=SSCEXTRA3#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC EXTRA 3"
   },
   {
     "category": "กีฬา",
     "name": "SSC NEWS",
     "img_src": "//dookeela.live/uploads/1693674503.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=203&tv=SSCNEWS",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=203&tv=SSCNEWS#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC NEWS"
   },
   {
     "category": "กีฬา",
     "name": "SSC2 HD",
     "img_src": "//dookeela.live/uploads/1691934908.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=194&tv=SSC2HD",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=194&tv=SSC2HD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC2 HD"
   },
   {
     "category": "กีฬา",
     "name": "SSC3 HD",
     "img_src": "//dookeela.live/uploads/1691934918.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=195&tv=SSC3HD",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=195&tv=SSC3HD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC3 HD"
   },
   {
     "category": "กีฬา",
     "name": "SSC4 HD",
     "img_src": "//dookeela.live/uploads/1691934931.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=196&tv=SSC4HD",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=196&tv=SSC4HD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC4 HD"
   },
   {
     "category": "กีฬา",
     "name": "SSC5 HD",
     "img_src": "//dookeela.live/uploads/1691934941.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=197&tv=SSC5HD",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=197&tv=SSC5HD#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง SSC5 HD"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Action",
     "img_src": "//dookeela.live/uploads/1715648808.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=378&tv=SkySportsAction",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=378&tv=SkySportsAction#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Action"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Cricket | UK",
     "img_src": "//dookeela.live/uploads/1744742402.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=598&tv=SkySportsCricket|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=598&tv=SkySportsCricket|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Cricket | UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports F1 | UK",
     "img_src": "//dookeela.live/uploads/1712888821.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=346&tv=SkySportsF1|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=346&tv=SkySportsF1|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports F1 | UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Football UK",
     "img_src": "//dookeela.live/uploads/1664576894.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=64&tv=SkySportsFootballUK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=64&tv=SkySportsFootballUK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Football UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Golf | UK",
     "img_src": "//dookeela.live/uploads/1712888702.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=345&tv=SkySportsGolf|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=345&tv=SkySportsGolf|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Golf | UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Main Event UK",
     "img_src": "//dookeela.live/uploads/1665106057.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=83&tv=SkySportsMainEventUK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=83&tv=SkySportsMainEventUK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Main Event UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Mix | UK",
     "img_src": "//dookeela.live/uploads/1712889285.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=349&tv=SkySportsMix|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=349&tv=SkySportsMix|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Mix | UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports News | UK",
     "img_src": "//dookeela.live/uploads/1715648168.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=377&tv=SkySportsNews|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=377&tv=SkySportsNews|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports News | UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Premier League UK",
     "img_src": "//dookeela.live/uploads/1696317833.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=241&tv=SkySportsPremierLeagueUK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=241&tv=SkySportsPremierLeagueUK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Premier League UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Racing | UK",
     "img_src": "//dookeela.live/uploads/1712889189.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=348&tv=SkySportsRacing|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=348&tv=SkySportsRacing|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Racing | UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports Tennis | UK",
     "img_src": "//dookeela.live/uploads/1712889076.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=347&tv=SkySportsTennis|UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=347&tv=SkySportsTennis|UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports Tennis | UK"
   },
   {
     "category": "กีฬา",
     "name": "Sky Sports+",
     "img_src": "//dookeela.live/uploads/1725980915.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=523&tv=SkySports+",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=523&tv=SkySports+#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sky Sports+"
   },
   {
     "category": "กีฬา",
     "name": "Sport TV +",
     "img_src": "//dookeela.live/uploads/1736239662.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=575&tv=SportTV+",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=575&tv=SportTV+#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sport TV +"
   },
   {
     "category": "กีฬา",
     "name": "Sport TV 1",
     "img_src": "//dookeela.live/uploads/1663979709.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=2&tv=SportTV1",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=2&tv=SportTV1#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sport TV 1"
   },
   {
     "category": "กีฬา",
     "name": "Sport TV 2",
     "img_src": "//dookeela.live/uploads/1663979801.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=3&tv=SportTV2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=3&tv=SportTV2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sport TV 2"
   },
   {
     "category": "กีฬา",
     "name": "Sport TV 3",
     "img_src": "//dookeela.live/uploads/1663980327.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=5&tv=SportTV3",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=5&tv=SportTV3#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sport TV 3"
   },
   {
     "category": "กีฬา",
     "name": "Sport TV 4",
     "img_src": "//dookeela.live/uploads/1664041351.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=11&tv=SportTV4",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=11&tv=SportTV4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sport TV 4"
   },
   {
     "category": "กีฬา",
     "name": "Sport TV 5",
     "img_src": "//dookeela.live/uploads/1664125991.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=13&tv=SportTV5",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=13&tv=SportTV5#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sport TV 5"
   },
   {
     "category": "กีฬา",
     "name": "Sport TV 6",
     "img_src": "//dookeela.live/uploads/1736239304.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=573&tv=SportTV6",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=573&tv=SportTV6#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sport TV 6"
   },
   {
     "category": "กีฬา",
     "name": "Sport TV 7",
     "img_src": "//dookeela.live/uploads/1736239646.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=574&tv=SportTV7",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=574&tv=SportTV7#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sport TV 7"
   },
   {
     "category": "กีฬา",
     "name": "Sports One",
     "img_src": "//dookeela.live/uploads/1720429672.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=419&tv=SportsOne",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=419&tv=SportsOne#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Sports One"
   },
   {
     "category": "กีฬา",
     "name": "T Sports 7",
     "img_src": "//dookeela.live/uploads/1673134276.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง T Sports 7"
   },
   {
     "category": "กีฬา",
     "name": "T-Sport HD 3",
     "img_src": "//dookeela.live/uploads/1742695956.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=595&tv=T-SportHD3",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=595&tv=T-SportHD3#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง T-Sport HD 3"
   },
   {
     "category": "กีฬา",
     "name": "T-Sport HD 4",
     "img_src": "//dookeela.live/uploads/1742695971.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=596&tv=T-SportHD4",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=596&tv=T-SportHD4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง T-Sport HD 4"
   },
   {
     "category": "กีฬา",
     "name": "TNT Sports 5 UK",
     "img_src": "//dookeela.live/uploads/1691521854.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=192&tv=TNTSports5UK",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=192&tv=TNTSports5UK#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง TNT Sports 5 UK"
   },
   {
     "category": "กีฬา",
     "name": "TUDN USA",
     "img_src": "//dookeela.live/uploads/1689987703.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=182&tv=TUDNUSA",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=182&tv=TUDNUSA#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง TUDN USA"
   },
   {
     "category": "กีฬา",
     "name": "TV4 Fotboll (Sweden)",
     "img_src": "//dookeela.live/uploads/1695936059.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=237&tv=TV4Fotboll(Sweden)",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=237&tv=TV4Fotboll(Sweden)#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง TV4 Fotboll (Sweden)"
   },
   {
     "category": "กีฬา",
     "name": "True Ball Thai 9",
     "img_src": "//dookeela.live/uploads/1723660123.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง True Ball Thai 9"
   },
   {
     "category": "กีฬา",
     "name": "True Tennis",
     "img_src": "//dookeela.live/uploads/1717257614.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=394&tv=TrueTennis",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=394&tv=TrueTennis#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง True Tennis"
   },
   {
     "category": "กีฬา",
     "name": "TyC Sports Internacional",
     "img_src": "//dookeela.live/uploads/1699121407.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=270&tv=TyCSportsInternacional",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=270&tv=TyCSportsInternacional#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง TyC Sports Internacional"
   },
   {
     "category": "กีฬา",
     "name": "UFC Fight Pass",
     "img_src": "//dookeela.live/uploads/1731847474.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=556&tv=UFCFightPass",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=556&tv=UFCFightPass#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง UFC Fight Pass"
   },
   {
     "category": "กีฬา",
     "name": "UNIVERSO [USA]",
     "img_src": "//dookeela.live/uploads/1698455515.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=268&tv=UNIVERSO[USA]",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=268&tv=UNIVERSO[USA]#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง UNIVERSO [USA]"
   },
   {
     "category": "กีฬา",
     "name": "Volleyball 1",
     "img_src": "//dookeela.live/uploads/1728462430.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=528&tv=Volleyball1",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=528&tv=Volleyball1#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Volleyball 1"
   },
   {
     "category": "กีฬา",
     "name": "Volleyball 2",
     "img_src": "//dookeela.live/uploads/1728462447.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=529&tv=Volleyball2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=529&tv=Volleyball2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Volleyball 2"
   },
   {
     "category": "กีฬา",
     "name": "Volleyball 3",
     "img_src": "//dookeela.live/uploads/1728462457.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=530&tv=Volleyball3",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=530&tv=Volleyball3#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Volleyball 3"
   },
   {
     "category": "กีฬา",
     "name": "Volleyball 4",
     "img_src": "//dookeela.live/uploads/1728462466.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีवी/?id=531&tv=Volleyball4",
+    "data_url": "intent://goal-th.com/ช่องรายการทีवी/?id=531&tv=Volleyball4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Volleyball 4"
   },
   {
     "category": "กีฬา",
     "name": "Volleyball 5",
     "img_src": "//dookeela.live/uploads/1728462475.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=532&tv=Volleyball5",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=532&tv=Volleyball5#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Volleyball 5"
   },
   {
     "category": "กีฬา",
     "name": "Volleyball PEA",
     "img_src": "//dookeela.live/uploads/1749882883.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=601&tv=VolleyballPEA",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=601&tv=VolleyballPEA#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง Volleyball PEA"
   },
   {
     "category": "กีฬา",
     "name": "WWE Network",
     "img_src": "//dookeela.live/uploads/1696317392.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=240&tv=WWENetwork",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=240&tv=WWENetwork#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง WWE Network"
   },
   {
     "category": "กีฬา",
     "name": "beIN SPORTS Max 1 Turkey",
     "img_src": "//dookeela.live/uploads/1674393244.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=149&tv=beINSPORTSMax1Turkey",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=149&tv=beINSPORTSMax1Turkey#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN SPORTS Max 1 Turkey"
   },
   {
     "category": "กีฬา",
     "name": "beIN SPORTS Max 2 Turkey",
     "img_src": "//dookeela.live/uploads/1679591572.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=161&tv=beINSPORTSMax2Turkey",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=161&tv=beINSPORTSMax2Turkey#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN SPORTS Max 2 Turkey"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 1 France",
     "img_src": "//dookeela.live/uploads/1664323955.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=35&tv=beINSports1France",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=35&tv=beINSports1France#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 1 France"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 1 Turkey",
     "img_src": "//dookeela.live/uploads/1664502528.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=56&tv=beINSports1Turkey",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=56&tv=beINSports1Turkey#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 1 Turkey"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 10 Max",
     "img_src": "//dookeela.live/uploads/1733602113.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=567&tv=beINSports10Max",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=567&tv=beINSports10Max#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 10 Max"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 2 France",
     "img_src": "//dookeela.live/uploads/1685036091.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=171&tv=beINSports2France",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=171&tv=beINSports2France#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 2 France"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 2 Turkey",
     "img_src": "//dookeela.live/uploads/1664502539.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=57&tv=beINSports2Turkey",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=57&tv=beINSports2Turkey#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 2 Turkey"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 3 France",
     "img_src": "//dookeela.live/uploads/1733600709.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=562&tv=beINSports3France",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=562&tv=beINSports3France#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 3 France"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 3 Turkey",
     "img_src": "//dookeela.live/uploads/1664581228.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=69&tv=beINSports3Turkey",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=69&tv=beINSports3Turkey#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 3 Turkey"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 4 Max",
     "img_src": "//dookeela.live/uploads/1733601219.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=563&tv=beINSports4Max",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=563&tv=beINSports4Max#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 4 Max"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 4 Turkey",
     "img_src": "//dookeela.live/uploads/1664581241.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=70&tv=beINSports4Turkey",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=70&tv=beINSports4Turkey#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 4 Turkey"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 7 Max",
     "img_src": "//dookeela.live/uploads/1733601777.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=564&tv=beINSports7Max",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=564&tv=beINSports7Max#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 7 Max"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 8 Max",
     "img_src": "//dookeela.live/uploads/1733602058.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=565&tv=beINSports8Max",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=565&tv=beINSports8Max#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 8 Max"
   },
   {
     "category": "กีฬา",
     "name": "beIN Sports 9 Max",
     "img_src": "//dookeela.live/uploads/1733602083.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=566&tv=beINSports9Max",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=566&tv=beINSports9Max#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง beIN Sports 9 Max"
   },
   {
     "category": "กีฬา",
     "name": "sportdigital",
     "img_src": "//dookeela.live/uploads/1664202734.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=18&tv=sportdigital",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=18&tv=sportdigital#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง sportdigital"
   },
   {
     "category": "กีฬา",
     "name": "truesports 1",
     "img_src": "//dookeela.live/uploads/1664802455.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=74&tv=truesports1",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=74&tv=truesports1#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง truesports 1"
   },
   {
     "category": "กีฬา",
     "name": "truesports 2",
     "img_src": "//dookeela.live/uploads/1664499966.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=43&tv=truesports2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=43&tv=truesports2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง truesports 2"
   },
   {
     "category": "กีฬา",
     "name": "truesports 3",
     "img_src": "//dookeela.live/uploads/1664802480.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=76&tv=truesports3",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=76&tv=truesports3#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง truesports 3"
   },
   {
     "category": "กีฬา",
     "name": "truesports 4",
     "img_src": "//dookeela.live/uploads/1717396131.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=395&tv=truesports4",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=395&tv=truesports4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง truesports 4"
   },
   {
     "category": "กีฬา",
     "name": "truesports 5",
     "img_src": "//dookeela.live/uploads/1664847910.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=78&tv=truesports5",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=78&tv=truesports5#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง truesports 5"
   },
   {
     "category": "กีฬา",
     "name": "truesports 7",
     "img_src": "//dookeela.live/uploads/1664847921.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=79&tv=truesports7",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=79&tv=truesports7#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง truesports 7"
   },
   {
     "category": "กีฬา",
     "name": "ทรูไอดี สปอร์ต",
     "img_src": "//dookeela.live/uploads/1743311087.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=597&tv=ทรูไอดีสปอร์ต",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=597&tv=ทรูไอดีสปอร์ต#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง ทรูไอดี สปอร์ต"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 1",
     "img_src": "//dookeela.live/uploads/1664500365.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=44&tv=บีอินสปอตส์1",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=44&tv=บีอินสปอตส์1#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 1"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 1 (617)",
     "img_src": "//dookeela.live/uploads/1726690688.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=526&tv=บีอินสปอตส์1(617)",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=526&tv=บีอินสปอตส์1(617)#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 1 (617)"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 10",
     "img_src": "//dookeela.live/uploads/1724346113.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=496&tv=บีอินสปอตส์10",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=496&tv=บีอินสปอตส์10#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 10"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 2",
     "img_src": "//dookeela.live/uploads/1690843424.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=188&tv=บีอินสปอตส์2",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=188&tv=บีอินสปอตส์2#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 2"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 3",
     "img_src": "//dookeela.live/uploads/1663980670.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=6&tv=บีอินสปอตส์3",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=6&tv=บีอินสปอตส์3#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 3"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 4",
     "img_src": "//dookeela.live/uploads/1692816640.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=201&tv=บีอินสปอตส์4",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=201&tv=บีอินสปอตส์4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 4"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 5",
     "img_src": "//dookeela.live/uploads/1693290376.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=202&tv=บีอินสปอตส์5",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=202&tv=บีอินสปอตส์5#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 5"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 6",
     "img_src": "//dookeela.live/uploads/1694719513.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=214&tv=บีอินสปอตส์6",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=214&tv=บีอินสปอตส์6#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 6"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 7",
     "img_src": "//dookeela.live/uploads/1694719622.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=215&tv=บีอินสปอตส์7",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=215&tv=บีอินสปอตส์7#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 7"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 8",
     "img_src": "//dookeela.live/uploads/1724241278.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=494&tv=บีอินสปอตส์8",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=494&tv=บีอินสปอตส์8#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 8"
   },
   {
     "category": "กีฬา",
     "name": "บีอินสปอตส์ 9",
     "img_src": "//dookeela.live/uploads/1724241287.png",
-    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=495&tv=บีอินสปอตส์9",
+    "data_url": "intent://goal-th.com/ช่องรายการทีวี/?id=495&tv=บีอินสปอตส์9#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
     "aria_label": "ดูช่อง บีอินสปอตส์ 9"
   },
   {
