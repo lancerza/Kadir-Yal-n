@@ -27,8 +27,7 @@ html, body {
     color: var(--light-text);
     font-family: 'Arial', sans-serif;
     text-align: center;
-    /* ลบ user-select: none; ออกจาก body เพื่อให้ผู้ใช้เลือกข้อความได้ตามปกติ */
-    /* การป้องกันการเลือกข้อความจะถูกจัดการด้วย JavaScript ในบางส่วน */
+    /* user-select ถูกจัดการใน JS เพื่อความยืดหยุ่น */
 }
 
 /* --- Animations --- */
@@ -75,8 +74,7 @@ h1 {
     width: 100%;
     margin-bottom: var(--spacing-xs);
     position: relative;
-    /* ปรับ height ให้ยืดหยุ่นมากขึ้นด้วย min-height หรือตรวจสอบให้แน่ใจว่า 20px เพียงพอ */
-    min-height: 20px; 
+    min-height: 20px; /* ใช้ min-height เพื่อความยืดหยุ่น */
     overflow: hidden;
 }
 
@@ -159,18 +157,18 @@ main.categories-container {
     flex: 0 0 auto;
     width: 220px;
     box-sizing: border-box;
-    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* เพิ่ม box-shadow ใน transition */
+    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     border: 1px solid var(--dark-bg);
     height: auto;
-    box-shadow: none; /* สถานะปกติไม่มีเงา */
+    box-shadow: none;
 }
 
 .category:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* เพิ่มเงาเมื่อ hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* --- Accordion Components --- */
@@ -186,23 +184,23 @@ main.categories-container {
     width: 100%;
     text-align: center;
     margin-bottom: 0;
-    transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* เพิ่ม box-shadow ใน transition */
+    transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
     border: 1px solid var(--white);
-    box-shadow: none; /* สถานะปกติไม่มีเงา */
+    box-shadow: none;
 }
 
 .accordion-button:hover {
     background: linear-gradient(145deg, #616161, #505050);
     transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* เพิ่มเงาเมื่อ hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     border-color: var(--white);
 }
 
 .accordion-button:active {
     transform: translateY(0);
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5); /* เงาแบบ inset เมื่อ active */
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
     background: #333333;
     border-color: #AAAAAA;
 }
@@ -217,7 +215,7 @@ main.categories-container {
     padding: 0;
     overflow: hidden;
     transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
-    display: none; /* เริ่มต้นด้วย display: none */
+    display: none;
     opacity: 0;
     width: 100%;
     flex-wrap: wrap;
@@ -227,7 +225,7 @@ main.categories-container {
 }
 
 .accordion-content.show {
-    display: flex; /* เปลี่ยนเป็น display: flex เมื่อ show */
+    display: flex;
     opacity: 1;
     padding-top: var(--spacing-sm);
     padding-bottom: var(--spacing-sm);
@@ -242,9 +240,8 @@ main img {
     height: 50px;
     width: 50px;
     object-fit: cover;
-    /* หากใช้ channel-link เป็น flexbox หรือ grid อาจพิจารณาจัดตำแหน่งด้วย align-items/place-items */
-    vertical-align: middle; 
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; /* เพิ่ม box-shadow ใน transition */
+    vertical-align: middle;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
     user-select: none; /* ป้องกันการเลือกรูปภาพ */
 }
@@ -252,7 +249,7 @@ main img {
 main img:hover {
     transform: scale(1.05);
     border-color: var(--white);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* เพิ่มเงาเมื่อ hover */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* --- Footer --- */
@@ -274,16 +271,147 @@ footer {
     color: rgba(255, 255, 255, 0.7);
     font-family: 'Kanit', sans-serif;
     font-size: clamp(14px, 2.5vw, 18px);
-    display: none; /* ซ่อนโดยค่าเริ่มต้น */
+    display: none;
 }
 
 .loading-indicator.active, .no-channels-message.active {
-    display: block; /* แสดงเมื่อมี class active */
+    display: block;
 }
 
 .loading-indicator i.fa-spinner {
     animation: spin 1s linear infinite;
     margin-right: var(--spacing-xs);
+}
+
+/* --- Modal Dialog Styles --- */
+.modal {
+    display: none; /* ซ่อนเป็นค่าเริ่มต้น */
+    position: fixed; /* อยู่เหนือเนื้อหาอื่นๆ */
+    z-index: 1000; /* ให้แสดงทับองค์ประกอบอื่น ๆ */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* ป้องกันการเลื่อนพื้นหลัง */
+    background-color: rgba(0, 0, 0, 0.7); /* พื้นหลังทึบแสง */
+    display: flex; /* ใช้ flex เพื่อจัดตำแหน่งตรงกลาง */
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอพื้นหลัง */
+}
+
+.modal-content {
+    background-color: var(--dark-bg);
+    margin: auto;
+    padding: var(--spacing-xl);
+    border: 1px solid var(--white);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.close-button {
+    color: var(--white);
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--red-accent);
+    text-decoration: none;
+}
+
+.modal h3 {
+    color: var(--red-accent);
+    font-family: 'Kanit', sans-serif;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    font-size: clamp(20px, 4vw, 28px);
+}
+
+.modal p {
+    color: var(--light-text);
+    font-family: 'Kanit', sans-serif;
+    font-size: clamp(14px, 3vw, 18px);
+    margin-bottom: var(--spacing-xl);
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.modal-button {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-family: 'Kanit', sans-serif;
+    font-size: clamp(14px, 3vw, 18px);
+    font-weight: bold;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.primary-button {
+    background-color: var(--line-green);
+    color: var(--white);
+}
+
+.primary-button:hover {
+    background-color: #008f00;
+    transform: translateY(-2px);
+}
+
+.secondary-button {
+    background-color: #616161;
+    color: var(--white);
+}
+
+.secondary-button:hover {
+    background-color: #424242;
+    transform: translateY(-2px);
+}
+
+/* Video Player Specific Styles */
+.video-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto var(--spacing-md) auto;
+}
+
+#desktopVideoPlayer {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+}
+
+/* --- Network Status Alert Styles --- */
+.network-status-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--red-accent);
+    color: var(--white);
+    text-align: center;
+    padding: 10px;
+    z-index: 1001;
+    font-family: 'Kanit', sans-serif;
+    font-size: clamp(14px, 3vw, 18px);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 /* --- Media Queries --- */
@@ -292,22 +420,28 @@ footer {
         gap: var(--spacing-md);
     }
     .category {
-        width: calc(50% - var(--spacing-lg)); /* ปรับให้เหมาะสมกับ gap */
+        width: calc(50% - var(--spacing-lg));
         max-width: unset;
     }
 }
 
 @media (max-width: 480px) {
     body {
-        padding: 0 var(--spacing-xs); /* ลด padding ด้านข้างของ body */
+        padding: 0 var(--spacing-xs);
     }
     .categories-container {
         gap: var(--spacing-md);
         padding: 0 var(--spacing-xs) var(--spacing-md) var(--spacing-xs);
     }
     .category {
-        width: calc(100% - var(--spacing-md)); /* ปรับให้เหมาะสมกับ padding body และ gap */
+        width: calc(100% - var(--spacing-md));
         margin-left: auto;
         margin-right: auto;
+    }
+    .modal-content {
+        padding: var(--spacing-lg);
+    }
+    .modal-buttons {
+        flex-direction: column;
     }
 }
