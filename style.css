@@ -55,6 +55,9 @@ header {
     animation: fadeIn 3s ease-out;
     width: 100%;
     box-sizing: border-box;
+    display: flex; /* เพิ่ม display: flex เพื่อจัดเรียงองค์ประกอบใน header */
+    flex-direction: column; /* จัดเรียงแบบคอลัมน์ */
+    align-items: center; /* จัดให้อยู่ตรงกลาง */
 }
 
 #running-text-container {
@@ -107,7 +110,7 @@ h1 {
     font-size: clamp(14px, 2.5vw, 20px);
     color: var(--line-blue);
     margin-top: var(--spacing-xl);
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl); /* ปรับ margin-bottom ให้มีพื้นที่สำหรับปุ่มเคลียร์แคช */
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     font-weight: 700;
     display: flex;
@@ -135,6 +138,40 @@ h1 {
     margin-left: var(--spacing-sm);
 }
 
+/* --- CSS สำหรับปุ่ม Clear Cache --- */
+#clear-cache-button {
+    background-color: #555; /* สีกด */
+    color: var(--white);
+    border: 2px solid var(--white);
+    border-radius: 50%; /* ทำให้เป็นวงกลม */
+    width: 60px; /* กำหนดขนาด */
+    height: 60px; /* กำหนดขนาด */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px; /* ขนาดไอคอน */
+    cursor: pointer;
+    margin-top: var(--spacing-md); /* จัดระยะห่างจากส่วนด้านบน */
+    margin-bottom: var(--spacing-xl); /* จัดระยะห่างจากส่วนด้านล่าง (categories) */
+    transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* เงาเริ่มต้น */
+}
+
+#clear-cache-button:hover {
+    background-color: #777; /* สีเมื่อ hover */
+    transform: translateY(-2px); /* ยกขึ้นเล็กน้อย */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 25px rgba(255, 255, 255, 0.4); /* เรืองแสง */
+}
+
+#clear-cache-button:active {
+    background-color: #333; /* สีเมื่อกด */
+    transform: translateY(0); /* กลับมาตำแหน่งเดิม */
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5); /* เงาด้านใน */
+}
+
+/* --- สิ้นสุด CSS สำหรับปุ่ม Clear Cache --- */
+
+
 main.categories-container {
     display: flex;
     flex-wrap: wrap;
@@ -142,7 +179,7 @@ main.categories-container {
     gap: var(--spacing-lg);
     width: 100%;
     max-width: 1200px;
-    margin-top: clamp(30px, 6vw, 50px);
+    margin-top: clamp(30px, 6vw, 50px); /* อาจปรับค่านี้เล็กน้อยหากต้องการให้ใกล้ปุ่มมากขึ้น */
     padding-bottom: var(--spacing-md);
     flex-grow: 1;
     align-items: flex-start;
@@ -159,7 +196,7 @@ main.categories-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 1px solid var(--dark-bg); /* ยังคงขอบสีเข้มปกติ */
+    border: 1px solid var(--dark-bg);
     height: auto;
     box-shadow: none;
 }
@@ -254,16 +291,14 @@ main.categories-container {
 
 main img {
     border-radius: var(--border-radius);
-    border: 1px solid var(--white); /* ขอบสีขาวเริ่มต้น */
+    border: 1px solid var(--white);
     padding: 3px;
     margin: 0;
     height: 50px;
     width: 50px;
     object-fit: cover;
     vertical-align: middle;
-    /* เพิ่ม box-shadow เริ่มต้นเป็นค่าใสๆ เพื่อให้ transition ทำงานได้ราบรื่น */
-    box-shadow: 0 0 0px rgba(255, 255, 255, 0); /* เริ่มต้นไม่มีเงา */
-    /* ปรับ transition ให้รวม box-shadow ด้วย */
+    box-shadow: 0 0 0px rgba(255, 255, 255, 0);
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.3s ease;
     cursor: pointer;
 }
@@ -271,7 +306,6 @@ main img {
 main img:hover {
     transform: scale(1.05);
     border-color: var(--white);
-    /* เพิ่ม box-shadow สำหรับเอฟเฟกต์เรืองแสงสีขาว */
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
 }
 
@@ -301,7 +335,7 @@ footer {
 }
 
 .loading-indicator i.fa-spinner {
-    animation: spin 1s linear infinite;
+    animation: spin 1.5s linear infinite; /* ปรับความเร็วเล็กน้อย */
     margin-right: var(--spacing-xs);
 }
 
