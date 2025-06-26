@@ -283,7 +283,8 @@ footer {
     margin-right: var(--spacing-xs);
 }
 
-/* --- Modal Dialog Styles --- */
+/* --- Modal Dialog Styles (ทั่วไปสำหรับ Modal) --- */
+/* ส่วนนี้ใช้ร่วมกันสำหรับ appInstallModal และ errorModal */
 .modal {
     display: none; /* ซ่อนเป็นค่าเริ่มต้น */
     position: fixed; /* อยู่เหนือเนื้อหาอื่นๆ */
@@ -383,7 +384,9 @@ footer {
     transform: translateY(-2px);
 }
 
-/* Video Player Specific Styles */
+/* Video Player Specific Styles - ส่วนนี้ถูกลบออกจาก HTML แล้ว แต่ถ้ายังเหลืออยู่ใน CSS อาจทำให้เกิดปัญหา */
+/* หากต้องการลบ Modal วิดีโอ Player ออกอย่างสมบูรณ์ ควรลบโค้ดส่วนนี้ด้วย */
+/*
 .video-container {
     width: 100%;
     max-width: 800px;
@@ -395,6 +398,7 @@ footer {
     height: auto;
     border-radius: var(--border-radius);
 }
+*/
 
 /* --- Network Status Alert Styles --- */
 .network-status-alert {
