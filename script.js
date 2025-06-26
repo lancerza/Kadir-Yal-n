@@ -253,10 +253,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- ส่วนป้องกันการดูโค้ด (Code View Protection) ---
+// --- ส่วนป้องกันการดูโค้ด (Code View Protection) ---
     // โปรดทราบ: การป้องกันเหล่านี้มุ่งเป้าไปที่การลดโอกาสในการเข้าถึงซอร์สโค้ดโดยผู้ใช้ทั่วไป
     // แต่ไม่สามารถป้องกันผู้ใช้ที่มีความรู้ทางเทคนิคสูงได้อย่างสมบูรณ์
-    // และบางครั้งอาจส่งผลต่อประสบการณ์ผู้ใช้ในการใช้งานเบราว์เซอร์ปกติ
+    // และอาจส่งผลต่อประสบการณ์ผู้ใช้ในการใช้งานเบราว์เซอร์ปกติ
 
     // ป้องกันการคลิกขวา เพื่อไม่ให้เมนูบริบทของเบราว์เซอร์ปรากฏขึ้น
     document.addEventListener('contextmenu', e => {
@@ -283,28 +283,40 @@ document.addEventListener('DOMContentLoaded', function() {
             return; 
         }
 
-        // ตรวจสอบการกดปุ่ม Ctrl (บน Windows/Linux) หรือ Command (บน Mac) ร่วมกับปุ่มอื่น
-        if (e.ctrlKey || e.metaKey) {
-            const lowerKey = e.key.toLowerCase();
+        // ดักจับแป้นพิมพ์ลัด Developer Tools และ View Source ที่สำคัญ
+        // e.ctrlKey สำหรับ Windows/Linux, e.metaKey สำหรับ macOS (ปุ่ม Command)
 
-            // ป้องกัน Ctrl/Cmd + U (สำหรับเปิดดูซอร์สโค้ดของหน้าเว็บ)
-            if (lowerKey === 'u') {
-                e.preventDefault();
-            }
-            // ป้องกัน Ctrl/Cmd + Shift + I/J/C (สำหรับเปิด Developer Tools ของเบราว์เซอร์)
-            else if (e.shiftKey && (lowerKey === 'i' || lowerKey === 'j' || lowerKey === 'c')) {
-                e.preventDefault();
-            }
-            // ป้องกันแป้นพิมพ์ลัดพื้นฐานอื่นๆ ที่เกี่ยวข้องกับการจัดการเนื้อหา
-            // เช่น S (บันทึก), P (พิมพ์), A (เลือกทั้งหมด), C (คัดลอก), X (ตัด), V (วาง)
-            else if (['s', 'p', 'a', 'c', 'x', 'v'].includes(lowerKey)) {
-                e.preventDefault();
-            }
-        }
-        
-        // ป้องกันปุ่ม F12 (สำหรับเปิด Developer Tools ของเบราว์เซอร์)
+        // 1. ป้องกัน F12 (Developer Tools)
         if (e.key === 'F12') {
             e.preventDefault();
+            // console.log("Blocked F12"); // สำหรับดีบัก
+            return; // หยุดการทำงานในฟังก์ชันนี้หลังจากป้องกันแล้ว
+        }
+
+        // 2. ป้องกัน Ctrl/Cmd + Shift + I/J/C (Developer Tools)
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && 
+            (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+            e.preventDefault();
+            // console.log("Blocked Ctrl/Cmd+Shift+I/J/C"); // สำหรับดีบัก
+            return;
+        }
+
+        // 3. ป้องกัน Ctrl/Cmd + U (View Source)
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')) {
+            e.preventDefault();
+            // console.log("Blocked Ctrl/Cmd+U"); // สำหรับดีบัก
+            return;
+        }
+
+        // 4. ป้องกันแป้นพิมพ์ลัดพื้นฐานอื่นๆ ที่เกี่ยวข้องกับการจัดการเนื้อหา
+        // เช่น Ctrl/Cmd + S (บันทึก), P (พิมพ์), A (เลือกทั้งหมด), C (คัดลอก), X (ตัด), V (วาง)
+        if (e.ctrlKey || e.metaKey) {
+            const lowerKey = e.key.toLowerCase();
+            if (['s', 'p', 'a', 'c', 'x', 'v'].includes(lowerKey)) {
+                e.preventDefault();
+                // console.log(`Blocked Ctrl/Cmd+${e.key}`); // สำหรับดีบัก
+                return;
+            }
         }
     });
     // --- สิ้นสุดส่วนป้องกันการดูโค้ด ---
