@@ -11,6 +11,8 @@
     --spacing-md: 10px;
     --spacing-lg: 15px;
     --spacing-xl: 20px;
+    /* --- เพิ่มบรรทัดนี้: กำหนดค่าเริ่มต้นสำหรับระยะเวลา marquee --- */
+    --marquee-duration: 15s; 
 }
 
 /* Animation for header (Fade in) */
@@ -70,7 +72,8 @@ header {
     font-family: 'Kanit', sans-serif;
     font-size: clamp(12px, 2vw, 16px);
     font-weight: 700;
-    animation: marquee 15s linear infinite;
+    /* --- ปรับตรงนี้: ใช้ตัวแปร CSS สำหรับ animation duration --- */
+    animation: marquee var(--marquee-duration) linear infinite;
     position: absolute;
     top: 0;
     left: 0;
@@ -104,7 +107,7 @@ h1 {
     font-family: 'Kanit', sans-serif;
     font-size: clamp(14px, 2.5vw, 20px);
     color: var(--line-blue);
-    margin-top: var(--spacing-xl); /* ปรับค่า margin-top ให้มากขึ้นตามที่คุณต้องการ */
+    margin-top: var(--spacing-xl);
     margin-bottom: var(--spacing-xl);
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     font-weight: 700;
@@ -153,20 +156,17 @@ main.categories-container {
     flex: 0 0 auto;
     width: 220px;
     box-sizing: border-box;
-    /* คง transition ที่จำเป็นไว้ แต่จะลบ box-shadow ที่ไม่ใช่ none ออก */
     transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     border: 1px solid var(--dark-bg);
     height: auto;
-    box-shadow: none; /* ทำให้แน่ใจว่าไม่มี box-shadow เริ่มต้น */
+    box-shadow: none;
 }
 
 .category:hover {
     transform: translateY(-2px);
-    /* ลบบรรทัดนี้ออกเพื่อเอาเงาดำเงาขาวรอบ category ออกเมื่อ hover */
-    /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); */
 }
 
 @media (max-width: 768px) {
@@ -174,7 +174,7 @@ main.categories-container {
         gap: var(--spacing-md);
     }
     .category {
-        width: calc(50% - 15px);
+        width: calc(50% - var(--spacing-lg));
         max-width: unset;
     }
 }
@@ -185,7 +185,7 @@ main.categories-container {
         padding: 0 var(--spacing-xs) var(--spacing-md) var(--spacing-xs);
     }
     .category {
-        width: calc(100% - 10px);
+        width: calc(100% - var(--spacing-md));
         margin-left: auto;
         margin-right: auto;
     }
@@ -203,25 +203,22 @@ main.categories-container {
     width: 100%;
     text-align: center;
     margin-bottom: 0;
-    transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease; /* ลบ box-shadow ออกจาก transition */
+    transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
     border: 1px solid var(--white);
-    /* ลบบรรทัดนี้ออกเพื่อเอาเงาดำเงาขาวรอบปุ่มออก */
-    box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเริ่มต้น */
+    box-shadow: none;
 }
 
 .accordion-button:hover {
     background: linear-gradient(145deg, #616161, #505050);
     transform: translateY(-3px);
-    /* ลบบรรทัดนี้ออกเพื่อเอาเงาดำเงาขาวรอบปุ่มออกเมื่อ hover */
-    box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเมื่อ hover */
+    box-shadow: none;
     border-color: var(--white);
 }
 
 .accordion-button:active {
     transform: translateY(0);
-    /* คงเงาด้านในนี้ไว้ หากต้องการให้มีเอฟเฟกต์กดลงไป */
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
     background: #333333;
     border-color: #AAAAAA;
@@ -244,6 +241,7 @@ main.categories-container {
     justify-content: center;
     gap: var(--spacing-sm);
     position: relative;
+    margin-top: var(--spacing-sm);
 }
 
 .accordion-content.show {
@@ -262,15 +260,14 @@ main img {
     width: 50px;
     object-fit: cover;
     vertical-align: middle;
-    transition: transform 0.2s ease, border-color 0.2s ease; /* ลบ box-shadow ออกจาก transition */
+    transition: transform 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
 }
 
 main img:hover {
     transform: scale(1.05);
     border-color: var(--white);
-    /* ลบบรรทัดนี้ออกเพื่อเอาเงาดำเงาขาวรอบรูปภาพช่องออกเมื่อ hover */
-    box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเมื่อ hover */
+    box-shadow: none;
 }
 
 footer {
