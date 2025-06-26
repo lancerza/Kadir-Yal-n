@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
             channelsData = data;
         } catch (error) {
             console.error('Error loading or parsing channels.json:', error);
-            // *** ปรับปรุงการจัดการข้อผิดพลาด: อัปเดตข้อความใน no-channels-message และแสดงผล ***
+            // ปรับปรุงการจัดการข้อผิดพลาด: อัปเดตข้อความใน no-channels-message และแสดง
             Object.values(categoryContentMap).forEach(container => {
                 const noChannelsMsg = container.querySelector('.no-channels-message');
                 // ล้างเนื้อหาช่องที่อาจจะโหลดบางส่วนไปแล้ว
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const channelName = imgElement ? imgElement.alt : 'Unknown Channel';
             const categoryElement = link.closest('.category');
             const categoryButton = categoryElement ? categoryElement.querySelector('.accordion-button') : null;
-            // *** ใช้ normalize("NFC").replace(/\s+/g, " ").trim() สำหรับ categoryName ***
+            // ใช้ normalize("NFC").replace(/\s+/g, " ").trim() เพื่อจัดการช่องว่างและ Normalize ตัวอักษรพิเศษ
             const categoryName = categoryButton ? categoryButton.innerText.normalize("NFC").replace(/\s+/g, " ").trim() : 'Unknown Category';
             // ส่งข้อมูลไปยัง Google Analytics (ถ้ามี)
             if (typeof gtag === 'function') {
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         clearMessages(contentElement); // ล้างข้อความสถานะก่อนแสดงช่อง
 
-        // *** ใช้ normalize("NFC").replace(/\s+/g, " ").trim() สำหรับ categoryText ***
+        // ดึงชื่อหมวดหมู่จากข้อความในปุ่ม โดยใช้ normalize("NFC").replace(/\s+/g, " ").trim()
         const categoryText = buttonElement.innerText.normalize("NFC").replace(/\s+/g, " ").trim();
         const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
 
