@@ -4,7 +4,7 @@
     "name": "ALTV4",
     "img_src": "https://dookeela.live/uploads/1725896083.png",
     "data_url": "intent://dookeela.live/live-tv/altv4#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
-    "ios_data_url": "liftplay://play?url=https://dookeela.live/live-tv/altv4", // ตัวอย่าง: ต้องทราบ URL จริง
+    "ios_data_url": "liftplay://play?url=https://dookeela.live/live-tv/altv4",
     "aria_label": "ดูช่อง ALTV4"
   },
   {
@@ -12,7 +12,7 @@
     "name": "NBT2 HD",
     "img_src": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png",
     "data_url": "intent://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8#Intent;package=com.wiseplay;S.referer=https://ais-vidnt.com/&userAgent=exo_player;S.title=KTV;scheme=https;type=video/mp4;end",
-    "ios_data_url": "liftplay://play?url=https://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8", // ตัวอย่าง
+    "ios_data_url": "liftplay://play?url=https://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8",
     "aria_label": "ดูช่อง NBT2 HD"
   }
 ]
