@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const APP_STORE_URLS = {
         wiseplay: 'https://play.google.com/store/apps/details?id=com.wiseplay',
-        liftplay: 'https://apps.apple.com/th/app/liftplay/idYOUR_LIFTPLAY_APP_ID' // **สำคัญ: เปลี่ยน YOUR_LIFTPLAY_APP_ID เป็น ID จริงของ Liftplay**
+        liftplay: 'https://apps.apple.com/th/app/liftplay/id1557001663' // **สำคัญ: เปลี่ยน YOUR_LIFTPLAY_APP_ID เป็น ID จริงของ Liftplay**
     };
 
     const PLACEHOLDER_IMG = 'https://via.placeholder.com/50x50?text=NO+IMG'; // ตัวอย่างลิงก์รูปภาพ Placeholder
