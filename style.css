@@ -27,7 +27,7 @@ html, body {
     color: var(--light-text);
     font-family: 'Arial', sans-serif;
     text-align: center;
-    /* user-select ถูกจัดการใน JS เพื่อความยืดหยุ่น */
+    /* user-select ถูกจัดการใน JS เพื่อความยืดหยุ่น (หากมีการป้องกันการเลือกข้อความ) */
 }
 
 /* --- Animations --- */
