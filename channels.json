@@ -1,25 +1,30 @@
 [
   {
     "category": "ทีวีดิจิตอล",
-    "name": "ALTV4",
-    "img_src": "https://dookeela.live/uploads/1725896083.png",
-    "data_url": "https://dookeela.live/live-tv/altv4.m3u8",
-    "fallback_data_url": "https://backup-dookeela.live/live-tv/altv4-backup.m3u8",
-    "aria_label": "ดูช่อง ALTV4"
+    "name": "Ch8",
+    "img_src": "https://dookeela.live/uploads/1704117313.png",
+    "data_url": "intent://dookeela.live/live-tv/ch8#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Ch8"
   },
   {
     "category": "ทีวีดิจิตอล",
-    "name": "NBT2 HD",
-    "img_src": "https://ais-s.ais.com/ais/play/origin/LIVE//channelicon/0001.png",
-    "data_url": "https://cdn-edge-ott.prd.go.th/live_vlc/smil:c30f-97f7-c767-ca64-98aa/chunklist.m3u8",
-    "aria_label": "ดูช่อง NBT2 HD"
+    "name": "Ch7HD",
+    "img_src": "https://dookeela.live/uploads/1688059473.png",
+    "data_url": "intent://dookeela.live/live-tv/ch7hd/thairathtv#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Ch7HD"
   },
   {
     "category": "ทีวีดิจิตอล",
-    "name": "Thai PBS",
-    "img_src": "https://ais-s.ais.com/ais/play/origin/LIVE//channelicon/0014.png",
-    "data_url": "https://thaipbs-live.cdn.byteark.com/live/playlist_1080p/index.m3u8",
-    "fallback_data_url": "https://backup-thaipbs.cdn.byteark.com/live/playlist_1080p/index.m3u8",
-    "aria_label": "ดูช่อง Thai PBS"
+    "name": "Ch5HD",
+    "img_src": "https://dookeela.live/uploads/1664574997.png",
+    "data_url": "intent://dookeela.live/live-tv/ch5hd#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Ch5HD"
+  },
+  {
+    "category": "ทีวีดิจิตอล",
+    "name": "Ch3HD",
+    "img_src": "https://dookeela.live/uploads/1685812254.png",
+    "data_url": "intent://dookeela.live/live-tv/ch3hd#Intent;package=com.wiseplay;S.userAgent=android;S.title=KTV;scheme=https;type=video/mp4;end",
+    "aria_label": "ดูช่อง Ch3HD"
   }
   ]
