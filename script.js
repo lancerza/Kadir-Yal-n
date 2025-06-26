@@ -144,16 +144,13 @@ document.addEventListener('DOMContentLoaded', function() {
     updateDateTime(); // Call immediately on load
     setInterval(updateDateTime, 1000); // Update every second
 
-    // Clear Cache button logic (can be used for refresh)
+    // Clear Cache/Refresh button logic
     const clearCacheButton = document.getElementById('clear-cache-button');
-    if (clearCacheButton) {
+    if (clearCacheButton) { // ตรวจสอบว่าปุ่มถูกพบใน DOM
         clearCacheButton.addEventListener('click', () => {
-            if (confirm('คุณต้องการรีเฟรชหน้าเว็บหรือไม่?')) { // Changed confirmation text
+            if (confirm('คุณต้องการรีเฟรชหน้าเว็บหรือไม่?')) {
                 console.log('Reloading the page...');
-                // Forces a reload from the server, bypassing cache (same as a hard refresh)
-                window.location.reload(true);
-                // Optionally add an alert after reload, but usually not needed as page reloads
-                // alert('หน้าเว็บถูกรีเฟรชแล้ว');
+                window.location.reload(true); // คำสั่งโหลดหน้าเว็บใหม่
             }
         });
     }
