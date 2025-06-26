@@ -22,11 +22,14 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    overflow-x: hidden;
+    overflow-x: hidden; /* ยังคงใช้ overflow-x: hidden; เพื่อป้องกันการเลื่อนในแนวนอน */
     background-color: var(--dark-bg);
     color: var(--light-text);
-    font-family: 'Kanit', sans-serif; /* เปลี่ยนเป็น Kanit ทั่วโลกเพื่อให้สอดคล้องกัน */
+    font-family: 'Kanit', sans-serif; /* ตั้ง Kanit เป็น font หลัก */
     text-align: center;
+    -webkit-font-smoothing: antialiased; /* สำหรับ WebKit/Safari */
+    -moz-osx-font-smoothing: grayscale; /* สำหรับ Firefox บน macOS */
+    text-rendering: optimizeLegibility; /* สำหรับเบราว์เซอร์อื่นๆ เพื่อการแสดงผลข้อความที่ดีขึ้น */
 }
 
 /* --- Animations --- */
@@ -36,8 +39,8 @@ html, body {
 }
 
 @keyframes marquee {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
+    0% { transform: translateX(100%); } /* Start from right */
+    100% { transform: translateX(-100%); } /* Go to far left */
 }
 
 @keyframes spin {
@@ -230,7 +233,22 @@ main.categories-container {
     padding-bottom: var(--spacing-sm);
 }
 
-/* --- Image Styles --- */
+/* --- Channel Link & Image Styles --- */
+.channel-link {
+    display: flex; /* ใช้ flexbox สำหรับ channel-link */
+    align-items: center; /* จัดรูปภาพและข้อความให้อยู่ตรงกลางแนวตั้ง */
+    justify-content: center; /* จัดให้อยู่ตรงกลางแนวนอน (ถ้ามีข้อความ) */
+    text-decoration: none;
+    color: inherit;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s ease;
+}
+
+.channel-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 main img {
     border-radius: var(--border-radius);
     border: 1px solid var(--white);
@@ -239,7 +257,7 @@ main img {
     height: 50px;
     width: 50px;
     object-fit: cover;
-    vertical-align: middle;
+    /* vertical-align: middle; ถูกลบออกเนื่องจาก channel-link ใช้ flexbox แล้ว */
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
     user-select: none;
@@ -282,122 +300,16 @@ footer {
     margin-right: var(--spacing-xs);
 }
 
-/* --- Modal Dialog Styles (ทั่วไปสำหรับ Modal) --- */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(5px);
-}
-
-.modal-content {
-    background-color: var(--dark-bg);
-    margin: auto;
-    padding: var(--spacing-xl);
-    border: 1px solid var(--white);
-    border-radius: var(--border-radius);
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    position: relative;
-    text-align: center;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.close-button {
-    color: var(--white);
-    font-size: 28px;
-    font-weight: bold;
-    position: absolute;
-    top: var(--spacing-sm);
-    right: var(--spacing-md);
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.close-button:hover,
-.close-button:focus {
-    color: var(--red-accent);
-    text-decoration: none;
-}
-
-.modal h3 {
-    color: var(--red-accent);
-    font-family: 'Kanit', sans-serif;
+/* --- Error Message Display --- */
+.error-display-message {
+    display: none; /* ซ่อนไว้เป็นค่าเริ่มต้น */
     margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-    font-size: clamp(20px, 4vw, 28px);
+    margin-bottom: var(--spacing-md);
+    /* สีและ text-align ถูกตั้งค่าใน JS แล้ว แต่สามารถ Override ได้ที่นี่ */
 }
 
-.modal p {
-    color: var(--light-text);
-    font-family: 'Kanit', sans-serif;
-    font-size: clamp(14px, 3vw, 18px);
-    margin-bottom: var(--spacing-xl);
-}
-
-.modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: var(--spacing-md);
-}
-
-.modal-button {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-family: 'Kanit', sans-serif;
-    font-size: clamp(14px, 3vw, 18px);
-    font-weight: bold;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.primary-button {
-    background-color: var(--line-green);
-    color: var(--white);
-}
-
-.primary-button:hover {
-    background-color: #008f00;
-    transform: translateY(-2px);
-}
-
-.secondary-button {
-    background-color: #616161;
-    color: var(--white);
-}
-
-.secondary-button:hover {
-    background-color: #424242;
-    transform: translateY(-2px);
-}
-
-/* --- Network Status Alert Styles --- */
-.network-status-alert {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--red-accent);
-    color: var(--white);
-    text-align: center;
-    padding: 10px;
-    z-index: 1001;
-    font-family: 'Kanit', sans-serif;
-    font-size: clamp(14px, 3vw, 18px);
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+.error-display-message.active {
+    display: block;
 }
 
 /* --- Media Queries --- */
@@ -423,11 +335,5 @@ footer {
         width: calc(100% - var(--spacing-md));
         margin-left: auto;
         margin-right: auto;
-    }
-    .modal-content {
-        padding: var(--spacing-lg);
-    }
-    .modal-buttons {
-        flex-direction: column;
     }
 }
