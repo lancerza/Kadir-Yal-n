@@ -369,20 +369,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // ตรวจสอบความถูกต้องของ URL หลัก
         if (!isValidUrl(urlToPlay)) {
             console.warn(`URL หลักของช่อง "${channel.name}" ไม่ถูกต้อง: ${urlToPlay}`);
-            if (channel.fallback_data_url && isValidUrl(channel.fallback_data_url)) {
-                urlToPlay = channel.fallback_data_url;
-                isFallback = true;
-                console.log(`ลองใช้ Fallback URL สำหรับช่อง "${channel.name}": ${urlToPlay}`);
-                if (typeof gtag === 'function') {
-                    gtag('event', 'channel_fallback_used', { 'channel_name': channel.name, 'main_url': channel.data_url, 'fallback_url': urlToPlay });
-                }
-            } else {
-                showErrorModal(
-                    'ลิงก์วิดีโอไม่ถูกต้อง',
-                    `ลิงก์หลักสำหรับช่อง "${channel.name}" ไม่ถูกต้อง และไม่มีลิงก์สำรองที่ใช้งานได้`
-                );
-                return; // หยุดทำงานถ้าไม่มี URL ที่ถูกต้องเลย
-            }
+            // หาก URL หลักไม่ถูกต้อง จะไม่ลอง Fallback แล้ว แต่แสดงข้อผิดพลาดทันที
+            showErrorModal(
+                'ลิงก์วิดีโอไม่ถูกต้อง',
+                `ลิงก์หลักสำหรับช่อง "${channel.name}" ไม่ถูกต้อง<br>โปรดติดต่อผู้ดูแล`
+            );
+            return; // หยุดทำงานถ้า URL หลักไม่ถูกต้อง
         }
 
         const userAgent = navigator.userAgent.toLowerCase();
@@ -423,14 +415,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 1000);
                 } else {
                     console.warn(`Liftplay config ไม่สมบูรณ์สำหรับ ${channel.name}`);
-                    window.open(urlToPlay, '_blank');
+                    showErrorModal(
+                        'ตั้งค่าแอปไม่สมบูรณ์',
+                        `การตั้งค่าสำหรับแอป Liftplay ของช่อง "${channel.name}" ไม่สมบูรณ์<br>โปรดติดต่อผู้ดูแล`
+                    );
                 }
             } else {
                 window.open(urlToPlay, '_blank');
             }
         } else if (isDesktop) {
             videoModalTitle.textContent = channel.name;
-            desktopVideoPlayer.src = urlToplay;
+            desktopVideoPlayer.src = urlToPlay;
             desktopVideoPlayer.load();
             desktopVideoPlayer.play();
 
