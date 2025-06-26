@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const link = event.target.closest('.channel-link');
         if (link) {
             event.preventDefault();
-            const url = link.dataset.url;
+            const url = link.dataset.url; // ดึงค่า data_url จากลิงก์ที่คลิก
             const imgElement = link.querySelector('img');
             const channelName = imgElement ? imgElement.alt : 'Unknown Channel';
             const categoryElement = link.closest('.category');
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 gtag('event', 'channel_click', { 'channel_name': channelName, 'category': categoryName, 'link_url': url });
             }
             // หน่วงเวลาเล็กน้อยก่อนเปลี่ยนหน้า เพื่อให้ Google Analytics ส่งข้อมูลทัน
-            setTimeout(() => { if (url) window.location.href = url; }, 200);
+            setTimeout(() => { if (url) window.location.href = url; }, 200); // เปลี่ยนหน้าไปยัง URL ของสตรีม
         }
     });
 
