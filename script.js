@@ -276,51 +276,57 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- ส่วนป้องกันการดูโค้ด ---
+    // ป้องกันการคลิกขวา, การเลือกข้อความ, การลากและวาง
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('dragstart', e => e.preventDefault());
     document.addEventListener('drop', e => e.preventDefault());
-    
-    // ใช้ capture phase สำหรับ keydown event เพื่อให้มั่นใจว่าถูกจัดการก่อน
-    // เหตุการณ์จะถูกจับตั้งแต่ระดับบนสุด (document) ก่อนที่จะลงไปถึงองค์ประกอบเป้าหมาย
-    document.addEventListener('keydown', e => {
-        // อนุญาต spacebar และ Enter
-        if (e.key === ' ' || e.key === 'Enter') return;
 
-        // ตรวจสอบ Ctrl (หรือ Cmd บน Mac) ร่วมกับคีย์ต่างๆ
+    // ใช้ window.onkeydown เพื่อเพิ่มโอกาสในการบล็อกคีย์ลัดระบบ
+    // และจัดลำดับการตรวจสอบให้มีความสำคัญกับคีย์ลัดที่ต้องการป้องกันเป็นพิเศษ
+    window.onkeydown = function(e) {
+        // ตรวจสอบคีย์ F12 (DevTools)
+        if (e.key === 'F12') {
+            e.preventDefault();
+            e.stopPropagation();
+            return false; // หยุดการทำงานของคีย์ลัด
+        }
+
+        // ตรวจสอบ Ctrl (หรือ Cmd บน Mac)
         if (e.ctrlKey || e.metaKey) {
             const lowerKey = e.key.toLowerCase();
-            
+
             // ป้องกัน Ctrl/Cmd + U (View Source)
             if (lowerKey === 'u') {
                 e.preventDefault();
-                e.stopPropagation(); // หยุดการแพร่กระจายของ event
-                return; // ออกจากฟังก์ชันทันที
+                e.stopPropagation();
+                return false;
             }
 
             // ป้องกัน Ctrl/Cmd + Shift + I, J, C (Developer Tools)
             if (e.shiftKey && ['i', 'j', 'c'].includes(lowerKey)) {
                 e.preventDefault();
                 e.stopPropagation();
-                return;
-            } 
-            
-            // ป้องกัน Ctrl/Cmd + S (Save), P (Print), A (Select All), C (Copy), X (Cut), V (Paste)
-            // (ยกเว้น C, X, V ที่อาจจำเป็นสำหรับบางสถานการณ์)
-            // หากต้องการป้องกัน C, X, V ด้วย ให้เอา 'c', 'x', 'v' เข้าไปในอาร์เรย์ด้านล่าง
+                return false;
+            }
+
+            // ป้องกัน Ctrl/Cmd + S (Save), P (Print)
             if (['s', 'p'].includes(lowerKey)) {
                 e.preventDefault();
                 e.stopPropagation();
-                return;
+                return false;
             }
+            // สามารถเพิ่ม 'a', 'x', 'c', 'v' ได้ หากต้องการป้องกัน Select All, Cut, Copy, Paste
+            // เช่น: if (['s', 'p', 'a', 'x', 'c', 'v'].includes(lowerKey)) { ... }
         }
-        
-        // ป้องกัน F12 (Developer Tools)
-        if (e.key === 'F12') {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    }, true); // `true` คือการใช้ capture phase
 
+        // อนุญาต spacebar และ Enter (หากต้องการให้คีย์เหล่านี้ทำงานปกติ)
+        if (e.key === ' ' || e.key === 'Enter') {
+            return true;
+        }
+
+        // หากไม่ใช่คีย์ที่ถูกป้องกัน ให้อนุญาตการทำงานปกติ
+        return true;
+    };
     // --- สิ้นสุดส่วนป้องกันการดูโค้ด ---
 });
