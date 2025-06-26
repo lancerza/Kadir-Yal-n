@@ -3,28 +3,28 @@
     "category": "ทีวีดิจิตอล",
     "name": "Ch8",
     "img_src": "https://dookeela.live/uploads/1704117313.png",
-    "data_url": "intent://dookeela.live/live-tv/ch8",
+    "data_url": "https://dookeela.live/live-tv/ch8",
     "aria_label": "ดูช่อง Ch8"
   },
   {
     "category": "ทีวีดิจิตอล",
     "name": "Ch7HD",
     "img_src": "https://dookeela.live/uploads/1688059473.png",
-    "data_url": "intent://dookeela.live/live-tv/ch7hd/thairathtv",
+    "data_url": "https://dookeela.live/live-tv/ch7hd/thairathtv",
     "aria_label": "ดูช่อง Ch7HD"
   },
   {
     "category": "ทีวีดิจิตอล",
     "name": "Ch5HD",
     "img_src": "https://dookeela.live/uploads/1664574997.png",
-    "data_url": "intent://dookeela.live/live-tv/ch5hd",
+    "data_url": "https://dookeela.live/live-tv/ch5hd",
     "aria_label": "ดูช่อง Ch5HD"
   },
   {
     "category": "ทีวีดิจิตอล",
     "name": "Ch3HD",
     "img_src": "https://dookeela.live/uploads/1685812254.png",
-    "data_url": "intent://dookeela.live/live-tv/ch3hd",
+    "data_url": "https://dookeela.live/live-tv/ch3hd",
     "aria_label": "ดูช่อง Ch3HD"
   }
   ]
