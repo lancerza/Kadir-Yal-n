@@ -11,6 +11,8 @@
     --spacing-md: 10px;
     --spacing-lg: 15px;
     --spacing-xl: 20px;
+    --spacing-vh-sm: 2vh;
+    --spacing-vh-md: 5vh;
 }
 
 /* Animation for header (Fade in) */
@@ -47,9 +49,11 @@ html, body {
 header {
     background-color: var(--dark-bg);
     color: var(--white);
-    padding: 2vw 4vw;
+    /* ปรับ padding โดยใช้ clamp เพื่อความยืดหยุ่น */
+    padding: clamp(15px, 2vw, 40px) clamp(20px, 4vw, 80px);
     border-radius: var(--border-radius);
-    margin: 5vh 0 2vh 0;
+    /* ใช้ตัวแปรสำหรับ margin */
+    margin: var(--spacing-vh-md) 0 var(--spacing-vh-sm) 0;
     animation: fadeIn 3s ease-out;
     width: 100%;
     box-sizing: border-box;
@@ -74,7 +78,7 @@ header {
     position: absolute;
     top: 0;
     left: 0;
-    min-width: 100%;
+    min-width: 100%; /* ยังคงค่านี้ไว้ หากคุณต้องการให้ข้อความวิ่งเป็นเส้นตรงข้ามหน้าจอ */
     cursor: default;
 }
 
@@ -104,7 +108,7 @@ h1 {
     font-family: 'Kanit', sans-serif;
     font-size: clamp(14px, 2.5vw, 20px);
     color: var(--line-blue);
-    margin-top: var(--spacing-xl); /* ปรับค่า margin-top ให้มากขึ้นตามที่คุณต้องการ */
+    margin-top: var(--spacing-xl);
     margin-bottom: var(--spacing-xl);
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     font-weight: 700;
@@ -153,20 +157,19 @@ main.categories-container {
     flex: 0 0 auto;
     width: 220px;
     box-sizing: border-box;
-    /* คง transition ที่จำเป็นไว้ แต่จะลบ box-shadow ที่ไม่ใช่ none ออก */
+    /* คง transition ที่จำเป็นไว้ และกำหนด box-shadow เป็น none ที่นี่ */
     transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     border: 1px solid var(--dark-bg);
     height: auto;
-    box-shadow: none; /* ทำให้แน่ใจว่าไม่มี box-shadow เริ่มต้น */
+    box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเริ่มต้น */
 }
 
 .category:hover {
     transform: translateY(-2px);
-    /* ลบบรรทัดนี้ออกเพื่อเอาเงาดำเงาขาวรอบ category ออกเมื่อ hover */
-    /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); */
+    /* ไม่ต้องใส่ box-shadow ที่นี่ เพราะต้องการให้ไม่มีเงาเลย */
 }
 
 @media (max-width: 768px) {
@@ -203,18 +206,17 @@ main.categories-container {
     width: 100%;
     text-align: center;
     margin-bottom: 0;
-    transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease; /* ลบ box-shadow ออกจาก transition */
+    /* กำหนด transition โดยไม่มี box-shadow */
+    transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
     border: 1px solid var(--white);
-    /* ลบบรรทัดนี้ออกเพื่อเอาเงาดำเงาขาวรอบปุ่มออก */
     box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเริ่มต้น */
 }
 
 .accordion-button:hover {
     background: linear-gradient(145deg, #616161, #505050);
     transform: translateY(-3px);
-    /* ลบบรรทัดนี้ออกเพื่อเอาเงาดำเงาขาวรอบปุ่มออกเมื่อ hover */
     box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเมื่อ hover */
     border-color: var(--white);
 }
@@ -236,9 +238,12 @@ main.categories-container {
     max-height: 0;
     padding: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
-    display: none;
+    /* เพิ่ม visibility ใน transition เพื่อการเปลี่ยนผ่านที่ราบรื่นขึ้น */
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out, visibility 0.3s ease-out;
+    /* เปลี่ยนจาก display: none; เป็น visibility: hidden; และคง display: flex; ไว้ */
+    display: flex;
     opacity: 0;
+    visibility: hidden;
     width: 100%;
     flex-wrap: wrap;
     justify-content: center;
@@ -247,8 +252,11 @@ main.categories-container {
 }
 
 .accordion-content.show {
+    /* กำหนด max-height ที่สูงพอสำหรับเนื้อหา */
+    max-height: 500px; /* หรือปรับค่าให้เหมาะสมกับเนื้อหาของคุณ */
     display: flex;
     opacity: 1;
+    visibility: visible;
     padding-top: var(--spacing-sm);
     padding-bottom: var(--spacing-sm);
 }
@@ -262,14 +270,15 @@ main img {
     width: 50px;
     object-fit: cover;
     vertical-align: middle;
-    transition: transform 0.2s ease, border-color 0.2s ease; /* ลบ box-shadow ออกจาก transition */
+    /* กำหนด transition โดยไม่มี box-shadow */
+    transition: transform 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
+    box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเริ่มต้น */
 }
 
 main img:hover {
     transform: scale(1.05);
     border-color: var(--white);
-    /* ลบบรรทัดนี้ออกเพื่อเอาเงาดำเงาขาวรอบรูปภาพช่องออกเมื่อ hover */
     box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเมื่อ hover */
 }
 
