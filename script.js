@@ -113,7 +113,6 @@ document.addEventListener('DOMContentLoaded', function() {
             textsData = data;
             if (runningTextElement && textsData.runningText) {
                 runningTextElement.textContent = textsData.runningText;
-                // --- เพิ่มส่วนนี้: ปรับความเร็ว marquee ตามความยาวข้อความ ---
                 updateMarqueeDuration(textsData.runningText);
             }
             if (footerTextElement && textsData.footerText) {
@@ -132,9 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function updateMarqueeDuration(text) {
         const textLength = text.length;
-        // กำหนดความเร็วมาตรฐาน (เช่น 0.2 วินาทีต่ออักขระ)
-        const speedFactor = 0.15; // คุณสามารถปรับค่านี้ได้ตามต้องการ
-        const newDuration = Math.max(10, textLength * speedFactor); // อย่างน้อย 10 วินาที เพื่อไม่ให้เร็วเกินไป
+        const speedFactor = 0.15;
+        const newDuration = Math.max(10, textLength * speedFactor);
         document.documentElement.style.setProperty('--marquee-duration', `${newDuration}s`);
     }
 
@@ -244,7 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 img.src = channel.img_src;
                 img.alt = channel.name;
                 img.loading = "lazy";
-                // เพิ่มคุณสมบัติ width และ height เพื่อป้องกัน layout shift
                 img.width = "50";
                 img.height = "50";
                 link.appendChild(img);
@@ -283,21 +280,47 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('selectstart', e => e.preventDefault());
     document.addEventListener('dragstart', e => e.preventDefault());
     document.addEventListener('drop', e => e.preventDefault());
+    
+    // ใช้ capture phase สำหรับ keydown event เพื่อให้มั่นใจว่าถูกจัดการก่อน
+    // เหตุการณ์จะถูกจับตั้งแต่ระดับบนสุด (document) ก่อนที่จะลงไปถึงองค์ประกอบเป้าหมาย
     document.addEventListener('keydown', e => {
+        // อนุญาต spacebar และ Enter
         if (e.key === ' ' || e.key === 'Enter') return;
+
+        // ตรวจสอบ Ctrl (หรือ Cmd บน Mac) ร่วมกับคีย์ต่างๆ
         if (e.ctrlKey || e.metaKey) {
             const lowerKey = e.key.toLowerCase();
-            if (e.shiftKey) {
-                if (['i', 'j', 'c'].includes(lowerKey)) {
-                    e.preventDefault();
-                }
-            } else {
-                if (['u', 's', 'p', 'a', 'c', 'x', 'v'].includes(lowerKey)) {
-                    e.preventDefault();
-                }
+            
+            // ป้องกัน Ctrl/Cmd + U (View Source)
+            if (lowerKey === 'u') {
+                e.preventDefault();
+                e.stopPropagation(); // หยุดการแพร่กระจายของ event
+                return; // ออกจากฟังก์ชันทันที
+            }
+
+            // ป้องกัน Ctrl/Cmd + Shift + I, J, C (Developer Tools)
+            if (e.shiftKey && ['i', 'j', 'c'].includes(lowerKey)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            } 
+            
+            // ป้องกัน Ctrl/Cmd + S (Save), P (Print), A (Select All), C (Copy), X (Cut), V (Paste)
+            // (ยกเว้น C, X, V ที่อาจจำเป็นสำหรับบางสถานการณ์)
+            // หากต้องการป้องกัน C, X, V ด้วย ให้เอา 'c', 'x', 'v' เข้าไปในอาร์เรย์ด้านล่าง
+            if (['s', 'p'].includes(lowerKey)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
             }
         }
-        if (e.key === 'F12') e.preventDefault();
-    });
+        
+        // ป้องกัน F12 (Developer Tools)
+        if (e.key === 'F12') {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true); // `true` คือการใช้ capture phase
+
     // --- สิ้นสุดส่วนป้องกันการดูโค้ด ---
 });
