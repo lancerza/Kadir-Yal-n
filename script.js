@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-// --- ส่วนป้องกันการดูโค้ด (Code View Protection) ---
+    // --- ส่วนป้องกันการดูโค้ด (Code View Protection) ---
     // โปรดทราบ: การป้องกันเหล่านี้มุ่งเป้าไปที่การลดโอกาสในการเข้าถึงซอร์สโค้ดโดยผู้ใช้ทั่วไป
     // แต่ไม่สามารถป้องกันผู้ใช้ที่มีความรู้ทางเทคนิคสูงได้อย่างสมบูรณ์
     // และอาจส่งผลต่อประสบการณ์ผู้ใช้ในการใช้งานเบราว์เซอร์ปกติ
@@ -319,5 +319,47 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // --- การตรวจจับ Developer Tools เพิ่มเติม ---
+    // วิธีนี้พยายามตรวจจับว่า DevTools เปิดอยู่หรือไม่ โดยการตรวจสอบขนาดหน้าต่าง
+    // หากพบว่าเปิดอยู่ อาจจะรีเฟรชหน้า หรือเปลี่ยนเส้นทางไปหน้าอื่น
+    const threshold = 160; // ค่าความแตกต่างของขนาดหน้าต่างที่คาดว่าเกิดจาก DevTools (ปรับได้)
+    let devtoolsOpen = false;
+
+    function checkDevTools() {
+        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+        // ตรวจสอบแนวตั้งและแนวนอน (หรือทั้งคู่)
+        if (widthThreshold || heightThreshold) {
+            if (!devtoolsOpen) {
+                devtoolsOpen = true;
+                // console.warn("Developer Tools Detected!"); // สำหรับดีบัก
+                // ตัวเลือกการตอบสนองเมื่อตรวจพบ DevTools:
+                // 1. รีโหลดหน้า (อาจต้องทำหลายครั้งถ้าผู้ใช้พยายามเปิดซ้ำๆ)
+                // location.reload(); 
+                // 2. เปลี่ยนเส้นทางไปยังหน้าอื่น (เช่น หน้าแจ้งเตือน)
+                // window.location.href = 'https://example.com/blocked-access.html'; 
+                // 3. ลบเนื้อหาหน้าเว็บ
+                document.body.innerHTML = '<div style="font-size: 2em; text-align: center; margin-top: 100px; color: ' + redAccentColor + ';">' +
+                                          'ขออภัย ไม่สามารถเข้าถึงหน้านี้ได้เมื่อ Developer Tools เปิดอยู่' +
+                                          '</div>';
+            }
+        } else {
+            if (devtoolsOpen) {
+                devtoolsOpen = false;
+                // console.log("Developer Tools Closed."); // สำหรับดีบัก
+                // หากปิด DevTools แล้วต้องการให้หน้ากลับมาเป็นปกติ อาจต้องรีโหลด
+                // location.reload();
+            }
+        }
+    }
+
+    // ตรวจสอบทันทีเมื่อโหลดหน้า
+    checkDevTools();
+    // ตรวจสอบทุกๆ 500ms และเมื่อขนาดหน้าต่างเปลี่ยน
+    setInterval(checkDevTools, 500);
+    window.addEventListener('resize', checkDevTools);
+
     // --- สิ้นสุดส่วนป้องกันการดูโค้ด ---
 });
