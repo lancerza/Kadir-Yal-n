@@ -364,12 +364,11 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function tryPlayChannel(channel) {
         let urlToPlay = channel.data_url;
-        let isFallback = false; // Fallback ถูกลบไปแล้ว แต่ตัวแปรยังคงอยู่ (สามารถลบออกได้หากไม่ใช้แล้ว)
+        // let isFallback = false; // ไม่ได้ใช้แล้วเนื่องจากลบ fallback_data_url
 
         // ตรวจสอบความถูกต้องของ URL หลัก
         if (!isValidUrl(urlToPlay)) {
             console.warn(`URL หลักของช่อง "${channel.name}" ไม่ถูกต้อง: ${urlToPlay}`);
-            // หาก URL หลักไม่ถูกต้อง จะไม่ลอง Fallback แล้ว แต่แสดงข้อผิดพลาดทันที
             showErrorModal(
                 'ลิงก์วิดีโอไม่ถูกต้อง',
                 `ลิงก์หลักสำหรับช่อง "${channel.name}" ไม่ถูกต้อง<br>โปรดติดต่อผู้ดูแล`
@@ -445,7 +444,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // GA Event
         if (typeof gtag === 'function') {
-            gtag('event', 'channel_click', { 'channel_name': channel.name, 'category': channel.category, 'link_url': urlToPlay, 'is_fallback': isFallback });
+            // is_fallback ควรถูกลบออกไปถ้าไม่มี fallback_data_url แล้ว
+            gtag('event', 'channel_click', { 'channel_name': channel.name, 'category': channel.category, 'link_url': urlToPlay });
         }
     }
 
@@ -608,8 +608,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Initializations ---
-    // ไม่มีส่วนป้องกันโค้ดแล้ว
-    // ดังนั้นจึงไม่มี checkDevTools หรือ Event Listener ที่เกี่ยวข้องแล้ว
+    // ไม่มีการตรวจจับ DevTools แล้ว (เนื่องจากฟังก์ชัน checkDevTools ถูกลบออก)
+    // ดังนั้นจึงไม่มีการเรียก checkDevTools หรือผูกกับ Event listener ที่เกี่ยวข้องแล้ว
 
     window.addEventListener('online', checkNetworkStatus); // ตรวจสอบเมื่อกลับมาออนไลน์
     window.addEventListener('offline', checkNetworkStatus); // ตรวจสอบเมื่อออฟไลน์
