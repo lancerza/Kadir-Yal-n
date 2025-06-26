@@ -2,11 +2,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const datetimeDisplay = document.getElementById('current-datetime');
     const runningTextElement = document.getElementById('running-text');
     const footerTextElement = document.getElementById('footer-text');
+    const clearCacheButton = document.getElementById('clear-cache-button'); // Get the clear cache button
+
     const categoryContentMap = {
         "ทีวีดิจิตอล": document.getElementById('content-thai-tv'),
         "กีฬา": document.getElementById('content-sport'),
         "หนังทีวี": document.getElementById('content-movies'),
-        "สารคดี": document.getElementById('content-documentary'), // ******** เพิ่มตรงนี้ครับ ********
+        "สารคดี": document.getElementById('content-documentary'),
         "IPTV": document.getElementById('content-iptv')
     };
     let channelsData = null;
@@ -56,9 +58,12 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error loading or parsing channels.json:', error);
             Object.values(categoryContentMap).forEach(container => {
-                container.innerHTML = `<div class="no-channels-message active" style="color: ${redAccentColor};">
+                // Check if container exists before modifying innerHTML
+                if (container) {
+                    container.innerHTML = `<div class="no-channels-message active" style="color: ${redAccentColor};">
                                             เกิดข้อผิดพลาดในการโหลดช่อง: ${error.message}<br>โปรดลองใหม่อีกครั้งในภายหลัง
                                         </div>`;
+                }
             });
             channelsData = [];
         }
@@ -110,7 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const channelName = imgElement ? imgElement.alt : 'Unknown Channel';
             const categoryElement = link.closest('.category');
             const categoryButton = categoryElement ? categoryElement.querySelector('.accordion-button') : null;
-            const categoryName = categoryButton ? categoryButton.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').trim() : 'Unknown Category';
+            // Removed emojis from category name extraction for gtag
+            const categoryName = categoryButton ? categoryButton.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}\u{2600}-\u{26FF}]/gu, '').trim() : 'Unknown Category';
             if (typeof gtag === 'function') {
                 gtag('event', 'channel_click', { 'channel_name': channelName, 'category': categoryName, 'link_url': url });
             }
@@ -119,11 +125,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function formatDateTime(date) {
+        // Updated formatting to match "วันพฤหัสบดีที่ 26 มิถุนายน 2568 10:37"
         const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false };
-        const datePart = date.toLocaleDateString('th-TH', optionsDate);
+
+        const datePart = date.toLocaleDateString('th-TH', optionsDate).replace('พ.ศ.', '').trim();
         const timePart = date.toLocaleTimeString('th-TH', optionsTime);
-        return { display: `${datePart} ${timePart}`, iso: date.toISOString() };
+
+        return { display: `วัน${datePart} ${timePart}`, iso: date.toISOString() };
     }
 
     function updateDateTime() {
@@ -132,8 +141,22 @@ document.addEventListener('DOMContentLoaded', function() {
         datetimeDisplay.textContent = formatted.display;
         datetimeDisplay.setAttribute('datetime', formatted.iso);
     }
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
+    updateDateTime(); // Call immediately on load
+    setInterval(updateDateTime, 1000); // Update every second
+
+    // Clear Cache button logic
+    if (clearCacheButton) {
+        clearCacheButton.addEventListener('click', () => {
+            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างแคชของเว็บไซต์? การดำเนินการนี้จะรีโหลดหน้าเว็บใหม่')) {
+                console.log('Attempting to clear browser cache...');
+                // Forces a reload from the server, bypassing cache
+                window.location.reload(true);
+                // Optionally add an alert after reload, but usually not needed as page reloads
+                // alert('แคชถูกล้างแล้ว');
+            }
+        });
+    }
+
 
     document.querySelectorAll('.accordion-content').forEach(contentElement => {
         contentElement.addEventListener('transitionend', function() {
@@ -149,6 +172,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function closeAccordion(contentElement, buttonElement) {
         contentElement.classList.remove('show');
         contentElement.style.maxHeight = '0px';
+        contentElement.style.paddingTop = '0';
+        contentElement.style.paddingBottom = '0';
         buttonElement.setAttribute('aria-expanded', 'false');
     }
 
@@ -164,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         clearMessages(contentElement);
 
-        const categoryText = buttonElement.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').trim();
+        const categoryText = buttonElement.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}\u{2600}-\u{26FF}]/gu, '').trim(); // Adjusted regex for emojis
         const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
 
         if (filteredChannels.length === 0) {
@@ -187,9 +212,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         requestAnimationFrame(() => {
+            // Need to set a slightly larger max-height to account for padding and ensure all content fits
             const actualContentHeight = contentElement.scrollHeight;
-            contentElement.style.maxHeight = (actualContentHeight + 16) + 'px';
+            contentElement.style.maxHeight = (actualContentHeight + 16) + 'px'; // Add extra space for padding/gap
             contentElement.classList.add('show');
+            contentElement.style.paddingTop = 'var(--spacing-sm)'; // Apply padding after calculating max-height
+            contentElement.style.paddingBottom = 'var(--spacing-sm)'; // Apply padding after calculating max-height
         });
     }
 
@@ -217,15 +245,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('dragstart', e => e.preventDefault());
     document.addEventListener('drop', e => e.preventDefault());
     document.addEventListener('keydown', e => {
+        // Allow space and Enter key presses
         if (e.key === ' ' || e.key === 'Enter') return;
-        if (e.ctrlKey || e.metaKey) {
-            if (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) e.preventDefault();
-            else {
+
+        // Prevent common developer tool shortcuts
+        if (e.ctrlKey || e.metaKey) { // Ctrl for Windows/Linux, Meta (Cmd) for Mac
+            if (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { // Ctrl+Shift+I/J/C
+                e.preventDefault();
+            } else {
                 const lowerKey = e.key.toLowerCase();
-                if (['s', 'p', 'u', 'a', 'c', 'x', 'v'].includes(lowerKey)) e.preventDefault();
+                // Ctrl+S (Save), Ctrl+P (Print), Ctrl+U (View Source), Ctrl+A (Select All), Ctrl+C (Copy), Ctrl+X (Cut), Ctrl+V (Paste)
+                if (['s', 'p', 'u', 'a', 'c', 'x', 'v'].includes(lowerKey)) {
+                    e.preventDefault();
+                }
             }
         }
-        if (e.key === 'F12') e.preventDefault();
+        if (e.key === 'F12') e.preventDefault(); // Prevent F12 key for developer tools
     });
     // --- สิ้นสุดส่วนป้องกันการดูโค้ด ---
 });
