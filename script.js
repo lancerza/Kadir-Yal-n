@@ -321,45 +321,48 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- การตรวจจับ Developer Tools เพิ่มเติม ---
-    // วิธีนี้พยายามตรวจจับว่า DevTools เปิดอยู่หรือไม่ โดยการตรวจสอบขนาดหน้าต่าง
-    // หากพบว่าเปิดอยู่ อาจจะรีเฟรชหน้า หรือเปลี่ยนเส้นทางไปหน้าอื่น
+    // วิธีนี้พยายามตรวจจับว่า DevTools เปิดอยู่หรือไม่ โดยการตรวจสอบขนาดหน้าต่างและ/หรือ DOM element
+    // หากพบว่าเปิดอยู่ อาจจะรีเฟรชหน้า หรือเปลี่ยนเส้นทางไปหน้าอื่น หรือลบเนื้อหา
     const threshold = 160; // ค่าความแตกต่างของขนาดหน้าต่างที่คาดว่าเกิดจาก DevTools (ปรับได้)
     let devtoolsOpen = false;
 
     function checkDevTools() {
         const widthThreshold = window.outerWidth - window.innerWidth > threshold;
         const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-
+        
         // ตรวจสอบแนวตั้งและแนวนอน (หรือทั้งคู่)
-        if (widthThreshold || heightThreshold) {
+        // และตรวจสอบเพิ่มเติมจาก element บางตัวที่ DevTools สร้างขึ้นมา (อาจไม่แน่นอนเสมอไป)
+        const elementCheck = document.getElementById('webkit-dev-tools'); // สำหรับ Chrome/Edge
+        const firefoxDevToolsCheck = window.outerWidth === window.innerWidth && window.outerHeight === window.innerHeight && navigator.userAgent.includes('Firefox') && (window.innerHeight < 200 || window.innerWidth < 200); // ตัวอย่างสำหรับ Firefox
+
+        if (widthThreshold || heightThreshold || elementCheck || firefoxDevToolsCheck) {
             if (!devtoolsOpen) {
                 devtoolsOpen = true;
                 // console.warn("Developer Tools Detected!"); // สำหรับดีบัก
-                // ตัวเลือกการตอบสนองเมื่อตรวจพบ DevTools:
-                // 1. รีโหลดหน้า (อาจต้องทำหลายครั้งถ้าผู้ใช้พยายามเปิดซ้ำๆ)
-                // location.reload(); 
-                // 2. เปลี่ยนเส้นทางไปยังหน้าอื่น (เช่น หน้าแจ้งเตือน)
-                // window.location.href = 'https://example.com/blocked-access.html'; 
-                // 3. ลบเนื้อหาหน้าเว็บ
-                document.body.innerHTML = '<div style="font-size: 2em; text-align: center; margin-top: 100px; color: ' + redAccentColor + ';">' +
+                // เลือกหนึ่งในตัวเลือกการตอบสนองด้านล่าง:
+                // 1. ล้างเนื้อหาหน้าเว็บและแสดงข้อความเตือน
+                document.body.innerHTML = '<div style="font-size: 2em; text-align: center; margin-top: 100px; color: ' + redAccentColor + '; height: 100vh; display: flex; align-items: center; justify-content: center;">' +
                                           'ขออภัย ไม่สามารถเข้าถึงหน้านี้ได้เมื่อ Developer Tools เปิดอยู่' +
                                           '</div>';
+                // 2. รีโหลดหน้า (อาจต้องทำหลายครั้งถ้าผู้ใช้พยายามเปิดซ้ำๆ)
+                // location.reload(); 
+                // 3. เปลี่ยนเส้นทางไปยังหน้าอื่น (เช่น หน้าแจ้งเตือน)
+                // window.location.href = 'https://example.com/blocked-access.html'; 
             }
         } else {
             if (devtoolsOpen) {
                 devtoolsOpen = false;
                 // console.log("Developer Tools Closed."); // สำหรับดีบัก
-                // หากปิด DevTools แล้วต้องการให้หน้ากลับมาเป็นปกติ อาจต้องรีโหลด
+                // หากต้องการให้หน้ากลับมาเป็นปกติเมื่อปิด DevTools อาจต้องรีโหลด
                 // location.reload();
             }
         }
     }
 
-    // ตรวจสอบทันทีเมื่อโหลดหน้า
+    // ตรวจสอบทันทีเมื่อโหลดหน้าและตรวจสอบเมื่อมีการรีไซซ์หรือทุกๆ ช่วงเวลา
     checkDevTools();
-    // ตรวจสอบทุกๆ 500ms และเมื่อขนาดหน้าต่างเปลี่ยน
-    setInterval(checkDevTools, 500);
-    window.addEventListener('resize', checkDevTools);
+    setInterval(checkDevTools, 500); // ตรวจสอบทุกๆ 500ms
+    window.addEventListener('resize', checkDevTools); // ตรวจสอบเมื่อขนาดหน้าต่างเปลี่ยน
 
     // --- สิ้นสุดส่วนป้องกันการดูโค้ด ---
 });
