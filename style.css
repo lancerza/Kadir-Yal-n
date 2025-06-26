@@ -25,9 +25,8 @@ html, body {
     overflow-x: hidden;
     background-color: var(--dark-bg);
     color: var(--light-text);
-    font-family: 'Arial', sans-serif;
+    font-family: 'Kanit', sans-serif; /* เปลี่ยนเป็น Kanit ทั่วโลกเพื่อให้สอดคล้องกัน */
     text-align: center;
-    /* user-select ถูกจัดการใน JS เพื่อความยืดหยุ่น (หากมีการป้องกันการเลือกข้อความ) */
 }
 
 /* --- Animations --- */
@@ -37,8 +36,8 @@ html, body {
 }
 
 @keyframes marquee {
-    0% { transform: translateX(100%); } /* Start from right */
-    100% { transform: translateX(-100%); } /* Go to far left */
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
 }
 
 @keyframes spin {
@@ -74,7 +73,7 @@ h1 {
     width: 100%;
     margin-bottom: var(--spacing-xs);
     position: relative;
-    min-height: 20px; /* ใช้ min-height เพื่อความยืดหยุ่น */
+    min-height: 20px;
     overflow: hidden;
 }
 
@@ -243,7 +242,7 @@ main img {
     vertical-align: middle;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
-    user-select: none; /* ป้องกันการเลือกรูปภาพ */
+    user-select: none;
 }
 
 main img:hover {
@@ -284,21 +283,20 @@ footer {
 }
 
 /* --- Modal Dialog Styles (ทั่วไปสำหรับ Modal) --- */
-/* ส่วนนี้ใช้ร่วมกันสำหรับ appInstallModal และ errorModal */
 .modal {
-    display: none; /* ซ่อนเป็นค่าเริ่มต้น */
-    position: fixed; /* อยู่เหนือเนื้อหาอื่นๆ */
-    z-index: 1000; /* ให้แสดงทับองค์ประกอบอื่น ๆ */
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden; /* ป้องกันการเลื่อนพื้นหลัง */
-    background-color: rgba(0, 0, 0, 0.7); /* พื้นหลังทึบแสง */
-    display: flex; /* ใช้ flex เพื่อจัดตำแหน่งตรงกลาง */
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอพื้นหลัง */
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
@@ -383,22 +381,6 @@ footer {
     background-color: #424242;
     transform: translateY(-2px);
 }
-
-/* Video Player Specific Styles - ส่วนนี้ถูกลบออกจาก HTML แล้ว แต่ถ้ายังเหลืออยู่ใน CSS อาจทำให้เกิดปัญหา */
-/* หากต้องการลบ Modal วิดีโอ Player ออกอย่างสมบูรณ์ ควรลบโค้ดส่วนนี้ด้วย */
-/*
-.video-container {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto var(--spacing-md) auto;
-}
-
-#desktopVideoPlayer {
-    width: 100%;
-    height: auto;
-    border-radius: var(--border-radius);
-}
-*/
 
 /* --- Network Status Alert Styles --- */
 .network-status-alert {
