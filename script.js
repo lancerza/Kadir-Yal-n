@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const APP_STORE_URLS = {
         wiseplay: 'https://play.google.com/store/apps/details?id=com.wiseplay',
-        liftplay: 'https://apps.apple.com/th/app/liftplay/id1557001663' // **สำคัญ: เปลี่ยน YOUR_LIFTPLAY_APP_ID เป็น ID จริงของ Liftplay**
+        liftplay: 'https://apps.apple.com/th/app/liftplay/idYOUR_LIFTPLAY_APP_ID' // **สำคัญ: เปลี่ยน YOUR_LIFTPLAY_APP_ID เป็น ID จริงของ Liftplay**
     };
 
     const PLACEHOLDER_IMG = 'https://via.placeholder.com/50x50?text=NO+IMG'; // ตัวอย่างลิงก์รูปภาพ Placeholder
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const firstFocusableElement = focusableElements[0];
         const lastFocusableElement = focusableElements[focusableElements.length - 1];
 
-        if (e.shiftKey) { // Shift + Tab
+        if (e.shiftKey) { // ถ้ากด Shift + Tab
             if (document.activeElement === firstFocusableElement) {
                 lastFocusableElement.focus();
                 e.preventDefault();
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function tryPlayChannel(channel) {
         let urlToPlay = channel.data_url;
-        let isFallback = false;
+        let isFallback = false; // Fallback ถูกลบไปแล้ว แต่ตัวแปรยังคงอยู่ (สามารถลบออกได้หากไม่ใช้แล้ว)
 
         // ตรวจสอบความถูกต้องของ URL หลัก
         if (!isValidUrl(urlToPlay)) {
@@ -594,27 +594,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- ส่วนป้องกันการดูโค้ด (Code View Protection) ---
-    document.addEventListener('contextmenu', e => { e.preventDefault(); });
-    document.addEventListener('selectstart', e => { e.preventDefault(); });
-    document.addEventListener('dragstart', e => { e.preventDefault(); });
-    document.addEventListener('drop', e => { e.preventDefault(); });
-
-    document.addEventListener('keydown', e => {
-        if (e.key === ' ' || e.key === 'Enter') { return; }
-        if (e.key === 'F12') { e.preventDefault(); return; }
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { e.preventDefault(); return; }
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return; }
-        if (e.ctrlKey || e.metaKey) {
-            const lowerKey = e.key.toLowerCase();
-            if (['s', 'p', 'a', 'c', 'x', 'v'].includes(lowerKey)) { e.preventDefault(); return; }
-        }
-    });
-
-    const threshold = 160;
-    let devtoolsOpen = false;
-    let initialDevtoolsCheckDone = false; // Flag to run initial check once
+    // (ส่วนนี้ถูกลบออกตามคำขอของผู้ใช้)
 
     // Debounce function
+    // (ฟังก์ชันนี้ยังคงอยู่เผื่อใช้งานกับ Event อื่นๆ ในอนาคต)
     function debounce(func, delay) {
         let timeout;
         return function(...args) {
@@ -624,48 +607,9 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    // Function to check for DevTools
-    function checkDevTools() {
-        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-        
-        if (widthThreshold || heightThreshold) {
-            if (!devtoolsOpen) {
-                devtoolsOpen = true;
-                // Store original body content to restore later
-                document.body.dataset.originalContent = document.body.innerHTML; 
-                document.body.innerHTML = `<div style="font-size: 2em; text-align: center; margin-top: 100px; color: ${redAccentColor}; height: 100vh; display: flex; align-items: center; justify-content: center;">
-                                                ขออภัย ไม่สามารถเข้าถึงหน้านี้ได้เมื่อ Developer Tools เปิดอยู่
-                                           </div>`;
-            }
-        } else {
-            if (devtoolsOpen) {
-                devtoolsOpen = false;
-                // Restore original body content
-                if (document.body.dataset.originalContent) {
-                    document.body.innerHTML = document.body.dataset.originalContent;
-                    delete document.body.dataset.originalContent;
-                }
-                // Reload page to re-initialize scripts and event listeners
-                location.reload(); 
-            }
-        }
-        initialDevtoolsCheckDone = true; // Mark initial check as complete
-    }
-
     // --- Initializations ---
-    checkDevTools();
-    // Apply debounce to resize event
-    const debouncedCheckDevTools = debounce(checkDevTools, 250); // Delay 250ms
-    window.addEventListener('resize', debouncedCheckDevTools);
-
-    // Set a periodic interval check (less frequent than resize)
-    setInterval(() => {
-        // Only run full check if initial check is done (to avoid race conditions)
-        if (initialDevtoolsCheckDone) {
-            checkDevTools();
-        }
-    }, 1000); // Check every 1 second
+    // ไม่มีส่วนป้องกันโค้ดแล้ว
+    // ดังนั้นจึงไม่มี checkDevTools หรือ Event Listener ที่เกี่ยวข้องแล้ว
 
     window.addEventListener('online', checkNetworkStatus); // ตรวจสอบเมื่อกลับมาออนไลน์
     window.addEventListener('offline', checkNetworkStatus); // ตรวจสอบเมื่อออฟไลน์
