@@ -13,21 +13,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalCloseButton = document.getElementById('modalCloseButton');
     const appInstallModalCloseButtonSpan = appInstallModal.querySelector('.close-button');
 
-    // Generic Error Modal elements (หากยังมีใน HTML)
+    // Generic Error Modal elements (ตรวจสอบให้แน่ใจว่ามีใน HTML แล้ว)
     const errorModal = document.getElementById('errorModal');
     const errorModalTitle = document.getElementById('errorModalTitle');
     const errorModalMessage = document.getElementById('errorModalMessage');
     const errorModalReloadButton = document.getElementById('errorModalReloadButton');
     const errorModalCloseButton = document.getElementById('errorModalCloseButton');
-    const errorModalCloseButtonSpan = errorModal.querySelector('.close-button');
+    // เพิ่มการตรวจสอบ null เพื่อป้องกัน error ถ้า HTML ไม่มีองค์ประกอบนี้
+    const errorModalCloseButtonSpan = errorModal ? errorModal.querySelector('.close-button') : null;
 
     // Network Status Alert
     const networkStatusAlert = document.getElementById('network-status-alert');
 
 
     // --- Data Variables ---
-    let channelsData = null;
-    let textsData = null;
+    let channelsData = null; // เก็บข้อมูลช่องทีวี
+    let textsData = null;    // เก็บข้อมูลข้อความประกาศ/ท้ายกระดาษ
 
     // --- Configuration Variables ---
     const redAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--red-accent').trim();
@@ -53,8 +54,8 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // --- ลิงก์รูปภาพ Placeholder และ Error (ใช้ URL สาธารณะ) ---
-    const PLACEHOLDER_IMG = 'https://via.placeholder.com/50x50?text=NO+IMG'; // ตัวอย่างลิงก์รูปภาพ Placeholder
-    const ERROR_IMG = 'https://via.placeholder.com/50x50?text=ERROR';     // ตัวอย่างลิงก์รูปภาพ Error
+    const PLACEHOLDER_IMG = 'https://via.placeholder.com/50x50?text=NO+IMG';
+    const ERROR_IMG = 'https://via.placeholder.com/50x50?text=ERROR';
 
 
     // --- Helper Functions ---
@@ -167,20 +168,36 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {Function} [onReload] - ฟังก์ชันที่จะเรียกเมื่อกดปุ่ม "ลองใหม่" (ถ้ามี)
      */
     function showErrorModal(title, message, onReload = null) {
+        // ตรวจสอบว่า errorModal มีอยู่ใน DOM ก่อนใช้งาน
+        if (!errorModal) {
+            console.error("Error Modal element not found in the DOM. Cannot display error.");
+            alert(`Error: ${title}\n${message}`); // Fallback ไปใช้ alert ถ้า Modal ไม่มีใน HTML
+            if (typeof gtag === 'function') {
+                gtag('event', 'error_modal_fallback_alert', { 'error_title': title, 'error_message': message });
+            }
+            return;
+        }
+
         errorModalTitle.textContent = title;
         errorModalMessage.innerHTML = message; // ใช้ innerHTML เพื่อรองรับ <br>
 
-        errorModalReloadButton.style.display = onReload ? 'inline-block' : 'none';
-        errorModalReloadButton.onclick = () => {
-            hideModal(errorModal);
-            if (onReload) onReload();
-            if (typeof gtag === 'function') {
-                gtag('event', 'error_modal_reload_clicked', { 'error_title': title });
-            }
-        };
+        if (errorModalReloadButton) {
+            errorModalReloadButton.style.display = onReload ? 'inline-block' : 'none';
+            errorModalReloadButton.onclick = () => {
+                hideModal(errorModal);
+                if (onReload) onReload();
+                if (typeof gtag === 'function') {
+                    gtag('event', 'error_modal_reload_clicked', { 'error_title': title });
+                }
+            };
+        }
 
-        errorModalCloseButton.onclick = () => hideModal(errorModal);
-        errorModalCloseButtonSpan.onclick = () => hideModal(errorModal);
+        if (errorModalCloseButton) {
+            errorModalCloseButton.onclick = () => hideModal(errorModal);
+        }
+        if (errorModalCloseButtonSpan) {
+            errorModalCloseButtonSpan.onclick = () => hideModal(errorModal);
+        }
         
         if (typeof gtag === 'function') {
             gtag('event', 'error_modal_shown', { 'error_title': title, 'error_message': message });
@@ -196,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container.querySelector('.loading-indicator').classList.add('active');
         container.querySelector('.no-channels-message').classList.remove('active');
         const existingChannelLinks = container.querySelectorAll('.channel-link');
-        existingChannelLinks.forEach(link => link.remove()); // ลบช่องเก่าก่อนโหลดใหม่
+        existingChannelLinks.forEach(link => link.remove());
     }
 
     /**
@@ -250,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchData(fileName, retries = 2, delay = 1000) {
         for (let i = 0; i <= retries; i++) {
             try {
-                const cacheBuster = `?v=${Date.now()}`; // Unique timestamp for cache busting
+                const cacheBuster = `?v=${Date.now()}`;
                 const response = await fetch(`${fileName}${cacheBuster}`);
                 if (!response.ok) {
                     const errorText = response.status === 404
@@ -266,9 +283,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     gtag('event', 'load_error', { 'file_name': fileName, 'error_message': error.message, 'attempt': i + 1 });
                 }
                 if (i < retries) {
-                    await new Promise(res => setTimeout(res, delay)); // หน่วงเวลาก่อนลองใหม่
+                    await new Promise(res => setTimeout(res, delay));
                 } else {
-                    throw error; // โยน error ถ้าลองครบทุกครั้งแล้วยังไม่สำเร็จ
+                    throw error;
                 }
             }
         }
@@ -281,13 +298,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function checkNetworkStatus() {
         if (!navigator.onLine) {
             networkStatusAlert.style.opacity = '1';
-            networkStatusAlert.style.display = 'block'; // ให้แสดงผลเพื่อเริ่ม transition
+            networkStatusAlert.style.display = 'block';
             if (typeof gtag === 'function') {
                 gtag('event', 'offline_alert_shown');
             }
         } else {
             networkStatusAlert.style.opacity = '0';
-            // เพิ่ม delay เล็กน้อยก่อนซ่อน display เพื่อให้ transition มีเวลาทำงาน
             networkStatusAlert.addEventListener('transitionend', function handler() {
                 networkStatusAlert.style.display = 'none';
                 networkStatusAlert.removeEventListener('transitionend', handler);
@@ -306,11 +322,10 @@ document.addEventListener('DOMContentLoaded', function() {
             channelsData = data;
         } catch (error) {
             console.error('การจัดการข้อผิดพลาดขั้นสุดท้ายสำหรับ channels.json:', error);
-            // แสดง Modal ข้อผิดพลาด เนื่องจากถูกลบออกไปจาก HTML จึงต้องใช้ showErrorModal() แทน
             showErrorModal(
                 'เกิดข้อผิดพลาดในการโหลดช่อง!',
                 `ไม่สามารถโหลดรายการช่องได้: ${error.message}<br>โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง`,
-                loadChannelsData // สามารถกดลองใหม่ได้
+                loadChannelsData
             );
             channelsData = [];
         }
@@ -332,11 +347,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('การจัดการข้อผิดพลาดขั้นสุดท้ายสำหรับ texts.json:', error);
-            // แสดง Modal ข้อผิดพลาด เนื่องจากถูกลบออกไปจาก HTML จึงต้องใช้ showErrorModal() แทน
             showErrorModal(
                 'เกิดข้อผิดพลาด!',
                 `ไม่สามารถโหลดข้อมูลข้อความประกาศได้: ${error.message}`,
-                loadTextsData // สามารถกดลองใหม่ได้
+                loadTextsData
             );
             textsData = {};
             if (runningTextElement) runningTextElement.textContent = "เกิดข้อผิดพลาดในการโหลดข้อความประกาศ!";
@@ -350,7 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('เกิดข้อผิดพลาดระหว่างการโหลดข้อมูลเริ่มต้น บางส่วนของหน้าอาจไม่แสดงผลอย่างถูกต้อง:', error);
-            // showErrorModal ถูกเรียกใน loadChannelsData/loadTextsData แล้ว
         });
 
     /**
@@ -361,14 +374,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function tryPlayChannel(channel) {
         let urlToPlay = channel.data_url;
 
-        // ตรวจสอบความถูกต้องของ URL หลัก
         if (!isValidUrl(urlToPlay)) {
             console.warn(`URL หลักของช่อง "${channel.name}" ไม่ถูกต้อง: ${urlToPlay}`);
             showErrorModal(
                 'ลิงก์วิดีโอไม่ถูกต้อง',
                 `ลิงก์หลักสำหรับช่อง "${channel.name}" ไม่ถูกต้อง<br>โปรดติดต่อผู้ดูแล`
             );
-            return; // หยุดทำงานถ้า URL หลักไม่ถูกต้อง
+            return;
         }
 
         const userAgent = navigator.userAgent.toLowerCase();
@@ -376,12 +388,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const isIOS = /ipad|iphone|ipod/.test(userAgent) && !window.MSStream;
         const isDesktop = !isAndroid && !isIOS;
 
-        // --- Logic การเปิดแอปตามแพลตฟอร์ม ---
         if (isAndroid) {
             if (APP_CONFIGS.wiseplay) {
                 let intentParams = Object.entries(APP_CONFIGS.wiseplay)
-                                        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-                                        .join(';');
+                                         .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                                         .join(';');
                 const finalIntentUrl = `intent://${urlToPlay}#Intent;${intentParams};end`;
                 window.location.href = finalIntentUrl;
                 
@@ -409,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 1000);
                 } else {
                     console.warn(`Liftplay config ไม่สมบูรณ์สำหรับ ${channel.name}`);
-                    showErrorModal( // ใช้ showErrorModal ที่เหลืออยู่
+                    showErrorModal(
                         'ตั้งค่าแอปไม่สมบูรณ์',
                         `การตั้งค่าสำหรับแอป Liftplay ของช่อง "${channel.name}" ไม่สมบูรณ์<br>โปรดติดต่อผู้ดูแล`
                     );
@@ -418,44 +429,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.open(urlToPlay, '_blank');
             }
         } else if (isDesktop) {
-            // สำหรับ Desktop, เนื่องจาก Modal วิดีโอ Player ถูกลบออกไปแล้ว
-            // จะเปลี่ยนเป็นการเปิด URL วิดีโอในแท็บใหม่แทน
             window.open(urlToPlay, '_blank');
         }
 
-        // GA Event
         if (typeof gtag === 'function') {
             gtag('event', 'channel_click', { 'channel_name': channel.name, 'category': channel.category, 'link_url': urlToPlay });
         }
     }
 
-
     // --- Event Listener สำหรับการคลิกช่อง (Channel Link) ---
     categoriesContainer.addEventListener('click', function(event) {
         const link = event.target.closest('.channel-link');
-        if (!link) return; // ไม่ใช่ channel link
+        if (!link) return;
 
-        event.preventDefault(); // ป้องกันการกระทำเริ่มต้นของลิงก์
+        event.preventDefault();
 
-        // ตรวจสอบสถานะเครือข่ายก่อนดำเนินการ
         if (!navigator.onLine) {
-            checkNetworkStatus(); // แสดงแจ้งเตือนทันที
-            return; // หยุดการทำงาน
+            checkNetworkStatus();
+            return;
         }
         
         const channelName = link.querySelector('img').alt;
-        const channel = channelsData.find(c => c.name === channelName);
+        const channel = channelsData ? channelsData.find(c => c.name === channelName) : null;
 
         if (!channel) {
             console.error('ไม่พบข้อมูลช่องสำหรับ:', channelName);
-            showErrorModal( // ใช้ showErrorModal ที่เหลืออยู่
+            showErrorModal(
                 'ข้อมูลช่องไม่พร้อมใช้งาน',
                 `ไม่พบข้อมูลสำหรับช่อง "${channelName}" โปรดลองช่องอื่น หรือติดต่อผู้ดูแล`
             );
             return;
         }
 
-        tryPlayChannel(channel); // เรียกใช้ฟังก์ชันใหม่เพื่อจัดการการเล่นวิดีโอ
+        tryPlayChannel(channel);
     });
 
     // --- การอัปเดตวันที่และเวลา ---
@@ -495,7 +501,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function openAccordion(contentElement, buttonElement) {
-        contentElement.style.display = 'flex'; 
+        contentElement.style.display = 'flex';
         buttonElement.setAttribute('aria-expanded', 'true');
 
         showLoading(contentElement);
@@ -506,9 +512,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!channelsData || channelsData.length === 0) {
             hideLoading(contentElement);
-            // ถ้าไม่มีช่องในหมวดหมู่นี้ อาจพิจารณาซ่อนปุ่มหมวดหมู่นั้นไปเลย
-            // buttonElement.style.display = 'none'; // หรือเพิ่ม class เพื่อซ่อน
-            return; 
+            showNoChannelsMessage(contentElement);
+            return;
         }
 
         clearMessages(contentElement);
@@ -518,24 +523,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (filteredChannels.length === 0) {
             showNoChannelsMessage(contentElement);
-            // ถ้าไม่มีช่องในหมวดหมู่นี้ อาจพิจารณาซ่อนปุ่มหมวดหมู่นั้นไปเลย
-            // buttonElement.style.display = 'none'; // หรือเพิ่ม class เพื่อซ่อน
         } else {
             filteredChannels.forEach(channel => {
                 const link = document.createElement('a');
-                link.href = "#"; // ลิงก์ href เป็น # เพราะจะจัดการด้วย JS
+                link.href = "#";
                 link.classList.add('channel-link');
-                link.setAttribute('aria-label', channel.aria_label);
+                link.setAttribute('aria-label', channel.aria_label || `ดูช่อง ${channel.name}`);
 
                 const img = document.createElement('img');
-                img.src = channel.img_src || PLACEHOLDER_IMG; // ใช้ placeholder ถ้า img_src ว่าง
+                img.src = channel.img_src || PLACEHOLDER_IMG;
                 img.alt = channel.name;
                 img.loading = "lazy";
                 
-                // การจัดการเมื่อรูปภาพโหลดไม่ได้ (จะใช้ ERROR_IMG ทันทีที่โหลดไม่ได้)
                 img.onerror = function() {
-                    this.onerror = null; // ป้องกัน infinite loop
-                    this.src = ERROR_IMG; // รูปภาพแสดงข้อผิดพลาดสุดท้าย
+                    this.onerror = null;
+                    this.src = ERROR_IMG;
                     console.warn(`ไม่สามารถโหลดรูปภาพสำหรับช่อง: ${channel.name} จาก ${channel.img_src || 'URL ว่างเปล่า'}. ใช้ภาพ ERROR.`);
                     if (typeof gtag === 'function') {
                         gtag('event', 'image_load_failed', { 'channel_name': channel.name, 'final_url_attempted': channel.img_src });
@@ -573,9 +575,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- ส่วนป้องกันการดูโค้ด (ถูกลบออกแล้ว) ---
-    // (ฟังก์ชันที่เกี่ยวข้องถูกลบออกไปทั้งหมด)
-
     // Debounce function (ยังคงอยู่เผื่อใช้งานกับ Event อื่นๆ ในอนาคต)
     function debounce(func, delay) {
         let timeout;
@@ -586,11 +585,7 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    // --- Initializations ---
-    // ไม่มี checkDevTools หรือส่วนป้องกันโค้ดแล้ว
-    // ดังนั้นจึงไม่มีการเรียก checkDevTools หรือผูกกับ Event listener ที่เกี่ยวข้องแล้ว
-
-    window.addEventListener('online', checkNetworkStatus); // ตรวจสอบเมื่อกลับมาออนไลน์
-    window.addEventListener('offline', checkNetworkStatus); // ตรวจสอบเมื่อออฟไลน์
-    checkNetworkStatus(); // ตรวจสอบสถานะเริ่มต้นเมื่อโหลดหน้า
+    window.addEventListener('online', checkNetworkStatus);
+    window.addEventListener('offline', checkNetworkStatus);
+    checkNetworkStatus();
 });
