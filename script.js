@@ -13,22 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalCloseButton = document.getElementById('modalCloseButton');
     const appInstallModalCloseButtonSpan = appInstallModal.querySelector('.close-button');
 
-    // Modal elements for desktop video player ถูกลบออกจาก HTML แล้ว
-    // ดังนั้นจึงไม่มีตัวแปรอ้างอิงถึง elements เหล่านี้อีกต่อไป
-    // const videoPlayerModal = document.getElementById('videoPlayerModal');
-    // const videoModalTitle = document.getElementById('videoModalTitle');
-    // const desktopVideoPlayer = document.getElementById('desktopVideoPlayer');
-    // const videoModalCloseButton = document.getElementById('videoModalCloseButton');
-    // const videoPlayerModalCloseButtonSpan = videoPlayerModal.querySelector('.close-button');
-
-    // Generic Error Modal elements
+    // Generic Error Modal elements (หากยังมีใน HTML)
     const errorModal = document.getElementById('errorModal');
     const errorModalTitle = document.getElementById('errorModalTitle');
     const errorModalMessage = document.getElementById('errorModalMessage');
     const errorModalReloadButton = document.getElementById('errorModalReloadButton');
     const errorModalCloseButton = document.getElementById('errorModalCloseButton');
     const errorModalCloseButtonSpan = errorModal.querySelector('.close-button');
-
 
     // Network Status Alert
     const networkStatusAlert = document.getElementById('network-status-alert');
@@ -170,40 +161,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * แสดง Modal ข้อผิดพลาดทั่วไป
+     * แสดง Modal ข้อผิดพลาดทั่วไป (errorModal)
      * @param {string} title - หัวข้อข้อผิดพลาด
      * @param {string} message - ข้อความอธิบายข้อผิดพลาด
      * @param {Function} [onReload] - ฟังก์ชันที่จะเรียกเมื่อกดปุ่ม "ลองใหม่" (ถ้ามี)
      */
     function showErrorModal(title, message, onReload = null) {
-        // อ้างอิง elements ของ errorModal (ซึ่งยังคงอยู่ใน HTML)
-        const currentErrorModal = document.getElementById('errorModal');
-        const currentErrorModalTitle = document.getElementById('errorModalTitle');
-        const currentErrorModalMessage = document.getElementById('errorModalMessage');
-        const currentErrorModalReloadButton = document.getElementById('errorModalReloadButton');
-        const currentErrorModalCloseButton = document.getElementById('errorModalCloseButton');
-        const currentErrorModalCloseButtonSpan = currentErrorModal.querySelector('.close-button');
+        errorModalTitle.textContent = title;
+        errorModalMessage.innerHTML = message; // ใช้ innerHTML เพื่อรองรับ <br>
 
-
-        currentErrorModalTitle.textContent = title;
-        currentErrorModalMessage.innerHTML = message; // ใช้ innerHTML เพื่อรองรับ <br>
-
-        currentErrorModalReloadButton.style.display = onReload ? 'inline-block' : 'none';
-        currentErrorModalReloadButton.onclick = () => {
-            hideModal(currentErrorModal);
+        errorModalReloadButton.style.display = onReload ? 'inline-block' : 'none';
+        errorModalReloadButton.onclick = () => {
+            hideModal(errorModal);
             if (onReload) onReload();
             if (typeof gtag === 'function') {
                 gtag('event', 'error_modal_reload_clicked', { 'error_title': title });
             }
         };
 
-        currentErrorModalCloseButton.onclick = () => hideModal(currentErrorModal);
-        currentErrorModalCloseButtonSpan.onclick = () => hideModal(currentErrorModal);
+        errorModalCloseButton.onclick = () => hideModal(errorModal);
+        errorModalCloseButtonSpan.onclick = () => hideModal(errorModal);
         
         if (typeof gtag === 'function') {
             gtag('event', 'error_modal_shown', { 'error_title': title, 'error_message': message });
         }
-        showModal(currentErrorModal);
+        showModal(errorModal);
     }
 
     /**
@@ -324,8 +306,12 @@ document.addEventListener('DOMContentLoaded', function() {
             channelsData = data;
         } catch (error) {
             console.error('การจัดการข้อผิดพลาดขั้นสุดท้ายสำหรับ channels.json:', error);
-            // แสดง Modal ข้อผิดพลาด เนื่องจากถูกลบออกไปจาก HTML จึงต้องใช้ alert แทน
-            alert(`เกิดข้อผิดพลาดในการโหลดช่อง: ${error.message}\nโปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง`);
+            // แสดง Modal ข้อผิดพลาด เนื่องจากถูกลบออกไปจาก HTML จึงต้องใช้ showErrorModal() แทน
+            showErrorModal(
+                'เกิดข้อผิดพลาดในการโหลดช่อง!',
+                `ไม่สามารถโหลดรายการช่องได้: ${error.message}<br>โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองใหม่อีกครั้ง`,
+                loadChannelsData // สามารถกดลองใหม่ได้
+            );
             channelsData = [];
         }
     }
@@ -346,8 +332,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('การจัดการข้อผิดพลาดขั้นสุดท้ายสำหรับ texts.json:', error);
-            // แสดง Modal ข้อผิดพลาด เนื่องจากถูกลบออกไปจาก HTML จึงต้องใช้ alert แทน
-            alert(`เกิดข้อผิดพลาดในการโหลดข้อความประกาศ: ${error.message}`);
+            // แสดง Modal ข้อผิดพลาด เนื่องจากถูกลบออกไปจาก HTML จึงต้องใช้ showErrorModal() แทน
+            showErrorModal(
+                'เกิดข้อผิดพลาด!',
+                `ไม่สามารถโหลดข้อมูลข้อความประกาศได้: ${error.message}`,
+                loadTextsData // สามารถกดลองใหม่ได้
+            );
             textsData = {};
             if (runningTextElement) runningTextElement.textContent = "เกิดข้อผิดพลาดในการโหลดข้อความประกาศ!";
             if (footerTextElement) footerTextElement.textContent = "เกิดข้อผิดพลาดในการโหลดข้อความท้ายหน้า!";
@@ -360,11 +350,11 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('เกิดข้อผิดพลาดระหว่างการโหลดข้อมูลเริ่มต้น บางส่วนของหน้าอาจไม่แสดงผลอย่างถูกต้อง:', error);
-            // เนื่องจากไม่มี showErrorModal แล้ว จึงไม่ต้องมีการเรียกที่นี่อีก
+            // showErrorModal ถูกเรียกใน loadChannelsData/loadTextsData แล้ว
         });
 
     /**
-     * พยายามเปิด URL วิดีโอหลัก หากล้มเหลว ให้ลอง Fallback URL (ถ้ามี)
+     * พยายามเปิด URL วิดีโอหลัก
      * และจัดการแสดงผลตามแพลตฟอร์ม
      * @param {object} channel - ข้อมูลช่อง
      */
@@ -374,8 +364,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // ตรวจสอบความถูกต้องของ URL หลัก
         if (!isValidUrl(urlToPlay)) {
             console.warn(`URL หลักของช่อง "${channel.name}" ไม่ถูกต้อง: ${urlToPlay}`);
-            // เนื่องจากไม่มี showErrorModal แล้ว จะใช้ alert() แทน
-            alert(`ลิงก์วิดีโอสำหรับช่อง "${channel.name}" ไม่ถูกต้อง\nโปรดติดต่อผู้ดูแล`);
+            showErrorModal(
+                'ลิงก์วิดีโอไม่ถูกต้อง',
+                `ลิงก์หลักสำหรับช่อง "${channel.name}" ไม่ถูกต้อง<br>โปรดติดต่อผู้ดูแล`
+            );
             return; // หยุดทำงานถ้า URL หลักไม่ถูกต้อง
         }
 
@@ -417,8 +409,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 1000);
                 } else {
                     console.warn(`Liftplay config ไม่สมบูรณ์สำหรับ ${channel.name}`);
-                    // เนื่องจากไม่มี showErrorModal แล้ว จะใช้ alert() แทน
-                    alert(`การตั้งค่าสำหรับแอป Liftplay ของช่อง "${channel.name}" ไม่สมบูรณ์\nโปรดติดต่อผู้ดูแล`);
+                    showErrorModal( // ใช้ showErrorModal ที่เหลืออยู่
+                        'ตั้งค่าแอปไม่สมบูรณ์',
+                        `การตั้งค่าสำหรับแอป Liftplay ของช่อง "${channel.name}" ไม่สมบูรณ์<br>โปรดติดต่อผู้ดูแล`
+                    );
                 }
             } else {
                 window.open(urlToPlay, '_blank');
@@ -454,8 +448,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!channel) {
             console.error('ไม่พบข้อมูลช่องสำหรับ:', channelName);
-            // เนื่องจากไม่มี showErrorModal แล้ว จะใช้ alert() แทน
-            alert(`ไม่พบข้อมูลสำหรับช่อง "${channelName}"\nโปรดลองช่องอื่น หรือติดต่อผู้ดูแล`);
+            showErrorModal( // ใช้ showErrorModal ที่เหลืออยู่
+                'ข้อมูลช่องไม่พร้อมใช้งาน',
+                `ไม่พบข้อมูลสำหรับช่อง "${channelName}" โปรดลองช่องอื่น หรือติดต่อผู้ดูแล`
+            );
             return;
         }
 
@@ -578,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // --- ส่วนป้องกันการดูโค้ด (ถูกลบออกแล้ว) ---
-    // เนื่องจากลบส่วนนี้ออกไปแล้ว จึงไม่ต้องมี Event Listener หรือฟังก์ชันที่เกี่ยวข้องอีก
+    // (ฟังก์ชันที่เกี่ยวข้องถูกลบออกไปทั้งหมด)
 
     // Debounce function (ยังคงอยู่เผื่อใช้งานกับ Event อื่นๆ ในอนาคต)
     function debounce(func, delay) {
