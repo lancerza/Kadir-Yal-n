@@ -253,25 +253,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- ส่วนป้องกันการดูโค้ด ---
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('selectstart', e => e.preventDefault());
-    document.addEventListener('dragstart', e => e.preventDefault());
-    document.addEventListener('drop', e => e.preventDefault());
+    // --- ส่วนป้องกันการดูโค้ด (Code View Protection) ---
+    // โปรดทราบ: การป้องกันเหล่านี้มุ่งเป้าไปที่การลดโอกาสในการเข้าถึงซอร์สโค้ดโดยผู้ใช้ทั่วไป
+    // แต่ไม่สามารถป้องกันผู้ใช้ที่มีความรู้ทางเทคนิคสูงได้อย่างสมบูรณ์
+    // และบางครั้งอาจส่งผลต่อประสบการณ์ผู้ใช้ในการใช้งานเบราว์เซอร์ปกติ
+
+    // ป้องกันการคลิกขวา เพื่อไม่ให้เมนูบริบทของเบราว์เซอร์ปรากฏขึ้น
+    document.addEventListener('contextmenu', e => {
+        e.preventDefault();
+    });
+
+    // ป้องกันการเลือกข้อความบนหน้าเว็บด้วยเมาส์
+    document.addEventListener('selectstart', e => {
+        e.preventDefault();
+    });
+
+    // ป้องกันการลากและวางองค์ประกอบต่างๆ บนหน้าเว็บ
+    document.addEventListener('dragstart', e => {
+        e.preventDefault();
+    });
+    document.addEventListener('drop', e => {
+        e.preventDefault();
+    });
+
+    // ป้องกันแป้นพิมพ์ลัดบางอย่างที่มักใช้ในการเข้าถึงหรือตรวจสอบโค้ด
     document.addEventListener('keydown', e => {
-        if (e.key === ' ' || e.key === 'Enter') return;
+        // อนุญาตแป้น Spacebar และ Enter เพื่อให้ยังคงใช้งานปกติได้ เช่น การกดปุ่มหรือเลื่อนหน้า
+        if (e.key === ' ' || e.key === 'Enter') {
+            return; 
+        }
+
+        // ตรวจสอบการกดปุ่ม Ctrl (บน Windows/Linux) หรือ Command (บน Mac) ร่วมกับปุ่มอื่น
         if (e.ctrlKey || e.metaKey) {
-            // **เพิ่มเงื่อนไขนี้เพื่อป้องกัน Ctrl + U**
-            if (e.key === 'u' || e.key === 'U') {
+            const lowerKey = e.key.toLowerCase();
+
+            // ป้องกัน Ctrl/Cmd + U (สำหรับเปิดดูซอร์สโค้ดของหน้าเว็บ)
+            if (lowerKey === 'u') {
                 e.preventDefault();
             }
-            if (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) e.preventDefault();
-            else {
-                const lowerKey = e.key.toLowerCase();
-                if (['s', 'p', 'a', 'c', 'x', 'v'].includes(lowerKey)) e.preventDefault();
+            // ป้องกัน Ctrl/Cmd + Shift + I/J/C (สำหรับเปิด Developer Tools ของเบราว์เซอร์)
+            else if (e.shiftKey && (lowerKey === 'i' || lowerKey === 'j' || lowerKey === 'c')) {
+                e.preventDefault();
+            }
+            // ป้องกันแป้นพิมพ์ลัดพื้นฐานอื่นๆ ที่เกี่ยวข้องกับการจัดการเนื้อหา
+            // เช่น S (บันทึก), P (พิมพ์), A (เลือกทั้งหมด), C (คัดลอก), X (ตัด), V (วาง)
+            else if (['s', 'p', 'a', 'c', 'x', 'v'].includes(lowerKey)) {
+                e.preventDefault();
             }
         }
-        if (e.key === 'F12') e.preventDefault();
+        
+        // ป้องกันปุ่ม F12 (สำหรับเปิด Developer Tools ของเบราว์เซอร์)
+        if (e.key === 'F12') {
+            e.preventDefault();
+        }
     });
     // --- สิ้นสุดส่วนป้องกันการดูโค้ด ---
 });
