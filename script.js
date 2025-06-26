@@ -557,8 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 img.alt = channel.name;
                 img.loading = "lazy";
                 
-                // การจัดการเมื่อรูปภาพโหลดไม่ได้ (รวมถึง fallback_img_src)
-                // เนื่องจากลบ fallback_img_src ออกไปแล้ว จะใช้ ERROR_IMG ทันทีที่โหลดไม่ได้
+                // การจัดการเมื่อรูปภาพโหลดไม่ได้
                 img.onerror = function() {
                     this.onerror = null; // ป้องกัน infinite loop
                     this.src = ERROR_IMG; // รูปภาพแสดงข้อผิดพลาดสุดท้าย
