@@ -257,7 +257,6 @@ main img {
     height: 50px;
     width: 50px;
     object-fit: cover;
-    /* vertical-align: middle; ถูกลบออกเนื่องจาก channel-link ใช้ flexbox แล้ว */
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
     user-select: none;
@@ -305,7 +304,6 @@ footer {
     display: none; /* ซ่อนไว้เป็นค่าเริ่มต้น */
     margin-top: var(--spacing-md);
     margin-bottom: var(--spacing-md);
-    /* สีและ text-align ถูกตั้งค่าใน JS แล้ว แต่สามารถ Override ได้ที่นี่ */
 }
 
 .error-display-message.active {
