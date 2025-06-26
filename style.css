@@ -13,18 +13,7 @@
     --spacing-xl: 20px;
 }
 
-/* Animation for header (Fade in) */
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-/* Animation for running text */
-@keyframes marquee {
-    0% { transform: translateX(100%); } /* Start from right */
-    100% { transform: translateX(-100%); } /* Go to far left */
-}
-
+/* --- Global Styles --- */
 html, body {
     margin: 0;
     padding: 0 var(--spacing-md);
@@ -44,6 +33,23 @@ html, body {
     user-select: none;
 }
 
+/* --- Animations --- */
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes marquee {
+    0% { transform: translateX(100%); } /* Start from right */
+    100% { transform: translateX(-100%); } /* Go to far left */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- Header Section --- */
 header {
     background-color: var(--dark-bg);
     color: var(--white);
@@ -55,11 +61,23 @@ header {
     box-sizing: border-box;
 }
 
+h1 {
+    color: var(--white);
+    text-align: center;
+    font-family: 'Kanit', sans-serif;
+    font-size: clamp(24px, 5vw, 40px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 12px rgba(255, 255, 255, 0.2);
+    margin-top: 1px;
+    margin-bottom: var(--spacing-md);
+}
+
 #running-text-container {
     width: 100%;
     margin-bottom: var(--spacing-xs);
     position: relative;
-    height: 20px; /* กำหนดความสูงเพื่อให้ข้อความวิ่งแสดงผลได้ดี */
+    height: 20px;
     overflow: hidden;
 }
 
@@ -76,18 +94,6 @@ header {
     left: 0;
     min-width: 100%;
     cursor: default;
-}
-
-h1 {
-    color: var(--white);
-    text-align: center;
-    font-family: 'Kanit', sans-serif;
-    font-size: clamp(24px, 5vw, 40px);
-    font-weight: 900;
-    letter-spacing: 2px;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 12px rgba(255, 255, 255, 0.2);
-    margin-top: 1px;
-    margin-bottom: var(--spacing-md);
 }
 
 #current-datetime {
@@ -116,7 +122,7 @@ h1 {
 }
 
 #line-group-info:hover {
-    color: #1976D2; /* สีน้ำเงินเข้มขึ้นเมื่อ hover */
+    color: #1976D2;
 }
 
 #line-group-info i {
@@ -133,6 +139,7 @@ h1 {
     margin-left: var(--spacing-sm);
 }
 
+/* --- Main Content & Categories --- */
 main.categories-container {
     display: flex;
     flex-wrap: wrap;
@@ -157,38 +164,16 @@ main.categories-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 1px solid var(--dark-bg); /* ให้มี border เริ่มต้นเพื่อความสอดคล้อง */
+    border: 1px solid var(--dark-bg);
     height: auto;
-    box-shadow: none; /* ทำให้แน่ใจว่าไม่มี box-shadow เริ่มต้น */
+    box-shadow: none;
 }
 
 .category:hover {
     transform: translateY(-2px);
-    /* ลบ box-shadow ที่ไม่ใช่ none ออกตามที่คุณต้องการ */
 }
 
-@media (max-width: 768px) {
-    .categories-container {
-        gap: var(--spacing-md);
-    }
-    .category {
-        width: calc(50% - var(--spacing-lg)); /* ปรับการคำนวณ width ให้เหมาะสมกับ gap */
-        max-width: unset;
-    }
-}
-
-@media (max-width: 480px) {
-    .categories-container {
-        gap: var(--spacing-md);
-        padding: 0 var(--spacing-xs) var(--spacing-md) var(--spacing-xs);
-    }
-    .category {
-        width: calc(100% - var(--spacing-md)); /* ปรับการคำนวณ width ให้เหมาะสมกับ gap */
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
-
+/* --- Accordion Components --- */
 .accordion-button {
     background: linear-gradient(145deg, #424242, #333333);
     color: var(--white);
@@ -205,19 +190,18 @@ main.categories-container {
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
     border: 1px solid var(--white);
-    box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเริ่มต้น */
+    box-shadow: none;
 }
 
 .accordion-button:hover {
     background: linear-gradient(145deg, #616161, #505050);
     transform: translateY(-3px);
-    box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเมื่อ hover */
+    box-shadow: none;
     border-color: var(--white);
 }
 
 .accordion-button:active {
     transform: translateY(0);
-    /* คงเงาด้านในนี้ไว้ หากต้องการให้มีเอฟเฟกต์กดลงไป */
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
     background: #333333;
     border-color: #AAAAAA;
@@ -240,8 +224,6 @@ main.categories-container {
     justify-content: center;
     gap: var(--spacing-sm);
     position: relative;
-    /* เพิ่ม margin-top เพื่อเว้นระยะจากปุ่ม accordion เล็กน้อยเมื่อเปิด */
-    margin-top: var(--spacing-sm);
 }
 
 .accordion-content.show {
@@ -251,6 +233,7 @@ main.categories-container {
     padding-bottom: var(--spacing-sm);
 }
 
+/* --- Image Styles --- */
 main img {
     border-radius: var(--border-radius);
     border: 1px solid var(--white);
@@ -267,9 +250,10 @@ main img {
 main img:hover {
     transform: scale(1.05);
     border-color: var(--white);
-    box-shadow: none; /* ตั้งค่าเป็น none เพื่อลบเงาเมื่อ hover */
+    box-shadow: none;
 }
 
+/* --- Footer --- */
 footer {
     margin-top: auto;
     padding: var(--spacing-xl);
@@ -277,10 +261,10 @@ footer {
     background-color: var(--dark-bg);
     width: 100%;
     text-align: center;
-    border-top: none; /* ไม่จำเป็นต้องมี border-top ถ้าไม่มีอยู่แล้ว */
+    border-top: none;
 }
 
-/* --- CSS สำหรับ Loading Indicator และ No Channels Message --- */
+/* --- Loading Indicator & No Channels Message --- */
 .loading-indicator, .no-channels-message {
     width: 100%;
     text-align: center;
@@ -288,11 +272,11 @@ footer {
     color: rgba(255, 255, 255, 0.7);
     font-family: 'Kanit', sans-serif;
     font-size: clamp(14px, 2.5vw, 18px);
-    display: none; /* ซ่อนเริ่มต้น */
+    display: none;
 }
 
 .loading-indicator.active, .no-channels-message.active {
-    display: block; /* แสดงเมื่อมี class active */
+    display: block;
 }
 
 .loading-indicator i.fa-spinner {
@@ -300,8 +284,25 @@ footer {
     margin-right: var(--spacing-xs);
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+/* --- Media Queries --- */
+@media (max-width: 768px) {
+    .categories-container {
+        gap: var(--spacing-md);
+    }
+    .category {
+        width: calc(50% - 15px);
+        max-width: unset;
+    }
 }
-/* --- สิ้นสุด CSS สำหรับ Loading Indicator และ No Channels Message --- */
+
+@media (max-width: 480px) {
+    .categories-container {
+        gap: var(--spacing-md);
+        padding: 0 var(--spacing-xs) var(--spacing-md) var(--spacing-xs);
+    }
+    .category {
+        width: calc(100% - 10px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
