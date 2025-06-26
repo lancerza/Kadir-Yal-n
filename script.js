@@ -144,15 +144,16 @@ document.addEventListener('DOMContentLoaded', function() {
     updateDateTime(); // Call immediately on load
     setInterval(updateDateTime, 1000); // Update every second
 
-    // Clear Cache button logic
+    // Clear Cache button logic (can be used for refresh)
+    const clearCacheButton = document.getElementById('clear-cache-button');
     if (clearCacheButton) {
         clearCacheButton.addEventListener('click', () => {
-            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างแคชของเว็บไซต์? การดำเนินการนี้จะรีโหลดหน้าเว็บใหม่')) {
-                console.log('Attempting to clear browser cache...');
-                // Forces a reload from the server, bypassing cache
+            if (confirm('คุณต้องการรีเฟรชหน้าเว็บหรือไม่?')) { // Changed confirmation text
+                console.log('Reloading the page...');
+                // Forces a reload from the server, bypassing cache (same as a hard refresh)
                 window.location.reload(true);
                 // Optionally add an alert after reload, but usually not needed as page reloads
-                // alert('แคชถูกล้างแล้ว');
+                // alert('หน้าเว็บถูกรีเฟรชแล้ว');
             }
         });
     }
