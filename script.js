@@ -18,12 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const redAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--red-accent').trim();
 
-    // ***** เพิ่ม DOM Elements สำหรับ Modal และ Authentication *****
+    // ***** DOM Elements สำหรับ Modal และ Authentication *****
     const authModal = document.getElementById('authModal');
     const closeButton = document.querySelector('.close-button');
     const loginBtn = document.getElementById('loginBtn');
     const registerBtn = document.getElementById('registerBtn');
-    const logoutBtn = document.getElementById('logoutBtn'); // ปุ่ม Logout
+    const logoutBtn = document.getElementById('logoutBtn');
     const showLoginButton = document.getElementById('showLogin');
     const showRegisterButton = document.getElementById('showRegister');
     const loginForm = document.getElementById('loginForm');
@@ -44,15 +44,121 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // Functions for loading and displaying messages (unchanged)
-    function showLoading(loadingIndicator, noChannelsMessage) { /* ... */ }
-    function hideLoading(loadingIndicator) { /* ... */ }
-    function showNoChannelsMessage(loadingIndicator, noChannelsMessage) { /* ... */ }
-    function clearMessages(loadingIndicator, noChannelsMessage) { /* ... */ }
+    function showLoading(loadingIndicator, noChannelsMessage) {
+        loadingIndicator.classList.add('active');
+        noChannelsMessage.classList.remove('active');
+        // ลบ channel links เก่าออกก่อนเสมอเมื่อจะโหลดใหม่ (ย้ายมาไว้ที่นี่เพื่อความชัดเจน)
+        const existingChannelLinks = loadingIndicator.parentElement.querySelectorAll('.channel-link');
+        existingChannelLinks.forEach(link => link.remove());
+    }
+    function hideLoading(loadingIndicator) {
+        loadingIndicator.classList.remove('active');
+    }
+    function showNoChannelsMessage(loadingIndicator, noChannelsMessage) {
+        hideLoading(loadingIndicator);
+        noChannelsMessage.classList.add('active');
+    }
+    function clearMessages(loadingIndicator, noChannelsMessage) {
+        loadingIndicator.classList.remove('active');
+        noChannelsMessage.classList.remove('active');
+    }
 
-    // Functions for fetching data from Backend (unchanged)
-    async function fetchDataFromBackend(endpoint) { /* ... */ }
-    async function loadChannelsData() { /* ... */ }
-    async function loadTextsData() { /* ... */ }
+    /**
+     * โหลดข้อมูลจาก Backend API ที่ระบุ พร้อมแนบ Authentication Token (ถ้ามี)
+     * @param {string} endpoint - Endpoint ของ API ที่จะเรียก (เช่น '/api/channels')
+     * @param {Object} options - ออปชันสำหรับการเรียก fetch (เช่น method, body)
+     * @returns {Promise<Array|Object>} - ข้อมูลที่โหลดมา
+     * @throws {Error} - หากการโหลดหรือการแยกวิเคราะห์ข้อมูลล้มเหลว
+     */
+    async function fetchDataFromBackend(endpoint, options = {}) {
+        const token = localStorage.getItem('authToken'); // ดึง token จาก localStorage
+        const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers // รวม header ที่ส่งมาด้วย
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`; // เพิ่ม Authorization header
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_API_URL}${endpoint}`, {
+                ...options,
+                headers: headers
+            });
+
+            if (!response.ok) {
+                // ถ้าเป็น 401 หรือ 403 และมี token แสดงว่า token ไม่ถูกต้องหรือหมดอายุ
+                if ((response.status === 401 || response.status === 403) && token) {
+                    console.warn('Authentication failed. Clearing token and redirecting to login.');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('currentUser');
+                    updateAuthButtons();
+                    // อาจจะแสดง modal login อัตโนมัติ หรือ alert
+                    // openAuthModal('login');
+                    alert('เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบอีกครั้ง');
+                    window.location.reload(); // รีโหลดหน้าเพื่อบังคับให้ Login ใหม่
+                }
+
+                const errorBody = await response.json().catch(() => ({ message: 'Unknown error' }));
+                const errorText = errorBody.message || `Failed to load ${endpoint}: HTTP error! status: ${response.status}`;
+                throw new Error(errorText);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error(`Error loading or parsing data from ${endpoint}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * โหลดข้อมูลช่องจาก Backend (ต้องใช้ Token เมื่อ API ถูกป้องกัน)
+     * @returns {Promise<void>}
+     */
+    async function loadChannelsData() {
+        if (channelsData !== null) return; // ถ้าโหลดแล้วหรือเกิดข้อผิดพลาดไปแล้ว ไม่ต้องโหลดซ้ำ
+        try {
+            // ในอนาคต เมื่อ API channels ถูกป้องกันด้วย Token จะต้องมี Token ถึงจะโหลดได้
+            // ตอนนี้ยังไม่ต้องส่ง Token เพราะ API ยังไม่ป้องกัน
+            const data = await fetchDataFromBackend('/api/channels');
+            if (!Array.isArray(data)) {
+                throw new Error('Fetched data from /api/channels is not an array.');
+            }
+            channelsData = data;
+            hasChannelsError = false;
+        } catch (error) {
+            console.error('Final error handling for channels data from Backend:', error);
+            channelsData = [];
+            hasChannelsError = true;
+        }
+    }
+
+    /**
+     * โหลดข้อมูลข้อความจาก Backend
+     * @returns {Promise<void>}
+     */
+    async function loadTextsData() {
+        if (textsData) return;
+        try {
+            const data = await fetchDataFromBackend('/api/texts');
+            if (typeof data !== 'object' || data === null) {
+                throw new Error('Fetched data from /api/texts is not a valid object.');
+            }
+            textsData = data;
+            if (runningTextElement && textsData.runningText) {
+                runningTextElement.textContent = textsData.runningText;
+            }
+            if (footerTextElement && textsData.footerText) {
+                footerTextElement.textContent = textsData.footerText;
+            }
+        } catch (error) {
+            console.error('Final error handling for texts data from Backend:', error);
+            textsData = {};
+            if (runningTextElement) runningTextElement.textContent = "เกิดข้อผิดพลาดในการโหลดข้อความประกาศ!";
+            if (footerTextElement) footerTextElement.textContent = "เกิดข้อผิดพลาดในการโหลดข้อความท้ายหน้า!";
+        }
+    }
 
     // Initial data load (unchanged)
     Promise.all([loadChannelsData(), loadTextsData()])
@@ -121,23 +227,127 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Accordion functions (unchanged)
-    function closeAccordion(contentElement, buttonElement) { /* ... */ }
-    function createChannelLinkElement(channel) { /* ... */ }
-    async function openAccordion(contentElement, buttonElement) { /* ... */ }
+    function closeAccordion(contentElement, buttonElement) {
+        contentElement.classList.remove('show');
+        contentElement.style.maxHeight = '0px';
+        buttonElement.setAttribute('aria-expanded', 'false');
+    }
+    function createChannelLinkElement(channel) {
+        const link = document.createElement('a');
+        link.href = "#";
+        link.classList.add('channel-link');
+        link.dataset.url = channel.data_url;
+        link.setAttribute('aria-label', channel.aria_label);
+
+        const img = document.createElement('img');
+        img.src = channel.img_src;
+        img.alt = channel.name;
+        img.loading = "lazy";
+        link.appendChild(img);
+        return link;
+    }
+
+    /**
+     * เปิด Accordion ที่กำหนดและโหลดช่องที่เกี่ยวข้อง
+     * @param {HTMLElement} contentElement - องค์ประกอบ content ของ Accordion
+     * @param {HTMLElement} buttonElement - องค์ประกอบ button ของ Accordion
+     */
+    async function openAccordion(contentElement, buttonElement) {
+        // ตรวจสอบว่าผู้ใช้เข้าสู่ระบบหรือไม่
+        const isLoggedIn = localStorage.getItem('authToken');
+        if (!isLoggedIn) {
+            // หากยังไม่ได้ Login ให้แสดง Modal Login และไม่โหลดช่อง
+            openAuthModal('login');
+            // อาจแสดงข้อความแจ้งเตือนผู้ใช้ว่าต้อง Login ก่อน
+            alert('กรุณาเข้าสู่ระบบเพื่อดูช่องรายการ');
+            closeAccordion(contentElement, buttonElement); // ปิด accordion ถ้าเปิดอยู่
+            return; // หยุดการทำงาน
+        }
+
+        // ต้องตั้งค่า display: flex ก่อน เพื่อให้ scrollHeight คำนวณได้ถูกต้อง
+        contentElement.style.display = 'flex'; 
+        buttonElement.setAttribute('aria-expanded', 'true');
+
+        const loadingIndicator = contentElement.querySelector('.loading-indicator');
+        const noChannelsMessage = contentElement.querySelector('.no-channels-message');
+
+        // ลบ channel links เก่าออกก่อนเสมอเมื่อจะโหลดใหม่
+        const existingChannelLinks = contentElement.querySelectorAll('.channel-link');
+        existingChannelLinks.forEach(link => link.remove());
+
+        showLoading(loadingIndicator, noChannelsMessage); // แสดง loading
+
+        if (channelsData === null) { // โหลดข้อมูลหากยังไม่ได้โหลดเลย
+            await loadChannelsData();
+        }
+
+        // หากยังคงมีข้อผิดพลาดหลังจากพยายามโหลด ให้หยุดทำงาน
+        if (hasChannelsError || !Array.isArray(channelsData) || channelsData.length === 0) {
+            hideLoading(loadingIndicator);
+            // ถ้ามีข้อผิดพลาดในการโหลด channelsData ทั่วไป ข้อความจะถูกแสดงไปแล้วใน Promise.all
+            // ถ้าไม่มีข้อมูลช่องสำหรับหมวดหมู่นี้โดยเฉพาะ จะแสดงข้อความ "ไม่พบช่อง"
+            if (!hasChannelsError) {
+                showNoChannelsMessage(loadingIndicator, noChannelsMessage);
+            } else {
+                 // หากมีข้อผิดพลาดระดับไฟล์ JSON ข้อความจะถูกจัดการโดย Promise.all
+                 // ตรงนี้อาจจะไม่ต้องทำอะไรเพิ่มเติม เพราะเนื้อหาถูกแทนที่ไปแล้ว
+            }
+            return;
+        }
+
+        clearMessages(loadingIndicator, noChannelsMessage); // ล้างข้อความสถานะหลังจากโหลดข้อมูลสำเร็จ
+
+        // ลบ emoji และ trim ช่องว่างสำหรับชื่อหมวดหมู่
+        const categoryText = buttonElement.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').replace(/\s+/g, ' ').trim();
+        const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
+
+        if (filteredChannels.length === 0) {
+            showNoChannelsMessage(loadingIndicator, noChannelsMessage);
+        } else {
+            filteredChannels.forEach(channel => {
+                const link = createChannelLinkElement(channel);
+                contentElement.appendChild(link);
+            });
+        }
+
+        // ใช้ requestAnimationFrame เพื่อให้แน่ใจว่า DOM ได้รับการอัปเดตก่อนคำนวณความสูง
+        requestAnimationFrame(() => {
+            const actualContentHeight = contentElement.scrollHeight;
+            contentElement.style.maxHeight = (actualContentHeight + 16) + 'px'; // +16px เพื่อรองรับ padding/margin
+            contentElement.classList.add('show');
+        });
+        hideLoading(loadingIndicator); // ซ่อน loading เมื่อช่องถูกแสดง
+    }
 
     // Accordion button handlers (unchanged)
     const allAccordionButtons = document.querySelectorAll('.accordion-button');
-    allAccordionButtons.forEach(button => { /* ... */ });
+    allAccordionButtons.forEach(button => {
+        const content = button.nextElementSibling;
+        button.addEventListener('click', function() {
+            // ปิด Accordion อื่นๆ ที่เปิดอยู่
+            allAccordionButtons.forEach(otherButton => {
+                const otherContent = otherButton.nextElementSibling;
+                if (otherButton !== this && otherContent && otherContent.classList.contains('show')) {
+                    closeAccordion(otherContent, otherButton);
+                }
+            });
+            // สลับสถานะ Accordion ที่ถูกคลิก
+            if (content && content.classList.contains('show')) {
+                closeAccordion(content, this);
+            } else if (content) {
+                openAccordion(content, this);
+            }
+        });
+    });
 
 
     // ***** START AUTHENTICATION UI LOGIC *****
 
     // ฟังก์ชันเพื่อเปิด Modal
     function openAuthModal(formType) {
-        authModal.style.display = 'flex'; // ตั้งค่า display เพื่อให้ Modal ปรากฏใน DOM
-        // ใช้ requestAnimationFrame เพื่อให้แน่ใจว่า browser ตรวจจับ display change ก่อน
+        authModal.style.display = 'flex';
         requestAnimationFrame(() => {
-            authModal.classList.add('show'); // เพิ่มคลาส show เพื่อแสดง Modal พร้อม transition
+            authModal.classList.add('show');
         });
         
         if (formType === 'login') {
@@ -149,14 +359,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ฟังก์ชันเพื่อปิด Modal
     function closeAuthModal() {
-        authModal.classList.remove('show'); // ลบคลาส show เพื่อซ่อน Modal พร้อม transition
-        // รอให้ transition จบก่อนที่จะตั้งค่า display เป็น none
+        authModal.classList.remove('show');
         authModal.addEventListener('transitionend', function handler() {
-            if (!authModal.classList.contains('show')) { // ตรวจสอบอีกครั้งว่าถูกซ่อนจริง
-                authModal.style.display = 'none'; // ซ่อน Modal จาก DOM
-                authModal.removeEventListener('transitionend', handler); // ลบ Event Listener เพื่อป้องกันการเรียกซ้ำ
+            if (!authModal.classList.contains('show')) {
+                authModal.style.display = 'none';
+                authModal.removeEventListener('transitionend', handler);
             }
-        }, { once: true }); // ใช้ { once: true } เพื่อให้ listener ถูกลบออกโดยอัตโนมัติหลังทำงานครั้งเดียว
+        }, { once: true });
 
         // ล้างข้อความแจ้งเตือนและค่าในฟอร์มเมื่อปิด Modal
         loginMessage.style.display = 'none';
@@ -168,16 +377,6 @@ document.addEventListener('DOMContentLoaded', function() {
         registerPasswordInput.value = '';
     }
 
-    // ฟังก์ชันเพื่อสลับไปแสดงฟอร์ม Login
-    function showLoginForm() {
-        showTab('login');
-    }
-
-    // ฟังก์ชันเพื่อสลับไปแสดงฟอร์ม Register
-    function showRegisterForm() {
-        showTab('register');
-    }
-
     // ฟังก์ชันรวมสำหรับสลับ Tab และ Form
     function showTab(tabName) {
         if (tabName === 'login') {
@@ -186,15 +385,19 @@ document.addEventListener('DOMContentLoaded', function() {
             showLoginButton.classList.add('active');
             showRegisterButton.classList.remove('active');
             loginMessage.style.display = 'none';
+            registerMessage.style.display = 'none'; // ซ่อนข้อความฟอร์มอื่น
         } else { // register
             registerForm.classList.add('active');
             loginForm.classList.remove('active');
             showRegisterButton.classList.add('active');
             showLoginButton.classList.remove('active');
             registerMessage.style.display = 'none';
+            loginMessage.style.display = 'none'; // ซ่อนข้อความฟอร์มอื่น
         }
     }
-
+    // ใช้ showTab แทน showLoginForm และ showRegisterForm เดิม
+    function showLoginForm() { showTab('login'); }
+    function showRegisterForm() { showTab('register'); }
 
     // Event Listeners สำหรับปุ่มแสดง Modal
     loginBtn.addEventListener('click', () => openAuthModal('login'));
@@ -202,7 +405,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event Listeners สำหรับปิด Modal
     closeButton.addEventListener('click', closeAuthModal);
-    // ปิด Modal เมื่อคลิกนอก Modal Content
     window.addEventListener('click', (event) => {
         if (event.target === authModal) {
             closeAuthModal();
@@ -213,27 +415,125 @@ document.addEventListener('DOMContentLoaded', function() {
     showLoginButton.addEventListener('click', showLoginForm);
     showRegisterButton.addEventListener('click', showRegisterForm);
 
+    // ***** FUNCTIONS FOR REGISTER AND LOGIN *****
+
+    /**
+     * แสดงข้อความแจ้งเตือนใน UI
+     * @param {HTMLElement} element - DOM element ที่จะแสดงข้อความ
+     * @param {string} message - ข้อความที่จะแสดง
+     * @param {string} type - 'success' หรือ 'error'
+     */
+    function showMessage(element, message, type) {
+        element.textContent = message;
+        element.className = `message-box ${type}`; // กำหนด class ทั้งหมดใหม่
+        element.style.display = 'block';
+    }
+
+    /**
+     * ฟังก์ชันลงทะเบียนผู้ใช้
+     */
+    registerSubmitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const username = registerUsernameInput.value.trim();
+        const email = registerEmailInput.value.trim();
+        const password = registerPasswordInput.value.trim();
+
+        if (!username || !email || !password) {
+            showMessage(registerMessage, 'กรุณากรอกข้อมูลให้ครบถ้วน.', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_API_URL}/api/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMessage(registerMessage, data.message, 'success');
+                // ล้างฟอร์มหลังจากลงทะเบียนสำเร็จ
+                registerUsernameInput.value = '';
+                registerEmailInput.value = '';
+                registerPasswordInput.value = '';
+                // อาจจะสลับไปหน้า Login ทันที
+                setTimeout(() => showLoginForm(), 1500);
+            } else {
+                showMessage(registerMessage, data.message || 'การลงทะเบียนไม่สำเร็จ', 'error');
+            }
+        } catch (error) {
+            console.error('Error registering user:', error);
+            showMessage(registerMessage, 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์', 'error');
+        }
+    });
+
+    /**
+     * ฟังก์ชันเข้าสู่ระบบ
+     */
+    loginSubmitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const identifier = loginIdentifierInput.value.trim();
+        const password = loginPasswordInput.value.trim();
+
+        if (!identifier || !password) {
+            showMessage(loginMessage, 'กรุณากรอกชื่อผู้ใช้/อีเมล และรหัสผ่าน', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${BACKEND_API_URL}/api/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ identifier, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showMessage(loginMessage, data.message, 'success');
+                localStorage.setItem('authToken', data.token); // เก็บ JWT Token
+                localStorage.setItem('currentUser', JSON.stringify(data.user)); // เก็บข้อมูลผู้ใช้
+                updateAuthButtons(); // อัปเดต UI ปุ่ม
+                closeAuthModal(); // ปิด Modal
+                alert('เข้าสู่ระบบสำเร็จแล้ว!');
+                // อาจจะต้องรีโหลดหน้า หรือปรับ UI อื่นๆ
+                window.location.reload(); // รีโหลดหน้าหลังจาก Login สำเร็จ เพื่อให้โหลดช่องโดยใช้ token ใหม่
+            } else {
+                showMessage(loginMessage, data.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
+            }
+        } catch (error) {
+            console.error('Error logging in user:', error);
+            showMessage(loginMessage, 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์', 'error');
+        }
+    });
+
     // ฟังก์ชันสำหรับจัดการการแสดงผลปุ่ม Login/Register/Logout
     function updateAuthButtons() {
-        const token = localStorage.getItem('authToken'); // สมมติว่าเก็บ token ใน localStorage
+        const token = localStorage.getItem('authToken');
         if (token) {
             loginBtn.style.display = 'none';
             registerBtn.style.display = 'none';
-            logoutBtn.style.display = 'inline-block'; // แสดงปุ่ม Logout
+            logoutBtn.style.display = 'inline-block';
         } else {
             loginBtn.style.display = 'inline-block';
             registerBtn.style.display = 'inline-block';
-            logoutBtn.style.display = 'none'; // ซ่อนปุ่ม Logout
+            logoutBtn.style.display = 'none';
         }
     }
 
     // Event Listener สำหรับปุ่ม Logout
     logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('authToken'); // ลบ token
-        localStorage.removeItem('currentUser'); // ลบข้อมูลผู้ใช้ (ถ้ามี)
-        updateAuthButtons(); // อัปเดตการแสดงผลปุ่ม
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('currentUser');
+        updateAuthButtons();
         alert('ออกจากระบบสำเร็จแล้ว');
-        window.location.reload(); // รีโหลดหน้าเพื่อกลับสู่สถานะก่อน Login
+        window.location.reload();
     });
 
     // เรียกใช้เมื่อหน้าโหลดครั้งแรก
