@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let hasChannelsError = false;
 
     // กำหนด URL ของ Backend API
-    const BACKEND_API_URL = 'http://localhost:3001'; // ***** สำคัญ: เปลี่ยนตาม Port ที่คุณตั้งค่าใน .env ของ Backend *****
+    const BACKEND_API_URL = 'https://tv-online-backend.onrender.com'; // ***** สำคัญ: เปลี่ยนตาม Port ที่คุณตั้งค่าใน .env ของ Backend *****
 
     const redAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--red-accent').trim();
 
