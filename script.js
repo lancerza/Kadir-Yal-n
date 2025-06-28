@@ -11,45 +11,46 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     let channelsData = null;
     let textsData = null;
+    let hasChannelsError = false; // Flag เพื่อติดตามสถานะข้อผิดพลาดของ channels.json
 
     const redAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--red-accent').trim();
 
     /**
      * แสดงสถานะการโหลดสำหรับ container ที่กำหนด
-     * @param {HTMLElement} container - องค์ประกอบ container ที่จะแสดงสถานะการโหลด
+     * @param {HTMLElement} loadingIndicator - องค์ประกอบ loading indicator
+     * @param {HTMLElement} noChannelsMessage - องค์ประกอบ no channels message
      */
-    function showLoading(container) {
-        container.querySelector('.loading-indicator').classList.add('active');
-        container.querySelector('.no-channels-message').classList.remove('active');
-        // ลบ channel links เก่าออกก่อนเสมอเมื่อจะโหลดใหม่
-        const existingChannelLinks = container.querySelectorAll('.channel-link');
-        existingChannelLinks.forEach(link => link.remove());
+    function showLoading(loadingIndicator, noChannelsMessage) {
+        loadingIndicator.classList.add('active');
+        noChannelsMessage.classList.remove('active');
     }
 
     /**
      * ซ่อนสถานะการโหลดสำหรับ container ที่กำหนด
-     * @param {HTMLElement} container - องค์ประกอบ container ที่จะซ่อนสถานะการโหลด
+     * @param {HTMLElement} loadingIndicator - องค์ประกอบ loading indicator
      */
-    function hideLoading(container) {
-        container.querySelector('.loading-indicator').classList.remove('active');
+    function hideLoading(loadingIndicator) {
+        loadingIndicator.classList.remove('active');
     }
 
     /**
      * แสดงข้อความ "ไม่พบช่อง" สำหรับ container ที่กำหนด
-     * @param {HTMLElement} container - องค์ประกอบ container ที่จะแสดงข้อความ
+     * @param {HTMLElement} loadingIndicator - องค์ประกอบ loading indicator
+     * @param {HTMLElement} noChannelsMessage - องค์ประกอบ no channels message
      */
-    function showNoChannelsMessage(container) {
-        hideLoading(container);
-        container.querySelector('.no-channels-message').classList.add('active');
+    function showNoChannelsMessage(loadingIndicator, noChannelsMessage) {
+        hideLoading(loadingIndicator);
+        noChannelsMessage.classList.add('active');
     }
 
     /**
      * ล้างข้อความสถานะทั้งหมด (โหลดและไม่พบช่อง) สำหรับ container ที่กำหนด
-     * @param {HTMLElement} container - องค์ประกอบ container ที่จะล้างข้อความ
+     * @param {HTMLElement} loadingIndicator - องค์ประกอบ loading indicator
+     * @param {HTMLElement} noChannelsMessage - องค์ประกอบ no channels message
      */
-    function clearMessages(container) {
-        container.querySelector('.loading-indicator').classList.remove('active');
-        container.querySelector('.no-channels-message').classList.remove('active');
+    function clearMessages(loadingIndicator, noChannelsMessage) {
+        loadingIndicator.classList.remove('active');
+        noChannelsMessage.classList.remove('active');
     }
 
     /**
@@ -80,33 +81,18 @@ document.addEventListener('DOMContentLoaded', function() {
      * @returns {Promise<void>}
      */
     async function loadChannelsData() {
-        if (channelsData) return;
+        if (channelsData !== null) return; // ถ้าโหลดแล้วหรือเกิดข้อผิดพลาดไปแล้ว ไม่ต้องโหลดซ้ำ
         try {
             const data = await fetchData('channels.json');
             if (!Array.isArray(data)) {
                 throw new Error('Fetched data from channels.json is not an array. Please ensure the JSON is an array of channel objects.');
             }
-            // แปลงชื่อฟิลด์จากรูปแบบที่คุณให้มา (image, url) ให้ตรงกับที่โค้ดใช้ (img_src, data_url)
-            channelsData = data.map(channel => ({
-                name: channel.name,
-                category: channel.category,
-                img_src: channel.image, // ใช้ 'image' จาก JSON ของคุณ
-                data_url: channel.url,   // ใช้ 'url' จาก JSON ของคุณ
-                aria_label: channel.name, // ใช้ name เป็น aria_label เริ่มต้น
-                referer: channel.referer,
-                userAgent: channel.userAgent,
-                playInNatPlayer: channel.playInNatPlayer
-            }));
-
+            channelsData = data;
+            hasChannelsError = false;
         } catch (error) {
             console.error('Final error handling for channels.json:', error);
-            // แสดงข้อความข้อผิดพลาดในทุกหมวดหมู่
-            Object.values(categoryContentMap).forEach(container => {
-                container.innerHTML = `<div class="no-channels-message active" style="color: ${redAccentColor}; text-align: center; padding: 20px;">
-                                        เกิดข้อผิดพลาดในการโหลดช่อง: ${error.message}<br>โปรดลองใหม่อีกครั้งในภายหลัง
-                                       </div>`;
-            });
-            channelsData = []; // กำหนดให้เป็น array ว่างเพื่อหลีกเลี่ยงการประมวลผลซ้ำ
+            channelsData = []; // กำหนดให้เป็น array ว่างเพื่อหลีกเลี่ยงการประมวลผลซ้ำและเพื่อบอกว่าโหลดไปแล้วแต่ไม่มีข้อมูล
+            hasChannelsError = true;
         }
     }
 
@@ -140,6 +126,14 @@ document.addEventListener('DOMContentLoaded', function() {
     Promise.all([loadChannelsData(), loadTextsData()])
         .then(() => {
             console.log('All initial data (channels and texts) loaded successfully!');
+            // ถ้ามีข้อผิดพลาดในการโหลด channelsData ให้แสดงข้อความแจ้งในทุกหมวดหมู่
+            if (hasChannelsError) {
+                Object.values(categoryContentMap).forEach(container => {
+                    container.innerHTML = `<div class="no-channels-message active" style="color: ${redAccentColor}; text-align: center; padding: 20px;">
+                                               เกิดข้อผิดพลาดในการโหลดช่อง: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ หรือไฟล์มีปัญหา<br>โปรดลองใหม่อีกครั้งในภายหลัง
+                                           </div>`;
+                });
+            }
         })
         .catch(error => {
             console.error('An error occurred during initial data loading. Some parts of the page might not load correctly:', error);
@@ -151,11 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (link) {
             event.preventDefault();
             const url = link.dataset.url;
-            const referer = link.dataset.referer; // ดึง referer
-            const userAgent = link.dataset.userAgent; // ดึง userAgent
-            // playInNatPlayer จะเป็นสตริง 'true'/'false' จาก dataset, แปลงเป็น boolean
-            const playInNatPlayer = link.dataset.playInNatPlayer === 'true';
-
             const imgElement = link.querySelector('img');
             const channelName = imgElement ? imgElement.alt : 'Unknown Channel';
             const categoryElement = link.closest('.category');
@@ -164,22 +153,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const categoryName = categoryButton ? categoryButton.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').replace(/\s+/g, ' ').trim() : 'Unknown Category';
             
             if (typeof gtag === 'function') {
-                gtag('event', 'channel_click', {
-                    'channel_name': channelName,
-                    'category': categoryName,
-                    'link_url': url,
-                    'referer': referer || 'N/A',
-                    'user_agent': userAgent || 'N/A', // เปลี่ยนชื่อ event parameter เพื่อความชัดเจน
-                    'play_in_native_player': playInNatPlayer
-                });
+                gtag('event', 'channel_click', { 'channel_name': channelName, 'category': categoryName, 'link_url': url });
             }
             // หน่วงเวลาเล็กน้อยก่อนเปลี่ยนหน้า เพื่อให้ Google Analytics ส่งข้อมูลทัน
-            setTimeout(() => {
-                if (url) {
-                    // เปิด URL โดยตรง ซึ่งเบราว์เซอร์หรือ Wiseplay จะรับช่วงต่อ
-                    window.location.href = url;
-                }
-            }, 200);
+            setTimeout(() => { if (url) window.location.href = url; }, 200);
         }
     });
 
@@ -232,62 +209,73 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
+     * สร้างและคืนค่า element ของ channel link
+     * @param {Object} channel - object ของข้อมูลช่อง
+     * @returns {HTMLAnchorElement} - องค์ประกอบ anchor ที่สร้างขึ้น
+     */
+    function createChannelLinkElement(channel) {
+        const link = document.createElement('a');
+        link.href = "#";
+        link.classList.add('channel-link');
+        link.dataset.url = channel.data_url;
+        link.setAttribute('aria-label', channel.aria_label);
+
+        const img = document.createElement('img');
+        img.src = channel.img_src;
+        img.alt = channel.name;
+        img.loading = "lazy";
+        link.appendChild(img);
+        return link;
+    }
+
+    /**
      * เปิด Accordion ที่กำหนดและโหลดช่องที่เกี่ยวข้อง
      * @param {HTMLElement} contentElement - องค์ประกอบ content ของ Accordion
      * @param {HTMLElement} buttonElement - องค์ประกอบ button ของ Accordion
      */
     async function openAccordion(contentElement, buttonElement) {
         // ต้องตั้งค่า display: flex ก่อน เพื่อให้ scrollHeight คำนวณได้ถูกต้อง
-        contentElement.style.display = 'flex';
+        contentElement.style.display = 'flex'; 
         buttonElement.setAttribute('aria-expanded', 'true');
 
-        showLoading(contentElement); // แสดง loading และลบ channel links เก่า
+        const loadingIndicator = contentElement.querySelector('.loading-indicator');
+        const noChannelsMessage = contentElement.querySelector('.no-channels-message');
 
-        if (!channelsData) {
-            await loadChannelsData(); // โหลดข้อมูลหากยังไม่ได้โหลด
+        // ลบ channel links เก่าออกก่อนเสมอเมื่อจะโหลดใหม่
+        const existingChannelLinks = contentElement.querySelectorAll('.channel-link');
+        existingChannelLinks.forEach(link => link.remove());
+
+        showLoading(loadingIndicator, noChannelsMessage); // แสดง loading
+
+        if (channelsData === null) { // โหลดข้อมูลหากยังไม่ได้โหลดเลย
+            await loadChannelsData();
         }
 
         // หากยังคงมีข้อผิดพลาดหลังจากพยายามโหลด ให้หยุดทำงาน
-        if (!channelsData || channelsData.length === 0) {
-            hideLoading(contentElement);
-            // ข้อความ error จะถูกแสดงไปแล้วใน loadChannelsData หากเกิดข้อผิดพลาด
+        if (hasChannelsError || !Array.isArray(channelsData) || channelsData.length === 0) {
+            hideLoading(loadingIndicator);
+            // ถ้ามีข้อผิดพลาดในการโหลด channelsData ทั่วไป ข้อความจะถูกแสดงไปแล้วใน Promise.all
+            // ถ้าไม่มีข้อมูลช่องสำหรับหมวดหมู่นี้โดยเฉพาะ จะแสดงข้อความ "ไม่พบช่อง"
+            if (!hasChannelsError) {
+                showNoChannelsMessage(loadingIndicator, noChannelsMessage);
+            } else {
+                 // หากมีข้อผิดพลาดระดับไฟล์ JSON ข้อความจะถูกจัดการโดย Promise.all
+                 // ตรงนี้อาจจะไม่ต้องทำอะไรเพิ่มเติม เพราะเนื้อหาถูกแทนที่ไปแล้ว
+            }
             return;
         }
 
-        clearMessages(contentElement); // ล้างข้อความสถานะหลังจากโหลดข้อมูลสำเร็จ (หรือจัดการข้อผิดพลาดไปแล้ว)
+        clearMessages(loadingIndicator, noChannelsMessage); // ล้างข้อความสถานะหลังจากโหลดข้อมูลสำเร็จ
 
         // ลบ emoji และ trim ช่องว่างสำหรับชื่อหมวดหมู่
         const categoryText = buttonElement.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').replace(/\s+/g, ' ').trim();
         const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
 
         if (filteredChannels.length === 0) {
-            showNoChannelsMessage(contentElement);
+            showNoChannelsMessage(loadingIndicator, noChannelsMessage);
         } else {
             filteredChannels.forEach(channel => {
-                const link = document.createElement('a');
-                link.href = "#"; // กำหนดเป็น # เพื่อให้ JavaScript จัดการการเปลี่ยนหน้า
-                link.classList.add('channel-link');
-                link.dataset.url = channel.data_url;
-                link.setAttribute('aria-label', channel.aria_label || channel.name);
-
-                // *** เพิ่มข้อมูล referer, userAgent, playInNatPlayer ลงใน dataset ***
-                if (channel.referer) {
-                    link.dataset.referer = channel.referer;
-                }
-                if (channel.userAgent) {
-                    link.dataset.userAgent = channel.userAgent;
-                }
-                // แปลง boolean เป็นสตริง 'true' หรือ 'false' สำหรับ dataset
-                if (typeof channel.playInNatPlayer === 'boolean') {
-                    link.dataset.playInNatPlayer = channel.playInNatPlayer.toString();
-                }
-                // *** สิ้นสุดการเพิ่มข้อมูล ***
-
-                const img = document.createElement('img');
-                img.src = channel.img_src;
-                img.alt = channel.name;
-                img.loading = "lazy";
-                link.appendChild(img);
+                const link = createChannelLinkElement(channel);
                 contentElement.appendChild(link);
             });
         }
@@ -298,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
             contentElement.style.maxHeight = (actualContentHeight + 16) + 'px'; // +16px เพื่อรองรับ padding/margin
             contentElement.classList.add('show');
         });
-        hideLoading(contentElement); // ซ่อน loading เมื่อช่องถูกแสดง
+        hideLoading(loadingIndicator); // ซ่อน loading เมื่อช่องถูกแสดง
     }
 
     // จัดการการคลิกปุ่ม Accordion ทั้งหมด
@@ -332,10 +320,10 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
     });
 
-    // ป้องกันการเลือกข้อความ
-    document.addEventListener('selectstart', e => {
-        e.preventDefault();
-    });
+    // ป้องกันการเลือกข้อความ (อาจไม่จำเป็นต้องป้องกันทั้งหน้า)
+    // document.addEventListener('selectstart', e => {
+    //     e.preventDefault();
+    // });
 
     // ป้องกันการลากและวาง
     document.addEventListener('dragstart', e => {
@@ -345,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
     });
 
-    // ป้องกันแป้นพิมพ์ลัดบางอย่าง
+    // ป้องกันแป้นพิมพ์ลัดบางอย่าง (เฉพาะที่เกี่ยวข้องกับ DevTools และ View Source)
     document.addEventListener('keydown', e => {
         // อนุญาตแป้น Spacebar และ Enter เพื่อให้ยังคงใช้งานปกติได้
         if (e.key === ' ' || e.key === 'Enter') {
@@ -373,15 +361,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             return;
         }
-
-        // 4. ป้องกันแป้นพิมพ์ลัดพื้นฐานอื่นๆ ที่เกี่ยวข้องกับการจัดการเนื้อหา
-        if (e.ctrlKey || e.metaKey) {
-            const lowerKey = e.key.toLowerCase();
-            if (['s', 'p', 'a', 'c', 'x', 'v'].includes(lowerKey)) {
-                e.preventDefault();
-                return;
-            }
-        }
     });
 
     // --- การตรวจจับ Developer Tools เพิ่มเติม ---
@@ -392,16 +371,24 @@ document.addEventListener('DOMContentLoaded', function() {
     let devtoolsOpen = false;
 
     function checkDevTools() {
+        // ตรวจสอบแนวตั้งและแนวนอน (ขนาด inner/outer window)
         const widthThreshold = window.outerWidth - window.innerWidth > threshold;
         const heightThreshold = window.outerHeight - window.innerHeight > threshold;
         
-        // ตรวจสอบแนวตั้งและแนวนอน
-        if (widthThreshold || heightThreshold) {
+        // ตรวจสอบขนาดของ DevTools ที่เปิดทางขวาหรือด้านล่าง
+        const devtoolsWidthOpen = window.innerWidth > 0 && Math.abs(window.outerWidth - window.innerWidth) > (window.outerWidth * 0.2); // DevTools มักจะกินพื้นที่ > 20%
+        const devtoolsHeightOpen = window.innerHeight > 0 && Math.abs(window.outerHeight - window.innerHeight) > (window.outerHeight * 0.2);
+
+        // ตรวจจับการเปิด/ปิด DevTools จาก property บางตัว
+        // วิธีนี้อาจไม่น่าเชื่อถือเท่าขนาดหน้าต่างในทุกเบราว์เซอร์
+        const isChromeDevToolsOpen = window.devtools && window.devtools.isOpen;
+
+        if (widthThreshold || heightThreshold || devtoolsWidthOpen || devtoolsHeightOpen || isChromeDevToolsOpen) {
             if (!devtoolsOpen) {
                 devtoolsOpen = true;
                 // ล้างเนื้อหาหน้าเว็บและแสดงข้อความเตือน
                 document.body.innerHTML = `<div style="font-size: 2em; text-align: center; margin-top: 100px; color: ${redAccentColor}; height: 100vh; display: flex; align-items: center; justify-content: center;">
-                                            ขออภัย ไม่สามารถเข้าถึงหน้านี้ได้เมื่อ Developer Tools เปิดอยู่
+                                                ขออภัย ไม่สามารถเข้าถึงหน้านี้ได้เมื่อ Developer Tools เปิดอยู่
                                            </div>`;
             }
         } else {
