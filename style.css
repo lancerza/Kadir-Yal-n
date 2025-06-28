@@ -1,313 +1,229 @@
-:root {
-    --dark-bg: #1a1a1a;
-    --light-text: #f0f0f0;
-    --white: #FFFFFF;
-    --red-accent: #ff4d4d;
-    --line-blue: #2196F3;
-    --line-green: #00B900;
-    --border-radius: 8px;
-    --spacing-xs: 5px;
-    --spacing-sm: 8px;
-    --spacing-md: 10px;
-    --spacing-lg: 15px;
-    --spacing-xl: 20px;
-}
-
 /* --- Global Styles --- */
-html, body {
-    margin: 0;
-    padding: 0 var(--spacing-md);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    overflow-x: hidden;
-    background-color: var(--dark-bg);
-    color: var(--light-text);
-    font-family: 'Arial', sans-serif;
-    text-align: center;
-    /* ลบ user-select: none; ออกจาก body เพื่อให้ผู้ใช้เลือกข้อความได้ตามปกติ */
-    /* การป้องกันการเลือกข้อความจะถูกจัดการด้วย JavaScript ในบางส่วน */
-}
-
-/* --- Animations --- */
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@keyframes marquee {
-    0% { transform: translateX(100%); } /* Start from right */
-    100% { transform: translateX(-100%); } /* Go to far left */
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+/* ... (โค้ดเดิม) ... */
 
 /* --- Header Section --- */
-header {
-    background-color: var(--dark-bg);
-    color: var(--white);
-    padding: 2vw 4vw;
-    border-radius: var(--border-radius);
-    margin: 5vh 0 2vh 0;
-    animation: fadeIn 3s ease-out;
-    width: 100%;
-    box-sizing: border-box;
-}
+/* ... (โค้ดเดิม) ... */
 
-h1 {
-    color: var(--white);
-    text-align: center;
-    font-family: 'Kanit', sans-serif;
-    font-size: clamp(24px, 5vw, 40px);
-    font-weight: 900;
-    letter-spacing: 2px;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 12px rgba(255, 255, 255, 0.2);
-    margin-top: 1px;
-    margin-bottom: var(--spacing-md);
-}
-
-#running-text-container {
-    width: 100%;
-    margin-bottom: var(--spacing-xs);
-    position: relative;
-    /* ปรับ height ให้ยืดหยุ่นมากขึ้นด้วย min-height หรือตรวจสอบให้แน่ใจว่า 20px เพียงพอ */
-    min-height: 20px; 
-    overflow: hidden;
-}
-
-#running-text {
-    display: inline-block;
-    white-space: nowrap;
-    color: var(--red-accent);
-    font-family: 'Kanit', sans-serif;
-    font-size: clamp(12px, 2vw, 16px);
-    font-weight: 700;
-    animation: marquee 15s linear infinite;
-    position: absolute;
-    top: 0;
-    left: 0;
-    min-width: 100%;
-    cursor: default;
-}
-
-#current-datetime {
-    font-family: 'Kanit', sans-serif;
-    font-size: clamp(14px, 2.5vw, 20px);
-    color: rgba(255, 255, 255, 0.8);
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-    font-weight: 400;
-}
-
-#line-group-info {
-    font-family: 'Kanit', sans-serif;
-    font-size: clamp(14px, 2.5vw, 20px);
-    color: var(--line-blue);
+/* ***** เพิ่มสไตล์สำหรับปุ่ม Auth ที่นี่ ***** */
+.auth-buttons-container {
     margin-top: var(--spacing-xl);
     margin-bottom: var(--spacing-xl);
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-    font-weight: 700;
     display: flex;
-    align-items: center;
     justify-content: center;
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+.auth-button {
+    background-color: var(--line-blue);
+    color: var(--white);
+    font-family: 'Kanit', sans-serif;
+    font-size: clamp(14px, 2.5vw, 18px);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border: none;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-#line-group-info:hover {
-    color: #1976D2;
+.auth-button:hover {
+    background-color: #1976D2;
+    transform: translateY(-2px);
 }
 
-#line-group-info i {
-    font-size: 25px;
-    vertical-align: middle;
-    color: var(--line-green);
-}
-
-#line-group-info i.fa-brands.fa-line.left-icon {
-    margin-right: var(--spacing-sm);
-}
-
-#line-group-info i.fa-brands.fa-line.right-icon {
-    margin-left: var(--spacing-sm);
+.auth-button:active {
+    transform: translateY(0);
+    background-color: #1565C0;
 }
 
 /* --- Main Content & Categories --- */
-main.categories-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--spacing-lg);
-    width: 100%;
-    max-width: 1200px;
-    margin-top: clamp(30px, 6vw, 50px);
-    padding-bottom: var(--spacing-md);
-    flex-grow: 1;
-    align-items: flex-start;
-}
-
-.category {
-    background-color: var(--dark-bg);
-    border-radius: var(--border-radius);
-    padding: var(--spacing-xs);
-    flex: 0 0 auto;
-    width: 220px;
-    box-sizing: border-box;
-    transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* เพิ่ม box-shadow ใน transition */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid var(--dark-bg);
-    height: auto;
-    box-shadow: none; /* สถานะปกติไม่มีเงา */
-}
-
-.category:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* เพิ่มเงาเมื่อ hover */
-}
+/* ... (โค้ดเดิม) ... */
 
 /* --- Accordion Components --- */
-.accordion-button {
-    background: linear-gradient(145deg, #424242, #333333);
-    color: var(--white);
-    font-family: 'Kanit', sans-serif;
-    font-size: 1.3em;
-    font-weight: bold;
-    padding: 7px 14px;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    width: 100%;
-    text-align: center;
-    margin-bottom: 0;
-    transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* เพิ่ม box-shadow ใน transition */
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-    box-sizing: border-box;
-    border: 1px solid var(--white);
-    box-shadow: none; /* สถานะปกติไม่มีเงา */
-}
-
-.accordion-button:hover {
-    background: linear-gradient(145deg, #616161, #505050);
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* เพิ่มเงาเมื่อ hover */
-    border-color: var(--white);
-}
-
-.accordion-button:active {
-    transform: translateY(0);
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5); /* เงาแบบ inset เมื่อ active */
-    background: #333333;
-    border-color: #AAAAAA;
-}
-
-.accordion-button i {
-    margin-right: var(--spacing-sm);
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.accordion-content {
-    max-height: 0;
-    padding: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
-    display: none; /* เริ่มต้นด้วย display: none */
-    opacity: 0;
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    position: relative;
-}
-
-.accordion-content.show {
-    display: flex; /* เปลี่ยนเป็น display: flex เมื่อ show */
-    opacity: 1;
-    padding-top: var(--spacing-sm);
-    padding-bottom: var(--spacing-sm);
-}
+/* ... (โค้ดเดิม) ... */
 
 /* --- Image Styles --- */
-main img {
-    border-radius: var(--border-radius);
-    border: 1px solid var(--white);
-    padding: 3px;
-    margin: 0;
-    height: 50px;
-    width: 50px;
-    object-fit: cover;
-    /* หากใช้ channel-link เป็น flexbox หรือ grid อาจพิจารณาจัดตำแหน่งด้วย align-items/place-items */
-    vertical-align: middle; 
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; /* เพิ่ม box-shadow ใน transition */
-    cursor: pointer;
-    user-select: none; /* ป้องกันการเลือกรูปภาพ */
-}
-
-main img:hover {
-    transform: scale(1.05);
-    border-color: var(--white);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* เพิ่มเงาเมื่อ hover */
-}
+/* ... (โค้ดเดิม) ... */
 
 /* --- Footer --- */
-footer {
-    margin-top: auto;
-    padding: var(--spacing-xl);
-    color: var(--light-text);
-    background-color: var(--dark-bg);
-    width: 100%;
-    text-align: center;
-    border-top: none;
-}
+/* ... (โค้ดเดิม) ... */
 
 /* --- Loading Indicator & No Channels Message --- */
-.loading-indicator, .no-channels-message {
+/* ... (โค้ดเดิม) ... */
+
+/* ***** เพิ่มสไตล์สำหรับ Modal และฟอร์ม Login/Register ที่นี่ ***** */
+.modal {
+    display: none; /* ซ่อน modal ตามค่าเริ่มต้น */
+    position: fixed; /* อยู่เหนือเนื้อหาอื่นๆ */
+    z-index: 1000; /* อยู่ด้านหน้าสุด */
+    left: 0;
+    top: 0;
     width: 100%;
-    text-align: center;
-    padding: var(--spacing-md);
-    color: rgba(255, 255, 255, 0.7);
+    height: 100%;
+    overflow: auto; /* เปิดใช้งานการ scroll ถ้าเนื้อหามากเกินไป */
+    background-color: rgba(0,0,0,0.8); /* พื้นหลังทึบแสง */
+    backdrop-filter: blur(5px); /* เพิ่มเอฟเฟกต์เบลอ */
+    display: flex; /* ใช้ flexbox เพื่อจัดตำแหน่งตรงกลาง */
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out; /* แอนิเมชันตอนแสดง */
+}
+
+.modal-content {
+    background-color: var(--dark-bg);
+    margin: auto;
+    padding: var(--spacing-xl);
+    border: 1px solid #888;
+    border-radius: var(--border-radius);
+    width: 90%; /* กว้าง 90% */
+    max-width: 500px; /* แต่ไม่เกิน 500px */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    position: relative;
+    color: var(--light-text);
     font-family: 'Kanit', sans-serif;
-    font-size: clamp(14px, 2.5vw, 18px);
-    display: none; /* ซ่อนโดยค่าเริ่มต้น */
 }
 
-.loading-indicator.active, .no-channels-message.active {
-    display: block; /* แสดงเมื่อมี class active */
+.close-button {
+    color: var(--white);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+    transition: color 0.3s ease;
 }
 
-.loading-indicator i.fa-spinner {
-    animation: spin 1s linear infinite;
-    margin-right: var(--spacing-xs);
+.close-button:hover,
+.close-button:focus {
+    color: var(--red-accent);
+    text-decoration: none;
+    cursor: pointer;
 }
 
-/* --- Media Queries --- */
-@media (max-width: 768px) {
-    .categories-container {
-        gap: var(--spacing-md);
-    }
-    .category {
-        width: calc(50% - var(--spacing-lg)); /* ปรับให้เหมาะสมกับ gap */
-        max-width: unset;
-    }
+.modal-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-xl);
+    gap: var(--spacing-md);
 }
 
+.tab-button {
+    background-color: #424242;
+    color: var(--white);
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tab-button.active {
+    background-color: var(--red-accent);
+    color: var(--white);
+}
+
+.tab-button:hover:not(.active) {
+    background-color: #616161;
+}
+
+.form-container {
+    display: none; /* ซ่อน form ตามค่าเริ่มต้น */
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.form-container.active {
+    display: flex; /* แสดงเมื่อมี class active */
+}
+
+.form-container h2 {
+    color: var(--white);
+    margin-bottom: var(--spacing-lg);
+    font-size: 1.8em;
+    text-align: center;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="password"] {
+    padding: var(--spacing-sm);
+    border-radius: var(--spacing-xs);
+    border: 1px solid #555;
+    background-color: #333;
+    color: var(--light-text);
+    font-size: 1em;
+    width: calc(100% - 2 * var(--spacing-sm)); /* ลบ padding ออกจาก width */
+    box-sizing: border-box; /* ให้ padding อยู่ใน width ที่กำหนด */
+}
+
+.form-container input::placeholder {
+    color: #aaa;
+}
+
+.form-container input:focus {
+    outline: none;
+    border-color: var(--line-blue);
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+}
+
+.submit-button {
+    background-color: var(--line-green);
+    color: var(--white);
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: var(--spacing-md);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.submit-button:hover {
+    background-color: #008C00;
+    transform: translateY(-2px);
+}
+
+.submit-button:active {
+    transform: translateY(0);
+    background-color: #007000;
+}
+
+.message-box {
+    padding: var(--spacing-sm);
+    border-radius: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    font-weight: bold;
+}
+
+.message-box.error {
+    background-color: rgba(255, 77, 77, 0.2);
+    color: var(--red-accent);
+    border: 1px solid var(--red-accent);
+}
+
+.message-box.success {
+    background-color: rgba(0, 185, 0, 0.2);
+    color: var(--line-green);
+    border: 1px solid var(--line-green);
+}
+
+/* Media Queries สำหรับ Modal */
 @media (max-width: 480px) {
-    body {
-        padding: 0 var(--spacing-xs); /* ลด padding ด้านข้างของ body */
+    .modal-content {
+        width: 95%; /* กว้างขึ้นบนจอมือถือ */
+        padding: var(--spacing-lg);
     }
-    .categories-container {
-        gap: var(--spacing-md);
-        padding: 0 var(--spacing-xs) var(--spacing-md) var(--spacing-xs);
+    .modal-header {
+        flex-direction: column; /* ปุ่มแท็บเรียงแนวตั้ง */
+        gap: var(--spacing-sm);
     }
-    .category {
-        width: calc(100% - var(--spacing-md)); /* ปรับให้เหมาะสมกับ padding body และ gap */
-        margin-left: auto;
-        margin-right: auto;
+    .tab-button {
+        width: 100%;
     }
 }
