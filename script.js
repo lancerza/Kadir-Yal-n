@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let textsData = null;
     let hasChannelsError = false; // Flag เพื่อติดตามสถานะข้อผิดพลาดของ channels.json
 
+    // กำหนด URL ของ Backend API
+    const BACKEND_API_URL = 'http://localhost:3001'; // ***** สำคัญ: เปลี่ยนตาม Port ที่คุณตั้งค่าใน .env ของ Backend *****
+
     const redAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--red-accent').trim();
 
     /**
@@ -54,58 +57,58 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * โหลดข้อมูลจากไฟล์ JSON ที่ระบุ
-     * @param {string} fileName - ชื่อไฟล์ JSON ที่จะโหลด (เช่น 'channels.json')
+     * โหลดข้อมูลจาก Backend API ที่ระบุ
+     * @param {string} endpoint - Endpoint ของ API ที่จะเรียก (เช่น '/api/channels')
      * @returns {Promise<Array|Object>} - ข้อมูลที่โหลดมา
      * @throws {Error} - หากการโหลดหรือการแยกวิเคราะห์ข้อมูลล้มเหลว
      */
-    async function fetchData(fileName) {
+    async function fetchDataFromBackend(endpoint) {
         try {
-            const response = await fetch(fileName);
+            const response = await fetch(`${BACKEND_API_URL}${endpoint}`);
             if (!response.ok) {
                 const errorText = response.status === 404
-                    ? `${fileName} not found (HTTP 404). Please ensure the file exists at the root of your server.`
-                    : `Failed to load ${fileName}: HTTP error! status: ${response.status}`;
+                    ? `Endpoint ${endpoint} not found (HTTP 404).`
+                    : `Failed to load ${endpoint}: HTTP error! status: ${response.status}`;
                 throw new Error(errorText);
             }
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error(`Error loading or parsing ${fileName}:`, error);
-            throw error; // ส่งต่อข้อผิดพลาดเพื่อให้ Promise.all จัดการ
+            console.error(`Error loading or parsing data from ${endpoint}:`, error);
+            throw error;
         }
     }
 
     /**
-     * โหลดข้อมูลช่องจาก channels.json
+     * โหลดข้อมูลช่องจาก Backend
      * @returns {Promise<void>}
      */
     async function loadChannelsData() {
         if (channelsData !== null) return; // ถ้าโหลดแล้วหรือเกิดข้อผิดพลาดไปแล้ว ไม่ต้องโหลดซ้ำ
         try {
-            const data = await fetchData('channels.json');
+            const data = await fetchDataFromBackend('/api/channels'); // เรียกจาก Backend
             if (!Array.isArray(data)) {
-                throw new Error('Fetched data from channels.json is not an array. Please ensure the JSON is an array of channel objects.');
+                throw new Error('Fetched data from /api/channels is not an array.');
             }
             channelsData = data;
             hasChannelsError = false;
         } catch (error) {
-            console.error('Final error handling for channels.json:', error);
-            channelsData = []; // กำหนดให้เป็น array ว่างเพื่อหลีกเลี่ยงการประมวลผลซ้ำและเพื่อบอกว่าโหลดไปแล้วแต่ไม่มีข้อมูล
+            console.error('Final error handling for channels data from Backend:', error);
+            channelsData = [];
             hasChannelsError = true;
         }
     }
 
     /**
-     * โหลดข้อมูลข้อความจาก texts.json
+     * โหลดข้อมูลข้อความจาก Backend
      * @returns {Promise<void>}
      */
     async function loadTextsData() {
         if (textsData) return;
         try {
-            const data = await fetchData('texts.json');
+            const data = await fetchDataFromBackend('/api/texts'); // เรียกจาก Backend
             if (typeof data !== 'object' || data === null) {
-                throw new Error('Fetched data from texts.json is not a valid object.');
+                throw new Error('Fetched data from /api/texts is not a valid object.');
             }
             textsData = data;
             if (runningTextElement && textsData.runningText) {
@@ -115,8 +118,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 footerTextElement.textContent = textsData.footerText;
             }
         } catch (error) {
-            console.error('Final error handling for texts.json:', error);
-            textsData = {}; // กำหนดเป็น object ว่างเมื่อเกิดข้อผิดพลาด
+            console.error('Final error handling for texts data from Backend:', error);
+            textsData = {};
             if (runningTextElement) runningTextElement.textContent = "เกิดข้อผิดพลาดในการโหลดข้อความประกาศ!";
             if (footerTextElement) footerTextElement.textContent = "เกิดข้อผิดพลาดในการโหลดข้อความท้ายหน้า!";
         }
@@ -125,12 +128,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // โหลดข้อมูลเริ่มต้นทั้งหมดพร้อมกัน
     Promise.all([loadChannelsData(), loadTextsData()])
         .then(() => {
-            console.log('All initial data (channels and texts) loaded successfully!');
-            // ถ้ามีข้อผิดพลาดในการโหลด channelsData ให้แสดงข้อความแจ้งในทุกหมวดหมู่
+            console.log('All initial data (channels and texts) loaded successfully from Backend!');
             if (hasChannelsError) {
                 Object.values(categoryContentMap).forEach(container => {
                     container.innerHTML = `<div class="no-channels-message active" style="color: ${redAccentColor}; text-align: center; padding: 20px;">
-                                               เกิดข้อผิดพลาดในการโหลดช่อง: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ หรือไฟล์มีปัญหา<br>โปรดลองใหม่อีกครั้งในภายหลัง
+                                               เกิดข้อผิดพลาดในการโหลดช่อง: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้<br>โปรดตรวจสอบ Backend Server
                                            </div>`;
                 });
             }
@@ -319,11 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('contextmenu', e => {
         e.preventDefault();
     });
-
-    // ป้องกันการเลือกข้อความ (อาจไม่จำเป็นต้องป้องกันทั้งหน้า)
-    // document.addEventListener('selectstart', e => {
-    //     e.preventDefault();
-    // });
 
     // ป้องกันการลากและวาง
     document.addEventListener('dragstart', e => {
