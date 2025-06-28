@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const categoryElement = link.closest('.category');
             const categoryButton = categoryElement ? categoryElement.querySelector('.accordion-button') : null;
             // ลบ emoji และ trim ช่องว่าง
-            const categoryName = categoryButton ? categoryButton.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').replace(/\s+/g, ' ').trim() : 'Unknown Category';
+            const categoryName = categoryButton ? button.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').replace(/\s+/g, ' ').trim() : 'Unknown Category';
             
             if (typeof gtag === 'function') {
                 gtag('event', 'channel_click', { 'channel_name': channelName, 'category': categoryName, 'link_url': url });
@@ -311,96 +311,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-
-    // --- ส่วนป้องกันการดูโค้ด (Code View Protection) ---
-    // ข้อควรระวัง: ฟังก์ชันเหล่านี้มีวัตถุประสงค์เพื่อลดโอกาสในการเข้าถึงซอร์สโค้ดโดยผู้ใช้ทั่วไป
-    // แต่ไม่สามารถป้องกันผู้ใช้ที่มีความรู้ทางเทคนิคสูงได้อย่างสมบูรณ์
-    // และอาจส่งผลต่อประสบการณ์ผู้ใช้ในการใช้งานเบราว์เซอร์ปกติ
-
-    // ป้องกันการคลิกขวา
-    document.addEventListener('contextmenu', e => {
-        e.preventDefault();
-    });
-
-    // ป้องกันการลากและวาง
-    document.addEventListener('dragstart', e => {
-        e.preventDefault();
-    });
-    document.addEventListener('drop', e => {
-        e.preventDefault();
-    });
-
-    // ป้องกันแป้นพิมพ์ลัดบางอย่าง (เฉพาะที่เกี่ยวข้องกับ DevTools และ View Source)
-    document.addEventListener('keydown', e => {
-        // อนุญาตแป้น Spacebar และ Enter เพื่อให้ยังคงใช้งานปกติได้
-        if (e.key === ' ' || e.key === 'Enter') {
-            return;
-        }
-
-        // ดักจับแป้นพิมพ์ลัด Developer Tools และ View Source ที่สำคัญ
-        // e.ctrlKey สำหรับ Windows/Linux, e.metaKey สำหรับ macOS (ปุ่ม Command)
-
-        // 1. ป้องกัน F12 (Developer Tools)
-        if (e.key === 'F12') {
-            e.preventDefault();
-            return;
-        }
-
-        // 2. ป้องกัน Ctrl/Cmd + Shift + I/J/C (Developer Tools)
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey &&
-            (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
-            e.preventDefault();
-            return;
-        }
-
-        // 3. ป้องกัน Ctrl/Cmd + U (View Source)
-        if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')) {
-            e.preventDefault();
-            return;
-        }
-    });
-
-    // --- การตรวจจับ Developer Tools เพิ่มเติม ---
-    // วิธีนี้พยายามตรวจจับว่า DevTools เปิดอยู่หรือไม่ โดยการตรวจสอบขนาดหน้าต่าง
-    // หากพบว่าเปิดอยู่ จะล้างเนื้อหาหน้าและแสดงข้อความเตือน
-
-    const threshold = 160; // ค่าความแตกต่างของขนาดหน้าต่างที่คาดว่าเกิดจาก DevTools (ปรับได้)
-    let devtoolsOpen = false;
-
-    function checkDevTools() {
-        // ตรวจสอบแนวตั้งและแนวนอน (ขนาด inner/outer window)
-        const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-        const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-        
-        // ตรวจสอบขนาดของ DevTools ที่เปิดทางขวาหรือด้านล่าง
-        const devtoolsWidthOpen = window.innerWidth > 0 && Math.abs(window.outerWidth - window.innerWidth) > (window.outerWidth * 0.2); // DevTools มักจะกินพื้นที่ > 20%
-        const devtoolsHeightOpen = window.innerHeight > 0 && Math.abs(window.outerHeight - window.innerHeight) > (window.outerHeight * 0.2);
-
-        // ตรวจจับการเปิด/ปิด DevTools จาก property บางตัว
-        // วิธีนี้อาจไม่น่าเชื่อถือเท่าขนาดหน้าต่างในทุกเบราว์เซอร์
-        const isChromeDevToolsOpen = window.devtools && window.devtools.isOpen;
-
-        if (widthThreshold || heightThreshold || devtoolsWidthOpen || devtoolsHeightOpen || isChromeDevToolsOpen) {
-            if (!devtoolsOpen) {
-                devtoolsOpen = true;
-                // ล้างเนื้อหาหน้าเว็บและแสดงข้อความเตือน
-                document.body.innerHTML = `<div style="font-size: 2em; text-align: center; margin-top: 100px; color: ${redAccentColor}; height: 100vh; display: flex; align-items: center; justify-content: center;">
-                                                ขออภัย ไม่สามารถเข้าถึงหน้านี้ได้เมื่อ Developer Tools เปิดอยู่
-                                           </div>`;
-            }
-        } else {
-            if (devtoolsOpen) {
-                devtoolsOpen = false;
-                // เมื่อ DevTools ปิด คุณอาจต้องรีโหลดหน้าเพื่อคืนค่าเนื้อหาเดิม
-                // location.reload(); // เปิดคอมเมนต์บรรทัดนี้หากต้องการให้รีโหลดอัตโนมัติ
-            }
-        }
-    }
-
-    // ตรวจสอบทันทีเมื่อโหลดหน้าและตรวจสอบเมื่อมีการรีไซซ์หรือทุกๆ ช่วงเวลา
-    checkDevTools();
-    setInterval(checkDevTools, 500); // ตรวจสอบทุกๆ 500ms
-    window.addEventListener('resize', checkDevTools); // ตรวจสอบเมื่อขนาดหน้าต่างเปลี่ยน
-
-    // --- สิ้นสุดส่วนป้องกันการดูโค้ด ---
 });
