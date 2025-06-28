@@ -35,6 +35,11 @@
             <i class="fa-brands fa-line left-icon"></i> เข้ากลุ่มไลน์อัพเดทต่างๆ
             <i class="fa-brands fa-line right-icon"></i>
         </a>
+        <div class="auth-buttons-container">
+            <button id="loginBtn" class="auth-button">เข้าสู่ระบบ</button>
+            <button id="registerBtn" class="auth-button">ลงทะเบียน</button>
+            <button id="logoutBtn" class="auth-button" style="display: none;">ออกจากระบบ</button>
+        </div>
     </header>
 
     <main class="categories-container">
@@ -93,6 +98,31 @@
         <p id="footer-text">
             </p>
     </footer>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div class="modal-header">
+                <button id="showLogin" class="tab-button active">เข้าสู่ระบบ</button>
+                <button id="showRegister" class="tab-button">ลงทะเบียน</button>
+            </div>
+            <div id="loginForm" class="form-container active">
+                <h2>เข้าสู่ระบบ</h2>
+                <div id="loginMessage" class="message-box error" style="display: none;"></div>
+                <input type="text" id="loginIdentifier" placeholder="ชื่อผู้ใช้ หรือ อีเมล" required>
+                <input type="password" id="loginPassword" placeholder="รหัสผ่าน" required>
+                <button id="loginSubmit" class="submit-button">เข้าสู่ระบบ</button>
+            </div>
+            <div id="registerForm" class="form-container">
+                <h2>ลงทะเบียน</h2>
+                <div id="registerMessage" class="message-box error" style="display: none;"></div>
+                <input type="text" id="registerUsername" placeholder="ชื่อผู้ใช้" required>
+                <input type="email" id="registerEmail" placeholder="อีเมล" required>
+                <input type="password" id="registerPassword" placeholder="รหัสผ่าน" required>
+                <button id="registerSubmit" class="submit-button">ลงทะเบียน</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js" defer></script>
 </body>
