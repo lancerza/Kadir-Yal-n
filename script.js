@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
         "สารคดี": document.getElementById('content-documentary'),
         "IPTV": document.getElementById('content-iptv')
     };
-    let channelsData = null;
+    let channelsData = null; // ตั้งค่าเป็น null เพื่อให้โหลดใหม่หลัง Login
     let textsData = null;
     let hasChannelsError = false;
 
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Input fields for Login
     const loginIdentifierInput = document.getElementById('loginIdentifier');
-    const loginPasswordInput = document.getElementById('loginPassword');
+    const loginPasswordInput = document = document.getElementById('loginPassword');
     const loginSubmitBtn = document.getElementById('loginSubmit');
     const loginMessage = document.getElementById('loginMessage');
 
@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function showLoading(loadingIndicator, noChannelsMessage) {
         loadingIndicator.classList.add('active');
         noChannelsMessage.classList.remove('active');
-        // ลบ channel links เก่าออกก่อนเสมอเมื่อจะโหลดใหม่ (ย้ายมาไว้ที่นี่เพื่อความชัดเจน)
         const existingChannelLinks = loadingIndicator.parentElement.querySelectorAll('.channel-link');
         existingChannelLinks.forEach(link => link.remove());
     }
@@ -94,8 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('currentUser');
                     updateAuthButtons();
-                    // อาจจะแสดง modal login อัตโนมัติ หรือ alert
-                    // openAuthModal('login');
                     alert('เซสชันหมดอายุแล้ว กรุณาเข้าสู่ระบบอีกครั้ง');
                     window.location.reload(); // รีโหลดหน้าเพื่อบังคับให้ Login ใหม่
                 }
@@ -117,11 +114,9 @@ document.addEventListener('DOMContentLoaded', function() {
      * @returns {Promise<void>}
      */
     async function loadChannelsData() {
-        if (channelsData !== null) return; // ถ้าโหลดแล้วหรือเกิดข้อผิดพลาดไปแล้ว ไม่ต้องโหลดซ้ำ
+        // ไม่ต้องตรวจสอบ channelsData !== null อีก เพราะเราต้องการให้โหลดใหม่ทุกครั้งที่จำเป็น
         try {
-            // ในอนาคต เมื่อ API channels ถูกป้องกันด้วย Token จะต้องมี Token ถึงจะโหลดได้
-            // ตอนนี้ยังไม่ต้องส่ง Token เพราะ API ยังไม่ป้องกัน
-            const data = await fetchDataFromBackend('/api/channels');
+            const data = await fetchDataFromBackend('/api/channels'); // เรียกจาก Backend
             if (!Array.isArray(data)) {
                 throw new Error('Fetched data from /api/channels is not an array.');
             }
@@ -129,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hasChannelsError = false;
         } catch (error) {
             console.error('Final error handling for channels data from Backend:', error);
-            channelsData = [];
+            channelsData = []; // ตั้งค่าเป็น array ว่างเพื่อแสดงสถานะ
             hasChannelsError = true;
         }
     }
@@ -164,7 +159,8 @@ document.addEventListener('DOMContentLoaded', function() {
     Promise.all([loadChannelsData(), loadTextsData()])
         .then(() => {
             console.log('All initial data (channels and texts) loaded successfully from Backend!');
-            if (hasChannelsError) {
+            // ถ้ามี Error ในการโหลด channelsData ทั่วไป (เช่น Server Down) จะแสดงข้อความ
+            if (hasChannelsError && channelsData.length === 0) { // เพิ่มเช็ค channelsData.length === 0 ด้วย
                 Object.values(categoryContentMap).forEach(container => {
                     container.innerHTML = `<div class="no-channels-message active" style="color: ${redAccentColor}; text-align: center; padding: 20px;">
                                                เกิดข้อผิดพลาดในการโหลดช่อง: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้<br>โปรดตรวจสอบ Backend Server
@@ -198,54 +194,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Date/Time display (unchanged)
-    function formatDateTime(date) {
-        const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false };
-        const datePart = date.toLocaleDateString('th-TH', optionsDate);
-        const timePart = date.toLocaleTimeString('th-TH', optionsTime);
-        return { display: `${datePart} ${timePart}`, iso: date.toISOString() };
-    }
-    function updateDateTime() {
-        const now = new Date();
-        const formatted = formatDateTime(now);
-        datetimeDisplay.textContent = formatted.display;
-        datetimeDisplay.setAttribute('datetime', formatted.iso);
-    }
+    function formatDateTime(date) { /* ... */ }
+    function updateDateTime() { /* ... */ }
     updateDateTime();
     setInterval(updateDateTime, 1000);
 
     // Accordion transitionend (unchanged)
-    document.querySelectorAll('.accordion-content').forEach(contentElement => {
-        contentElement.addEventListener('transitionend', function() {
-            if (!this.classList.contains('show')) {
-                const computedMaxHeight = window.getComputedStyle(this).maxHeight;
-                if (computedMaxHeight === '0px') {
-                    this.style.display = 'none'; // ซ่อนอย่างสมบูรณ์เมื่อปิดและ transition จบ
-                }
-            }
-        });
-    });
+    document.querySelectorAll('.accordion-content').forEach(contentElement => { /* ... */ });
 
     // Accordion functions (unchanged)
     function closeAccordion(contentElement, buttonElement) {
         contentElement.classList.remove('show');
         contentElement.style.maxHeight = '0px';
         buttonElement.setAttribute('aria-expanded', 'false');
+        // เมื่อปิด accordion ให้ลบช่องรายการเดิมออกด้วย
+        const existingChannelLinks = contentElement.querySelectorAll('.channel-link');
+        existingChannelLinks.forEach(link => link.remove());
+        clearMessages(contentElement.querySelector('.loading-indicator'), contentElement.querySelector('.no-channels-message'));
     }
-    function createChannelLinkElement(channel) {
-        const link = document.createElement('a');
-        link.href = "#";
-        link.classList.add('channel-link');
-        link.dataset.url = channel.data_url;
-        link.setAttribute('aria-label', channel.aria_label);
-
-        const img = document.createElement('img');
-        img.src = channel.img_src;
-        img.alt = channel.name;
-        img.loading = "lazy";
-        link.appendChild(img);
-        return link;
-    }
+    function createChannelLinkElement(channel) { /* ... */ }
 
     /**
      * เปิด Accordion ที่กำหนดและโหลดช่องที่เกี่ยวข้อง
@@ -258,13 +225,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isLoggedIn) {
             // หากยังไม่ได้ Login ให้แสดง Modal Login และไม่โหลดช่อง
             openAuthModal('login');
-            // อาจแสดงข้อความแจ้งเตือนผู้ใช้ว่าต้อง Login ก่อน
             alert('กรุณาเข้าสู่ระบบเพื่อดูช่องรายการ');
-            closeAccordion(contentElement, buttonElement); // ปิด accordion ถ้าเปิดอยู่
+            // ปิด accordion ถ้าเปิดอยู่ (สำคัญ)
+            closeAccordion(contentElement, buttonElement);
             return; // หยุดการทำงาน
         }
 
-        // ต้องตั้งค่า display: flex ก่อน เพื่อให้ scrollHeight คำนวณได้ถูกต้อง
         contentElement.style.display = 'flex'; 
         buttonElement.setAttribute('aria-expanded', 'true');
 
@@ -274,27 +240,24 @@ document.addEventListener('DOMContentLoaded', function() {
         // ลบ channel links เก่าออกก่อนเสมอเมื่อจะโหลดใหม่
         const existingChannelLinks = contentElement.querySelectorAll('.channel-link');
         existingChannelLinks.forEach(link => link.remove());
+        clearMessages(loadingIndicator, noChannelsMessage); // เคลียร์ข้อความเก่า
 
         showLoading(loadingIndicator, noChannelsMessage); // แสดง loading
 
-        if (channelsData === null) { // โหลดข้อมูลหากยังไม่ได้โหลดเลย
+        // ตรวจสอบว่า channelsData โหลดแล้วหรือยัง หรือเกิดข้อผิดพลาด
+        // ถ้า channelsData เป็น null (ยังไม่เคยโหลด) หรือ channelsData เป็น array ว่างเปล่าจากการโหลดครั้งก่อน
+        // ให้ลองโหลดใหม่
+        if (channelsData === null || channelsData.length === 0 || hasChannelsError) {
             await loadChannelsData();
         }
 
-        // หากยังคงมีข้อผิดพลาดหลังจากพยายามโหลด ให้หยุดทำงาน
+        // หากยังคงมีข้อผิดพลาดหลังจากพยายามโหลด หรือไม่มีข้อมูล
         if (hasChannelsError || !Array.isArray(channelsData) || channelsData.length === 0) {
-            hideLoading(loadingIndicator);
-            // ถ้ามีข้อผิดพลาดในการโหลด channelsData ทั่วไป ข้อความจะถูกแสดงไปแล้วใน Promise.all
-            // ถ้าไม่มีข้อมูลช่องสำหรับหมวดหมู่นี้โดยเฉพาะ จะแสดงข้อความ "ไม่พบช่อง"
-            if (!hasChannelsError) {
-                showNoChannelsMessage(loadingIndicator, noChannelsMessage);
-            } else {
-                 // หากมีข้อผิดพลาดระดับไฟล์ JSON ข้อความจะถูกจัดการโดย Promise.all
-                 // ตรงนี้อาจจะไม่ต้องทำอะไรเพิ่มเติม เพราะเนื้อหาถูกแทนที่ไปแล้ว
-            }
+            showNoChannelsMessage(loadingIndicator, noChannelsMessage); // แสดงข้อความไม่พบช่อง หรือข้อผิดพลาด
             return;
         }
 
+        // หากมาถึงตรงนี้ แสดงว่า channelsData มีข้อมูลและโหลดสำเร็จ
         clearMessages(loadingIndicator, noChannelsMessage); // ล้างข้อความสถานะหลังจากโหลดข้อมูลสำเร็จ
 
         // ลบ emoji และ trim ช่องว่างสำหรับชื่อหมวดหมู่
@@ -502,8 +465,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateAuthButtons(); // อัปเดต UI ปุ่ม
                 closeAuthModal(); // ปิด Modal
                 alert('เข้าสู่ระบบสำเร็จแล้ว!');
-                // อาจจะต้องรีโหลดหน้า หรือปรับ UI อื่นๆ
-                window.location.reload(); // รีโหลดหน้าหลังจาก Login สำเร็จ เพื่อให้โหลดช่องโดยใช้ token ใหม่
+                // รีเซ็ต channelsData เป็น null เพื่อให้โหลดใหม่เมื่อ Login สำเร็จ
+                channelsData = null; // ***** เพิ่มบรรทัดนี้ *****
+                hasChannelsError = false; // ***** เพิ่มบรรทัดนี้ *****
+                // ไม่ต้องรีโหลดหน้าทั้งหมด แต่โหลดข้อมูลช่องใหม่
+                // window.location.reload(); // คอมเมนต์บรรทัดนี้ออก
+
+                // หลังจาก Login สำเร็จ และ token ถูกเก็บแล้ว
+                // เราต้องการให้ accordion โหลดช่องใหม่เมื่อผู้ใช้กดเปิด
+                // แต่ถ้ามี accordion ที่เปิดอยู่แล้ว (เช่น ตอนที่ระบบบอกให้ Login) เราต้องพยายามโหลดมันใหม่
+                const openAccordionButton = document.querySelector('.accordion-button[aria-expanded="true"]');
+                if (openAccordionButton) {
+                    const openContent = openAccordionButton.nextElementSibling;
+                    closeAccordion(openContent, openAccordionButton); // ปิดก่อนเพื่อรีเซ็ต
+                    // สามารถเรียก openAccordion(openContent, openAccordionButton); ตรงนี้ได้
+                    // หรือปล่อยให้ผู้ใช้คลิกเปิดเอง
+                }
+                
             } else {
                 showMessage(loginMessage, data.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
             }
@@ -533,7 +511,18 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('currentUser');
         updateAuthButtons();
         alert('ออกจากระบบสำเร็จแล้ว');
-        window.location.reload();
+        // รีเซ็ต channelsData และ Error flag เมื่อ Logout
+        channelsData = null; // ***** เพิ่มบรรทัดนี้ *****
+        hasChannelsError = false; // ***** เพิ่มบรรทัดนี้ *****
+        // ปิด accordion ที่เปิดอยู่ทั้งหมดเมื่อ Logout
+        allAccordionButtons.forEach(button => {
+            const content = button.nextElementSibling;
+            if (content && content.classList.contains('show')) {
+                closeAccordion(content, button);
+            }
+        });
+        // ไม่ต้องรีโหลดหน้าทั้งหมดก็ได้
+        // window.location.reload();
     });
 
     // เรียกใช้เมื่อหน้าโหลดครั้งแรก
