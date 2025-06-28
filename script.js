@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let textsData = null;
     let hasChannelsError = false;
 
-    const BACKEND_API_URL = 'http://localhost:3001';
+    // กำหนด URL ของ Backend API
+    const BACKEND_API_URL = 'http://localhost:3001'; // ***** สำคัญ: เปลี่ยนตาม Port ที่คุณตั้งค่าใน .env ของ Backend *****
 
     const redAccentColor = getComputedStyle(document.documentElement).getPropertyValue('--red-accent').trim();
 
@@ -70,16 +71,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     // Event listener for channel clicks (unchanged)
-    document.querySelector('main.categories-container').addEventListener('click', function(event) { /* ... */ });
+    document.querySelector('main.categories-container').addEventListener('click', function(event) {
+        const link = event.target.closest('.channel-link');
+        if (link) {
+            event.preventDefault();
+            const url = link.dataset.url;
+            const imgElement = link.querySelector('img');
+            const channelName = imgElement ? imgElement.alt : 'Unknown Channel';
+            const categoryElement = link.closest('.category');
+            const categoryButton = categoryElement ? categoryElement.querySelector('.accordion-button') : null;
+            // ลบ emoji และ trim ช่องว่าง
+            const categoryName = categoryButton ? categoryButton.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').replace(/\s+/g, ' ').trim() : 'Unknown Category';
+            
+            if (typeof gtag === 'function') {
+                gtag('event', 'channel_click', { 'channel_name': channelName, 'category': categoryName, 'link_url': url });
+            }
+            // หน่วงเวลาเล็กน้อยก่อนเปลี่ยนหน้า เพื่อให้ Google Analytics ส่งข้อมูลทัน
+            setTimeout(() => { if (url) window.location.href = url; }, 200);
+        }
+    });
 
     // Date/Time display (unchanged)
-    function formatDateTime(date) { /* ... */ }
-    function updateDateTime() { /* ... */ }
+    function formatDateTime(date) {
+        const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false };
+        const datePart = date.toLocaleDateString('th-TH', optionsDate);
+        const timePart = date.toLocaleTimeString('th-TH', optionsTime);
+        return { display: `${datePart} ${timePart}`, iso: date.toISOString() };
+    }
+    function updateDateTime() {
+        const now = new Date();
+        const formatted = formatDateTime(now);
+        datetimeDisplay.textContent = formatted.display;
+        datetimeDisplay.setAttribute('datetime', formatted.iso);
+    }
     updateDateTime();
     setInterval(updateDateTime, 1000);
 
     // Accordion transitionend (unchanged)
-    document.querySelectorAll('.accordion-content').forEach(contentElement => { /* ... */ });
+    document.querySelectorAll('.accordion-content').forEach(contentElement => {
+        contentElement.addEventListener('transitionend', function() {
+            if (!this.classList.contains('show')) {
+                const computedMaxHeight = window.getComputedStyle(this).maxHeight;
+                if (computedMaxHeight === '0px') {
+                    this.style.display = 'none'; // ซ่อนอย่างสมบูรณ์เมื่อปิดและ transition จบ
+                }
+            }
+        });
+    });
 
     // Accordion functions (unchanged)
     function closeAccordion(contentElement, buttonElement) { /* ... */ }
@@ -95,7 +134,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ฟังก์ชันเพื่อเปิด Modal
     function openAuthModal(formType) {
-        authModal.style.display = 'flex'; // ใช้ flex เพื่อจัดกึ่งกลาง
+        authModal.style.display = 'flex'; // ตั้งค่า display เพื่อให้ Modal ปรากฏใน DOM
+        // ใช้ requestAnimationFrame เพื่อให้แน่ใจว่า browser ตรวจจับ display change ก่อน
+        requestAnimationFrame(() => {
+            authModal.classList.add('show'); // เพิ่มคลาส show เพื่อแสดง Modal พร้อม transition
+        });
+        
         if (formType === 'login') {
             showLoginForm();
         } else {
@@ -105,7 +149,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ฟังก์ชันเพื่อปิด Modal
     function closeAuthModal() {
-        authModal.style.display = 'none';
+        authModal.classList.remove('show'); // ลบคลาส show เพื่อซ่อน Modal พร้อม transition
+        // รอให้ transition จบก่อนที่จะตั้งค่า display เป็น none
+        authModal.addEventListener('transitionend', function handler() {
+            if (!authModal.classList.contains('show')) { // ตรวจสอบอีกครั้งว่าถูกซ่อนจริง
+                authModal.style.display = 'none'; // ซ่อน Modal จาก DOM
+                authModal.removeEventListener('transitionend', handler); // ลบ Event Listener เพื่อป้องกันการเรียกซ้ำ
+            }
+        }, { once: true }); // ใช้ { once: true } เพื่อให้ listener ถูกลบออกโดยอัตโนมัติหลังทำงานครั้งเดียว
+
         // ล้างข้อความแจ้งเตือนและค่าในฟอร์มเมื่อปิด Modal
         loginMessage.style.display = 'none';
         registerMessage.style.display = 'none';
@@ -118,21 +170,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ฟังก์ชันเพื่อสลับไปแสดงฟอร์ม Login
     function showLoginForm() {
-        loginForm.classList.add('active');
-        registerForm.classList.remove('active');
-        showLoginButton.classList.add('active');
-        showRegisterButton.classList.remove('active');
-        loginMessage.style.display = 'none'; // ซ่อนข้อความเมื่อสลับฟอร์ม
+        showTab('login');
     }
 
     // ฟังก์ชันเพื่อสลับไปแสดงฟอร์ม Register
     function showRegisterForm() {
-        registerForm.classList.add('active');
-        loginForm.classList.remove('active');
-        showRegisterButton.classList.add('active');
-        showLoginButton.classList.remove('active');
-        registerMessage.style.display = 'none'; // ซ่อนข้อความเมื่อสลับฟอร์ม
+        showTab('register');
     }
+
+    // ฟังก์ชันรวมสำหรับสลับ Tab และ Form
+    function showTab(tabName) {
+        if (tabName === 'login') {
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+            showLoginButton.classList.add('active');
+            showRegisterButton.classList.remove('active');
+            loginMessage.style.display = 'none';
+        } else { // register
+            registerForm.classList.add('active');
+            loginForm.classList.remove('active');
+            showRegisterButton.classList.add('active');
+            showLoginButton.classList.remove('active');
+            registerMessage.style.display = 'none';
+        }
+    }
+
 
     // Event Listeners สำหรับปุ่มแสดง Modal
     loginBtn.addEventListener('click', () => openAuthModal('login'));
@@ -151,9 +213,6 @@ document.addEventListener('DOMContentLoaded', function() {
     showLoginButton.addEventListener('click', showLoginForm);
     showRegisterButton.addEventListener('click', showRegisterForm);
 
-    // ยังไม่มี Event Listener สำหรับ loginSubmitBtn และ registerSubmitBtn ในตอนนี้
-    // จะเพิ่มในขั้นตอนถัดไปเมื่อเชื่อมต่อกับ Backend
-
     // ฟังก์ชันสำหรับจัดการการแสดงผลปุ่ม Login/Register/Logout
     function updateAuthButtons() {
         const token = localStorage.getItem('authToken'); // สมมติว่าเก็บ token ใน localStorage
@@ -171,10 +230,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event Listener สำหรับปุ่ม Logout
     logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('authToken'); // ลบ token
-        localStorage.removeItem('currentUser'); // ลบข้อมูลผู้ใช้
+        localStorage.removeItem('currentUser'); // ลบข้อมูลผู้ใช้ (ถ้ามี)
         updateAuthButtons(); // อัปเดตการแสดงผลปุ่ม
         alert('ออกจากระบบสำเร็จแล้ว');
-        // อาจจะต้องรีโหลดหน้า หรือปรับ UI อื่นๆ
         window.location.reload(); // รีโหลดหน้าเพื่อกลับสู่สถานะก่อน Login
     });
 
