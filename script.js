@@ -86,13 +86,24 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!Array.isArray(data)) {
                 throw new Error('Fetched data from channels.json is not an array. Please ensure the JSON is an array of channel objects.');
             }
-            channelsData = data;
+            // แปลงชื่อฟิลด์จากรูปแบบที่คุณให้มา (image, url) ให้ตรงกับที่โค้ดใช้ (img_src, data_url)
+            channelsData = data.map(channel => ({
+                name: channel.name,
+                category: channel.category,
+                img_src: channel.image, // ใช้ 'image' จาก JSON ของคุณ
+                data_url: channel.url,   // ใช้ 'url' จาก JSON ของคุณ
+                aria_label: channel.name, // ใช้ name เป็น aria_label เริ่มต้น
+                referer: channel.referer,
+                userAgent: channel.userAgent,
+                playInNatPlayer: channel.playInNatPlayer
+            }));
+
         } catch (error) {
             console.error('Final error handling for channels.json:', error);
             // แสดงข้อความข้อผิดพลาดในทุกหมวดหมู่
             Object.values(categoryContentMap).forEach(container => {
                 container.innerHTML = `<div class="no-channels-message active" style="color: ${redAccentColor}; text-align: center; padding: 20px;">
-                                           เกิดข้อผิดพลาดในการโหลดช่อง: ${error.message}<br>โปรดลองใหม่อีกครั้งในภายหลัง
+                                        เกิดข้อผิดพลาดในการโหลดช่อง: ${error.message}<br>โปรดลองใหม่อีกครั้งในภายหลัง
                                        </div>`;
             });
             channelsData = []; // กำหนดให้เป็น array ว่างเพื่อหลีกเลี่ยงการประมวลผลซ้ำ
@@ -140,6 +151,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (link) {
             event.preventDefault();
             const url = link.dataset.url;
+            const referer = link.dataset.referer; // ดึง referer
+            const userAgent = link.dataset.userAgent; // ดึง userAgent
+            // playInNatPlayer จะเป็นสตริง 'true'/'false' จาก dataset, แปลงเป็น boolean
+            const playInNatPlayer = link.dataset.playInNatPlayer === 'true';
+
             const imgElement = link.querySelector('img');
             const channelName = imgElement ? imgElement.alt : 'Unknown Channel';
             const categoryElement = link.closest('.category');
@@ -148,10 +164,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const categoryName = categoryButton ? categoryButton.innerText.replace(/[\u{1F000}-\u{1FFFF}\u{2000}-\u{2BFF}]/gu, '').replace(/\s+/g, ' ').trim() : 'Unknown Category';
             
             if (typeof gtag === 'function') {
-                gtag('event', 'channel_click', { 'channel_name': channelName, 'category': categoryName, 'link_url': url });
+                gtag('event', 'channel_click', {
+                    'channel_name': channelName,
+                    'category': categoryName,
+                    'link_url': url,
+                    'referer': referer || 'N/A',
+                    'user_agent': userAgent || 'N/A', // เปลี่ยนชื่อ event parameter เพื่อความชัดเจน
+                    'play_in_native_player': playInNatPlayer
+                });
             }
             // หน่วงเวลาเล็กน้อยก่อนเปลี่ยนหน้า เพื่อให้ Google Analytics ส่งข้อมูลทัน
-            setTimeout(() => { if (url) window.location.href = url; }, 200);
+            setTimeout(() => {
+                if (url) {
+                    // เปิด URL โดยตรง ซึ่งเบราว์เซอร์หรือ Wiseplay จะรับช่วงต่อ
+                    window.location.href = url;
+                }
+            }, 200);
         }
     });
 
@@ -210,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     async function openAccordion(contentElement, buttonElement) {
         // ต้องตั้งค่า display: flex ก่อน เพื่อให้ scrollHeight คำนวณได้ถูกต้อง
-        contentElement.style.display = 'flex'; 
+        contentElement.style.display = 'flex';
         buttonElement.setAttribute('aria-expanded', 'true');
 
         showLoading(contentElement); // แสดง loading และลบ channel links เก่า
@@ -223,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!channelsData || channelsData.length === 0) {
             hideLoading(contentElement);
             // ข้อความ error จะถูกแสดงไปแล้วใน loadChannelsData หากเกิดข้อผิดพลาด
-            return; 
+            return;
         }
 
         clearMessages(contentElement); // ล้างข้อความสถานะหลังจากโหลดข้อมูลสำเร็จ (หรือจัดการข้อผิดพลาดไปแล้ว)
@@ -237,10 +265,23 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             filteredChannels.forEach(channel => {
                 const link = document.createElement('a');
-                link.href = "#";
+                link.href = "#"; // กำหนดเป็น # เพื่อให้ JavaScript จัดการการเปลี่ยนหน้า
                 link.classList.add('channel-link');
                 link.dataset.url = channel.data_url;
-                link.setAttribute('aria-label', channel.aria_label);
+                link.setAttribute('aria-label', channel.aria_label || channel.name);
+
+                // *** เพิ่มข้อมูล referer, userAgent, playInNatPlayer ลงใน dataset ***
+                if (channel.referer) {
+                    link.dataset.referer = channel.referer;
+                }
+                if (channel.userAgent) {
+                    link.dataset.userAgent = channel.userAgent;
+                }
+                // แปลง boolean เป็นสตริง 'true' หรือ 'false' สำหรับ dataset
+                if (typeof channel.playInNatPlayer === 'boolean') {
+                    link.dataset.playInNatPlayer = channel.playInNatPlayer.toString();
+                }
+                // *** สิ้นสุดการเพิ่มข้อมูล ***
 
                 const img = document.createElement('img');
                 img.src = channel.img_src;
@@ -360,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 devtoolsOpen = true;
                 // ล้างเนื้อหาหน้าเว็บและแสดงข้อความเตือน
                 document.body.innerHTML = `<div style="font-size: 2em; text-align: center; margin-top: 100px; color: ${redAccentColor}; height: 100vh; display: flex; align-items: center; justify-content: center;">
-                                                ขออภัย ไม่สามารถเข้าถึงหน้านี้ได้เมื่อ Developer Tools เปิดอยู่
+                                            ขออภัย ไม่สามารถเข้าถึงหน้านี้ได้เมื่อ Developer Tools เปิดอยู่
                                            </div>`;
             }
         } else {
