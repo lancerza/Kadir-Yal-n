@@ -17,7 +17,7 @@
         }
 
         :root {
-            /* Always Dark Mode Defaults - These should force dark mode */
+            /* Always Dark Mode Defaults */
             --bg-color: #000;
             --text-color: #fff;
             --channel-bg: #222;
@@ -34,11 +34,11 @@
             --category-tab-active-shadow-color: rgba(255, 255, 255, 0.7); /* เปลี่ยนสีเงา Active เป็นสีขาวเรืองแสง */
             --glow-color: rgba(255, 255, 255, 0.9);
             --no-channels-text: #ccc;
-            --body-bg-image: none; /* Default: no image */
-            --body-bg-size: cover;
-            --body-bg-position: center;
-            --body-bg-repeat: no-repeat;
-            --body-overlay-color: rgba(0, 0, 0, 0.5); /* Overlay color for background image */
+            /* --body-bg-image: none; */ /* REMOVED: Background Image Variable */
+            /* --body-bg-size: cover; */
+            /* --body-bg-position: center; */
+            /* --body-bg-repeat: no-repeat; */
+            /* --body-overlay-color: rgba(0, 0, 0, 0.5); */ /* REMOVED: Overlay color for background image */
         }
 
         /* ไม่มี @media (prefers-color-scheme: light) เพื่อบังคับ Dark Mode */
@@ -55,19 +55,19 @@
             min-height: 100vh;
             justify-content: flex-start;
             padding-top: 20px;
-            background-image: var(--body-bg-image);
-            background-size: var(--body-bg-size);
-            background-position: var(--body-bg-position);
-            background-repeat: var(--body-bg-repeat);
-            background-attachment: fixed;
-            position: relative;
-            z-index: 1;
+            /* background-image: var(--body-bg-image); */ /* REMOVED: Background Image */
+            /* background-size: var(--body-bg-size); */
+            /* background-position: var(--body-bg-position); */
+            /* background-repeat: var(--body-bg-repeat); */
+            /* background-attachment: fixed; */
+            position: relative; /* สำหรับ body::before */
+            z-index: 1; /* ทำให้เนื้อหา body อยู่บน overlay */
         }
 
         /* ==================== */
-        /* Background Image Overlay */
+        /* Background Image Overlay - REMOVED */
         /* ==================== */
-        body::before {
+        /* body::before {
             content: "";
             position: fixed;
             top: 0;
@@ -79,10 +79,9 @@
             opacity: 1; 
             transition: opacity 0.3s ease;
         }
-        /* ถ้าไม่มีภาพพื้นหลัง overlay ก็ไม่จำเป็นต้องมี */
         body:not([style*="background-image: url"])::before {
             opacity: 0; 
-        }
+        } */
 
 
         h1 {
@@ -90,7 +89,10 @@
             margin-bottom: 20px;
         }
 
-        #bg-image-controls {
+        /* ==================== */
+        /* Background Image Controls Styling - REMOVED */
+        /* ==================== */
+        /* #bg-image-controls {
             margin-bottom: 20px;
             padding: 8px 12px; 
             background-color: #1a1a1a;
@@ -150,49 +152,9 @@
         }
         #bg-image-url::placeholder {
             color: #aaa;
-        }
-        /* ==================== */
-        /* Button Styling - General Enhancements */
-        /* ==================== */
-        .bg-control-btn, .category-tab {
-            /* General button reset */
-            -webkit-appearance: none; 
-            -moz-appearance: none; 
-            appearance: none; 
-            border: none;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            user-select: none; /* ป้องกันการเลือกข้อความ */
-            outline: none; /* ลบ outline เริ่มต้น */
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.1s ease; 
-        }
-
-        /* Focus state for accessibility (keyboard navigation) */
-        .bg-control-btn:focus-visible, .category-tab:focus-visible, #bg-image-url:focus-visible { 
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
-        }
-
-        /* Active state (when clicked/pressed) */
-        .bg-control-btn:active, .category-tab:active {
-            transform: scale(0.98); 
-            opacity: 0.9; 
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2); 
-        }
-
-
-        .bg-control-btn { /* Specific styles for background control buttons */
-            padding: 6px 12px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 8px; 
-            font-size: 13px;
-            flex-shrink: 0;
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
-        }
-        .bg-control-btn:hover {
-            background-color: #0056b3;
-        }
+        } */
+        /* Note: .bg-control-btn is below as it's also used by category-tabs */
+        /*
         .bg-control-btn.reset {
             background-color: #dc3545;
         }
@@ -237,7 +199,7 @@
         }
 
 
-        /* Initial state hidden for success message, visible for input section */
+        Initial state hidden for success message, visible for input section
         #bg-image-controls.bg-set .bg-input-section {
             display: none;
         }
@@ -250,6 +212,57 @@
         #bg-image-controls:not(.bg-set) .bg-success-section {
             display: none;
         }
+        */
+
+
+        /* ==================== */
+        /* Button Styling - General Enhancements (retained common styles) */
+        /* ==================== */
+        .bg-control-btn, .category-tab { /* Note: .bg-control-btn is now only for category tabs if bg-image controls are removed */
+            /* General button reset */
+            -webkit-appearance: none; 
+            -moz-appearance: none; 
+            appearance: none; 
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            user-select: none; /* ป้องกันการเลือกข้อความ */
+            outline: none; /* ลบ outline เริ่มต้น */
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.1s ease; 
+        }
+
+        /* Focus state for accessibility (keyboard navigation) */
+        .bg-control-btn:focus-visible, .category-tab:focus-visible /* Removed #bg-image-url:focus-visible */ { 
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
+        }
+
+        /* Active state (when clicked/pressed) */
+        .bg-control-btn:active, .category-tab:active {
+            transform: scale(0.98); 
+            opacity: 0.9; 
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2); 
+        }
+
+        /* If .bg-control-btn is only used for category tabs now, these specific styles can be moved */
+        /* .bg-control-btn { 
+            padding: 6px 12px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 8px; 
+            font-size: 13px;
+            flex-shrink: 0;
+            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
+        }
+        .bg-control-btn:hover {
+            background-color: #0056b3;
+        }
+        .bg-control-btn.reset {
+            background-color: #dc3545;
+        }
+        .bg-control-btn.reset:hover {
+            background-color: #c82333;
+        } */
 
 
         #category-tabs {
@@ -376,42 +389,16 @@
                 padding-top: 15px;
             }
 
-            #bg-image-controls {
-                padding: 6px 8px; 
-                gap: 5px; 
-                width: 95%; 
-            }
+            /* #bg-image-controls section is removed */
 
-            .bg-input-section {
-                flex-direction: column; 
-                gap: 5px; 
-            }
-            #bg-image-url {
-                width: 100%; 
-                min-width: unset; 
-                box-sizing: border-box; 
-            }
-            .bg-control-btn {
-                width: 100%; 
+            /* .bg-input-section etc. are removed as they are part of bg-image-controls */
+            /* .bg-control-btn (general) is adjusted here if needed, now applies mostly to category tabs */
+            .bg-control-btn { /* Re-apply general button styles for mobile if needed for category tabs */
                 font-size: 14px; 
                 padding: 8px 10px; 
                 box-sizing: border-box; 
             }
-            .bg-success-section {
-                flex-direction: column; 
-                gap: 5px; 
-            }
-            .bg-success-message {
-                width: 100%; 
-                justify-content: center; 
-                padding: 0; 
-            }
-            #reset-bg-btn-success {
-                width: 100%; 
-                margin-top: 5px;
-                font-size: 14px; 
-                padding: 8px 10px; 
-            }
+            /* .bg-success-section related styles are removed */
 
 
             #category-tabs {
@@ -446,19 +433,6 @@
 <body>
     <h1>เลือกช่องเพื่อเปิดใน Wiseplay</h1>
     
-    <div id="bg-image-controls">
-        <div class="bg-input-section">
-            <input type="text" id="bg-image-url" placeholder="ใส่ URL ภาพพื้นหลังที่นี่">
-            <button id="toggle-bg-btn" class="bg-control-btn">ตั้งค่าภาพพื้นหลัง</button>
-        </div>
-        <div class="bg-success-section">
-            <span class="bg-success-message">
-                <span class="success-icon"></span>เรียบร้อยแล้ว
-            </span>
-            <button id="reset-bg-btn-success" class="bg-control-btn reset">รีเซ็ต</button>
-        </div>
-    </div>
-
     <div id="category-tabs">
         </div>
 
@@ -472,7 +446,7 @@
                 logo: "https://dookeela.live/uploads/1685812254.png",
                 // ***** สำคัญมาก: เพื่อลดแสงขาวและเพิ่มประสิทธิภาพ Wiseplay ให้ใช้ URL ตรงนี้ *****
                 // ใช้ URL ของไฟล์สตรีมมิ่งโดยตรง (เช่น .m3u8 หรือ .mpd) แทน URL ของหน้าเว็บ
-                // ตัวอย่าง URL ที่อาจจะช่วยลดแสงขาว: "https://dkl-o53d.cdn.akamaiz.com/dookeela/ch3hd/chunks.m3u8?nimblesessionid=..."
+                // ตัวอย่าง: file: "https://dkl-o53d.cdn.akamaiz.com/dookeela/ch3hd/chunks.m3u8?nimblesessionid=...", 
                 file: "https://dookeela.live/live-tv/ch3hd", // <--- ปัจจุบันยังเป็น URL ของหน้าเว็บ
                 category: "ทั่วไป"
             },
@@ -607,7 +581,8 @@
             }
         }
 
-        // === Background Image Logic ===
+        // === Background Image Logic - REMOVED ===
+        /*
         const bgImageControls = document.getElementById('bg-image-controls');
         const bgImageUrlInput = document.getElementById('bg-image-url');
         const toggleBgBtn = document.getElementById('toggle-bg-btn'); 
@@ -649,8 +624,11 @@
                 updateBgControlsState(false); 
             }
         }
+        */
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Background Image Logic - Removed from DOMContentLoaded
+            /*
             const savedImageUrl = localStorage.getItem(localStorageKey);
             if (savedImageUrl) {
                 const img = new Image();
@@ -667,6 +645,7 @@
             } else {
                 updateBgControlsState(false); 
             }
+            */
             
             // Initial category filter
             let initialCategoryToShow = null;
@@ -688,25 +667,25 @@
             createCategoryTabs();
         });
 
-        // Event listener for the single toggle button
+        // Event listeners for background image controls - REMOVED
+        /*
         toggleBgBtn.addEventListener('click', () => {
-            if (toggleBgBtn.classList.contains('reset')) { // If it's currently a "reset" button
+            if (toggleBgBtn.classList.contains('reset')) { 
                 applyBackgroundImage(null);
-            } else { // If it's currently a "set background" button
+            } else { 
                 const url = bgImageUrlInput.value.trim();
                 if (url) { 
                     applyBackgroundImage(url);
                 } else { 
-                    alert('กรุณาใส่ URL ภาพพื้นหลัง'); // Prompt if URL is empty
+                    alert('กรุณาใส่ URL ภาพพื้นหลัง');
                 }
             }
         });
 
-        // The reset button in the success section remains separate
         resetBgBtnSuccessSection.addEventListener('click', () => {
             applyBackgroundImage(null);
         });
-
+        */
     </script>
 </body>
 </html>
