@@ -18,47 +18,51 @@
             justify-content: center;
         }
         h1 {
-            margin-top: 20px; /* เพิ่มระยะห่างด้านบนของหัวข้อ */
-            margin-bottom: 30px; /* เพิ่มระยะห่างด้านล่างของหัวข้อ */
+            margin-top: 20px;
+            margin-bottom: 30px;
         }
         #channel-list {
             margin: 20px auto;
             max-width: 800px;
             display: flex;
             flex-wrap: wrap;
-            gap: 15px; /* เพิ่มระยะห่างระหว่างช่องให้มากขึ้น */
+            gap: 15px;
             justify-content: center;
         }
         .channel {
             cursor: pointer;
-            padding: 15px; /* เพิ่ม padding ให้กล่องใหญ่ขึ้น */
+            padding: 15px;
             background: #222;
             border: 1px solid #444;
-            border-radius: 12px; /* เพิ่มรัศมีขอบให้โค้งมนขึ้น */
+            border-radius: 12px;
             text-align: center;
-            width: 120px; /* เพิ่มขนาดความกว้างของช่อง */
+            width: 120px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-decoration: none; /* ลบขีดเส้นใต้ของลิงก์ */
-            color: inherit; /* ให้สีตัวอักษรเป็นสีเดียวกับ body */
-            transition: background 0.3s ease; /* เพิ่ม transition สำหรับ hover effect */
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.3s ease;
         }
         .channel:hover {
-            background: #444; /* เปลี่ยนสีพื้นหลังเมื่อ hover */
+            background: #444;
             border-color: #666;
         }
         .channel img {
-            width: 90px; /* เพิ่มขนาดโลโก้ */
-            height: 90px; /* เพิ่มขนาดโลโก้ */
+            width: 90px;
+            height: 90px;
             margin-bottom: 10px;
-            border-radius: 50%;
-            object-fit: cover;
+            border-radius: 50%; /* ทำให้รูปภาพเป็นวงกลม */
+            object-fit: contain; /* ทำให้รูปภาพพอดีโดยรักษาสัดส่วน ไม่ตัดขอบ */
+            background-color: #fff; /* เพิ่มพื้นหลังสีขาวให้กับโลโก้ */
+            padding: 5px; /* เพิ่ม padding รอบโลโก้ภายในวงกลมสีขาว */
+            box-sizing: border-box; /* ให้ padding อยู่ใน width/height */
+            border: 1px solid #ccc; /* เพิ่มขอบสีเทาอ่อนๆ ให้โลโก้ */
         }
         .channel-name {
-            font-size: 16px; /* ปรับขนาดตัวอักษรชื่อช่อง */
-            font-weight: bold; /* ทำให้ชื่อช่องตัวหนาขึ้น */
+            font-size: 16px;
+            font-weight: bold;
             word-break: break-word;
         }
     </style>
@@ -71,21 +75,19 @@
         const channels = [
             {
                 name: "ช่อง 3 HD",
-                logo: "https://dookeela.live/uploads/1685812254.png", // โลโก้ช่อง 3 HD
-                // **สำคัญ: URL นี้มีอายุจำกัดและอาจต้องมีการดึงใหม่บ่อยๆ**
+                logo: "https://dookeela.live/uploads/1685812254.png",
                 file: "https://dookeela.live/live-tv/ch3hd",
             },
             {
                 name: "Ch5HD",
-                logo: "https://dookeela.live/uploads/1664574997.png", 
+                logo: "https://dookeela.live/uploads/1664574997.png",
                 file: "https://dookeela.live/live-tv/ch5hd",
             },
             {
                 name: "Ch7HD",
-                logo: "https://dookeela.live/uploads/1688059473.png", 
+                logo: "https://dookeela.live/uploads/1688059473.png",
                 file: "https://dookeela.live/live-tv/ch7hd",
             },
-            // เพิ่มช่องอื่นๆ ของคุณที่นี่
             {
                 name: "T-Sports 7",
                 logo: "https://dookeela.live/uploads/1673134276.png",
@@ -100,14 +102,13 @@
 
         const channelList = document.getElementById("channel-list");
         channels.forEach(channel => {
-            // สร้าง Wiseplay Intent URI สำหรับแต่ละช่อง
             const encodedFileUrl = encodeURIComponent(channel.file);
             const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
 
-            const a = document.createElement("a"); // ใช้แท็ก <a> เป็นคอนเทนเนอร์หลัก
-            a.href = wiseplayIntentUri; // กำหนด href ให้เป็น Intent URI
-            a.className = "channel"; // กำหนด class เพื่อใช้ CSS
-            a.target = "_blank"; // เปิดในแท็บ/แอปใหม่
+            const a = document.createElement("a");
+            a.href = wiseplayIntentUri;
+            a.className = "channel";
+            a.target = "_blank";
 
             a.innerHTML = `
                 <img src="${channel.logo}" alt="${channel.name}"><br>
