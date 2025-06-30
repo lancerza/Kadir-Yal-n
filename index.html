@@ -16,6 +16,7 @@
         }
 
         :root {
+            /* Always Dark Mode */
             --bg-color: #000;
             --text-color: #fff;
             --channel-bg: #222;
@@ -122,18 +123,16 @@
             width: fit-content; /* ทำให้ความกว้างพอดีกับเนื้อหาในสถานะสำเร็จ */
             min-width: 250px; /* กำหนด min-width เพื่อไม่ให้เล็กเกินไป */
             max-width: 90vw; /* จำกัด max-width บนมือถือ */
-            /* padding: 8px 12px; */ /* padding ที่กำหนดไว้แล้วใน #bg-image-controls จะทำงานกับ fit-content ได้ดี */
+            /* padding ที่กำหนดไว้แล้วใน #bg-image-controls จะทำงานกับ fit-content ได้ดี */
         }
         .bg-success-section {
-            /* width: 100%; */ /* ลบออกเพื่อให้ fit-content ทำงานได้ดี */
             display: flex;
             flex-wrap: nowrap;
             gap: 5px; 
             justify-content: space-between; /* กระจายองค์ประกอบให้ชิดซ้าย-ขวา */
             align-items: center;
-            /* เพิ่ม padding ด้านซ้ายและขวาให้กับ section นี้โดยตรง เพื่อควบคุมระยะห่างจากขอบดำ */
             padding: 0 5px; /* ปรับ padding ซ้ายขวา เพื่อให้สมดุล */
-            margin: 0; /* ลบ margin: 0 auto; ออก */
+            margin: 0; 
             flex-grow: 1; /* ให้ section ขยายเต็มพื้นที่ที่เหลือใน parent */
         }
 
@@ -147,7 +146,7 @@
             color: #fff;
             font-size: 13px;
             outline: none;
-            min-width: 100px;
+            min-width: 80px; /* ลด min-width ลงเพื่อให้ input ยืดหยุ่นขึ้น */
         }
         #bg-image-url::placeholder {
             color: #aaa;
@@ -181,7 +180,7 @@
             align-items: center;
             gap: 5px;
             flex-grow: 0; 
-            /* justify-content: flex-start; */ /* ลบ justify-content ออก เพราะ parent จัดการ */
+            justify-content: flex-start;
             padding-left: 0px; 
         }
         .bg-success-message .success-icon {
@@ -424,8 +423,7 @@
     <div id="bg-image-controls">
         <div class="bg-input-section">
             <input type="text" id="bg-image-url" placeholder="ใส่ URL ภาพพื้นหลังที่นี่">
-            <button id="apply-bg-btn" class="bg-control-btn">ตั้งค่าภาพพื้นหลัง</button>
-            <button id="reset-bg-btn" class="bg-control-btn reset">รีเซ็ตพื้นหลัง</button>
+            <button id="toggle-bg-btn" class="bg-control-btn">ตั้งค่าภาพพื้นหลัง</button>
         </div>
         <div class="bg-success-section">
             <span class="bg-success-message">
@@ -566,8 +564,9 @@
         // === Background Image Logic ===
         const bgImageControls = document.getElementById('bg-image-controls');
         const bgImageUrlInput = document.getElementById('bg-image-url');
-        const applyBgBtn = document.getElementById('apply-bg-btn');
-        const resetBgBtnInputSection = document.getElementById('reset-bg-btn'); 
+        // const applyBgBtn = document.getElementById('apply-bg-btn'); // No longer used
+        const toggleBgBtn = document.getElementById('toggle-bg-btn'); // Combined button
+        // const resetBgBtnInputSection = document.getElementById('reset-bg-btn'); // No longer used
         const resetBgBtnSuccessSection = document.getElementById('reset-bg-btn-success');
         const successIconSpan = document.querySelector('.bg-success-section .success-icon'); 
         const root = document.documentElement;
@@ -577,9 +576,13 @@
             if (hasImage) {
                 bgImageControls.classList.add('bg-set');
                 successIconSpan.textContent = '✅'; 
+                toggleBgBtn.textContent = 'รีเซ็ตพื้นหลัง'; // Change button text
+                toggleBgBtn.classList.add('reset'); // Add reset style class
             } else {
                 bgImageControls.classList.remove('bg-set');
                 bgImageUrlInput.value = ''; 
+                toggleBgBtn.textContent = 'ตั้งค่าภาพพื้นหลัง'; // Change button text
+                toggleBgBtn.classList.remove('reset'); // Remove reset style class
             }
         }
 
@@ -641,19 +644,21 @@
             createCategoryTabs();
         });
 
-        applyBgBtn.addEventListener('click', () => {
-            const url = bgImageUrlInput.value.trim();
-            if (url) { 
-                applyBackgroundImage(url);
-            } else { 
+        // Event listener for the single toggle button
+        toggleBgBtn.addEventListener('click', () => {
+            if (toggleBgBtn.classList.contains('reset')) { // If it's currently a "reset" button
                 applyBackgroundImage(null);
+            } else { // If it's currently a "set background" button
+                const url = bgImageUrlInput.value.trim();
+                if (url) { 
+                    applyBackgroundImage(url);
+                } else { 
+                    alert('กรุณาใส่ URL ภาพพื้นหลัง'); // Prompt if URL is empty
+                }
             }
         });
 
-        resetBgBtnInputSection.addEventListener('click', () => {
-            applyBackgroundImage(null);
-        });
-
+        // The reset button in the success section remains separate
         resetBgBtnSuccessSection.addEventListener('click', () => {
             applyBackgroundImage(null);
         });
