@@ -49,16 +49,27 @@
             background: #444;
             border-color: #666;
         }
-        .channel img {
+        /* Container for the logo to control its background and shape */
+        .channel-logo-container {
             width: 90px;
             height: 90px;
             margin-bottom: 10px;
-            border-radius: 50%; /* ทำให้รูปภาพเป็นวงกลม */
-            object-fit: contain; /* ทำให้รูปภาพพอดีโดยรักษาสัดส่วน ไม่ตัดขอบ */
-            background-color: #fff; /* เพิ่มพื้นหลังสีขาวให้กับโลโก้ */
-            padding: 5px; /* เพิ่ม padding รอบโลโก้ภายในวงกลมสีขาว */
-            box-sizing: border-box; /* ให้ padding อยู่ใน width/height */
-            border: 1px solid #ccc; /* เพิ่มขอบสีเทาอ่อนๆ ให้โลโก้ */
+            border-radius: 50%; /* ทำให้ container เป็นวงกลม */
+            background-color: #fff; /* พื้นหลังสีขาวสำหรับวงกลม */
+            display: flex; /* ใช้ flexbox เพื่อจัดรูปภาพให้อยู่ตรงกลาง */
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* ซ่อนส่วนเกินของรูปภาพที่ออกนอกวงกลม */
+            border: 1px solid #ccc; /* เพิ่มขอบสีเทาอ่อนๆ รอบวงกลม */
+        }
+        .channel img {
+            max-width: 80%; /* จำกัดขนาดรูปภาพให้พอดีกับ container */
+            max-height: 80%; /* จำกัดขนาดรูปภาพให้พอดีกับ container */
+            object-fit: contain; /* ทำให้รูปภาพพอดีโดยรักษาสัดส่วน */
+            /* ลบ border-radius และ background-color ออกจาก img โดยตรง */
+            border-radius: 0; /* ตรวจสอบให้แน่ใจว่ารูปภาพเป็นสี่เหลี่ยม */
+            background-color: transparent; /* ไม่มีพื้นหลังที่ตัวรูปภาพ */
+            padding: 0; /* ไม่มี padding ที่ตัวรูปภาพ */
         }
         .channel-name {
             font-size: 16px;
@@ -111,7 +122,9 @@
             a.target = "_blank";
 
             a.innerHTML = `
-                <img src="${channel.logo}" alt="${channel.name}"><br>
+                <div class="channel-logo-container">
+                    <img src="${channel.logo}" alt="${channel.name}">
+                </div>
                 <div class="channel-name">${channel.name}</div>
             `;
             channelList.appendChild(a);
