@@ -165,7 +165,7 @@
         }
 
         /* Focus state for accessibility (keyboard navigation) */
-        .bg-control-btn:focus-visible, .category-tab:focus-visible, #bg-image-url:focus-visible { 
+        .bg-control-btn:focus-visible, .category-tab:focus-visible, #bg-image-url:focus-visible { /* Removed #search-input:focus-visible */
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
         }
 
@@ -285,7 +285,7 @@
             padding: 10px 20px;
             background-color: var(--category-tab-bg);
             border: 1px solid var(--category-tab-border);
-            border-radius: 8px; /* ปรับเป็น 8px เพื่อความสอดคล้อง */
+            border-radius: 8px; 
             font-size: 15px;
             font-weight: normal;
             color: var(--category-tab-text);
@@ -327,7 +327,7 @@
             padding: 0;
             background: var(--channel-bg);
             border: 1px solid #444;
-            border-radius: 10px; /* คงค่า 10px */
+            border-radius: 10px; 
             text-align: center;
             box-sizing: border-box;
             display: flex;
@@ -460,10 +460,6 @@
         </div>
     </div>
 
-    <div id="search-container">
-        <input type="text" id="search-input" placeholder="ค้นหาช่อง...">
-    </div>
-
     <div id="category-tabs">
         </div>
 
@@ -538,7 +534,7 @@
 
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
-        const searchInput = document.getElementById('search-input'); 
+        // const searchInput = document.getElementById('search-input'); // Removed search input
 
         let currentSelectedCategory = null; 
 
@@ -551,7 +547,7 @@
                     tab.textContent = categoryDisplayNames[category] || category; 
                     tab.dataset.category = category;
                     tab.onclick = () => {
-                        searchInput.value = ''; 
+                        // searchInput.value = ''; // Removed search input related logic
                         filterChannels(category);
                     };
                     categoryTabsContainer.appendChild(tab);
@@ -559,7 +555,7 @@
             });
         }
 
-        function filterChannels(selectedCategory, searchTerm = '') {
+        function filterChannels(selectedCategory /*, searchTerm = '' */) { // Removed searchTerm parameter
             currentSelectedCategory = selectedCategory; 
 
             document.querySelectorAll('.category-tab').forEach(tab => {
@@ -574,21 +570,23 @@
 
             channelListContainer.innerHTML = ''; 
             
-            // Filter by category first
+            // Filter by category only
             let filteredChannels = allChannels.filter(channel => channel.category === selectedCategory);
 
-            // Then filter by search term if provided
+            // Removed search filtering logic
+            /*
             if (searchTerm) {
                 const lowerCaseSearchTerm = searchTerm.toLowerCase();
                 filteredChannels = filteredChannels.filter(channel => 
                     channel.name.toLowerCase().includes(lowerCaseSearchTerm)
                 );
             }
+            */
 
             if (filteredChannels.length === 0) {
                 const messageDiv = document.createElement("div");
                 messageDiv.className = "no-channels-message";
-                messageDiv.textContent = `ไม่พบช่อง${searchTerm ? 'ที่ค้นหา' : ''}ในหมวดหมู่ "${categoryDisplayNames[selectedCategory] || selectedCategory}" นี้`;
+                messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[selectedCategory] || selectedCategory}" นี้`; // Removed searchTerm part
                 channelListContainer.appendChild(messageDiv);
             } else {
                 filteredChannels.forEach(channel => {
@@ -709,11 +707,11 @@
             applyBackgroundImage(null);
         });
 
-        // Search functionality
-        searchInput.addEventListener('input', () => {
-            // Filter based on the current selected category and search term
-            filterChannels(currentSelectedCategory, searchInput.value.trim());
-        });
+        // Search functionality - REMOVED
+        // searchInput.addEventListener('input', () => {
+        //     // Filter based on the current selected category and search term
+        //     filterChannels(currentSelectedCategory, searchInput.value.trim());
+        // });
 
     </script>
 </body>
