@@ -34,11 +34,7 @@
             --category-tab-active-shadow-color: rgba(255, 255, 255, 0.7); /* เปลี่ยนสีเงา Active เป็นสีขาวเรืองแสง */
             --glow-color: rgba(255, 255, 255, 0.9);
             --no-channels-text: #ccc;
-            /* --body-bg-image: none; */ /* REMOVED: Background Image Variable */
-            /* --body-bg-size: cover; */
-            /* --body-bg-position: center; */
-            /* --body-bg-repeat: no-repeat; */
-            /* --body-overlay-color: rgba(0, 0, 0, 0.5); */ /* REMOVED: Overlay color for background image */
+            /* ไม่มี --body-bg-image, --body-overlay-color เพราะฟังก์ชันพื้นหลังถูกลบไปแล้ว */
         }
 
         /* ไม่มี @media (prefers-color-scheme: light) เพื่อบังคับ Dark Mode */
@@ -55,33 +51,11 @@
             min-height: 100vh;
             justify-content: flex-start;
             padding-top: 20px;
-            /* background-image: var(--body-bg-image); */ /* REMOVED: Background Image */
-            /* background-size: var(--body-bg-size); */
-            /* background-position: var(--body-bg-position); */
-            /* background-repeat: var(--body-bg-repeat); */
-            /* background-attachment: fixed; */
-            position: relative; /* สำหรับ body::before */
-            z-index: 1; /* ทำให้เนื้อหา body อยู่บน overlay */
+            /* ไม่มี background-image */
+            /* ไม่มี position: relative; z-index: 1 สำหรับ body::before ที่ถูกลบไป */
         }
 
-        /* ==================== */
-        /* Background Image Overlay - REMOVED */
-        /* ==================== */
-        /* body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--body-overlay-color);
-            z-index: -1; 
-            opacity: 1; 
-            transition: opacity 0.3s ease;
-        }
-        body:not([style*="background-image: url"])::before {
-            opacity: 0; 
-        } */
+        /* Background Image Overlay - ถูกลบไปแล้ว */
 
 
         h1 {
@@ -89,136 +63,13 @@
             margin-bottom: 20px;
         }
 
-        /* ==================== */
-        /* Background Image Controls Styling - REMOVED */
-        /* ==================== */
-        /* #bg-image-controls {
-            margin-bottom: 20px;
-            padding: 8px 12px; 
-            background-color: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            align-items: center;
-            max-width: 320px; 
-            width: 90%; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            min-height: auto; 
-            position: relative;
-            z-index: 2; 
-            transition: max-width 0.3s ease, width 0.3s ease; 
-        }
-        
-        .bg-input-section {
-            width: 100%;
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 8px;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-        }
-        #bg-image-controls.bg-set {
-            width: 200px; 
-            min-width: 200px; 
-            max-width: 90vw; 
-            padding: 8px 12px; 
-        }
-        .bg-success-section {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 5px; 
-            justify-content: center; 
-            align-items: center;
-            padding: 0 5px; 
-            margin: 0 auto; 
-            flex-grow: 1; 
-        }
-
-
-        #bg-image-url {
-            flex-grow: 1;
-            padding: 6px 10px;
-            border: 1px solid #555;
-            border-radius: 8px; 
-            background-color: #333;
-            color: #fff;
-            font-size: 13px;
-            outline: none;
-            min-width: 80px; 
-        }
-        #bg-image-url::placeholder {
-            color: #aaa;
-        } */
-        /* Note: .bg-control-btn is below as it's also used by category-tabs */
-        /*
-        .bg-control-btn.reset {
-            background-color: #dc3545;
-        }
-        .bg-control-btn.reset:hover {
-            background-color: #c82333;
-        }
-
-        .bg-success-message {
-            font-size: 14px;
-            font-weight: bold;
-            color: #28a745;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex-grow: 0; 
-            justify-content: flex-start;
-            padding-left: 0px; 
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
-        }
-        .bg-success-message .success-icon {
-            font-size: 18px;
-            width: 24px;
-            height: 24px;
-            background-color: #28a745;
-            color: white;
-            border-radius: 8px; 
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        #reset-bg-btn-success {
-            padding: 5px 10px;
-            font-size: 12px;
-            background-color: #dc3545;
-            color: white;
-            border-radius: 8px; 
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
-        }
-        #reset-bg-btn-success:hover {
-            background-color: #c82333;
-        }
-
-
-        Initial state hidden for success message, visible for input section
-        #bg-image-controls.bg-set .bg-input-section {
-            display: none;
-        }
-        #bg-image-controls.bg-set .bg-success-section {
-            display: flex;
-        }
-        #bg-image-controls:not(.bg-set) .bg-input-section {
-            display: flex;
-        }
-        #bg-image-controls:not(.bg-set) .bg-success-section {
-            display: none;
-        }
-        */
+        /* Background Image Controls Styling - ถูกลบไปแล้ว */
 
 
         /* ==================== */
-        /* Button Styling - General Enhancements (retained common styles) */
+        /* Button Styling - General Enhancements */
         /* ==================== */
-        .bg-control-btn, .category-tab { /* Note: .bg-control-btn is now only for category tabs if bg-image controls are removed */
+        .bg-control-btn, .category-tab {
             /* General button reset */
             -webkit-appearance: none; 
             -moz-appearance: none; 
@@ -233,7 +84,7 @@
         }
 
         /* Focus state for accessibility (keyboard navigation) */
-        .bg-control-btn:focus-visible, .category-tab:focus-visible /* Removed #bg-image-url:focus-visible */ { 
+        .bg-control-btn:focus-visible, .category-tab:focus-visible, #bg-image-url:focus-visible { 
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
         }
 
@@ -244,25 +95,9 @@
             box-shadow: inset 0 0 5px rgba(0,0,0,0.2); 
         }
 
-        /* If .bg-control-btn is only used for category tabs now, these specific styles can be moved */
-        /* .bg-control-btn { 
-            padding: 6px 12px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 8px; 
-            font-size: 13px;
-            flex-shrink: 0;
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
-        }
-        .bg-control-btn:hover {
-            background-color: #0056b3;
-        }
-        .bg-control-btn.reset {
-            background-color: #dc3545;
-        }
-        .bg-control-btn.reset:hover {
-            background-color: #c82333;
-        } */
+        /* .bg-control-btn is now mainly for general category tab styles */
+        /* If no other elements use .bg-control-btn, these can be merged into .category-tab */
+        /* For now, leaving as is for clarity */
 
 
         #category-tabs {
@@ -276,7 +111,7 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
             scrollbar-color: var(--category-tab-hover-bg) var(--category-tab-bg);
-            z-index: 2; /* ทำให้แท็บอยู่เหนือ overlay */
+            z-index: 2; /* ทำให้แท็บอยู่เหนือเนื้อหา */
         }
         #category-tabs::-webkit-scrollbar {
             height: 8px;
@@ -389,17 +224,14 @@
                 padding-top: 15px;
             }
 
-            /* #bg-image-controls section is removed */
+            /* bg-image-controls section ถูกลบไปแล้ว */
 
-            /* .bg-input-section etc. are removed as they are part of bg-image-controls */
-            /* .bg-control-btn (general) is adjusted here if needed, now applies mostly to category tabs */
-            .bg-control-btn { /* Re-apply general button styles for mobile if needed for category tabs */
+            /* .bg-control-btn (general) is adjusted here, now applies mostly to category tabs */
+            .bg-control-btn { 
                 font-size: 14px; 
                 padding: 8px 10px; 
                 box-sizing: border-box; 
             }
-            /* .bg-success-section related styles are removed */
-
 
             #category-tabs {
                 gap: 6px;
@@ -581,71 +413,8 @@
             }
         }
 
-        // === Background Image Logic - REMOVED ===
-        /*
-        const bgImageControls = document.getElementById('bg-image-controls');
-        const bgImageUrlInput = document.getElementById('bg-image-url');
-        const toggleBgBtn = document.getElementById('toggle-bg-btn'); 
-        const resetBgBtnSuccessSection = document.getElementById('reset-bg-btn-success');
-        const successIconSpan = document.querySelector('.bg-success-section .success-icon'); 
-        const root = document.documentElement;
-        const localStorageKey = 'customBgImageUrl';
-
-        function updateBgControlsState(hasImage) {
-            if (hasImage) {
-                bgImageControls.classList.add('bg-set');
-                successIconSpan.textContent = '✅'; 
-                toggleBgBtn.textContent = 'รีเซ็ตพื้นหลัง'; 
-                toggleBgBtn.classList.add('reset'); 
-            } else {
-                bgImageControls.classList.remove('bg-set');
-                bgImageUrlInput.value = ''; 
-                toggleBgBtn.textContent = 'ตั้งค่าภาพพื้นหลัง'; 
-                toggleBgBtn.classList.remove('reset'); 
-            }
-        }
-
-        function applyBackgroundImage(url) {
-            if (url) {
-                const img = new Image();
-                img.onload = () => {
-                    root.style.setProperty('--body-bg-image', `url('${url}')`);
-                    localStorage.setItem(localStorageKey, url);
-                    updateBgControlsState(true); 
-                };
-                img.onerror = () => {
-                    alert('ไม่สามารถโหลดภาพพื้นหลังได้ กรุณาตรวจสอบ URL');
-                    applyBackgroundImage(null); 
-                };
-                img.src = url; 
-            } else {
-                root.style.setProperty('--body-bg-image', 'none');
-                localStorage.removeItem(localStorageKey);
-                updateBgControlsState(false); 
-            }
-        }
-        */
-
         document.addEventListener('DOMContentLoaded', () => {
-            // Background Image Logic - Removed from DOMContentLoaded
-            /*
-            const savedImageUrl = localStorage.getItem(localStorageKey);
-            if (savedImageUrl) {
-                const img = new Image();
-                img.onload = () => {
-                    root.style.setProperty('--body-bg-image', `url('${savedImageUrl}')`);
-                    updateBgControlsState(true);
-                    bgImageUrlInput.value = savedImageUrl; 
-                };
-                img.onerror = () => {
-                    console.error("Failed to load saved background image. Resetting.");
-                    applyBackgroundImage(null); 
-                };
-                img.src = savedImageUrl;
-            } else {
-                updateBgControlsState(false); 
-            }
-            */
+            // Background Image Logic - ถูกลบออกไปแล้ว
             
             // Initial category filter
             let initialCategoryToShow = null;
@@ -667,25 +436,8 @@
             createCategoryTabs();
         });
 
-        // Event listeners for background image controls - REMOVED
-        /*
-        toggleBgBtn.addEventListener('click', () => {
-            if (toggleBgBtn.classList.contains('reset')) { 
-                applyBackgroundImage(null);
-            } else { 
-                const url = bgImageUrlInput.value.trim();
-                if (url) { 
-                    applyBackgroundImage(url);
-                } else { 
-                    alert('กรุณาใส่ URL ภาพพื้นหลัง');
-                }
-            }
-        });
+        // Event listeners for background image controls - ถูกลบออกไปแล้ว
 
-        resetBgBtnSuccessSection.addEventListener('click', () => {
-            applyBackgroundImage(null);
-        });
-        */
     </script>
 </body>
 </html>
