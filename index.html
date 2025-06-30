@@ -15,47 +15,53 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            justify-content: flex-start; /* จัดให้อยู่ด้านบนเพื่อเหลือพื้นที่ให้หมวดหมู่ */
-            padding-top: 20px; /* เพิ่ม padding ด้านบน */
+            justify-content: flex-start;
+            padding-top: 20px;
         }
         h1 {
-            margin-top: 0px; /* ลด margin-top */
-            margin-bottom: 20px; /* ลด margin-bottom */
+            margin-top: 0px;
+            margin-bottom: 20px;
         }
         #category-tabs {
-            margin-bottom: 20px; /* ระยะห่างระหว่างแท็บกับรายการช่อง */
+            margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
+            padding: 0 10px;
         }
         .category-tab {
-            padding: 8px 15px;
+            padding: 10px 20px;
             background-color: #333;
-            border: 1px solid #555;
-            border-radius: 20px; /* ทำให้เป็นปุ่มกลม */
+            border: 1px solid #333;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            font-size: 15px;
+            font-weight: normal;
+            color: #ccc;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            white-space: nowrap;
         }
         .category-tab:hover {
             background-color: #555;
-            border-color: #777;
+            color: #fff;
+            border-color: #555;
         }
         .category-tab.active {
-            background-color: #007bff; /* สีฟ้าเมื่อ Active */
+            background-color: #007bff;
             border-color: #007bff;
             font-weight: bold;
             color: #fff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
         }
 
         #channel-list {
-            margin: 0px auto; /* ปรับ margin */
+            margin: 0px auto;
             max-width: 800px;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
             justify-content: center;
+            gap: 10px;
         }
         .channel {
             cursor: pointer;
@@ -105,12 +111,12 @@
     <div id="channel-list"></div>
 
     <script>
-        const allChannels = [ // เปลี่ยนชื่อเป็น allChannels
+        const allChannels = [
             {
                 name: "ช่อง 3 HD",
                 logo: "https://dookeela.live/uploads/1685812254.png",
                 file: "https://dookeela.live/live-tv/ch3hd",
-                category: "ทั่วไป" // เพิ่มหมวดหมู่
+                category: "ทั่วไป"
             },
             {
                 name: "Ch5HD",
@@ -128,7 +134,7 @@
                 name: "T-Sports 7",
                 logo: "https://dookeela.live/uploads/1673134276.png",
                 file: "https://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7",
-                category: "กีฬา" // ตัวอย่างหมวดหมู่กีฬา
+                category: "กีฬา"
             },
             {
                 name: "True Ball Thai 9",
@@ -137,9 +143,9 @@
                 category: "กีฬา"
             },
             {
-                name: "Cartoon Club", // เพิ่มช่องตัวอย่างสำหรับหมวดหมู่อื่นๆ
+                name: "Cartoon Club",
                 logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cartoon_Club_logo.png/800px-Cartoon_Club_logo.png",
-                file: "https://example.com/cartoonclub.m3u8", // URL ตัวอย่าง
+                file: "https://example.com/cartoonclub.m3u8",
                 category: "การ์ตูน"
             },
             {
@@ -150,20 +156,18 @@
             }
         ];
 
-        // ดึงหมวดหมู่ทั้งหมดที่ไม่ซ้ำกัน
         const categories = [...new Set(allChannels.map(channel => channel.category))];
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
 
-        // สร้างปุ่มหมวดหมู่
         function createCategoryTabs() {
-            // เพิ่มปุ่ม "ทั้งหมด"
-            const allTab = document.createElement("div");
-            allTab.className = "category-tab active"; // ให้ "ทั้งหมด" เป็น active ตั้งแต่แรก
-            allTab.textContent = "ทั้งหมด";
-            allTab.dataset.category = "all";
-            allTab.onclick = () => filterChannels("all");
-            categoryTabsContainer.appendChild(allTab);
+            // ลบโค้ดที่สร้างปุ่ม "ทั้งหมด" ออกไป
+            // const allTab = document.createElement("div");
+            // allTab.className = "category-tab active";
+            // allTab.textContent = "ทั้งหมด";
+            // allTab.dataset.category = "all";
+            // allTab.onclick = () => filterChannels("all");
+            // categoryTabsContainer.appendChild(allTab);
 
             categories.forEach(category => {
                 const tab = document.createElement("div");
@@ -177,18 +181,19 @@
 
         // ฟังก์ชันกรองและแสดงช่องตามหมวดหมู่
         function filterChannels(selectedCategory) {
-            // ลบ active class ออกจากทุกแท็บ
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            // เพิ่ม active class ให้แท็บที่ถูกเลือก
-            document.querySelector(`.category-tab[data-category="${selectedCategory}"]`).classList.add('active');
+            // ตรวจสอบว่าแท็บที่ถูกเลือกมีอยู่จริง ก่อนที่จะเพิ่ม active class
+            const selectedTab = document.querySelector(`.category-tab[data-category="${selectedCategory}"]`);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
 
-            channelListContainer.innerHTML = ''; // ล้างรายการช่องเดิม
+            channelListContainer.innerHTML = '';
             
-            const filteredChannels = selectedCategory === "all" 
-                ? allChannels 
-                : allChannels.filter(channel => channel.category === selectedCategory);
+            // ปรับตรรกะการกรอง: ไม่มีการเลือก "all" แล้ว
+            const filteredChannels = allChannels.filter(channel => channel.category === selectedCategory);
 
             filteredChannels.forEach(channel => {
                 const encodedFileUrl = encodeURIComponent(channel.file);
@@ -207,9 +212,11 @@
             });
         }
 
-        // เริ่มต้นสร้างแท็บและแสดงช่องทั้งหมด
         createCategoryTabs();
-        filterChannels("all"); // แสดงช่องทั้งหมดเมื่อโหลดครั้งแรก
+        // ตั้งค่าหมวดหมู่แรกสุดเป็น active และแสดงผลเมื่อโหลดหน้าครั้งแรก
+        if (categories.length > 0) {
+            filterChannels(categories[0]); 
+        }
     </script>
 </body>
 </html>
