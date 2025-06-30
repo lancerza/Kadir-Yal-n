@@ -97,13 +97,13 @@
             gap: 8px;
             justify-content: center;
             align-items: center;
-            max-width: 320px; /* ค่า max-width ล่าสุด */
+            max-width: 320px; 
             width: 90%; 
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             min-height: auto; 
             position: relative;
             z-index: 2; /* ทำให้คอนโทรลอยู่เหนือ overlay */
-            transition: max-width 0.3s ease, width 0.3s ease; /* เพิ่ม transition สำหรับ width */
+            transition: max-width 0.3s ease, width 0.3s ease; 
         }
         
         .bg-input-section {
@@ -122,11 +122,10 @@
             padding: 8px 12px; 
         }
         .bg-success-section {
-            width: fit-content; /* ทำให้ความกว้างพอดีกับเนื้อหาในสถานะสำเร็จ */
             display: flex;
             flex-wrap: nowrap;
             gap: 5px; 
-            justify-content: space-between; 
+            justify-content: center; 
             align-items: center;
             padding: 0 5px; 
             margin: 0 auto; 
@@ -138,7 +137,7 @@
             flex-grow: 1;
             padding: 6px 10px;
             border: 1px solid #555;
-            border-radius: 5px;
+            border-radius: 8px; /* ปรับเป็น 8px */
             background-color: #333;
             color: #fff;
             font-size: 13px;
@@ -166,7 +165,7 @@
         }
 
         /* Focus state for accessibility (keyboard navigation) */
-        .bg-control-btn:focus-visible, .category-tab:focus-visible {
+        .bg-control-btn:focus-visible, .category-tab:focus-visible, #search-input:focus-visible, #bg-image-url:focus-visible { /* Add input fields here */
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* เรืองแสงสีฟ้าอ่อนๆ เมื่อ Focus ด้วยแป้นพิมพ์ */
         }
 
@@ -182,7 +181,7 @@
             padding: 6px 12px;
             background-color: #007bff;
             color: white;
-            border-radius: 5px;
+            border-radius: 8px; /* ปรับเป็น 8px */
             font-size: 13px;
             flex-shrink: 0;
         }
@@ -213,7 +212,7 @@
             height: 24px;
             background-color: #28a745;
             color: white;
-            border-radius: 5px;
+            border-radius: 8px; /* ปรับเป็น 8px */
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -224,7 +223,7 @@
             font-size: 12px;
             background-color: #dc3545;
             color: white;
-            border-radius: 5px; 
+            border-radius: 8px; /* ปรับเป็น 8px */
         }
         #reset-bg-btn-success:hover {
             background-color: #c82333;
@@ -243,6 +242,31 @@
         }
         #bg-image-controls:not(.bg-set) .bg-success-section {
             display: none;
+        }
+
+        /* ==================== */
+        /* Search Bar Styling */
+        /* ==================== */
+        #search-container {
+            margin-bottom: 20px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            z-index: 2;
+        }
+        #search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #555;
+            border-radius: 8px; /* ปรับเป็น 8px */
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box; /* สำคัญเพื่อให้ padding ไม่ดันเกิน width */
+        }
+        #search-input::placeholder {
+            color: #aaa;
         }
 
 
@@ -278,7 +302,7 @@
             padding: 10px 20px;
             background-color: var(--category-tab-bg);
             border: 1px solid var(--category-tab-border);
-            border-radius: 10px; /* ปรับเป็น 10px เพื่อความสอดคล้อง */
+            border-radius: 8px; /* ปรับเป็น 8px เพื่อความสอดคล้อง */
             font-size: 15px;
             font-weight: normal;
             color: var(--category-tab-text);
@@ -318,7 +342,7 @@
             padding: 0;
             background: var(--channel-bg);
             border: 1px solid #444;
-            border-radius: 10px; /* คงค่า 10px */
+            border-radius: 10px; /* คงค่า 10px สำหรับกล่องช่อง */
             text-align: center;
             box-sizing: border-box;
             display: flex;
@@ -413,7 +437,7 @@
             .category-tab {
                 padding: 7px 12px;
                 font-size: 13px;
-                border-radius: 8px; /* ปรับเป็น 8px เพื่อความสอดคล้องบนจอเล็ก */
+                border-radius: 8px; 
             }
             .category-tab.active {
                  transform: scale(1.03);
@@ -449,6 +473,10 @@
             </span>
             <button id="reset-bg-btn-success" class="bg-control-btn reset">รีเซ็ต</button>
         </div>
+    </div>
+
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="ค้นหาช่อง...">
     </div>
 
     <div id="category-tabs">
@@ -525,22 +553,30 @@
 
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
+        const searchInput = document.getElementById('search-input'); // Get search input
+
+        let currentSelectedCategory = null; // Track current selected category for filtering
 
         function createCategoryTabs() {
             categoryOrder.forEach(category => {
-                // ตัวเลือก: แสดงปุ่มเฉพาะหมวดหมู่ที่มีช่องอยู่จริง ( uncomment if block if desired )
+                // Option: display button only if category has channels (uncomment if block if desired )
                 // if (actualCategories.includes(category)) { 
                     const tab = document.createElement("div");
                     tab.className = "category-tab";
                     tab.textContent = categoryDisplayNames[category] || category; 
                     tab.dataset.category = category;
-                    tab.onclick = () => filterChannels(category);
+                    tab.onclick = () => {
+                        searchInput.value = ''; // Clear search input when category is clicked
+                        filterChannels(category);
+                    };
                     categoryTabsContainer.appendChild(tab);
                 // } 
             });
         }
 
-        function filterChannels(selectedCategory) {
+        function filterChannels(selectedCategory, searchTerm = '') {
+            currentSelectedCategory = selectedCategory; // Update current selected category
+
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
                 tab.style.transform = 'scale(1)'; 
@@ -553,12 +589,21 @@
 
             channelListContainer.innerHTML = ''; 
             
-            const filteredChannels = allChannels.filter(channel => channel.category === selectedCategory);
+            // Filter by category first
+            let filteredChannels = allChannels.filter(channel => channel.category === selectedCategory);
+
+            // Then filter by search term if provided
+            if (searchTerm) {
+                const lowerCaseSearchTerm = searchTerm.toLowerCase();
+                filteredChannels = filteredChannels.filter(channel => 
+                    channel.name.toLowerCase().includes(lowerCaseSearchTerm)
+                );
+            }
 
             if (filteredChannels.length === 0) {
                 const messageDiv = document.createElement("div");
                 messageDiv.className = "no-channels-message";
-                messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[selectedCategory] || selectedCategory}" นี้`;
+                messageDiv.textContent = `ไม่พบช่อง${searchTerm ? 'ที่ค้นหา' : ''}ในหมวดหมู่ "${categoryDisplayNames[selectedCategory] || selectedCategory}" นี้`;
                 channelListContainer.appendChild(messageDiv);
             } else {
                 filteredChannels.forEach(channel => {
@@ -677,6 +722,12 @@
         // The reset button in the success section remains separate
         resetBgBtnSuccessSection.addEventListener('click', () => {
             applyBackgroundImage(null);
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', () => {
+            // Filter based on the current selected category and search term
+            filterChannels(currentSelectedCategory, searchInput.value.trim());
         });
 
     </script>
