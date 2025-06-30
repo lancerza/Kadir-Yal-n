@@ -26,17 +26,17 @@
             max-width: 800px;
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px; /* ลดระยะห่างระหว่างช่องลงเล็กน้อย */
             justify-content: center;
         }
         .channel {
             cursor: pointer;
-            padding: 15px;
+            padding: 10px; /* ลด padding ลง */
             background: #222;
             border: 1px solid #444;
             border-radius: 12px;
             text-align: center;
-            width: 120px;
+            width: 100px; /* ลดขนาดความกว้างของช่องลง */
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -49,20 +49,19 @@
             background: #444;
             border-color: #666;
         }
-        /* ปรับสไตล์ของรูปภาพโดยตรง ไม่มี container สีขาวแล้ว */
+        /* ปรับสไตล์ของรูปภาพโดยตรง */
         .channel img {
-            width: 90px; /* ขนาดของรูปภาพโลโก้ */
-            height: 90px; /* ขนาดของรูปภาพโลโก้ */
-            margin-bottom: 10px;
-            object-fit: contain; /* รักษาสัดส่วนของรูปภาพ */
-            /* ลบคุณสมบัติที่เกี่ยวข้องกับพื้นหลังขาวและขอบวงกลม/สี่เหลี่ยมของ container ออก */
-            border-radius: 0; /* ตรวจสอบให้แน่ใจว่าไม่มีการโค้งมนที่ตัวรูปภาพ */
-            background-color: transparent; /* ทำให้พื้นหลังของรูปภาพโปร่งใส */
-            border: none; /* ลบขอบที่เคยมี */
-            padding: 0; /* ลบ padding ที่เคยมี */
+            width: 80px; /* ลดขนาดของรูปภาพโลโก้ลง */
+            height: 80px; /* ลดขนาดของรูปภาพโลโก้ลง */
+            margin-bottom: 8px; /* ลดระยะห่างด้านล่างของโลโก้ลง */
+            object-fit: contain;
+            border-radius: 0;
+            background-color: transparent;
+            border: none;
+            padding: 0;
         }
         .channel-name {
-            font-size: 16px;
+            font-size: 14px; /* ลดขนาดตัวอักษรชื่อช่องลงเล็กน้อย */
             font-weight: bold;
             word-break: break-word;
         }
