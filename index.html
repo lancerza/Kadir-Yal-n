@@ -6,10 +6,10 @@
     <title>รายการช่อง Wiseplay</title>
     <style>
         /* ==================== */
-        /* Suggestion 4: Dark/Light Mode - CSS Variables */
+        /* Force Dark Mode & Background Image Variables */
         /* ==================== */
         :root {
-            /* Dark Mode Defaults */
+            /* Always Dark Mode */
             --bg-color: #000;
             --text-color: #fff;
             --channel-bg: #222;
@@ -26,35 +26,21 @@
             --category-tab-active-shadow-color: rgba(0, 123, 255, 0.5);
             --glow-color: rgba(255, 255, 255, 0.9);
             --no-channels-text: #ccc;
+
+            /* New: Background Image Variable */
+            --body-bg-image: none; /* Default: no image */
+            --body-bg-size: cover;
+            --body-bg-position: center;
+            --body-bg-repeat: no-repeat;
         }
 
-        @media (prefers-color-scheme: light) {
-            :root {
-                /* Light Mode Overrides */
-                --bg-color: #f0f0f0;
-                --text-color: #333;
-                --channel-bg: #e0e0e0;
-                --channel-border: #ccc;
-                --channel-hover-bg: #d0d0d0;
-                --channel-hover-border: #bbb;
-                --category-tab-bg: #ccc;
-                --category-tab-border: #ccc;
-                --category-tab-text: #555;
-                --category-tab-hover-bg: #aaa;
-                --category-tab-hover-text: #333;
-                --category-tab-active-bg: #007bff; /* อาจจะคงสีเดิมไว้ */
-                --category-tab-active-border: #007bff;
-                --category-tab-active-shadow-color: rgba(0, 123, 255, 0.3); /* ลดความเข้มเงา */
-                --glow-color: rgba(0, 0, 0, 0.3); /* เงาดำอ่อนๆ */
-                --no-channels-text: #555;
-            }
-        }
+        /* ลบ @media (prefers-color-scheme: light) ออกไป เพื่อบังคับ Dark Mode */
 
         body {
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color); /* ใช้ CSS Variable */
-            color: var(--text-color); /* ใช้ CSS Variable */
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -62,11 +48,71 @@
             min-height: 100vh;
             justify-content: flex-start;
             padding-top: 20px;
+
+            /* Apply background image */
+            background-image: var(--body-bg-image);
+            background-size: var(--body-bg-size);
+            background-position: var(--body-bg-position);
+            background-repeat: var(--body-bg-repeat);
+            background-attachment: fixed; /* ทำให้ภาพพื้นหลังไม่เลื่อนตามเนื้อหา */
         }
         h1 {
             margin-top: 0px;
             margin-bottom: 20px;
         }
+
+        /* ==================== */
+        /* Background Image Controls Styling */
+        /* ==================== */
+        #bg-image-controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        #bg-image-url {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            min-width: 200px; /* เพิ่ม min-width เพื่อให้ช่องใส่ URL ใหญ่ขึ้น */
+        }
+        #bg-image-url::placeholder {
+            color: #aaa;
+        }
+        .bg-control-btn {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .bg-control-btn:hover {
+            background-color: #0056b3;
+        }
+        .bg-control-btn.reset {
+            background-color: #dc3545; /* สีแดงสำหรับปุ่มรีเซ็ต */
+        }
+        .bg-control-btn.reset:hover {
+            background-color: #c82333;
+        }
+
+
         #category-tabs {
             margin-bottom: 20px;
             display: flex;
@@ -76,31 +122,23 @@
             padding: 0 10px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            
-            /* ==================== */
-            /* Suggestion 3: Custom Scrollbar Styling */
-            /* ==================== */
-            scrollbar-width: thin; /* สำหรับ Firefox: 'auto' | 'thin' | 'none' */
-            scrollbar-color: var(--category-tab-hover-bg) var(--category-tab-bg); /* สำหรับ Firefox: thumb track */
+            scrollbar-width: thin;
+            scrollbar-color: var(--category-tab-hover-bg) var(--category-tab-bg);
         }
-        /* สำหรับ WebKit (Chrome, Safari) */
         #category-tabs::-webkit-scrollbar {
-            height: 8px; /* ความสูงของ scrollbar */
+            height: 8px;
         }
         #category-tabs::-webkit-scrollbar-track {
-            background: var(--category-tab-bg); /* สีพื้นหลังของ track */
+            background: var(--category-tab-bg);
             border-radius: 10px;
         }
         #category-tabs::-webkit-scrollbar-thumb {
-            background: var(--category-tab-hover-bg); /* สีของ thumb */
+            background: var(--category-tab-hover-bg);
             border-radius: 10px;
         }
         #category-tabs::-webkit-scrollbar-thumb:hover {
-            background: var(--category-tab-active-bg); /* สีของ thumb เมื่อ hover */
+            background: var(--category-tab-active-bg);
         }
-        /* ถ้ายังต้องการซ่อน scrollbar ในบางกรณี */
-        /* #category-tabs::-webkit-scrollbar { display: none; } */
-
 
         .category-tab {
             padding: 10px 20px;
@@ -124,7 +162,7 @@
             background-color: var(--category-tab-active-bg);
             border-color: var(--category-tab-active-border);
             font-weight: bold;
-            color: var(--category-tab-hover-text); /* Active text color */
+            color: var(--category-tab-hover-text);
             box-shadow: 0 0 10px var(--category-tab-active-shadow-color);
             transform: scale(1.05);
         }
@@ -188,12 +226,19 @@
 <body>
     <h1>เลือกช่องเพื่อเปิดใน Wiseplay</h1>
     
+    <div id="bg-image-controls">
+        <input type="text" id="bg-image-url" placeholder="ใส่ URL ภาพพื้นหลังที่นี่">
+        <button id="apply-bg-btn" class="bg-control-btn">ตั้งค่าภาพพื้นหลัง</button>
+        <button id="reset-bg-btn" class="bg-control-btn reset">รีเซ็ตพื้นหลัง</button>
+    </div>
+
     <div id="category-tabs">
         </div>
 
     <div id="channel-list"></div>
 
     <script>
+        // === Channel Data ===
         const allChannels = [
             {
                 name: "ช่อง 3 HD",
@@ -245,6 +290,7 @@
             }
         ];
 
+        // === Category Management ===
         const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"];
 
         const categoryDisplayNames = {
@@ -263,8 +309,7 @@
 
         function createCategoryTabs() {
             categoryOrder.forEach(category => {
-                // ตัวเลือก: แสดงปุ่มเฉพาะหมวดหมู่ที่มีช่องอยู่จริง
-                // หากต้องการให้แสดงปุ่มทุกหมวดหมู่ที่ระบุใน categoryOrder แม้จะยังไม่มีช่อง ให้คอมเมนต์ if นี้ออกไป
+                // ตัวเลือก: แสดงปุ่มเฉพาะหมวดหมู่ที่มีช่องอยู่จริง ( uncomment if block if desired )
                 // if (actualCategories.includes(category)) { 
                     const tab = document.createElement("div");
                     tab.className = "category-tab";
@@ -279,7 +324,7 @@
         function filterChannels(selectedCategory) {
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
-                tab.style.transform = 'scale(1)'; // รีเซ็ตขนาดเมื่อ de-active
+                tab.style.transform = 'scale(1)'; 
             });
             
             const selectedTab = document.querySelector(`.category-tab[data-category="${selectedCategory}"]`);
@@ -315,23 +360,62 @@
             }
         }
 
-        createCategoryTabs();
-        
-        let initialCategoryToShow = null;
-        for (let i = 0; i < categoryOrder.length; i++) {
-            const category = categoryOrder[i];
-            const channelsInCategory = allChannels.filter(channel => channel.category === category);
-            if (channelsInCategory.length > 0) {
-                initialCategoryToShow = category;
-                break;
+        // === Background Image Logic ===
+        const bgImageUrlInput = document.getElementById('bg-image-url');
+        const applyBgBtn = document.getElementById('apply-bg-btn');
+        const resetBgBtn = document.getElementById('reset-bg-btn');
+        const root = document.documentElement; // Get :root element for CSS variables
+        const localStorageKey = 'customBgImageUrl';
+
+        function applyBackgroundImage(url) {
+            if (url) {
+                root.style.setProperty('--body-bg-image', `url('${url}')`);
+                localStorage.setItem(localStorageKey, url);
+            } else {
+                root.style.setProperty('--body-bg-image', 'none');
+                localStorage.removeItem(localStorageKey);
             }
         }
-        
-        if (initialCategoryToShow) {
-            filterChannels(initialCategoryToShow);
-        } else {
-            channelListContainer.innerHTML = '<p class="no-channels-message">ยังไม่มีช่องรายการในระบบ</p>';
-        }
+
+        // Load saved background image on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedImageUrl = localStorage.getItem(localStorageKey);
+            if (savedImageUrl) {
+                applyBackgroundImage(savedImageUrl);
+                bgImageUrlInput.value = savedImageUrl; // Set input value to saved URL
+            }
+            
+            // Initial category filter
+            let initialCategoryToShow = null;
+            for (let i = 0; i < categoryOrder.length; i++) {
+                const category = categoryOrder[i];
+                const channelsInCategory = allChannels.filter(channel => channel.category === category);
+                if (channelsInCategory.length > 0) {
+                    initialCategoryToShow = category;
+                    break;
+                }
+            }
+            
+            if (initialCategoryToShow) {
+                filterChannels(initialCategoryToShow);
+            } else {
+                channelListContainer.innerHTML = '<p class="no-channels-message">ยังไม่มีช่องรายการในระบบ</p>';
+            }
+
+            // Create category tabs after initial load
+            createCategoryTabs();
+        });
+
+        applyBgBtn.addEventListener('click', () => {
+            const url = bgImageUrlInput.value.trim();
+            applyBackgroundImage(url);
+        });
+
+        resetBgBtn.addEventListener('click', () => {
+            bgImageUrlInput.value = ''; // Clear input field
+            applyBackgroundImage(null); // Reset to no image
+        });
+
     </script>
 </body>
 </html>
