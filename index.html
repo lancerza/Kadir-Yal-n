@@ -27,7 +27,7 @@
             --category-tab-text: #e0e0e0;
             --category-tab-hover-bg: #555;
             --category-tab-hover-text: #fff;
-            --category-tab-active-bg: #007bff; /* สีพื้นหลัง Active ยังคงเดิม (สีฟ้า) */
+            --category-tab-active-bg: #007bff;
             --category-tab-active-border: #fff; /* เปลี่ยนสีขอบ Active เป็นสีขาว */
             --category-tab-active-shadow-color: rgba(255, 255, 255, 0.7); /* เปลี่ยนสีเงา Active เป็นสีขาวเรืองแสง */
             --glow-color: rgba(255, 255, 255, 0.9);
@@ -248,9 +248,6 @@
         }
 
 
-        /* Removed search container */
-
-
         #category-tabs {
             margin-bottom: 20px;
             display: flex;
@@ -283,7 +280,7 @@
             padding: 10px 20px;
             background-color: var(--category-tab-bg);
             border: 1px solid var(--category-tab-border);
-            border-radius: 8px; /* คง 8px ตามที่ปรับล่าสุดให้เข้ากับปุ่มอื่นๆ */
+            border-radius: 8px; 
             font-size: 15px;
             font-weight: normal;
             color: var(--category-tab-text);
@@ -297,10 +294,10 @@
             border-color: var(--category-tab-hover-border);
         }
         .category-tab.active {
-            background-color: var(--category-tab-active-bg); /* สีฟ้าที่ตั้งไว้เดิม */
-            border-color: #fff; /* เปลี่ยนสีขอบเป็นสีขาว */
+            background-color: var(--category-tab-active-bg);
+            border-color: #fff; /* เปลี่ยนสีขอบ Active เป็นสีขาว */
             font-weight: bold;
-            color: var(--category-tab-hover-text); /* สีตัวอักษรเป็นสีขาว */
+            color: var(--category-tab-hover-text); 
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* เปลี่ยนเงาเป็นสีขาวเรืองแสง */
             transform: scale(1.05);
             text-shadow: 0 0 3px rgba(0,0,0,0.3); 
@@ -532,7 +529,7 @@
 
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
-        const searchInput = document.getElementById('search-input'); 
+        // const searchInput = document.getElementById('search-input'); // Removed search input
 
         let currentSelectedCategory = null; 
 
@@ -545,7 +542,7 @@
                     tab.textContent = categoryDisplayNames[category] || category; 
                     tab.dataset.category = category;
                     tab.onclick = () => {
-                        searchInput.value = ''; 
+                        // searchInput.value = ''; // Removed search input related logic
                         filterChannels(category);
                     };
                     categoryTabsContainer.appendChild(tab);
@@ -553,7 +550,7 @@
             });
         }
 
-        function filterChannels(selectedCategory, searchTerm = '') { 
+        function filterChannels(selectedCategory /*, searchTerm = '' */) { // Removed searchTerm parameter
             currentSelectedCategory = selectedCategory; 
 
             document.querySelectorAll('.category-tab').forEach(tab => {
@@ -568,7 +565,7 @@
 
             channelListContainer.innerHTML = ''; 
             
-            // Filter by category first
+            // Filter by category only
             let filteredChannels = allChannels.filter(channel => channel.category === selectedCategory);
 
             // Removed search filtering logic
@@ -705,7 +702,7 @@
             applyBackgroundImage(null);
         });
 
-        // Search functionality - Removed search input related logic
+        // Removed search input related logic
         // searchInput.addEventListener('input', () => {
         //     // Filter based on the current selected category and search term
         //     filterChannels(currentSelectedCategory, searchInput.value.trim());
