@@ -116,25 +116,23 @@
             padding: 0;
         }
         /* ==================== */
-        /* Adjust for Success Section Width and Alignment (Perfectly Balanced) */
+        /* Adjust for Success Section Width and Alignment */
         /* ==================== */
         #bg-image-controls.bg-set {
-            /* กำหนด width ที่แน่นอนเพื่อควบคุมขนาดรวมของกล่องในสถานะ success */
-            /* ปรับตามภาพตัวอย่างให้มีขนาดที่พอดี */
-            width: 200px; /* ความกว้างโดยประมาณที่พอดีกับเนื้อหาในภาพตัวอย่าง */
-            min-width: 200px; /* ทำให้ไม่เล็กกว่านี้ */
-            max-width: 90vw; /* จำกัด max-width บนมือถือ */
-            padding: 8px 12px; /* รักษาระยะห่างจากขอบ */
+            width: 200px; 
+            min-width: 200px; 
+            max-width: 90vw; 
+            padding: 8px 12px; 
         }
         .bg-success-section {
             display: flex;
             flex-wrap: nowrap;
-            gap: 5px; /* ระยะห่างระหว่าง icon/text กับปุ่มรีเซ็ต */
-            justify-content: space-between; /* กระจายองค์ประกอบให้ชิดซ้าย-ขวา */
+            gap: 5px; 
+            justify-content: space-between; 
             align-items: center;
-            padding: 0; /* ลบ padding ภายใน section นี้ */
+            padding: 0 5px; 
             margin: 0; 
-            flex-grow: 1; /* ให้ section ขยายเต็มพื้นที่ที่เหลือใน parent */
+            flex-grow: 1; 
         }
 
 
@@ -147,20 +145,46 @@
             color: #fff;
             font-size: 13px;
             outline: none;
-            min-width: 80px; 
         }
         #bg-image-url::placeholder {
             color: #aaa;
         }
-        .bg-control-btn {
+        /* ==================== */
+        /* Button Styling - General Enhancements */
+        /* ==================== */
+        .bg-control-btn, .category-tab {
+            /* General button reset */
+            -webkit-appearance: none; /* สำหรับ Safari */
+            -moz-appearance: none; /* สำหรับ Firefox */
+            appearance: none; /* สำหรับเบราว์เซอร์อื่น ๆ */
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            user-select: none; /* ป้องกันการเลือกข้อความ */
+            outline: none; /* ลบ outline เริ่มต้น */
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.1s ease; /* เพิ่ม transform และ box-shadow ใน transition */
+        }
+
+        /* Focus state for accessibility (keyboard navigation) */
+        .bg-control-btn:focus-visible, .category-tab:focus-visible {
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); /* เรืองแสงสีฟ้าอ่อนๆ เมื่อ Focus ด้วยแป้นพิมพ์ */
+        }
+
+        /* Active state (when clicked/pressed) */
+        .bg-control-btn:active, .category-tab:active {
+            transform: scale(0.98); /* ปุ่มจะยุบลงเล็กน้อย */
+            opacity: 0.9; /* ลดความทึบแสงเล็กน้อย */
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2); /* เพิ่มเงาด้านใน */
+        }
+
+
+        .bg-control-btn { /* Specific styles for background control buttons */
             padding: 6px 12px;
             background-color: #007bff;
             color: white;
-            border: none;
             border-radius: 5px;
-            cursor: pointer;
             font-size: 13px;
-            transition: background-color 0.3s ease;
             flex-shrink: 0;
         }
         .bg-control-btn:hover {
@@ -201,11 +225,7 @@
             font-size: 12px;
             background-color: #dc3545;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            flex-shrink: 0;
+            border-radius: 5px; /* Added border-radius */
         }
         #reset-bg-btn-success:hover {
             background-color: #c82333;
@@ -260,7 +280,6 @@
             background-color: var(--category-tab-bg);
             border: 1px solid var(--category-tab-border);
             border-radius: 8px;
-            cursor: pointer;
             font-size: 15px;
             font-weight: normal;
             color: var(--category-tab-text);
@@ -373,7 +392,7 @@
                 box-sizing: border-box; 
             }
             .bg-success-section {
-                flex-direction: column; /* ในจอเล็ก อาจจะต้องเรียงกันไปเลย */
+                flex-direction: column; 
                 gap: 5px; 
             }
             .bg-success-message {
