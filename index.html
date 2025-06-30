@@ -20,27 +20,32 @@
         h1 {
             margin-top: 20px;
             margin-bottom: 30px;
+            /* อาจลบ h1 ออกไปได้หากไม่ต้องการแสดงข้อความหัวข้อ */
         }
         #channel-list {
             margin: 20px auto;
             max-width: 800px;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px; /* ลดระยะห่างระหว่างช่องลงอีกเล็กน้อย */
+            gap: 10px;
             justify-content: center;
         }
         .channel {
             cursor: pointer;
-            padding: 8px; /* ลด padding รอบกล่องให้กระชับขึ้นไปอีก */
+            /* กำหนดขนาดของช่องให้เท่ากับโลโก้พอดี */
+            width: 70px; /* เท่ากับ width ของ img */
+            height: 70px; /* เท่ากับ height ของ img */
+            padding: 0; /* ลบ padding ทั้งหมดออกเพื่อให้รูปภาพอยู่เต็มกล่อง */
+
             background: #222;
             border: 1px solid #444;
-            border-radius: 10px; /* ลดรัศมีขอบเล็กน้อยเพื่อให้ดูเล็กลง */
+            border-radius: 10px;
             text-align: center;
-            width: 90px; /* ลดขนาดความกว้างของแต่ละกล่องลง */
             box-sizing: border-box;
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* ยังคงเป็น column เพื่อจัดการ img + name (แม้ name จะถูกซ่อน) */
             align-items: center;
+            justify-content: center; /* จัดโลโก้ให้อยู่กึ่งกลางในช่อง */
             text-decoration: none;
             color: inherit;
             transition: background 0.3s ease;
@@ -50,9 +55,9 @@
             border-color: #666;
         }
         .channel img {
-            width: 70px; /* ลดขนาดของรูปภาพโลโก้ลง */
-            height: 70px; /* ลดขนาดของรูปภาพโลโก้ลง */
-            margin-bottom: 4px; /* ลดระยะห่างระหว่างโลโก้กับชื่อช่องลงอีก */
+            width: 70px; /* ขนาดของรูปภาพโลโก้ */
+            height: 70px; /* ขนาดของรูปภาพโลโก้ */
+            margin: 0; /* ลบ margin ทั้งหมดออกจากรูปภาพ */
             object-fit: contain;
             border-radius: 0;
             background-color: transparent;
@@ -60,11 +65,7 @@
             padding: 0;
         }
         .channel-name {
-            font-size: 13px; /* ลดขนาดตัวอักษรชื่อช่องลง */
-            font-weight: bold;
-            margin-top: 0px;
-            word-break: break-word;
-            white-space: normal;
+            display: none; /* ซ่อนชื่อช่องไม่ให้แสดงผล */
         }
     </style>
 </head>
@@ -112,7 +113,7 @@
             a.target = "_blank";
 
             a.innerHTML = `
-                <img src="${channel.logo}" alt="${channel.name}"><br>
+                <img src="${channel.logo}" alt="${channel.name}">
                 <div class="channel-name">${channel.name}</div>
             `;
             channelList.appendChild(a);
