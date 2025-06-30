@@ -54,22 +54,22 @@
             width: 90px;
             height: 90px;
             margin-bottom: 10px;
-            border-radius: 50%; /* ทำให้ container เป็นวงกลม */
-            background-color: #fff; /* พื้นหลังสีขาวสำหรับวงกลม */
-            display: flex; /* ใช้ flexbox เพื่อจัดรูปภาพให้อยู่ตรงกลาง */
+            /* border-radius: 50%; <--- ลบออกเพื่อทำให้เป็นสี่เหลี่ยม */
+            border-radius: 8px; /* เพิ่มรัศมีขอบเล็กน้อยเพื่อให้ดูโค้งมน */
+            background-color: #fff; /* พื้นหลังสีขาวสำหรับสี่เหลี่ยม */
+            display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* ซ่อนส่วนเกินของรูปภาพที่ออกนอกวงกลม */
-            border: 1px solid #ccc; /* เพิ่มขอบสีเทาอ่อนๆ รอบวงกลม */
+            overflow: hidden;
+            border: 1px solid #ccc; /* ขอบสีเทาอ่อนๆ รอบสี่เหลี่ยม */
         }
         .channel img {
-            max-width: 80%; /* จำกัดขนาดรูปภาพให้พอดีกับ container */
-            max-height: 80%; /* จำกัดขนาดรูปภาพให้พอดีกับ container */
-            object-fit: contain; /* ทำให้รูปภาพพอดีโดยรักษาสัดส่วน */
-            /* ลบ border-radius และ background-color ออกจาก img โดยตรง */
-            border-radius: 0; /* ตรวจสอบให้แน่ใจว่ารูปภาพเป็นสี่เหลี่ยม */
-            background-color: transparent; /* ไม่มีพื้นหลังที่ตัวรูปภาพ */
-            padding: 0; /* ไม่มี padding ที่ตัวรูปภาพ */
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+            border-radius: 0;
+            background-color: transparent;
+            padding: 0;
         }
         .channel-name {
             font-size: 16px;
