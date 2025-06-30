@@ -51,23 +51,21 @@
             margin-bottom: 20px;
         }
 
-        /* ==================== */
-        /* Background Image Controls Styling (Updated for smaller size) */
-        /* ==================== */
         #bg-image-controls {
             margin-bottom: 20px;
-            padding: 8px 12px; /* ลด padding ทั้งหมดลงอีก */
+            padding: 8px 12px;
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 10px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px; /* ลดระยะห่างระหว่างองค์ประกอบลง */
+            gap: 8px;
             justify-content: center;
             align-items: center;
-            max-width: 600px;
+            max-width: 600px; /* กำหนด max-width */
+            width: 90%; /* ให้ความกว้าง 90% ของ viewport เพื่อให้มีระยะห่างจากขอบจอ */
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            min-height: auto; /* ตั้งค่าเป็น auto เพื่อให้ความสูงปรับตามเนื้อหา */
+            min-height: auto; 
             position: relative;
         }
         
@@ -75,7 +73,7 @@
             width: 100%;
             display: flex;
             flex-wrap: nowrap;
-            gap: 8px; /* ลดระยะห่างภายใน section ลง */
+            gap: 8px;
             justify-content: center;
             align-items: center;
             padding: 0;
@@ -83,26 +81,26 @@
 
         #bg-image-url {
             flex-grow: 1;
-            padding: 6px 10px; /* ลด padding ของ input */
+            padding: 6px 10px;
             border: 1px solid #555;
             border-radius: 5px;
             background-color: #333;
             color: #fff;
-            font-size: 13px; /* ลดขนาด font ของ input */
+            font-size: 13px;
             outline: none;
-            min-width: 180px; /* ลด min-width เล็กน้อย */
+            min-width: 150px; /* ลด min-width ลงเล็กน้อยเพื่อให้ปรับได้มากขึ้น */
         }
         #bg-image-url::placeholder {
             color: #aaa;
         }
         .bg-control-btn {
-            padding: 6px 12px; /* ลด padding ของปุ่มทั่วไป */
+            padding: 6px 12px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 13px; /* ลดขนาด font ของปุ่มทั่วไป */
+            font-size: 13px;
             transition: background-color 0.3s ease;
             flex-shrink: 0;
         }
@@ -116,34 +114,32 @@
             background-color: #c82333;
         }
 
-        /* Styles for the success section */
         .bg-success-message {
-            font-size: 14px; /* ลดขนาดตัวอักษรลง */
+            font-size: 14px;
             font-weight: bold;
             color: #28a745;
             display: flex;
             align-items: center;
-            gap: 5px; /* ลดระยะห่างระหว่าง icon กับข้อความ */
+            gap: 5px;
             flex-grow: 1;
-            justify-content: flex-start; /* จัดข้อความไปทางซ้าย */
-            padding-left: 5px; /* เพิ่ม padding ด้านซ้ายของข้อความ */
+            justify-content: flex-start;
+            padding-left: 5px;
         }
         .bg-success-message .success-icon {
-            font-size: 18px; /* ลดขนาด icon ลง */
-            width: 24px; /* ลดขนาด icon container */
-            height: 24px; /* ลดขนาด icon container */
+            font-size: 18px;
+            width: 24px;
+            height: 24px;
             background-color: #28a745;
             color: white;
-            border-radius: 5px; /* ปรับ border-radius ให้เล็กลง */
+            border-radius: 5px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
-        /* ปรับปุ่มรีเซ็ตในสถานะ Success */
         #reset-bg-btn-success {
-            padding: 5px 10px; /* ลด padding ของปุ่มรีเซ็ตนี้ */
-            font-size: 12px; /* ลดขนาด font ของปุ่มรีเซ็ตนี้ */
+            padding: 5px 10px;
+            font-size: 12px;
             background-color: #dc3545;
             color: white;
             border: none;
@@ -229,6 +225,7 @@
         #channel-list {
             margin: 0px auto;
             max-width: 800px;
+            width: 90%; /* ให้ความกว้าง 90% ของ viewport สำหรับ channel list ด้วย */
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -279,6 +276,67 @@
             width: 100%;
             margin-top: 20px;
             font-size: 16px;
+        }
+
+        /* ==================== */
+        /* Responsive Adjustments for Smaller Screens (e.g., Mobile Portrait) */
+        /* ==================== */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+            #bg-image-controls {
+                padding: 6px 8px; /* ปรับ padding ลงอีกสำหรับจอเล็ก */
+                gap: 5px; /* ลด gap ลงอีก */
+                width: 95%; /* ใช้ 95% ของ viewport เพื่อมี margin ด้านข้าง */
+            }
+            #bg-image-url {
+                min-width: unset; /* ถอน min-width เพื่อให้ยืดหยุ่นเต็มที่ */
+                width: 100%; /* ให้ input กินพื้นที่ 100% ของบรรทัด */
+            }
+            .bg-control-btn {
+                width: calc(50% - 2.5px); /* ทำให้ปุ่มกินพื้นที่ 50% ของบรรทัด (รวม gap) */
+                box-sizing: border-box; /* สำคัญเพื่อให้ padding/border ไม่ดันเกิน width */
+            }
+            /* สำหรับปุ่มใน bg-success-section (✅ + รีเซ็ต) */
+            .bg-success-section {
+                flex-wrap: wrap; /* ให้รีเซ็ตปุ่มขึ้นบรรทัดใหม่ได้ถ้าจำเป็น */
+                justify-content: center; /* จัดให้อยู่ตรงกลาง */
+            }
+            .bg-success-message {
+                width: 100%; /* ให้ข้อความกินพื้นที่เต็มบรรทัด */
+                justify-content: center; /* จัดข้อความให้อยู่ตรงกลางเมื่ออยู่คนเดียว */
+                padding: 0; /* ลบ padding ด้านซ้าย/ขวา */
+            }
+            #reset-bg-btn-success {
+                width: 100%; /* ให้ปุ่มรีเซ็ตใน success state กินพื้นที่เต็มบรรทัด */
+                margin-top: 5px; /* เพิ่ม margin ด้านบนเล็กน้อย */
+            }
+
+
+            #category-tabs {
+                gap: 8px;
+                padding: 0 5px;
+            }
+            .category-tab {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            #channel-list {
+                gap: 8px;
+                width: 95%; /* ใช้ 95% ของ viewport สำหรับ channel list ด้วย */
+            }
+            .channel {
+                width: 60px; /* ลดขนาดช่องและโลโก้ลงอีกสำหรับจอเล็กมาก */
+                height: 60px;
+                border-radius: 8px; /* ปรับ border-radius ให้เล็กลง */
+            }
+            .channel img {
+                width: 60px;
+                height: 60px;
+            }
         }
     </style>
 </head>
