@@ -52,22 +52,22 @@
         }
 
         /* ==================== */
-        /* Background Image Controls Styling (Updated) */
+        /* Background Image Controls Styling (Updated for smaller size) */
         /* ==================== */
         #bg-image-controls {
             margin-bottom: 20px;
-            padding: 10px 15px; /* ลด padding ด้านบนและล่างลงเหลือ 10px */
+            padding: 8px 12px; /* ลด padding ทั้งหมดลงอีก */
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 10px;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px; /* ลดระยะห่างระหว่างองค์ประกอบลง */
             justify-content: center;
             align-items: center;
             max-width: 600px;
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            min-height: 40px; 
+            min-height: auto; /* ตั้งค่าเป็น auto เพื่อให้ความสูงปรับตามเนื้อหา */
             position: relative;
         }
         
@@ -75,7 +75,7 @@
             width: 100%;
             display: flex;
             flex-wrap: nowrap;
-            gap: 10px;
+            gap: 8px; /* ลดระยะห่างภายใน section ลง */
             justify-content: center;
             align-items: center;
             padding: 0;
@@ -83,26 +83,26 @@
 
         #bg-image-url {
             flex-grow: 1;
-            padding: 8px 12px;
+            padding: 6px 10px; /* ลด padding ของ input */
             border: 1px solid #555;
             border-radius: 5px;
             background-color: #333;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px; /* ลดขนาด font ของ input */
             outline: none;
-            min-width: 200px;
+            min-width: 180px; /* ลด min-width เล็กน้อย */
         }
         #bg-image-url::placeholder {
             color: #aaa;
         }
         .bg-control-btn {
-            padding: 8px 15px;
+            padding: 6px 12px; /* ลด padding ของปุ่มทั่วไป */
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px; /* ลดขนาด font ของปุ่มทั่วไป */
             transition: background-color 0.3s ease;
             flex-shrink: 0;
         }
@@ -116,32 +116,34 @@
             background-color: #c82333;
         }
 
+        /* Styles for the success section */
         .bg-success-message {
-            font-size: 15px;
+            font-size: 14px; /* ลดขนาดตัวอักษรลง */
             font-weight: bold;
             color: #28a745;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px; /* ลดระยะห่างระหว่าง icon กับข้อความ */
             flex-grow: 1;
-            justify-content: flex-start; /* เปลี่ยนเป็น flex-start เพื่อให้ข้อความอยู่ซ้าย */
+            justify-content: flex-start; /* จัดข้อความไปทางซ้าย */
             padding-left: 5px; /* เพิ่ม padding ด้านซ้ายของข้อความ */
         }
         .bg-success-message .success-icon {
-            font-size: 20px;
+            font-size: 18px; /* ลดขนาด icon ลง */
+            width: 24px; /* ลดขนาด icon container */
+            height: 24px; /* ลดขนาด icon container */
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px; /* ปรับ border-radius ให้เล็กลง */
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            background-color: #28a745;
-            color: white;
-            border-radius: 6px;
             flex-shrink: 0;
         }
+        /* ปรับปุ่มรีเซ็ตในสถานะ Success */
         #reset-bg-btn-success {
-            padding: 6px 12px;
-            font-size: 13px;
+            padding: 5px 10px; /* ลด padding ของปุ่มรีเซ็ตนี้ */
+            font-size: 12px; /* ลดขนาด font ของปุ่มรีเซ็ตนี้ */
             background-color: #dc3545;
             color: white;
             border: none;
@@ -447,7 +449,6 @@
 
         function applyBackgroundImage(url) {
             if (url) {
-                // Preload image to check if it's valid
                 const img = new Image();
                 img.onload = () => {
                     root.style.setProperty('--body-bg-image', `url('${url}')`);
@@ -456,9 +457,9 @@
                 };
                 img.onerror = () => {
                     alert('ไม่สามารถโหลดภาพพื้นหลังได้ กรุณาตรวจสอบ URL');
-                    applyBackgroundImage(null); // Reset if image fails to load
+                    applyBackgroundImage(null); 
                 };
-                img.src = url; // Start loading the image
+                img.src = url; 
             } else {
                 root.style.setProperty('--body-bg-image', 'none');
                 localStorage.removeItem(localStorageKey);
@@ -469,16 +470,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             const savedImageUrl = localStorage.getItem(localStorageKey);
             if (savedImageUrl) {
-                // Reapply the background without showing input, but check if it's still valid
                 const img = new Image();
                 img.onload = () => {
                     root.style.setProperty('--body-bg-image', `url('${savedImageUrl}')`);
                     updateBgControlsState(true);
-                    bgImageUrlInput.value = savedImageUrl; // Keep input value in case user wants to modify
+                    bgImageUrlInput.value = savedImageUrl; 
                 };
                 img.onerror = () => {
                     console.error("Failed to load saved background image. Resetting.");
-                    applyBackgroundImage(null); // Clear if saved image is invalid
+                    applyBackgroundImage(null); 
                 };
                 img.src = savedImageUrl;
             } else {
