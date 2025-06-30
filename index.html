@@ -20,7 +20,6 @@
         h1 {
             margin-top: 20px;
             margin-bottom: 30px;
-            /* อาจลบ h1 ออกไปได้หากไม่ต้องการแสดงข้อความหัวข้อ */
         }
         #channel-list {
             margin: 20px auto;
@@ -32,32 +31,33 @@
         }
         .channel {
             cursor: pointer;
-            /* กำหนดขนาดของช่องให้เท่ากับโลโก้พอดี */
-            width: 70px; /* เท่ากับ width ของ img */
-            height: 70px; /* เท่ากับ height ของ img */
-            padding: 0; /* ลบ padding ทั้งหมดออกเพื่อให้รูปภาพอยู่เต็มกล่อง */
-
+            width: 70px;
+            height: 70px;
+            padding: 0;
             background: #222;
             border: 1px solid #444;
             border-radius: 10px;
             text-align: center;
             box-sizing: border-box;
             display: flex;
-            flex-direction: column; /* ยังคงเป็น column เพื่อจัดการ img + name (แม้ name จะถูกซ่อน) */
+            flex-direction: column;
             align-items: center;
-            justify-content: center; /* จัดโลโก้ให้อยู่กึ่งกลางในช่อง */
+            justify-content: center;
             text-decoration: none;
             color: inherit;
-            transition: background 0.3s ease;
+            /* เพิ่ม box-shadow สำหรับเรืองแสง */
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0); /* เริ่มต้นไม่มีเรืองแสง */
+            transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease; /* เพิ่ม transition ให้ box-shadow */
         }
         .channel:hover {
             background: #444;
             border-color: #666;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* เรืองแสงสีขาวเมื่อโฮเวอร์ */
         }
         .channel img {
-            width: 70px; /* ขนาดของรูปภาพโลโก้ */
-            height: 70px; /* ขนาดของรูปภาพโลโก้ */
-            margin: 0; /* ลบ margin ทั้งหมดออกจากรูปภาพ */
+            width: 70px;
+            height: 70px;
+            margin: 0;
             object-fit: contain;
             border-radius: 0;
             background-color: transparent;
@@ -65,7 +65,7 @@
             padding: 0;
         }
         .channel-name {
-            display: none; /* ซ่อนชื่อช่องไม่ให้แสดงผล */
+            display: none;
         }
     </style>
 </head>
