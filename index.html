@@ -88,7 +88,7 @@
 
         #bg-image-controls {
             margin-bottom: 20px;
-            padding: 8px 12px; /* รักษาระยะห่างเท่าเดิมตามที่ปรับล่าสุด */
+            padding: 8px 12px; 
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 10px;
@@ -97,12 +97,14 @@
             gap: 8px;
             justify-content: center;
             align-items: center;
-            max-width: 400px; /* ค่า max-width ล่าสุด */
+            /* Default width for input section */
+            max-width: 400px; /* ค่า max-width เดิมสำหรับ input state */
             width: 90%; 
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             min-height: auto; 
             position: relative;
             z-index: 2; /* ทำให้คอนโทรลอยู่เหนือ overlay */
+            transition: max-width 0.3s ease, width 0.3s ease; /* เพิ่ม transition สำหรับ width */
         }
         
         .bg-input-section {
@@ -115,14 +117,19 @@
             padding: 0;
         }
         /* ==================== */
-        /* Adjust for Success Section Width */
+        /* Adjust for Success Section Width to fit content */
         /* ==================== */
+        #bg-image-controls.bg-set {
+            width: fit-content; /* ทำให้ความกว้างพอดีกับเนื้อหาในสถานะสำเร็จ */
+            min-width: 250px; /* กำหนด min-width เพื่อไม่ให้เล็กเกินไป */
+            max-width: 90vw; /* จำกัด max-width บนมือถือ */
+        }
         .bg-success-section {
-            width: fit-content; /* ทำให้ความกว้างพอดีกับเนื้อหา */
+            /* width: 100%; */ /* ไม่จำเป็นต้องกำหนด width:100% ถ้า parent มี width: fit-content */
             display: flex;
             flex-wrap: nowrap;
-            gap: 5px; /* ลด gap ให้ชิดกันมากขึ้น */
-            justify-content: center; /* จัดให้อยู่ตรงกลางรวมกัน */
+            gap: 5px; 
+            justify-content: center; 
             align-items: center;
             padding: 0;
             margin: 0 auto; /* จัดให้อยู่กลางกล่องควบคุมหลัก */
@@ -171,9 +178,9 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            flex-grow: 0; /* ลบ flex-grow ออก เพื่อให้ข้อความกินพื้นที่เท่าที่จำเป็น */
+            flex-grow: 0; 
             justify-content: flex-start;
-            padding-left: 0px; /* ลบ padding-left ออก */
+            padding-left: 0px; 
         }
         .bg-success-message .success-icon {
             font-size: 18px;
