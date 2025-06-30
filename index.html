@@ -88,7 +88,7 @@
 
         #bg-image-controls {
             margin-bottom: 20px;
-            padding: 8px 12px; /* รักษาระยะห่างเท่าเดิมตามที่ปรับล่าสุด */
+            padding: 8px 12px; 
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 10px;
@@ -97,8 +97,8 @@
             gap: 8px;
             justify-content: center;
             align-items: center;
-            max-width: 400px; /* ลด max-width ลงอีก */
-            width: 90%; /* ให้ความกว้าง 90% ของ viewport เพื่อให้มีระยะห่างจากขอบจอ */
+            max-width: 400px;
+            width: 90%; 
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             min-height: auto; 
             position: relative;
@@ -109,8 +109,9 @@
             width: 100%;
             display: flex;
             flex-wrap: nowrap;
-            gap: 8px;
-            justify-content: center;
+            /* ปรับ gap สำหรับ bg-success-section ให้ชิดขึ้น */
+            gap: 5px; /* ลด gap ให้ชิดกันมากขึ้น */
+            justify-content: center; /* จัดให้อยู่ตรงกลางรวมกัน */
             align-items: center;
             padding: 0;
         }
@@ -124,7 +125,7 @@
             color: #fff;
             font-size: 13px;
             outline: none;
-            min-width: 100px; /* ลด min-width ลงเพื่อให้ input ยืดหยุ่นขึ้น */
+            min-width: 100px;
         }
         #bg-image-url::placeholder {
             color: #aaa;
@@ -157,7 +158,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            flex-grow: 1;
+            /* flex-grow: 1; */ /* ลบ flex-grow ออก เพื่อให้ข้อความกินพื้นที่เท่าที่จำเป็น */
             justify-content: flex-start;
             padding-left: 5px;
         }
