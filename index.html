@@ -20,16 +20,16 @@
             --text-color: #fff;
             --channel-bg: #222;
             --channel-border: #444;
-            --channel-hover-bg: #444;
+            --channel-hover-bg: #555;
             --channel-hover-border: #666;
             --category-tab-bg: #333;
             --category-tab-border: #333;
-            --category-tab-text: #e0e0e0; /* ปรับเป็นสีที่สว่างขึ้นเล็กน้อยสำหรับปุ่ม inactive */
+            --category-tab-text: #e0e0e0;
             --category-tab-hover-bg: #555;
             --category-tab-hover-text: #fff;
-            --category-tab-active-bg: #eb8702; 
-            --category-tab-active-border: #007bff;
-            --category-tab-active-shadow-color: rgba(0, 123, 255, 0.5);
+            --category-tab-active-bg: #007bff; /* สีพื้นหลัง Active ยังคงเดิม (สีฟ้า) */
+            --category-tab-active-border: #fff; /* เปลี่ยนสีขอบ Active เป็นสีขาว */
+            --category-tab-active-shadow-color: rgba(255, 255, 255, 0.7); /* เปลี่ยนสีเงา Active เป็นสีขาวเรืองแสง */
             --glow-color: rgba(255, 255, 255, 0.9);
             --no-channels-text: #ccc;
             --body-bg-image: none;
@@ -165,7 +165,7 @@
         }
 
         /* Focus state for accessibility (keyboard navigation) */
-        .bg-control-btn:focus-visible, .category-tab:focus-visible, #bg-image-url:focus-visible { /* Removed #search-input:focus-visible */
+        .bg-control-btn:focus-visible, .category-tab:focus-visible, #bg-image-url:focus-visible { 
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
         }
 
@@ -184,7 +184,7 @@
             border-radius: 8px; 
             font-size: 13px;
             flex-shrink: 0;
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); /* เพิ่มเงาข้อความ */
+            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
         }
         .bg-control-btn:hover {
             background-color: #0056b3;
@@ -206,7 +206,7 @@
             flex-grow: 0; 
             justify-content: flex-start;
             padding-left: 0px; 
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); /* เพิ่มเงาข้อความ */
+            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
         }
         .bg-success-message .success-icon {
             font-size: 18px;
@@ -226,7 +226,7 @@
             background-color: #dc3545;
             color: white;
             border-radius: 8px; 
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); /* เพิ่มเงาข้อความ */
+            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
         }
         #reset-bg-btn-success:hover {
             background-color: #c82333;
@@ -248,9 +248,7 @@
         }
 
 
-        /* ==================== */
-        /* Search Bar Styling - REMOVED */
-        /* ==================== */
+        /* Removed search container */
 
 
         #category-tabs {
@@ -285,13 +283,13 @@
             padding: 10px 20px;
             background-color: var(--category-tab-bg);
             border: 1px solid var(--category-tab-border);
-            border-radius: 8px; 
+            border-radius: 8px; /* คง 8px ตามที่ปรับล่าสุดให้เข้ากับปุ่มอื่นๆ */
             font-size: 15px;
             font-weight: normal;
             color: var(--category-tab-text);
             white-space: nowrap;
             flex-shrink: 0;
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); /* เพิ่มเงาข้อความ */
+            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
         }
         .category-tab:hover {
             background-color: var(--category-tab-hover-bg);
@@ -299,13 +297,13 @@
             border-color: var(--category-tab-hover-border);
         }
         .category-tab.active {
-            background-color: var(--category-tab-active-bg);
-            border-color: var(--category-tab-active-border);
+            background-color: var(--category-tab-active-bg); /* สีฟ้าที่ตั้งไว้เดิม */
+            border-color: #fff; /* เปลี่ยนสีขอบเป็นสีขาว */
             font-weight: bold;
-            color: var(--category-tab-hover-text);
-            box-shadow: 0 0 10px var(--category-tab-active-shadow-color);
+            color: var(--category-tab-hover-text); /* สีตัวอักษรเป็นสีขาว */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* เปลี่ยนเงาเป็นสีขาวเรืองแสง */
             transform: scale(1.05);
-            text-shadow: 0 0 3px rgba(0,0,0,0.3); /* เพิ่มเงาข้อความสำหรับ active */
+            text-shadow: 0 0 3px rgba(0,0,0,0.3); 
         }
 
         #channel-list {
@@ -318,7 +316,7 @@
             gap: 10px;
             min-height: 80px;
             align-items: flex-start;
-            z-index: 2; /* ทำให้รายการช่องอยู่เหนือ overlay */
+            z-index: 2; 
         }
         .channel {
             cursor: pointer;
@@ -534,7 +532,7 @@
 
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
-        // const searchInput = document.getElementById('search-input'); // Removed search input
+        const searchInput = document.getElementById('search-input'); 
 
         let currentSelectedCategory = null; 
 
@@ -547,7 +545,7 @@
                     tab.textContent = categoryDisplayNames[category] || category; 
                     tab.dataset.category = category;
                     tab.onclick = () => {
-                        // searchInput.value = ''; // Removed search input related logic
+                        searchInput.value = ''; 
                         filterChannels(category);
                     };
                     categoryTabsContainer.appendChild(tab);
@@ -555,7 +553,7 @@
             });
         }
 
-        function filterChannels(selectedCategory /*, searchTerm = '' */) { // Removed searchTerm parameter
+        function filterChannels(selectedCategory, searchTerm = '') { 
             currentSelectedCategory = selectedCategory; 
 
             document.querySelectorAll('.category-tab').forEach(tab => {
@@ -570,7 +568,7 @@
 
             channelListContainer.innerHTML = ''; 
             
-            // Filter by category only
+            // Filter by category first
             let filteredChannels = allChannels.filter(channel => channel.category === selectedCategory);
 
             // Removed search filtering logic
@@ -586,7 +584,7 @@
             if (filteredChannels.length === 0) {
                 const messageDiv = document.createElement("div");
                 messageDiv.className = "no-channels-message";
-                messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[selectedCategory] || selectedCategory}" นี้`; // Removed searchTerm part
+                messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[selectedCategory] || selectedCategory}" นี้`; 
                 channelListContainer.appendChild(messageDiv);
             } else {
                 filteredChannels.forEach(channel => {
@@ -707,7 +705,7 @@
             applyBackgroundImage(null);
         });
 
-        // Search functionality - REMOVED
+        // Search functionality - Removed search input related logic
         // searchInput.addEventListener('input', () => {
         //     // Filter based on the current selected category and search term
         //     filterChannels(currentSelectedCategory, searchInput.value.trim());
