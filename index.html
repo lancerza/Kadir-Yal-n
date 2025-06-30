@@ -115,9 +115,6 @@
             align-items: center;
             padding: 0;
         }
-        /* ==================== */
-        /* Adjust for Success Section Width and Alignment */
-        /* ==================== */
         #bg-image-controls.bg-set {
             width: 200px; 
             min-width: 200px; 
@@ -125,13 +122,14 @@
             padding: 8px 12px; 
         }
         .bg-success-section {
+            width: fit-content; /* ทำให้ความกว้างพอดีกับเนื้อหาในสถานะสำเร็จ */
             display: flex;
             flex-wrap: nowrap;
             gap: 5px; 
             justify-content: space-between; 
             align-items: center;
             padding: 0 5px; 
-            margin: 0; 
+            margin: 0 auto; 
             flex-grow: 1; 
         }
 
@@ -145,6 +143,7 @@
             color: #fff;
             font-size: 13px;
             outline: none;
+            min-width: 80px; 
         }
         #bg-image-url::placeholder {
             color: #aaa;
@@ -154,16 +153,16 @@
         /* ==================== */
         .bg-control-btn, .category-tab {
             /* General button reset */
-            -webkit-appearance: none; /* สำหรับ Safari */
-            -moz-appearance: none; /* สำหรับ Firefox */
-            appearance: none; /* สำหรับเบราว์เซอร์อื่น ๆ */
+            -webkit-appearance: none; 
+            -moz-appearance: none; 
+            appearance: none; 
             border: none;
             cursor: pointer;
             text-align: center;
             text-decoration: none;
             user-select: none; /* ป้องกันการเลือกข้อความ */
             outline: none; /* ลบ outline เริ่มต้น */
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.1s ease; /* เพิ่ม transform และ box-shadow ใน transition */
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.1s ease; 
         }
 
         /* Focus state for accessibility (keyboard navigation) */
@@ -225,7 +224,7 @@
             font-size: 12px;
             background-color: #dc3545;
             color: white;
-            border-radius: 5px; /* Added border-radius */
+            border-radius: 5px; 
         }
         #reset-bg-btn-success:hover {
             background-color: #c82333;
@@ -279,11 +278,10 @@
             padding: 10px 20px;
             background-color: var(--category-tab-bg);
             border: 1px solid var(--category-tab-border);
-            border-radius: 8px;
+            border-radius: 10px; /* ปรับเป็น 10px เพื่อความสอดคล้อง */
             font-size: 15px;
             font-weight: normal;
             color: var(--category-tab-text);
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -320,7 +318,7 @@
             padding: 0;
             background: var(--channel-bg);
             border: 1px solid #444;
-            border-radius: 10px;
+            border-radius: 10px; /* คงค่า 10px */
             text-align: center;
             box-sizing: border-box;
             display: flex;
@@ -415,7 +413,7 @@
             .category-tab {
                 padding: 7px 12px;
                 font-size: 13px;
-                border-radius: 6px;
+                border-radius: 8px; /* ปรับเป็น 8px เพื่อความสอดคล้องบนจอเล็ก */
             }
             .category-tab.active {
                  transform: scale(1.03);
