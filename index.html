@@ -25,11 +25,20 @@
         #category-tabs {
             margin-bottom: 20px;
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap; /* ป้องกันไม่ให้ปุ่มขึ้นบรรทัดใหม่ */
             justify-content: center;
             gap: 12px;
             padding: 0 10px;
+            overflow-x: auto; /* ทำให้สามารถเลื่อนแนวนอนได้ */
+            -webkit-overflow-scrolling: touch; /* ปรับปรุงการเลื่อนบน iOS */
+            scrollbar-width: none; /* ซ่อน scrollbar สำหรับ Firefox */
+            -ms-overflow-style: none;  /* ซ่อน scrollbar สำหรับ IE/Edge */
         }
+        /* สำหรับ WebKit (Chrome, Safari) */
+        #category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
         .category-tab {
             padding: 10px 20px;
             background-color: #333;
@@ -39,8 +48,9 @@
             font-size: 15px;
             font-weight: normal;
             color: #ccc;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease; /* เพิ่ม transform ใน transition */
             white-space: nowrap;
+            flex-shrink: 0; /* ป้องกันไม่ให้ปุ่มหดตัวเมื่อเนื้อที่จำกัด */
         }
         .category-tab:hover {
             background-color: #555;
@@ -53,6 +63,7 @@
             font-weight: bold;
             color: #fff;
             box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+            transform: scale(1.05); /* ทำให้ปุ่ม Active ขยายขึ้นเล็กน้อย */
         }
 
         #channel-list {
@@ -62,8 +73,8 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
-            min-height: 80px; /* เพิ่ม min-height เพื่อไม่ให้หน้าจอกระโดดเมื่อไม่มีช่อง */
-            align-items: flex-start; /* จัดให้ช่องอยู่ด้านบนของ container */
+            min-height: 80px;
+            align-items: flex-start;
         }
         .channel {
             cursor: pointer;
@@ -164,7 +175,7 @@
                 category: "ภาพยนตร์"
             },
             {
-                name: "ช่องข่าวว่าง", // ช่องนี้อยู่ในหมวดหมู่ที่ไม่มีใน categoryOrder เพื่อทดสอบ
+                name: "ช่องข่าวว่าง",
                 logo: "https://via.placeholder.com/70?text=News",
                 file: "https://example.com/newschannel.m3u8",
                 category: "ข่าว" 
@@ -172,39 +183,38 @@
         ];
 
         // กำหนดลำดับการแสดงหมวดหมู่และชื่อที่ต้องการให้แสดง
-        const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"]; // เพิ่ม "ข่าว" ใน order
-
-        // ดึงหมวดหมู่ทั้งหมดที่ไม่ซ้ำกันที่มีอยู่จริงใน allChannels
-        const actualCategories = [...new Set(allChannels.map(channel => channel.category))];
+        const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"]; // คุณสามารถเพิ่ม/ลด/เปลี่ยนลำดับได้ที่นี่
 
         // สร้างชื่อแสดงผลสำหรับหมวดหมู่ (ถ้าต้องการให้ต่างจาก category ในข้อมูล)
+        // ถ้าไม่ต้องการเปลี่ยนชื่อ ให้ categoryDisplayNames[category] || category เป็นแค่ category
         const categoryDisplayNames = {
             "ทั่วไป": "ทั่วไป",
             "กีฬา": "กีฬา",
             "การ์ตูน": "การ์ตูน",
             "ภาพยนตร์": "ภาพยนตร์",
-            "รายการพิเศษ": "รายการพิเศษ", // ตัวอย่างหมวดหมู่ที่อาจจะยังไม่มีช่อง
-            "ข่าว": "ข่าวล่าสุด" // ตัวอย่างเปลี่ยนชื่อ
+            "รายการพิเศษ": "รายการพิเศษ", 
+            "ข่าว": "ข่าวล่าสุด" 
         };
 
+        // ดึงหมวดหมู่ทั้งหมดที่ไม่ซ้ำกันที่มีอยู่จริงใน allChannels เพื่อใช้ในการตรวจสอบว่าหมวดหมู่นั้นมีช่องอยู่จริงหรือไม่
+        const actualCategories = [...new Set(allChannels.map(channel => channel.category))];
 
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
 
         function createCategoryTabs() {
-            // สร้างปุ่มหมวดหมู่ตามลำดับที่กำหนด
+            // สร้างปุ่มหมวดหมู่ตามลำดับที่กำหนดใน categoryOrder
             categoryOrder.forEach(category => {
-                // ตรวจสอบว่าหมวดหมู่นั้นมีอยู่ใน actualCategories (มีช่องอยู่ในหมวดหมู่นั้นจริงๆ)
-                // หรือเป็นหมวดหมู่ที่เราต้องการให้แสดงปุ่มว่างๆ ไว้ก่อนก็ได้ (ถ้าไม่ใส่ if)
-                // แต่เพื่อความถูกต้อง จะเช็คว่ามีช่องอยู่จริง
-                // if (actualCategories.includes(category)) { // เปิดใช้งานบรรทัดนี้หากต้องการให้แสดงเฉพาะหมวดหมู่ที่มีช่อง
+                // ตัวเลือก: แสดงปุ่มเฉพาะหมวดหมู่ที่มีช่องอยู่จริง
+                // หากต้องการให้แสดงปุ่มทุกหมวดหมู่ที่ระบุใน categoryOrder แม้จะยังไม่มีช่อง ให้คอมเมนต์ if นี้ออกไป
+                // if (actualCategories.includes(category)) { 
                     const tab = document.createElement("div");
                     tab.className = "category-tab";
-                    tab.textContent = categoryDisplayNames[category] || category; // ใช้ชื่อแสดงผล หรือชื่อจริง
+                    tab.textContent = categoryDisplayNames[category] || category; 
                     tab.dataset.category = category;
                     tab.onclick = () => filterChannels(category);
                     categoryTabsContainer.appendChild(tab);
-                // } // ปิด if
+                // } 
             });
         }
 
@@ -213,11 +223,14 @@
             // ลบ active class ออกจากทุกแท็บ
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
+                tab.style.transform = 'scale(1)'; // รีเซ็ตขนาด
             });
-            // เพิ่ม active class ให้แท็บที่ถูกเลือก
+            
+            // เพิ่ม active class ให้แท็บที่ถูกเลือกและปรับขนาด
             const selectedTab = document.querySelector(`.category-tab[data-category="${selectedCategory}"]`);
             if (selectedTab) {
                 selectedTab.classList.add('active');
+                // selectedTab.style.transform = 'scale(1.05)'; // ไม่ต้อง set ตรงนี้แล้ว เพราะมีใน active class
             }
 
             channelListContainer.innerHTML = ''; // ล้างรายการช่องเดิม
@@ -249,30 +262,26 @@
             }
         }
 
+        // เริ่มต้นสร้างแท็บและกำหนดหมวดหมู่เริ่มต้นเมื่อโหลดหน้าครั้งแรก
         createCategoryTabs();
-        // กำหนดหมวดหมู่เริ่มต้นเมื่อโหลดหน้าครั้งแรก
-        // หาหมวดหมู่แรกใน categoryOrder ที่มีช่องอยู่จริง
-        let initialCategory = categoryOrder[0]; // กำหนดให้เป็นหมวดหมู่แรกใน order
-        let foundChannelsForInitialCategory = false;
+        
+        let initialCategoryToShow = null;
         for (let i = 0; i < categoryOrder.length; i++) {
             const category = categoryOrder[i];
             const channelsInCategory = allChannels.filter(channel => channel.category === category);
             if (channelsInCategory.length > 0) {
-                initialCategory = category;
-                foundChannelsForInitialCategory = true;
+                initialCategoryToShow = category;
                 break;
             }
         }
         
-        // ถ้าหมวดหมู่แรกที่ตั้งใจไม่มีช่อง ให้เลือกหมวดหมู่แรกที่มีช่อง หรือแสดงข้อความถ้าไม่มีเลย
-        if (foundChannelsForInitialCategory) {
-             filterChannels(initialCategory);
+        if (initialCategoryToShow) {
+            filterChannels(initialCategoryToShow);
         } else {
-            // ถ้าไม่มีช่องในทุกหมวดหมู่ ให้ล้างและแสดงข้อความว่าไม่พบช่องใดๆ
+            // ถ้าไม่มีช่องในทุกหมวดหมู่ที่กำหนดไว้ใน categoryOrder
             channelListContainer.innerHTML = '<p class="no-channels-message">ยังไม่มีช่องรายการในระบบ</p>';
             // และไม่มีแท็บ active เพราะไม่มีช่องให้เลือก
         }
-       
     </script>
 </body>
 </html>
