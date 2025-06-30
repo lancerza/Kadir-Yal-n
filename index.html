@@ -52,11 +52,11 @@
         }
 
         /* ==================== */
-        /* Background Image Controls Styling (Updated for Success State) */
+        /* Background Image Controls Styling (Updated) */
         /* ==================== */
         #bg-image-controls {
             margin-bottom: 20px;
-            padding: 15px; /* รักษาระยะห่างโดยรวมของ container */
+            padding: 10px 15px; /* ลด padding ด้านบนและล่างลงเหลือ 10px */
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 10px;
@@ -67,18 +67,18 @@
             align-items: center;
             max-width: 600px;
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            min-height: 40px;
+            min-height: 40px; 
             position: relative;
         }
         
         .bg-input-section, .bg-success-section {
             width: 100%;
-            display: flex; /* ใช้ flex เพื่อจัดเรียงองค์ประกอบภายใน */
-            flex-wrap: nowrap; /* ป้องกันไม่ให้ขึ้นบรรทัดใหม่ */
+            display: flex;
+            flex-wrap: nowrap;
             gap: 10px;
             justify-content: center;
             align-items: center;
-            padding: 0; /* ลบ padding ที่อาจทำให้เกิน */
+            padding: 0;
         }
 
         #bg-image-url {
@@ -104,7 +104,7 @@
             cursor: pointer;
             font-size: 14px;
             transition: background-color 0.3s ease;
-            flex-shrink: 0; /* ป้องกันการหดตัว */
+            flex-shrink: 0;
         }
         .bg-control-btn:hover {
             background-color: #0056b3;
@@ -116,35 +116,33 @@
             background-color: #c82333;
         }
 
-        /* Styles for the new smaller success section */
         .bg-success-message {
-            font-size: 15px; /* ลดขนาดตัวอักษรลงเล็กน้อย */
+            font-size: 15px;
             font-weight: bold;
             color: #28a745;
             display: flex;
             align-items: center;
-            gap: 6px; /* ลดระยะห่างระหว่าง icon กับข้อความ */
-            flex-grow: 1; /* ให้ข้อความขยายเต็มพื้นที่ที่เหลือ */
-            justify-content: flex-end; /* จัดข้อความไปทางขวาเมื่อมีปุ่มรีเซ็ตอยู่ด้านขวา */
-            padding-right: 10px; /* เพิ่ม padding ด้านขวาของข้อความ */
+            gap: 6px;
+            flex-grow: 1;
+            justify-content: flex-start; /* เปลี่ยนเป็น flex-start เพื่อให้ข้อความอยู่ซ้าย */
+            padding-left: 5px; /* เพิ่ม padding ด้านซ้ายของข้อความ */
         }
         .bg-success-message .success-icon {
-            font-size: 20px; /* ลดขนาด icon ลง */
-            display: inline-flex; /* ใช้ inline-flex เพื่อจัดแนว icon */
-            align-items: center; /* จัดแนว icon */
-            justify-content: center; /* จัดแนว icon */
-            width: 28px; /* กำหนดขนาดของ icon container */
-            height: 28px; /* กำหนดขนาดของ icon container */
-            background-color: #28a745; /* พื้นหลังสีเขียวเข้มสำหรับ icon */
-            color: white; /* สี icon เป็นสีขาว */
-            border-radius: 6px; /* ขอบโค้งมนสำหรับ icon container */
-            flex-shrink: 0; /* ป้องกัน icon หดตัว */
+            font-size: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 6px;
+            flex-shrink: 0;
         }
-        /* ปรับปุ่มรีเซ็ตในสถานะ Success */
         #reset-bg-btn-success {
-            padding: 6px 12px; /* ลด padding ของปุ่มรีเซ็ตนี้ */
-            font-size: 13px; /* ลดขนาด font ของปุ่มรีเซ็ตนี้ */
-            background-color: #dc3545; /* สีแดง */
+            padding: 6px 12px;
+            font-size: 13px;
+            background-color: #dc3545;
             color: white;
             border: none;
             border-radius: 5px;
@@ -433,26 +431,34 @@
         const applyBgBtn = document.getElementById('apply-bg-btn');
         const resetBgBtnInputSection = document.getElementById('reset-bg-btn'); 
         const resetBgBtnSuccessSection = document.getElementById('reset-bg-btn-success');
-        const successIconSpan = document.querySelector('.bg-success-section .success-icon'); // Get the success icon span
+        const successIconSpan = document.querySelector('.bg-success-section .success-icon'); 
         const root = document.documentElement;
         const localStorageKey = 'customBgImageUrl';
 
         function updateBgControlsState(hasImage) {
             if (hasImage) {
                 bgImageControls.classList.add('bg-set');
-                // Set the ✅ icon
                 successIconSpan.textContent = '✅'; 
             } else {
                 bgImageControls.classList.remove('bg-set');
-                bgImageUrlInput.value = ''; // Ensure input is cleared when resetting from success state
+                bgImageUrlInput.value = ''; 
             }
         }
 
         function applyBackgroundImage(url) {
             if (url) {
-                root.style.setProperty('--body-bg-image', `url('${url}')`);
-                localStorage.setItem(localStorageKey, url);
-                updateBgControlsState(true); 
+                // Preload image to check if it's valid
+                const img = new Image();
+                img.onload = () => {
+                    root.style.setProperty('--body-bg-image', `url('${url}')`);
+                    localStorage.setItem(localStorageKey, url);
+                    updateBgControlsState(true); 
+                };
+                img.onerror = () => {
+                    alert('ไม่สามารถโหลดภาพพื้นหลังได้ กรุณาตรวจสอบ URL');
+                    applyBackgroundImage(null); // Reset if image fails to load
+                };
+                img.src = url; // Start loading the image
             } else {
                 root.style.setProperty('--body-bg-image', 'none');
                 localStorage.removeItem(localStorageKey);
@@ -463,8 +469,18 @@
         document.addEventListener('DOMContentLoaded', () => {
             const savedImageUrl = localStorage.getItem(localStorageKey);
             if (savedImageUrl) {
-                applyBackgroundImage(savedImageUrl);
-                bgImageUrlInput.value = savedImageUrl; 
+                // Reapply the background without showing input, but check if it's still valid
+                const img = new Image();
+                img.onload = () => {
+                    root.style.setProperty('--body-bg-image', `url('${savedImageUrl}')`);
+                    updateBgControlsState(true);
+                    bgImageUrlInput.value = savedImageUrl; // Keep input value in case user wants to modify
+                };
+                img.onerror = () => {
+                    console.error("Failed to load saved background image. Resetting.");
+                    applyBackgroundImage(null); // Clear if saved image is invalid
+                };
+                img.src = savedImageUrl;
             } else {
                 updateBgControlsState(false); 
             }
@@ -491,9 +507,9 @@
 
         applyBgBtn.addEventListener('click', () => {
             const url = bgImageUrlInput.value.trim();
-            if (url) { // Only apply if URL is not empty
+            if (url) { 
                 applyBackgroundImage(url);
-            } else { // If URL is empty, reset
+            } else { 
                 applyBackgroundImage(null);
             }
         });
