@@ -26,17 +26,17 @@
             max-width: 800px;
             display: flex;
             flex-wrap: wrap;
-            gap: 12px; /* ลดระยะห่างระหว่างช่องลงเล็กน้อย */
+            gap: 12px;
             justify-content: center;
         }
         .channel {
             cursor: pointer;
-            padding: 10px; /* ลด padding ลง */
+            padding: 10px;
             background: #222;
             border: 1px solid #444;
             border-radius: 12px;
             text-align: center;
-            width: 100px; /* ลดขนาดความกว้างของช่องลง */
+            width: 100px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -49,11 +49,10 @@
             background: #444;
             border-color: #666;
         }
-        /* ปรับสไตล์ของรูปภาพโดยตรง */
         .channel img {
-            width: 80px; /* ลดขนาดของรูปภาพโลโก้ลง */
-            height: 80px; /* ลดขนาดของรูปภาพโลโก้ลง */
-            margin-bottom: 8px; /* ลดระยะห่างด้านล่างของโลโก้ลง */
+            width: 80px;
+            height: 80px;
+            margin-bottom: 4px; /* ลดระยะห่างด้านล่างของโลโก้ลงอีก */
             object-fit: contain;
             border-radius: 0;
             background-color: transparent;
@@ -61,8 +60,9 @@
             padding: 0;
         }
         .channel-name {
-            font-size: 14px; /* ลดขนาดตัวอักษรชื่อช่องลงเล็กน้อย */
+            font-size: 14px;
             font-weight: bold;
+            /* margin-top: 0; */ /* มั่นใจว่าไม่มี margin-top ที่ทำให้ชื่อช่องห่างลงไป */
             word-break: break-word;
         }
     </style>
