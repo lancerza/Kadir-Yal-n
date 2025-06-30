@@ -45,14 +45,14 @@
             justify-content: center;
             text-decoration: none;
             color: inherit;
-            /* เพิ่ม box-shadow สำหรับเรืองแสง */
             box-shadow: 0 0 5px rgba(255, 255, 255, 0); /* เริ่มต้นไม่มีเรืองแสง */
-            transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease; /* เพิ่ม transition ให้ box-shadow */
+            transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
         }
         .channel:hover {
             background: #444;
             border-color: #666;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* เรืองแสงสีขาวเมื่อโฮเวอร์ */
+            /* ปรับ box-shadow ให้สว่างขึ้น */
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.9); /* เพิ่ม blur เป็น 15px และ opacity เป็น 0.9 */
         }
         .channel img {
             width: 70px;
