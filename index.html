@@ -16,7 +16,6 @@
         }
 
         :root {
-            /* Always Dark Mode */
             --bg-color: #000;
             --text-color: #fff;
             --channel-bg: #222;
@@ -117,21 +116,23 @@
             padding: 0;
         }
         /* ==================== */
-        /* Adjust for Success Section Width and Alignment */
+        /* Adjust for Success Section Width and Alignment (Perfectly Balanced) */
         /* ==================== */
         #bg-image-controls.bg-set {
-            width: fit-content; /* ทำให้ความกว้างพอดีกับเนื้อหาในสถานะสำเร็จ */
-            min-width: 250px; /* กำหนด min-width เพื่อไม่ให้เล็กเกินไป */
+            /* กำหนด width ที่แน่นอนเพื่อควบคุมขนาดรวมของกล่องในสถานะ success */
+            /* ปรับตามภาพตัวอย่างให้มีขนาดที่พอดี */
+            width: 200px; /* ความกว้างโดยประมาณที่พอดีกับเนื้อหาในภาพตัวอย่าง */
+            min-width: 200px; /* ทำให้ไม่เล็กกว่านี้ */
             max-width: 90vw; /* จำกัด max-width บนมือถือ */
-            /* padding ที่กำหนดไว้แล้วใน #bg-image-controls จะทำงานกับ fit-content ได้ดี */
+            padding: 8px 12px; /* รักษาระยะห่างจากขอบ */
         }
         .bg-success-section {
             display: flex;
             flex-wrap: nowrap;
-            gap: 5px; 
+            gap: 5px; /* ระยะห่างระหว่าง icon/text กับปุ่มรีเซ็ต */
             justify-content: space-between; /* กระจายองค์ประกอบให้ชิดซ้าย-ขวา */
             align-items: center;
-            padding: 0 5px; /* ปรับ padding ซ้ายขวา เพื่อให้สมดุล */
+            padding: 0; /* ลบ padding ภายใน section นี้ */
             margin: 0; 
             flex-grow: 1; /* ให้ section ขยายเต็มพื้นที่ที่เหลือใน parent */
         }
@@ -146,7 +147,7 @@
             color: #fff;
             font-size: 13px;
             outline: none;
-            min-width: 80px; /* ลด min-width ลงเพื่อให้ input ยืดหยุ่นขึ้น */
+            min-width: 80px; 
         }
         #bg-image-url::placeholder {
             color: #aaa;
@@ -372,7 +373,7 @@
                 box-sizing: border-box; 
             }
             .bg-success-section {
-                flex-direction: column; 
+                flex-direction: column; /* ในจอเล็ก อาจจะต้องเรียงกันไปเลย */
                 gap: 5px; 
             }
             .bg-success-message {
@@ -564,9 +565,7 @@
         // === Background Image Logic ===
         const bgImageControls = document.getElementById('bg-image-controls');
         const bgImageUrlInput = document.getElementById('bg-image-url');
-        // const applyBgBtn = document.getElementById('apply-bg-btn'); // No longer used
-        const toggleBgBtn = document.getElementById('toggle-bg-btn'); // Combined button
-        // const resetBgBtnInputSection = document.getElementById('reset-bg-btn'); // No longer used
+        const toggleBgBtn = document.getElementById('toggle-bg-btn'); 
         const resetBgBtnSuccessSection = document.getElementById('reset-bg-btn-success');
         const successIconSpan = document.querySelector('.bg-success-section .success-icon'); 
         const root = document.documentElement;
@@ -576,13 +575,13 @@
             if (hasImage) {
                 bgImageControls.classList.add('bg-set');
                 successIconSpan.textContent = '✅'; 
-                toggleBgBtn.textContent = 'รีเซ็ตพื้นหลัง'; // Change button text
-                toggleBgBtn.classList.add('reset'); // Add reset style class
+                toggleBgBtn.textContent = 'รีเซ็ตพื้นหลัง'; 
+                toggleBgBtn.classList.add('reset'); 
             } else {
                 bgImageControls.classList.remove('bg-set');
                 bgImageUrlInput.value = ''; 
-                toggleBgBtn.textContent = 'ตั้งค่าภาพพื้นหลัง'; // Change button text
-                toggleBgBtn.classList.remove('reset'); // Remove reset style class
+                toggleBgBtn.textContent = 'ตั้งค่าภาพพื้นหลัง'; 
+                toggleBgBtn.classList.remove('reset'); 
             }
         }
 
