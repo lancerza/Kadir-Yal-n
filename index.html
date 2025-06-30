@@ -26,17 +26,17 @@
             max-width: 800px;
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 15px; /* ระยะห่างระหว่างกล่อง */
             justify-content: center;
         }
         .channel {
             cursor: pointer;
-            padding: 8px 10px 2px 10px; /* ลด padding-top ลงเหลือ 8px, padding-bottom 2px */
+            padding: 15px; /* Padding รอบกล่อง */
             background: #222;
             border: 1px solid #444;
             border-radius: 12px;
             text-align: center;
-            width: 100px;
+            width: 120px; /* ความกว้างของแต่ละกล่อง */
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -49,24 +49,23 @@
             background: #444;
             border-color: #666;
         }
+        /* Style for the logo image */
         .channel img {
-            /* หากต้องการให้โลโก้หายไปหรืออยู่เหนือจอ (ตามภาพตัวอย่าง) */
-            /* สามารถตั้งค่า height และ width เป็น 0 หรือ display: none; */
-            width: 0px; /* ลดขนาดโลโก้ให้ไม่แสดงผล */
-            height: 0px; /* ลดขนาดโลโก้ให้ไม่แสดงผล */
-            margin-bottom: 0px; /* ให้ไม่มี margin ด้านล่างของโลโก้เลย */
-            display: none; /* ซ่อนรูปภาพโลโก้ไปเลย ถ้าไม่ต้องการแสดง */
-            
-            /* หากยังต้องการโลโก้แต่ให้ขึ้นไปสูงมากๆ ให้ใช้ค่าติดลบมากๆ */
-            /* width: 80px; height: 80px; */
-            /* margin-bottom: -60px; /* ตัวอย่าง: ดึงขึ้นไป 60px ถ้าต้องการให้โลโก้อยู่สูงมาก */
-            /* object-fit: contain; */
+            width: 90px; /* ความกว้างของรูปภาพโลโก้ */
+            height: 90px; /* ความสูงของรูปภาพโลโก้ */
+            margin-bottom: 5px; /* ระยะห่างระหว่างโลโก้กับชื่อช่อง */
+            object-fit: contain; /* รักษาสัดส่วนของรูปภาพ */
+            border-radius: 0; /* ตรวจสอบให้แน่ใจว่ารูปภาพไม่มี border-radius ของตัวเอง */
+            background-color: transparent; /* ทำให้พื้นหลังของรูปภาพโปร่งใส */
+            border: none; /* ไม่มีเส้นขอบที่รูปภาพ */
+            padding: 0; /* ไม่มี padding ที่รูปภาพ */
         }
         .channel-name {
-            font-size: 14px;
+            font-size: 16px; /* ขนาดตัวอักษรชื่อช่อง */
             font-weight: bold;
-            margin-top: 0px; /* ให้ชื่อช่องชิดกับขอบบนของช่องมากที่สุด */
+            margin-top: 0px; /* ชิดกับโลโก้ด้านบน */
             word-break: break-word;
+            white-space: normal;
         }
     </style>
 </head>
@@ -78,7 +77,7 @@
         const channels = [
             {
                 name: "ช่อง 3 HD",
-                logo: "https://dookeela.live/uploads/1685812254.png", // โลโก้ยังคงอยู่ตรงนี้ แต่จะถูกซ่อนด้วย CSS
+                logo: "https://dookeela.live/uploads/1685812254.png",
                 file: "https://dookeela.live/live-tv/ch3hd",
             },
             {
@@ -113,9 +112,8 @@
             a.className = "channel";
             a.target = "_blank";
 
-            // ไม่ต้องใส่ <br> ระหว่าง img กับ div.channel-name แล้ว
             a.innerHTML = `
-                <img src="${channel.logo}" alt="${channel.name}">
+                <img src="${channel.logo}" alt="${channel.name}"><br>
                 <div class="channel-name">${channel.name}</div>
             `;
             channelList.appendChild(a);
