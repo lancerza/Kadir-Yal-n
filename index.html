@@ -62,6 +62,8 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
+            min-height: 80px; /* เพิ่ม min-height เพื่อไม่ให้หน้าจอกระโดดเมื่อไม่มีช่อง */
+            align-items: flex-start; /* จัดให้ช่องอยู่ด้านบนของ container */
         }
         .channel {
             cursor: pointer;
@@ -99,6 +101,13 @@
         }
         .channel-name {
             display: none;
+        }
+        .no-channels-message {
+            color: #ccc;
+            text-align: center;
+            width: 100%;
+            margin-top: 20px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -153,70 +162,117 @@
                 logo: "https://via.placeholder.com/70?text=Movie",
                 file: "https://example.com/moviechannel.m3u8",
                 category: "ภาพยนตร์"
+            },
+            {
+                name: "ช่องข่าวว่าง", // ช่องนี้อยู่ในหมวดหมู่ที่ไม่มีใน categoryOrder เพื่อทดสอบ
+                logo: "https://via.placeholder.com/70?text=News",
+                file: "https://example.com/newschannel.m3u8",
+                category: "ข่าว" 
             }
         ];
 
-        const categories = [...new Set(allChannels.map(channel => channel.category))];
+        // กำหนดลำดับการแสดงหมวดหมู่และชื่อที่ต้องการให้แสดง
+        const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"]; // เพิ่ม "ข่าว" ใน order
+
+        // ดึงหมวดหมู่ทั้งหมดที่ไม่ซ้ำกันที่มีอยู่จริงใน allChannels
+        const actualCategories = [...new Set(allChannels.map(channel => channel.category))];
+
+        // สร้างชื่อแสดงผลสำหรับหมวดหมู่ (ถ้าต้องการให้ต่างจาก category ในข้อมูล)
+        const categoryDisplayNames = {
+            "ทั่วไป": "ทั่วไป",
+            "กีฬา": "กีฬา",
+            "การ์ตูน": "การ์ตูน",
+            "ภาพยนตร์": "ภาพยนตร์",
+            "รายการพิเศษ": "รายการพิเศษ", // ตัวอย่างหมวดหมู่ที่อาจจะยังไม่มีช่อง
+            "ข่าว": "ข่าวล่าสุด" // ตัวอย่างเปลี่ยนชื่อ
+        };
+
+
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
 
         function createCategoryTabs() {
-            // ลบโค้ดที่สร้างปุ่ม "ทั้งหมด" ออกไป
-            // const allTab = document.createElement("div");
-            // allTab.className = "category-tab active";
-            // allTab.textContent = "ทั้งหมด";
-            // allTab.dataset.category = "all";
-            // allTab.onclick = () => filterChannels("all");
-            // categoryTabsContainer.appendChild(allTab);
-
-            categories.forEach(category => {
-                const tab = document.createElement("div");
-                tab.className = "category-tab";
-                tab.textContent = category;
-                tab.dataset.category = category;
-                tab.onclick = () => filterChannels(category);
-                categoryTabsContainer.appendChild(tab);
+            // สร้างปุ่มหมวดหมู่ตามลำดับที่กำหนด
+            categoryOrder.forEach(category => {
+                // ตรวจสอบว่าหมวดหมู่นั้นมีอยู่ใน actualCategories (มีช่องอยู่ในหมวดหมู่นั้นจริงๆ)
+                // หรือเป็นหมวดหมู่ที่เราต้องการให้แสดงปุ่มว่างๆ ไว้ก่อนก็ได้ (ถ้าไม่ใส่ if)
+                // แต่เพื่อความถูกต้อง จะเช็คว่ามีช่องอยู่จริง
+                // if (actualCategories.includes(category)) { // เปิดใช้งานบรรทัดนี้หากต้องการให้แสดงเฉพาะหมวดหมู่ที่มีช่อง
+                    const tab = document.createElement("div");
+                    tab.className = "category-tab";
+                    tab.textContent = categoryDisplayNames[category] || category; // ใช้ชื่อแสดงผล หรือชื่อจริง
+                    tab.dataset.category = category;
+                    tab.onclick = () => filterChannels(category);
+                    categoryTabsContainer.appendChild(tab);
+                // } // ปิด if
             });
         }
 
         // ฟังก์ชันกรองและแสดงช่องตามหมวดหมู่
         function filterChannels(selectedCategory) {
+            // ลบ active class ออกจากทุกแท็บ
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            // ตรวจสอบว่าแท็บที่ถูกเลือกมีอยู่จริง ก่อนที่จะเพิ่ม active class
+            // เพิ่ม active class ให้แท็บที่ถูกเลือก
             const selectedTab = document.querySelector(`.category-tab[data-category="${selectedCategory}"]`);
             if (selectedTab) {
                 selectedTab.classList.add('active');
             }
 
-            channelListContainer.innerHTML = '';
+            channelListContainer.innerHTML = ''; // ล้างรายการช่องเดิม
             
-            // ปรับตรรกะการกรอง: ไม่มีการเลือก "all" แล้ว
             const filteredChannels = allChannels.filter(channel => channel.category === selectedCategory);
 
-            filteredChannels.forEach(channel => {
-                const encodedFileUrl = encodeURIComponent(channel.file);
-                const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
+            if (filteredChannels.length === 0) {
+                // แสดงข้อความเมื่อไม่พบช่อง
+                const messageDiv = document.createElement("div");
+                messageDiv.className = "no-channels-message";
+                messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[selectedCategory] || selectedCategory}" นี้`;
+                channelListContainer.appendChild(messageDiv);
+            } else {
+                filteredChannels.forEach(channel => {
+                    const encodedFileUrl = encodeURIComponent(channel.file);
+                    const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
 
-                const a = document.createElement("a");
-                a.href = wiseplayIntentUri;
-                a.className = "channel";
-                a.target = "_blank";
+                    const a = document.createElement("a");
+                    a.href = wiseplayIntentUri;
+                    a.className = "channel";
+                    a.target = "_blank";
 
-                a.innerHTML = `
-                    <img src="${channel.logo}" alt="${channel.name}">
-                    <div class="channel-name">${channel.name}</div>
-                `;
-                channelListContainer.appendChild(a);
-            });
+                    a.innerHTML = `
+                        <img src="${channel.logo}" alt="${channel.name}">
+                        <div class="channel-name">${channel.name}</div>
+                    `;
+                    channelListContainer.appendChild(a);
+                });
+            }
         }
 
         createCategoryTabs();
-        // ตั้งค่าหมวดหมู่แรกสุดเป็น active และแสดงผลเมื่อโหลดหน้าครั้งแรก
-        if (categories.length > 0) {
-            filterChannels(categories[0]); 
+        // กำหนดหมวดหมู่เริ่มต้นเมื่อโหลดหน้าครั้งแรก
+        // หาหมวดหมู่แรกใน categoryOrder ที่มีช่องอยู่จริง
+        let initialCategory = categoryOrder[0]; // กำหนดให้เป็นหมวดหมู่แรกใน order
+        let foundChannelsForInitialCategory = false;
+        for (let i = 0; i < categoryOrder.length; i++) {
+            const category = categoryOrder[i];
+            const channelsInCategory = allChannels.filter(channel => channel.category === category);
+            if (channelsInCategory.length > 0) {
+                initialCategory = category;
+                foundChannelsForInitialCategory = true;
+                break;
+            }
         }
+        
+        // ถ้าหมวดหมู่แรกที่ตั้งใจไม่มีช่อง ให้เลือกหมวดหมู่แรกที่มีช่อง หรือแสดงข้อความถ้าไม่มีเลย
+        if (foundChannelsForInitialCategory) {
+             filterChannels(initialCategory);
+        } else {
+            // ถ้าไม่มีช่องในทุกหมวดหมู่ ให้ล้างและแสดงข้อความว่าไม่พบช่องใดๆ
+            channelListContainer.innerHTML = '<p class="no-channels-message">ยังไม่มีช่องรายการในระบบ</p>';
+            // และไม่มีแท็บ active เพราะไม่มีช่องให้เลือก
+        }
+       
     </script>
 </body>
 </html>
