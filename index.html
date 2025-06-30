@@ -31,7 +31,7 @@
         }
         .channel {
             cursor: pointer;
-            padding: 10px 10px 2px 10px; /* ลด padding-bottom ลงเหลือ 2px เพื่อให้กระชับยิ่งขึ้น */
+            padding: 8px 10px 2px 10px; /* ลด padding-top ลงเหลือ 8px, padding-bottom 2px */
             background: #222;
             border: 1px solid #444;
             border-radius: 12px;
@@ -50,19 +50,22 @@
             border-color: #666;
         }
         .channel img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: -2px; /* ใช้ค่าติดลบเพื่อดึงชื่อช่องให้เหลื่อมขึ้นไปบนโลโก้เล็กน้อย */
-            object-fit: contain;
-            border-radius: 0;
-            background-color: transparent;
-            border: none;
-            padding: 0;
+            /* หากต้องการให้โลโก้หายไปหรืออยู่เหนือจอ (ตามภาพตัวอย่าง) */
+            /* สามารถตั้งค่า height และ width เป็น 0 หรือ display: none; */
+            width: 0px; /* ลดขนาดโลโก้ให้ไม่แสดงผล */
+            height: 0px; /* ลดขนาดโลโก้ให้ไม่แสดงผล */
+            margin-bottom: 0px; /* ให้ไม่มี margin ด้านล่างของโลโก้เลย */
+            display: none; /* ซ่อนรูปภาพโลโก้ไปเลย ถ้าไม่ต้องการแสดง */
+            
+            /* หากยังต้องการโลโก้แต่ให้ขึ้นไปสูงมากๆ ให้ใช้ค่าติดลบมากๆ */
+            /* width: 80px; height: 80px; */
+            /* margin-bottom: -60px; /* ตัวอย่าง: ดึงขึ้นไป 60px ถ้าต้องการให้โลโก้อยู่สูงมาก */
+            /* object-fit: contain; */
         }
         .channel-name {
             font-size: 14px;
             font-weight: bold;
-            margin-top: 0px; /* ลด margin-top ให้เป็น 0 */
+            margin-top: 0px; /* ให้ชื่อช่องชิดกับขอบบนของช่องมากที่สุด */
             word-break: break-word;
         }
     </style>
@@ -75,7 +78,7 @@
         const channels = [
             {
                 name: "ช่อง 3 HD",
-                logo: "https://dookeela.live/uploads/1685812254.png",
+                logo: "https://dookeela.live/uploads/1685812254.png", // โลโก้ยังคงอยู่ตรงนี้ แต่จะถูกซ่อนด้วย CSS
                 file: "https://dookeela.live/live-tv/ch3hd",
             },
             {
@@ -110,8 +113,9 @@
             a.className = "channel";
             a.target = "_blank";
 
+            // ไม่ต้องใส่ <br> ระหว่าง img กับ div.channel-name แล้ว
             a.innerHTML = `
-                <img src="${channel.logo}" alt="${channel.name}"><br>
+                <img src="${channel.logo}" alt="${channel.name}">
                 <div class="channel-name">${channel.name}</div>
             `;
             channelList.appendChild(a);
