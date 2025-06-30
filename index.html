@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายการช่อง Wiseplay</title>
     <style>
+        /* ==================== */
+        /* Global Box Sizing */
+        /* ==================== */
+        html {
+            box-sizing: border-box;
+        }
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+
         :root {
             --bg-color: #000;
             --text-color: #fff;
@@ -26,6 +36,7 @@
             --body-bg-size: cover;
             --body-bg-position: center;
             --body-bg-repeat: no-repeat;
+            --body-overlay-color: rgba(0, 0, 0, 0.5); /* Overlay color for background image */
         }
 
         body {
@@ -45,7 +56,31 @@
             background-position: var(--body-bg-position);
             background-repeat: var(--body-bg-repeat);
             background-attachment: fixed;
+            position: relative; /* สำหรับ body::before */
+            z-index: 1; /* ทำให้เนื้อหา body อยู่บน overlay */
         }
+
+        /* ==================== */
+        /* Background Image Overlay */
+        /* ==================== */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--body-overlay-color);
+            z-index: -1; /* อยู่ด้านหลังเนื้อหา body */
+            opacity: 1; /* ค่าเริ่มต้น */
+            transition: opacity 0.3s ease;
+        }
+        /* ถ้าไม่มีภาพพื้นหลัง overlay ก็ไม่จำเป็นต้องมี */
+        body:not([style*="background-image: url"])::before {
+            opacity: 0; /* ซ่อน overlay ถ้าไม่มี background-image */
+        }
+
+
         h1 {
             margin-top: 0px;
             margin-bottom: 20px;
@@ -53,7 +88,7 @@
 
         #bg-image-controls {
             margin-bottom: 20px;
-            padding: 8px 12px;
+            padding: 6px 12px;
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 10px;
@@ -67,6 +102,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             min-height: auto; 
             position: relative;
+            z-index: 2; /* ทำให้คอนโทรลอยู่เหนือ overlay */
         }
         
         .bg-input-section, .bg-success-section {
@@ -179,6 +215,7 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
             scrollbar-color: var(--category-tab-hover-bg) var(--category-tab-bg);
+            z-index: 2; /* ทำให้แท็บอยู่เหนือ overlay */
         }
         #category-tabs::-webkit-scrollbar {
             height: 8px;
@@ -232,6 +269,7 @@
             gap: 10px;
             min-height: 80px;
             align-items: flex-start;
+            z-index: 2; /* ทำให้รายการช่องอยู่เหนือ overlay */
         }
         .channel {
             cursor: pointer;
@@ -283,62 +321,62 @@
         /* ==================== */
         @media (max-width: 480px) {
             h1 {
-                font-size: 22px; /* ลดขนาดหัวข้ออีก */
+                font-size: 22px;
                 margin-bottom: 10px;
             }
             body {
-                padding-top: 15px; /* ลด padding ด้านบน body */
+                padding-top: 15px;
             }
 
             #bg-image-controls {
-                padding: 6px 8px; /* ปรับ padding เท่าเดิม */
-                gap: 5px; /* ลด gap ลงอีก */
-                width: 95%; /* ใช้ 95% ของ viewport */
+                padding: 6px 8px; 
+                gap: 5px; 
+                width: 95%; 
             }
 
             .bg-input-section {
-                flex-direction: column; /* บังคับให้เป็นแนวตั้ง */
-                gap: 5px; /* ลด gap สำหรับแนวตั้ง */
+                flex-direction: column; 
+                gap: 5px; 
             }
             #bg-image-url {
-                width: 100%; /* ให้ input กินพื้นที่ 100% */
-                min-width: unset; /* ถอน min-width เพื่อความยืดหยุ่น */
-                box-sizing: border-box; /* สำคัญ */
+                width: 100%; 
+                min-width: unset; 
+                box-sizing: border-box; 
             }
             .bg-control-btn {
-                width: 100%; /* ให้ปุ่มกินพื้นที่ 100% */
-                font-size: 14px; /* เพิ่มขนาด font เล็กน้อย */
-                padding: 8px 10px; /* เพิ่ม padding เล็กน้อย */
-                box-sizing: border-box; /* สำคัญ */
+                width: 100%; 
+                font-size: 14px; 
+                padding: 8px 10px; 
+                box-sizing: border-box; 
             }
             .bg-success-section {
-                flex-direction: column; /* บังคับให้เป็นแนวตั้ง */
-                gap: 5px; /* ลด gap สำหรับแนวตั้ง */
+                flex-direction: column; 
+                gap: 5px; 
             }
             .bg-success-message {
-                width: 100%; /* ให้ข้อความกินพื้นที่ 100% */
-                justify-content: center; /* จัดให้อยู่ตรงกลาง */
-                padding: 0; /* ลบ padding */
+                width: 100%; 
+                justify-content: center; 
+                padding: 0; 
             }
             #reset-bg-btn-success {
-                width: 100%; /* ให้ปุ่มรีเซ็ตใน success state กินพื้นที่ 100% */
+                width: 100%; 
                 margin-top: 5px;
-                font-size: 14px; /* เพิ่มขนาด font เล็กน้อย */
-                padding: 8px 10px; /* เพิ่ม padding เล็กน้อย */
+                font-size: 14px; 
+                padding: 8px 10px; 
             }
 
 
             #category-tabs {
-                gap: 6px; /* ลด gap สำหรับแท็บ */
+                gap: 6px;
                 padding: 0 5px;
             }
             .category-tab {
-                padding: 7px 12px; /* ลด padding ของแท็บ */
-                font-size: 13px; /* ลดขนาด font ของแท็บ */
-                border-radius: 6px; /* ลด border-radius ของแท็บ */
+                padding: 7px 12px;
+                font-size: 13px;
+                border-radius: 6px;
             }
             .category-tab.active {
-                 transform: scale(1.03); /* ลดการขยายเล็กน้อย */
+                 transform: scale(1.03);
             }
 
             #channel-list {
@@ -346,7 +384,7 @@
                 width: 95%; 
             }
             .channel {
-                width: 60px; /* ลดขนาดช่องและโลโก้ลงอีกสำหรับจอเล็กมาก */
+                width: 60px; 
                 height: 60px;
                 border-radius: 8px; 
             }
