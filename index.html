@@ -54,8 +54,7 @@
             width: 90px;
             height: 90px;
             margin-bottom: 10px;
-            /* border-radius: 50%; <--- ลบออกเพื่อทำให้เป็นสี่เหลี่ยม */
-            border-radius: 8px; /* เพิ่มรัศมีขอบเล็กน้อยเพื่อให้ดูโค้งมน */
+            border-radius: 8px; /* ขอบโค้งมนสำหรับกรอบสี่เหลี่ยม */
             background-color: #fff; /* พื้นหลังสีขาวสำหรับสี่เหลี่ยม */
             display: flex;
             justify-content: center;
@@ -64,12 +63,13 @@
             border: 1px solid #ccc; /* ขอบสีเทาอ่อนๆ รอบสี่เหลี่ยม */
         }
         .channel img {
-            max-width: 80%;
-            max-height: 80%;
-            object-fit: contain;
-            border-radius: 0;
-            background-color: transparent;
+            width: 100%; /* ทำให้รูปภาพเต็มความกว้างของ container */
+            height: 100%; /* ทำให้รูปภาพเต็มความสูงของ container */
+            object-fit: contain; /* รักษาสัดส่วนของรูปภาพและพอดีกับกรอบ */
+            /* ลบ padding, background-color, border-radius ที่อาจมีผลต่อรูปภาพโดยตรง */
             padding: 0;
+            background-color: transparent;
+            border-radius: 0;
         }
         .channel-name {
             font-size: 16px;
