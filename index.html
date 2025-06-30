@@ -10,12 +10,14 @@
         /* ==================== */
         html {
             box-sizing: border-box;
+            background-color: #000 !important; /* บังคับพื้นหลังของ html เป็นสีดำ */
         }
         *, *::before, *::after {
             box-sizing: inherit;
         }
 
         :root {
+            /* Always Dark Mode Defaults - These should force dark mode */
             --bg-color: #000;
             --text-color: #fff;
             --channel-bg: #222;
@@ -32,17 +34,19 @@
             --category-tab-active-shadow-color: rgba(255, 255, 255, 0.7); /* เปลี่ยนสีเงา Active เป็นสีขาวเรืองแสง */
             --glow-color: rgba(255, 255, 255, 0.9);
             --no-channels-text: #ccc;
-            --body-bg-image: none;
+            --body-bg-image: none; /* Default: no image */
             --body-bg-size: cover;
             --body-bg-position: center;
             --body-bg-repeat: no-repeat;
             --body-overlay-color: rgba(0, 0, 0, 0.5); /* Overlay color for background image */
         }
 
+        /* ไม่มี @media (prefers-color-scheme: light) เพื่อบังคับ Dark Mode */
+
         body {
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
+            background-color: var(--bg-color) !important; /* บังคับพื้นหลังของ body เป็นสีดำ */
             color: var(--text-color);
             font-family: Arial, sans-serif;
             display: flex;
@@ -56,8 +60,8 @@
             background-position: var(--body-bg-position);
             background-repeat: var(--body-bg-repeat);
             background-attachment: fixed;
-            position: relative; /* สำหรับ body::before */
-            z-index: 1; /* ทำให้เนื้อหา body อยู่บน overlay */
+            position: relative;
+            z-index: 1;
         }
 
         /* ==================== */
@@ -71,13 +75,13 @@
             width: 100%;
             height: 100%;
             background-color: var(--body-overlay-color);
-            z-index: -1; /* อยู่ด้านหลังเนื้อหา body */
-            opacity: 1; /* ค่าเริ่มต้น */
+            z-index: -1; 
+            opacity: 1; 
             transition: opacity 0.3s ease;
         }
         /* ถ้าไม่มีภาพพื้นหลัง overlay ก็ไม่จำเป็นต้องมี */
         body:not([style*="background-image: url"])::before {
-            opacity: 0; /* ซ่อน overlay ถ้าไม่มี background-image */
+            opacity: 0; 
         }
 
 
@@ -102,7 +106,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             min-height: auto; 
             position: relative;
-            z-index: 2; /* ทำให้คอนโทรลอยู่เหนือ overlay */
+            z-index: 2; 
             transition: max-width 0.3s ease, width 0.3s ease; 
         }
         
@@ -294,7 +298,7 @@
             border-color: var(--category-tab-hover-border);
         }
         .category-tab.active {
-            background-color: var(--category-tab-active-bg); 
+            background-color: var(--category-tab-active-bg);
             border-color: #fff; /* เปลี่ยนสีขอบ Active เป็นสีขาว */
             font-weight: bold;
             color: var(--category-tab-hover-text); 
@@ -466,7 +470,10 @@
             {
                 name: "ช่อง 3 HD",
                 logo: "https://dookeela.live/uploads/1685812254.png",
-                file: "https://dookeela.live/live-tv/ch3hd", // URL ของหน้าเว็บ
+                // ***** สำคัญมาก: เพื่อลดแสงขาวและเพิ่มประสิทธิภาพ Wiseplay ให้ใช้ URL ตรงนี้ *****
+                // ใช้ URL ของไฟล์สตรีมมิ่งโดยตรง (เช่น .m3u8 หรือ .mpd) แทน URL ของหน้าเว็บ
+                // ตัวอย่าง URL ที่อาจจะช่วยลดแสงขาว: "https://dkl-o53d.cdn.akamaiz.com/dookeela/ch3hd/chunks.m3u8?nimblesessionid=..."
+                file: "https://dookeela.live/live-tv/ch3hd", // <--- ปัจจุบันยังเป็น URL ของหน้าเว็บ
                 category: "ทั่วไป"
             },
             {
@@ -539,7 +546,7 @@
                 tab.textContent = categoryDisplayNames[category] || category; 
                 tab.dataset.category = category;
                 tab.onclick = () => {
-                    filterChannels(category.trim()); // Trim here when passing to filterChannels
+                    filterChannels(category.trim()); 
                 };
                 categoryTabsContainer.appendChild(tab);
             });
