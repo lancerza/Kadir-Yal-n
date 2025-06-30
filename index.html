@@ -294,7 +294,7 @@
             border-color: var(--category-tab-hover-border);
         }
         .category-tab.active {
-            background-color: var(--category-tab-active-bg);
+            background-color: var(--category-tab-active-bg); 
             border-color: #fff; /* เปลี่ยนสีขอบ Active เป็นสีขาว */
             font-weight: bold;
             color: var(--category-tab-hover-text); 
@@ -466,49 +466,49 @@
             {
                 name: "ช่อง 3 HD",
                 logo: "https://dookeela.live/uploads/1685812254.png",
-                file: "https://dookeela.live/live-tv/ch3hd",
+                file: "https://dookeela.live/live-tv/ch3hd", // URL ของหน้าเว็บ
                 category: "ทั่วไป"
             },
             {
                 name: "Ch5HD",
                 logo: "https://dookeela.live/uploads/1664574997.png",
-                file: "https://dookeela.live/live-tv/ch5hd",
+                file: "https://dookeela.live/live-tv/ch5hd", // URL ของหน้าเว็บ
                 category: "ทั่วไป"
             },
             {
                 name: "Ch7HD",
                 logo: "https://dookeela.live/uploads/1688059473.png",
-                file: "https://dookeela.live/live-tv/ch7hd",
+                file: "https://dookeela.live/live-tv/ch7hd", // URL ของหน้าเว็บ
                 category: "ทั่วไป"
             },
             {
                 name: "T-Sports 7",
                 logo: "https://dookeela.live/uploads/1673134276.png",
-                file: "https://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7",
+                file: "https://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7", // URL ของหน้าเว็บ
                 category: "กีฬา"
             },
             {
                 name: "True Ball Thai 9",
                 logo: "https://dookeela.live/uploads/1723660123.png",
-                file: "https://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9",
+                file: "https://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9", // URL ของหน้าเว็บ
                 category: "กีฬา"
             },
             {
                 name: "Cartoon Club",
                 logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cartoon_Club_logo.png/800px-Cartoon_Club_logo.png",
-                file: "https://example.com/cartoonclub.m3u8",
+                file: "https://example.com/cartoonclub.m3u8", // URL ตัวอย่าง
                 category: "การ์ตูน"
             },
             {
                 name: "หนังดี",
                 logo: "https://via.placeholder.com/70?text=Movie",
-                file: "https://example.com/moviechannel.m3u8",
+                file: "https://example.com/moviechannel.m3u8", // URL ตัวอย่าง
                 category: "ภาพยนตร์"
             },
             {
                 name: "ช่องข่าวว่าง",
                 logo: "https://via.placeholder.com/70?text=News",
-                file: "https://example.com/newschannel.m3u8",
+                file: "https://example.com/newschannel.m3u8", // URL ตัวอย่าง
                 category: "ข่าว" 
             }
         ];
@@ -529,59 +529,57 @@
 
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
-        // const searchInput = document.getElementById('search-input'); // Removed search input
 
         let currentSelectedCategory = null; 
 
         function createCategoryTabs() {
             categoryOrder.forEach(category => {
-                // Option: display button only if category has channels (uncomment if block if desired )
-                // if (actualCategories.includes(category)) { 
-                    const tab = document.createElement("div");
-                    tab.className = "category-tab";
-                    tab.textContent = categoryDisplayNames[category] || category; 
-                    tab.dataset.category = category;
-                    tab.onclick = () => {
-                        // searchInput.value = ''; // Removed search input related logic
-                        filterChannels(category);
-                    };
-                    categoryTabsContainer.appendChild(tab);
-                // } 
+                const tab = document.createElement("div");
+                tab.className = "category-tab";
+                tab.textContent = categoryDisplayNames[category] || category; 
+                tab.dataset.category = category;
+                tab.onclick = () => {
+                    filterChannels(category.trim()); // Trim here when passing to filterChannels
+                };
+                categoryTabsContainer.appendChild(tab);
             });
         }
 
-        function filterChannels(selectedCategory /*, searchTerm = '' */) { // Removed searchTerm parameter
-            currentSelectedCategory = selectedCategory; 
+        function filterChannels(selectedCategory) {
+            console.log('--- filterChannels called ---');
+            console.log('Selected Category (raw):', selectedCategory);
+            const trimmedSelectedCategory = selectedCategory.trim();
+            console.log('Selected Category (trimmed):', trimmedSelectedCategory);
+
+            currentSelectedCategory = trimmedSelectedCategory; 
 
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
                 tab.style.transform = 'scale(1)'; 
             });
             
-            const selectedTab = document.querySelector(`.category-tab[data-category="${selectedCategory}"]`);
+            const selectedTab = document.querySelector(`.category-tab[data-category="${trimmedSelectedCategory}"]`);
             if (selectedTab) {
                 selectedTab.classList.add('active');
             }
 
             channelListContainer.innerHTML = ''; 
             
-            // Filter by category only
-            let filteredChannels = allChannels.filter(channel => channel.category === selectedCategory);
+            let filteredChannels = allChannels.filter(channel => {
+                const channelCategoryTrimmed = channel.category.trim(); 
+                const isMatch = channelCategoryTrimmed === trimmedSelectedCategory;
+                console.log(`Comparing channel category "${channel.category}" with selected "${trimmedSelectedCategory}": ${isMatch}`);
+                return isMatch;
+            });
 
-            // Removed search filtering logic
-            /*
-            if (searchTerm) {
-                const lowerCaseSearchTerm = searchTerm.toLowerCase();
-                filteredChannels = filteredChannels.filter(channel => 
-                    channel.name.toLowerCase().includes(lowerCaseSearchTerm)
-                );
-            }
-            */
+            console.log('Filtered Channels Count:', filteredChannels.length);
+            console.log('Filtered Channels:', filteredChannels);
+
 
             if (filteredChannels.length === 0) {
                 const messageDiv = document.createElement("div");
                 messageDiv.className = "no-channels-message";
-                messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[selectedCategory] || selectedCategory}" นี้`; 
+                messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[trimmedSelectedCategory] || trimmedSelectedCategory}" นี้`; 
                 channelListContainer.appendChild(messageDiv);
             } else {
                 filteredChannels.forEach(channel => {
@@ -669,7 +667,7 @@
                 const category = categoryOrder[i];
                 const channelsInCategory = allChannels.filter(channel => channel.category === category);
                 if (channelsInCategory.length > 0) {
-                    initialCategoryToShow = category;
+                    initialCategoryToShow = category.trim(); 
                     break;
                 }
             }
@@ -701,12 +699,6 @@
         resetBgBtnSuccessSection.addEventListener('click', () => {
             applyBackgroundImage(null);
         });
-
-        // Removed search input related logic
-        // searchInput.addEventListener('input', () => {
-        //     // Filter based on the current selected category and search term
-        //     filterChannels(currentSelectedCategory, searchInput.value.trim());
-        // });
 
     </script>
 </body>
