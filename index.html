@@ -31,7 +31,7 @@
         }
         .channel {
             cursor: pointer;
-            padding: 10px;
+            padding: 10px 10px 5px 10px; /* ลด padding-bottom ลงเหลือ 5px */
             background: #222;
             border: 1px solid #444;
             border-radius: 12px;
@@ -52,7 +52,7 @@
         .channel img {
             width: 80px;
             height: 80px;
-            margin-bottom: 4px; /* ลดระยะห่างด้านล่างของโลโก้ลงอีก */
+            margin-bottom: 0px; /* ลดระยะห่างด้านล่างของโลโก้เป็น 0 */
             object-fit: contain;
             border-radius: 0;
             background-color: transparent;
@@ -62,7 +62,7 @@
         .channel-name {
             font-size: 14px;
             font-weight: bold;
-            /* margin-top: 0; */ /* มั่นใจว่าไม่มี margin-top ที่ทำให้ชื่อช่องห่างลงไป */
+            margin-top: 2px; /* อาจจะเพิ่ม margin-top เล็กน้อยเพื่อไม่ให้ชิดโลโก้เกินไป */
             word-break: break-word;
         }
     </style>
