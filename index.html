@@ -14,58 +14,52 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh; /* ทำให้ body เต็มความสูงของ viewport */
-            justify-content: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
+            min-height: 100vh;
+            justify-content: center;
+        }
+        h1 {
+            margin-top: 20px; /* เพิ่มระยะห่างด้านบนของหัวข้อ */
+            margin-bottom: 30px; /* เพิ่มระยะห่างด้านล่างของหัวข้อ */
         }
         #channel-list {
-            margin: 20px auto; /* เพิ่ม margin รอบๆ */
+            margin: 20px auto;
             max-width: 800px;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px; /* เพิ่มระยะห่างระหว่างช่อง */
+            gap: 15px; /* เพิ่มระยะห่างระหว่างช่องให้มากขึ้น */
             justify-content: center;
         }
         .channel {
             cursor: pointer;
-            padding: 10px; /* เพิ่ม padding */
+            padding: 15px; /* เพิ่ม padding ให้กล่องใหญ่ขึ้น */
             background: #222;
             border: 1px solid #444;
-            border-radius: 8px; /* เพิ่มรัศมีขอบ */
+            border-radius: 12px; /* เพิ่มรัศมีขอบให้โค้งมนขึ้น */
             text-align: center;
-            width: 100px; /* เพิ่มขนาดช่อง */
-            box-sizing: border-box; /* ให้ padding และ border อยู่ใน width ที่กำหนด */
-            display: flex; /* ใช้ flexbox เพื่อจัดองค์ประกอบภายใน */
-            flex-direction: column; /* จัดเรียงองค์ประกอบในแนวตั้ง */
-            align-items: center; /* จัดให้อยู่กึ่งกลางแนวนอน */
+            width: 120px; /* เพิ่มขนาดความกว้างของช่อง */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none; /* ลบขีดเส้นใต้ของลิงก์ */
+            color: inherit; /* ให้สีตัวอักษรเป็นสีเดียวกับ body */
+            transition: background 0.3s ease; /* เพิ่ม transition สำหรับ hover effect */
+        }
+        .channel:hover {
+            background: #444; /* เปลี่ยนสีพื้นหลังเมื่อ hover */
+            border-color: #666;
         }
         .channel img {
-            width: 80px; /* เพิ่มขนาดโลโก้ */
-            height: 80px; /* เพิ่มขนาดโลโก้ */
-            margin-bottom: 8px;
-            border-radius: 50%; /* ทำให้โลโก้เป็นวงกลม */
-            object-fit: cover; /* ทำให้รูปภาพพอดีโดยไม่ยืด */
+            width: 90px; /* เพิ่มขนาดโลโก้ */
+            height: 90px; /* เพิ่มขนาดโลโก้ */
+            margin-bottom: 10px;
+            border-radius: 50%;
+            object-fit: cover;
         }
         .channel-name {
-            font-size: 14px; /* ขนาดตัวอักษรชื่อช่อง */
-            margin-bottom: 5px;
-            word-break: break-word; /* ให้ข้อความที่ยาวขึ้นตัดบรรทัด */
-        }
-        .open-btn {
-            display: block;
-            margin-top: 5px;
-            padding: 8px 12px;
-            background-color: #4CAF50; /* สีเขียว */
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            width: 100%; /* ให้ปุ่มเต็มความกว้างของช่อง */
-            box-sizing: border-box;
-        }
-        .open-btn:hover {
-            background-color: #45a049;
+            font-size: 16px; /* ปรับขนาดตัวอักษรชื่อช่อง */
+            font-weight: bold; /* ทำให้ชื่อช่องตัวหนาขึ้น */
+            word-break: break-word;
         }
     </style>
 </head>
@@ -106,20 +100,20 @@
 
         const channelList = document.getElementById("channel-list");
         channels.forEach(channel => {
-            const div = document.createElement("div");
-            div.className = "channel";
-
             // สร้าง Wiseplay Intent URI สำหรับแต่ละช่อง
-            // สำคัญ: การเข้ารหัส URI component สำหรับ URL ของไฟล์
             const encodedFileUrl = encodeURIComponent(channel.file);
             const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
 
-            div.innerHTML = `
+            const a = document.createElement("a"); // ใช้แท็ก <a> เป็นคอนเทนเนอร์หลัก
+            a.href = wiseplayIntentUri; // กำหนด href ให้เป็น Intent URI
+            a.className = "channel"; // กำหนด class เพื่อใช้ CSS
+            a.target = "_blank"; // เปิดในแท็บ/แอปใหม่
+
+            a.innerHTML = `
                 <img src="${channel.logo}" alt="${channel.name}"><br>
                 <div class="channel-name">${channel.name}</div>
-                <a href="${wiseplayIntentUri}" class="open-btn">เปิดใน Wiseplay</a>
             `;
-            channelList.appendChild(div);
+            channelList.appendChild(a);
         });
     </script>
 </body>
