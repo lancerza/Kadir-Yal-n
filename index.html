@@ -26,17 +26,17 @@
             max-width: 800px;
             display: flex;
             flex-wrap: wrap;
-            gap: 15px; /* ระยะห่างระหว่างกล่อง */
+            gap: 15px; /* รักษาระยะห่างระหว่างกล่อง */
             justify-content: center;
         }
         .channel {
             cursor: pointer;
-            padding: 15px; /* Padding รอบกล่อง */
+            padding: 10px; /* ลด padding รอบกล่องให้กระชับขึ้น (จาก 15px) */
             background: #222;
             border: 1px solid #444;
             border-radius: 12px;
             text-align: center;
-            width: 120px; /* ความกว้างของแต่ละกล่อง */
+            width: 120px; /* รักษากว้างของแต่ละกล่อง */
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -49,21 +49,20 @@
             background: #444;
             border-color: #666;
         }
-        /* Style for the logo image */
         .channel img {
-            width: 90px; /* ความกว้างของรูปภาพโลโก้ */
-            height: 90px; /* ความสูงของรูปภาพโลโก้ */
-            margin-bottom: 5px; /* ระยะห่างระหว่างโลโก้กับชื่อช่อง */
-            object-fit: contain; /* รักษาสัดส่วนของรูปภาพ */
-            border-radius: 0; /* ตรวจสอบให้แน่ใจว่ารูปภาพไม่มี border-radius ของตัวเอง */
-            background-color: transparent; /* ทำให้พื้นหลังของรูปภาพโปร่งใส */
-            border: none; /* ไม่มีเส้นขอบที่รูปภาพ */
-            padding: 0; /* ไม่มี padding ที่รูปภาพ */
+            width: 90px;
+            height: 90px;
+            margin-bottom: 5px;
+            object-fit: contain;
+            border-radius: 0;
+            background-color: transparent;
+            border: none;
+            padding: 0;
         }
         .channel-name {
-            font-size: 16px; /* ขนาดตัวอักษรชื่อช่อง */
+            font-size: 16px;
             font-weight: bold;
-            margin-top: 0px; /* ชิดกับโลโก้ด้านบน */
+            margin-top: 0px;
             word-break: break-word;
             white-space: normal;
         }
