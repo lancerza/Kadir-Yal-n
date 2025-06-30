@@ -88,7 +88,7 @@
 
         #bg-image-controls {
             margin-bottom: 20px;
-            padding: 6px 12px;
+            padding: 8px 12px; /* รักษาระยะห่างเท่าเดิมตามที่ปรับล่าสุด */
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 10px;
@@ -97,8 +97,8 @@
             gap: 8px;
             justify-content: center;
             align-items: center;
-            max-width: 450px;
-            width: 90%; 
+            max-width: 400px; /* ลด max-width ลงอีก */
+            width: 90%; /* ให้ความกว้าง 90% ของ viewport เพื่อให้มีระยะห่างจากขอบจอ */
             box-shadow: 0 0 10px rgba(0,0,0,0.3);
             min-height: auto; 
             position: relative;
@@ -124,7 +124,7 @@
             color: #fff;
             font-size: 13px;
             outline: none;
-            min-width: 150px;
+            min-width: 100px; /* ลด min-width ลงเพื่อให้ input ยืดหยุ่นขึ้น */
         }
         #bg-image-url::placeholder {
             color: #aaa;
@@ -401,7 +401,7 @@
     <div id="bg-image-controls">
         <div class="bg-input-section">
             <input type="text" id="bg-image-url" placeholder="ใส่ URL ภาพพื้นหลังที่นี่">
-            <button id="apply-bg-btn" class="bg-control-btn">ตั้งค่าพื้นหลัง</button>
+            <button id="apply-bg-btn" class="bg-control-btn">ตั้งค่าภาพพื้นหลัง</button>
             <button id="reset-bg-btn" class="bg-control-btn reset">รีเซ็ตพื้นหลัง</button>
         </div>
         <div class="bg-success-section">
