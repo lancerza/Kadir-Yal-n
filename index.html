@@ -336,14 +336,24 @@
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
 
+        // *** การปรับปรุง: จัดกลุ่มช่องตามหมวดหมู่ไว้ล่วงหน้า ***
+        const channelsByCategory = {};
+        allChannels.forEach(channel => {
+            const trimmedCategory = channel.category.trim();
+            if (!channelsByCategory[trimmedCategory]) {
+                channelsByCategory[trimmedCategory] = [];
+            }
+            channelsByCategory[trimmedCategory].push(channel);
+        });
+
         // Function to create category tabs dynamically
         function createCategoryTabs() {
-            // ใช้ Document Fragment สำหรับแท็บหมวดหมู่ด้วย
             const fragment = document.createDocumentFragment();
             categoryTabsContainer.innerHTML = ''; // Clear existing tabs
 
             categoryOrder.forEach(category => {
-                const hasChannels = allChannels.some(channel => channel.category.trim() === category.trim());
+                // ตรวจสอบว่ามีช่องในหมวดหมู่นั้นหรือไม่ โดยใช้ข้อมูลที่จัดกลุ่มไว้แล้ว
+                const hasChannels = channelsByCategory[category.trim()] && channelsByCategory[category.trim()].length > 0;
                 if (hasChannels) { 
                     const tab = document.createElement("div");
                     tab.className = "category-tab";
@@ -374,9 +384,8 @@
 
             channelListContainer.innerHTML = ''; // Clear previous channels before adding new ones
 
-            const filteredChannels = allChannels.filter(channel => 
-                channel.category.trim() === trimmedSelectedCategory
-            );
+            // *** การปรับปรุง: ดึงช่องที่กรองแล้วจาก Object ที่จัดกลุ่มไว้ล่วงหน้า ***
+            const filteredChannels = channelsByCategory[trimmedSelectedCategory] || []; 
 
             if (filteredChannels.length === 0) {
                 const messageDiv = document.createElement("div");
@@ -384,7 +393,6 @@
                 messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[trimmedSelectedCategory] || trimmedSelectedCategory}" นี้`; 
                 channelListContainer.appendChild(messageDiv);
             } else {
-                // ใช้ Document Fragment สำหรับรายการช่อง
                 const fragment = document.createDocumentFragment();
 
                 filteredChannels.forEach(channel => {
@@ -392,10 +400,7 @@
                     const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
                     
                     let isDirectStream = false;
-                    // ลบตัวแปร tooltipText ออก
-                    // let tooltipText = channel.name; 
 
-                    // เพิ่มประเภทไฟล์ที่ Wiseplay รองรับ
                     const isStreamUrl = channel.file.endsWith('.m3u8') || 
                                         channel.file.endsWith('.mpd') || 
                                         channel.file.endsWith('.ts') || 
@@ -407,19 +412,13 @@
 
                     if (isStreamUrl) {
                         isDirectStream = true;
-                        // ไม่ต้องกำหนด tooltipText แล้ว
-                        // tooltipText = `คลิกเพื่อเปิด ${channel.name} ใน Wiseplay`;
-                    } else {
-                        // ไม่ต้องกำหนด tooltipText แล้ว
-                        // tooltipText = `⚠️ ช่องนี้อาจเล่นไม่ได้โดยตรงใน Wiseplay (ไม่ใช่ URL สตรีมโดยตรง)\n(URL ปัจจุบัน: ${channel.file})`;
-                    }
+                    } 
+                    // เนื่องจากไม่มี tooltipText แล้ว จึงไม่ต้องมี else block สำหรับ tooltip
 
                     const channelLink = document.createElement("a");
                     channelLink.className = "channel";
                     channelLink.href = wiseplayIntentUri;
-                    // *** ลบแอตทริบิวต์ title ออกจากตรงนี้ ***
-                    // channelLink.title = tooltipText; 
-
+                    
                     if (!isDirectStream) {
                         channelLink.classList.add('non-playable-channel');
                     }
@@ -446,11 +445,10 @@
             createCategoryTabs();
 
             let initialCategoryToShow = null;
-            // หาหมวดหมู่แรกที่มีช่องอยู่
+            // หาหมวดหมู่แรกที่มีช่องอยู่ (ใช้ channelsByCategory ที่จัดกลุ่มไว้แล้ว)
             for (let i = 0; i < categoryOrder.length; i++) {
                 const category = categoryOrder[i];
-                const channelsInCategory = allChannels.filter(channel => channel.category.trim() === category.trim());
-                if (channelsInCategory.length > 0) {
+                if (channelsByCategory[category.trim()] && channelsByCategory[category.trim()].length > 0) {
                     initialCategoryToShow = category.trim(); 
                     break; 
                 }
