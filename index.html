@@ -181,16 +181,19 @@
         .channel:focus-visible { /* สำหรับเมื่อมีการโฟกัสด้วย keyboard */
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
         }
+        /* *** ลบ CSS สำหรับ .non-playable-channel ออกไปทั้งหมด *** */
+        /*
         .channel.non-playable-channel {
-            opacity: 0.6; /* ทำให้ดูจางลง */
-            border: 2px dashed #ff0; /* เปลี่ยนขอบเป็นเส้นประสีเหลือง */
-            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5); /* เงาสีเหลือง */
-            cursor: help; /* เปลี่ยนเคอร์เซอร์เป็นเครื่องหมายคำถาม */
+            opacity: 0.6;
+            border: 2px dashed #ff0;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+            cursor: help;
         }
         .channel.non-playable-channel:hover {
             opacity: 0.8;
-            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8); /* เงาสีเหลืองเข้มขึ้นเมื่อ hover */
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8);
         }
+        */
         .channel img {
             width: 70px;
             height: 70px;
@@ -255,7 +258,7 @@
 </head>
 <body>
     <h1>เลือกช่องเพื่อเปิดใน Wiseplay</h1>
-
+    
     <div id="category-tabs">
     </div>
 
@@ -264,8 +267,9 @@
     <script src="channels.js"></script> 
 
     <script>
-        // ตอนนี้ allChannels ถูกดึงมาจาก channels.js แล้ว
-
+        // === Channel Data (จะถูกดึงมาจาก channels.js) ===
+        // allChannels ถูกประกาศใน channels.js
+        
         // === Category Management ===
         const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"];
 
@@ -281,7 +285,7 @@
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
 
-        // *** การปรับปรุง: จัดกลุ่มช่องตามหมวดหมู่ไว้ล่วงหน้า ***
+        // *** การจัดกลุ่มช่องตามหมวดหมู่ไว้ล่วงหน้า ***
         const channelsByCategory = {};
         allChannels.forEach(channel => {
             const trimmedCategory = channel.category.trim();
@@ -297,7 +301,6 @@
             categoryTabsContainer.innerHTML = ''; // Clear existing tabs
 
             categoryOrder.forEach(category => {
-                // ตรวจสอบว่ามีช่องในหมวดหมู่นั้นหรือไม่ โดยใช้ข้อมูลที่จัดกลุ่มไว้แล้ว
                 const hasChannels = channelsByCategory[category.trim()] && channelsByCategory[category.trim()].length > 0;
                 if (hasChannels) { 
                     const tab = document.createElement("div");
@@ -321,7 +324,7 @@
                 tab.classList.remove('active');
                 tab.style.transform = 'scale(1)'; 
             });
-
+            
             const selectedTab = document.querySelector(`.category-tab[data-category="${trimmedSelectedCategory}"]`);
             if (selectedTab) {
                 selectedTab.classList.add('active');
@@ -329,7 +332,6 @@
 
             channelListContainer.innerHTML = ''; // Clear previous channels before adding new ones
 
-            // *** การปรับปรุง: ดึงช่องที่กรองแล้วจาก Object ที่จัดกลุ่มไว้ล่วงหน้า ***
             const filteredChannels = channelsByCategory[trimmedSelectedCategory] || []; 
 
             if (filteredChannels.length === 0) {
@@ -342,42 +344,34 @@
 
                 filteredChannels.forEach(channel => {
                     const encodedFileUrl = encodeURIComponent(channel.file);
+                    // Wiseplay Intent URI ยังคงต้องมี S.url และ S.title
                     const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
-
-                    let isDirectStream = false;
-
-                    const isStreamUrl = channel.file.endsWith('.m3u8') || 
-                                        channel.file.endsWith('.mpd') || 
-                                        channel.file.endsWith('.ts') || 
-                                        channel.file.endsWith('.mp4') ||
-                                        channel.file.endsWith('.m3u') || 
-                                        channel.file.includes('googlevideo.com') ||
-                                        channel.file.includes('.avi') || 
-                                        channel.file.includes('.webm'); 
-
-                    if (isStreamUrl) {
-                        isDirectStream = true;
-                    } 
+                    
+                    // *** ลบโค้ดส่วน isDirectStream ทั้งหมด ***
+                    // let isDirectStream = false;
+                    // const isStreamUrl = channel.file.endsWith('.m3u8') || ...;
+                    // if (isStreamUrl) { isDirectStream = true; }
 
                     const channelLink = document.createElement("a");
                     channelLink.className = "channel";
                     channelLink.href = wiseplayIntentUri;
-
-                    if (!isDirectStream) {
-                        channelLink.classList.add('non-playable-channel');
-                    }
+                    
+                    // *** ลบเงื่อนไขการเพิ่ม class 'non-playable-channel' ***
+                    // if (!isDirectStream) {
+                    //     channelLink.classList.add('non-playable-channel');
+                    // }
 
                     const img = document.createElement("img");
                     img.src = channel.logo;
                     img.alt = channel.name;
-
+                    
                     const divName = document.createElement("div");
                     divName.className = "channel-name";
                     divName.textContent = channel.name; 
 
                     channelLink.appendChild(img);
                     channelLink.appendChild(divName);
-
+                    
                     fragment.appendChild(channelLink); 
                 });
                 channelListContainer.appendChild(fragment); 
@@ -397,7 +391,7 @@
                     break; 
                 }
             }
-
+            
             // แสดงช่องสำหรับหมวดหมู่เริ่มต้น
             if (initialCategoryToShow) {
                 filterChannels(initialCategoryToShow);
