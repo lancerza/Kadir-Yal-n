@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายการช่อง Wiseplay</title>
     <style>
+        /* ... (CSS code remains unchanged) ... */
         /* ==================== */
         /* Global Box Sizing */
         /* ==================== */
@@ -254,72 +255,16 @@
 </head>
 <body>
     <h1>เลือกช่องเพื่อเปิดใน Wiseplay</h1>
-    
+
     <div id="category-tabs">
     </div>
 
     <div id="channel-list"></div>
 
+    <script src="channels.js"></script> 
+
     <script>
-        // === Channel Data ===
-        // ***** สำคัญมาก: เพื่อให้ Wiseplay ทำงานได้เต็มประสิทธิภาพและเล่นช่องได้
-        // คุณต้องเปลี่ยน URL ใน 'file:' ของแต่ละช่อง
-        // ให้เป็น URL ของไฟล์สตรีมมิ่งโดยตรงเท่านั้น (.m3u8, .mpd, .ts, .mp4 ที่สามารถเล่นได้โดยตรง)
-        // หากยังเป็น URL ของหน้าเว็บ (เช่น dookeela.live/live-tv/ch3hd หรือ goal-th.com/...)
-        // Wiseplay จะไม่สามารถเล่นได้และจะแจ้งว่า "กดเข้าช่องไม่ได้" หรือ "ไม่สามารถเล่นวิดีโอได้"
-        const allChannels = [
-            {
-                name: "ช่อง 3 HD",
-                logo: "https://dookeela.live/uploads/1685812254.png",
-                // ตัวอย่าง URL ที่ Wiseplay อาจเล่นได้:
-                // file: "https://example.com/live/ch3hd/playlist.m3u8", 
-                // file: "https://mycdn.tv/ch3/stream.mpd",
-                file: "https://dookeela.live/live-tv/ch3hd", // <--- ต้องแก้ไขตรงนี้!
-                category: "ทั่วไป"
-            },
-            {
-                name: "Ch5HD",
-                logo: "https://dookeela.live/uploads/1664574997.png",
-                file: "https://dookeela.live/live-tv/ch5hd", // <--- ต้องแก้ไขตรงนี้!
-                category: "ทั่วไป"
-            },
-            {
-                name: "Ch7HD",
-                logo: "https://dookeela.live/uploads/1688059473.png",
-                file: "https://dookeela.live/live-tv/ch7hd", // <--- ต้องแก้ไขตรงนี้!
-                category: "ทั่วไป"
-            },
-            {
-                name: "T-Sports 7",
-                logo: "https://dookeela.live/uploads/1673134276.png",
-                file: "https://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7", // <--- ต้องแก้ไขตรงนี้!
-                category: "กีฬา"
-            },
-            {
-                name: "True Ball Thai 9",
-                logo: "https://dookeela.live/uploads/1723660123.png",
-                file: "https://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9", // <--- ต้องแก้ไขตรงนี้!
-                category: "กีฬา"
-            },
-            {
-                name: "Cartoon Club",
-                logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cartoon_Club_logo.png/800px-Cartoon_Club_logo.png",
-                file: "https://example.com/cartoonclub.m3u8", // <--- ตัวอย่าง URL ที่ถูกต้องแล้ว
-                category: "การ์ตูน"
-            },
-            {
-                name: "หนังดี",
-                logo: "https://via.placeholder.com/70?text=Movie",
-                file: "https://example.com/moviechannel.m3u8", // <--- ตัวอย่าง URL ที่ถูกต้องแล้ว
-                category: "ภาพยนตร์"
-            },
-            {
-                name: "ช่องข่าวว่าง",
-                logo: "https://via.placeholder.com/70?text=News",
-                file: "https://example.com/newschannel.m3u8", // <--- ตัวอย่าง URL ที่ถูกต้องแล้ว
-                category: "ข่าว" 
-            }
-        ];
+        // ตอนนี้ allChannels ถูกดึงมาจาก channels.js แล้ว
 
         // === Category Management ===
         const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"];
@@ -376,7 +321,7 @@
                 tab.classList.remove('active');
                 tab.style.transform = 'scale(1)'; 
             });
-            
+
             const selectedTab = document.querySelector(`.category-tab[data-category="${trimmedSelectedCategory}"]`);
             if (selectedTab) {
                 selectedTab.classList.add('active');
@@ -398,7 +343,7 @@
                 filteredChannels.forEach(channel => {
                     const encodedFileUrl = encodeURIComponent(channel.file);
                     const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
-                    
+
                     let isDirectStream = false;
 
                     const isStreamUrl = channel.file.endsWith('.m3u8') || 
@@ -413,12 +358,11 @@
                     if (isStreamUrl) {
                         isDirectStream = true;
                     } 
-                    // เนื่องจากไม่มี tooltipText แล้ว จึงไม่ต้องมี else block สำหรับ tooltip
 
                     const channelLink = document.createElement("a");
                     channelLink.className = "channel";
                     channelLink.href = wiseplayIntentUri;
-                    
+
                     if (!isDirectStream) {
                         channelLink.classList.add('non-playable-channel');
                     }
@@ -426,14 +370,14 @@
                     const img = document.createElement("img");
                     img.src = channel.logo;
                     img.alt = channel.name;
-                    
+
                     const divName = document.createElement("div");
                     divName.className = "channel-name";
                     divName.textContent = channel.name; 
 
                     channelLink.appendChild(img);
                     channelLink.appendChild(divName);
-                    
+
                     fragment.appendChild(channelLink); 
                 });
                 channelListContainer.appendChild(fragment); 
@@ -445,7 +389,7 @@
             createCategoryTabs();
 
             let initialCategoryToShow = null;
-            // หาหมวดหมู่แรกที่มีช่องอยู่ (ใช้ channelsByCategory ที่จัดกลุ่มไว้แล้ว)
+            // หาหมวดหมู่แรกที่มีช่องอยู่
             for (let i = 0; i < categoryOrder.length; i++) {
                 const category = categoryOrder[i];
                 if (channelsByCategory[category.trim()] && channelsByCategory[category.trim()].length > 0) {
@@ -453,7 +397,7 @@
                     break; 
                 }
             }
-            
+
             // แสดงช่องสำหรับหมวดหมู่เริ่มต้น
             if (initialCategoryToShow) {
                 filterChannels(initialCategoryToShow);
