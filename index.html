@@ -17,6 +17,10 @@
     <script src="channels.js"></script> 
 
     <script>
+        // === Channel Data (จะถูกดึงมาจาก channels.js) ===
+        // allChannels ถูกประกาศใน channels.js
+        
+        // === Category Management ===
         const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"];
 
         const categoryDisplayNames = {
@@ -31,6 +35,7 @@
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
 
+        // *** การจัดกลุ่มช่องตามหมวดหมู่ไว้ล่วงหน้า ***
         const channelsByCategory = {};
         allChannels.forEach(channel => {
             const trimmedCategory = channel.category.trim();
@@ -40,9 +45,10 @@
             channelsByCategory[trimmedCategory].push(channel);
         });
 
+        // Function to create category tabs dynamically
         function createCategoryTabs() {
             const fragment = document.createDocumentFragment();
-            categoryTabsContainer.innerHTML = '';
+            categoryTabsContainer.innerHTML = ''; // Clear existing tabs
 
             categoryOrder.forEach(category => {
                 const hasChannels = channelsByCategory[category.trim()] && channelsByCategory[category.trim()].length > 0;
@@ -60,6 +66,7 @@
             categoryTabsContainer.appendChild(fragment);
         }
 
+        // Function to filter and display channels based on selected category
         function filterChannels(selectedCategory) {
             const trimmedSelectedCategory = selectedCategory.trim();
 
@@ -73,7 +80,7 @@
                 selectedTab.classList.add('active');
             }
 
-            channelListContainer.innerHTML = '';
+            channelListContainer.innerHTML = ''; // Clear previous channels before adding new ones
 
             const filteredChannels = channelsByCategory[trimmedSelectedCategory] || []; 
 
@@ -86,13 +93,17 @@
                 const fragment = document.createDocumentFragment();
 
                 filteredChannels.forEach(channel => {
+                    // *** โค้ดที่ปรับปรุง: สร้าง wiseplayIntentUri พร้อมพารามิเตอร์ใหม่ ***
                     const encodedFileUrl = encodeURIComponent(channel.file);
-                    // *** บรรทัดที่ถูกปรับ: ลบ S.title= ออกไปเลย ***
-                    const wiseplayIntentUri = `https://#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
+                    const encodedUserAgent = encodeURIComponent("exo_player");
+                    const encodedReferer = encodeURIComponent("https://dookeela.live/live-tv"); // แก้ไข URL referer ที่ผิดพลาด
+                    const encodedTitle = encodeURIComponent(channel.name); // นำชื่อช่องกลับมาเป็น Title
+
+                    const wiseplayIntentUri = `intent://${encodedFileUrl}#Intent;package=com.wiseplay;S.userAgent=${encodedUserAgent};S.title=${encodedTitle};S.referer=${encodedReferer};scheme=https;type=video/mp4;end`;
                     
                     const channelLink = document.createElement("a");
                     channelLink.className = "channel";
-                    channelLink.href = wiseplayIntentUri;
+                    channelLink.href = wiseplayIntentUri; // กำหนด href ให้กับลิงก์อีกครั้ง
                     
                     const img = document.createElement("img");
                     img.src = channel.logo;
@@ -111,10 +122,12 @@
             }
         }
 
+        // --- Initialize the page ---
         document.addEventListener('DOMContentLoaded', () => {
             createCategoryTabs();
 
             let initialCategoryToShow = null;
+            // หาหมวดหมู่แรกที่มีช่องอยู่
             for (let i = 0; i < categoryOrder.length; i++) {
                 const category = categoryOrder[i];
                 if (channelsByCategory[category.trim()] && channelsByCategory[category.trim()].length > 0) {
@@ -123,9 +136,11 @@
                 }
             }
             
+            // แสดงช่องสำหรับหมวดหมู่เริ่มต้น
             if (initialCategoryToShow) {
                 filterChannels(initialCategoryToShow);
             } else {
+                // หากไม่มีช่องเลยในข้อมูล
                 channelListContainer.innerHTML = '<p class="no-channels-message">ยังไม่มีช่องรายการในระบบ</p>';
             }
         });
