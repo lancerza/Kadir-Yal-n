@@ -151,8 +151,12 @@
             align-items: flex-start;
             z-index: 2; 
         }
-        /* เปลี่ยน .channel จาก <a> เป็น <div> */
+        /* เปลี่ยน .channel จาก <div> เป็น <a> */
         .channel {
+            display: flex; /* ทำให้เนื้อหาภายในอยู่ตรงกลาง */
+            flex-direction: column; /* วางรูปและชื่อซ้อนกัน */
+            align-items: center; /* จัดให้อยู่กึ่งกลางในแนวนอน */
+            justify-content: center; /* จัดให้อยู่กึ่งกลางในแนวตั้ง */
             cursor: pointer;
             width: 70px;
             height: 70px;
@@ -162,12 +166,9 @@
             border-radius: 10px; 
             text-align: center;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            /* เนื่องจากเป็น div ต้องกำหนดให้สามารถรับโฟกัสได้ */
-            outline: none; /* ลบ outline เริ่มต้น */
+            text-decoration: none; /* ลบขีดเส้นใต้ของลิงก์ */
+            color: inherit; /* ใช้สีตัวอักษรจาก parent (body) */
+            outline: none; /* ลบ outline เริ่มต้นของ <a> */
             transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
         }
         .channel:hover,
@@ -382,7 +383,10 @@
                 channelListContainer.appendChild(messageDiv);
             } else {
                 filteredChannels.forEach(channel => {
-                    let wiseplayIntentUri;
+                    // สร้าง wiseplayIntentUri ล่วงหน้า
+                    const encodedFileUrl = encodeURIComponent(channel.file);
+                    const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
+                    
                     let isDirectStream = false;
                     let tooltipText = channel.name; // Default tooltip text for hover
 
@@ -392,48 +396,32 @@
                                         channel.file.endsWith('.mpd') || 
                                         channel.file.endsWith('.ts') || 
                                         channel.file.endsWith('.mp4') ||
-                                        channel.file.includes('googlevideo.com') ||
-                                        channel.file.includes('.m3u'); // บางทีอาจเป็น .m3u ธรรมดา
+                                        channel.file.endsWith('.m3u') || // เพิ่ม .m3u
+                                        channel.file.includes('googlevideo.com'); // Google Video URL
 
                     if (isStreamUrl) {
                         isDirectStream = true;
-                        const encodedFileUrl = encodeURIComponent(channel.file);
-                        wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
                         tooltipText = `คลิกเพื่อเปิด ${channel.name} ใน Wiseplay`;
                     } else {
                         // ถ้าไม่ใช่ URL สตรีมโดยตรง
-                        const encodedFileUrl = encodeURIComponent(channel.file);
-                        wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
                         tooltipText = `⚠️ ช่องนี้อาจเล่นไม่ได้โดยตรงใน Wiseplay (ไม่ใช่ URL สตรีมโดยตรง)\n(URL ปัจจุบัน: ${channel.file})`;
                     }
 
-                    // *** การเปลี่ยนแปลงหลัก: ใช้ <div> และ JavaScript สำหรับ onClick ***
-                    const channelDiv = document.createElement("div");
-                    channelDiv.className = "channel";
-                    channelDiv.tabIndex = 0; // ทำให้ div สามารถรับโฟกัสได้ด้วย keyboard
-                    channelDiv.title = tooltipText; // Set tooltip for more info
-
-                    // Event listener สำหรับการคลิก
-                    channelDiv.onclick = () => {
-                        window.location.href = wiseplayIntentUri; // Trigger the Wiseplay Intent
-                    };
-                    
-                    // Event listener สำหรับการกดปุ่ม Enter (เพื่อ Accessibility)
-                    channelDiv.onkeydown = (event) => {
-                        if (event.key === 'Enter') {
-                            window.location.href = wiseplayIntentUri;
-                        }
-                    };
+                    // *** การเปลี่ยนแปลงหลัก: ใช้ <a> แทน <div> ***
+                    const channelLink = document.createElement("a");
+                    channelLink.className = "channel";
+                    channelLink.href = wiseplayIntentUri; // กำหนด href ให้เป็น Wiseplay Intent URI โดยตรง
+                    channelLink.title = tooltipText; // Set tooltip for more info
 
                     if (!isDirectStream) {
-                        channelDiv.classList.add('non-playable-channel'); // Add class for specific styling
+                        channelLink.classList.add('non-playable-channel'); // Add class for specific styling
                     }
 
-                    channelDiv.innerHTML = `
+                    channelLink.innerHTML = `
                         <img src="${channel.logo}" alt="${channel.name}">
                         <div class="channel-name">${channel.name}</div>
                     `;
-                    channelListContainer.appendChild(channelDiv);
+                    channelListContainer.appendChild(channelLink);
                 });
             }
         }
