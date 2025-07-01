@@ -34,10 +34,7 @@
             --category-tab-active-shadow-color: rgba(255, 255, 255, 0.7); /* เปลี่ยนสีเงา Active เป็นสีขาวเรืองแสง */
             --glow-color: rgba(255, 255, 255, 0.9);
             --no-channels-text: #ccc;
-            /* ไม่มี --body-bg-image, --body-overlay-color เพราะฟังก์ชันพื้นหลังถูกลบไปแล้ว */
         }
-
-        /* ไม่มี @media (prefers-color-scheme: light) เพื่อบังคับ Dark Mode */
 
         body {
             margin: 0;
@@ -51,25 +48,17 @@
             min-height: 100vh;
             justify-content: flex-start;
             padding-top: 20px;
-            /* ไม่มี background-image */
-            /* ไม่มี position: relative; z-index: 1 สำหรับ body::before ที่ถูกลบไป */
         }
-
-        /* Background Image Overlay - ถูกลบไปแล้ว */
-
 
         h1 {
             margin-top: 0px;
             margin-bottom: 20px;
         }
 
-        /* Background Image Controls Styling - ถูกลบไปแล้ว */
-
-
         /* ==================== */
         /* Button Styling - General Enhancements */
         /* ==================== */
-        .bg-control-btn, .category-tab {
+        .category-tab {
             /* General button reset */
             -webkit-appearance: none; 
             -moz-appearance: none; 
@@ -84,21 +73,16 @@
         }
 
         /* Focus state for accessibility (keyboard navigation) */
-        .bg-control-btn:focus-visible, .category-tab:focus-visible, #bg-image-url:focus-visible { 
+        .category-tab:focus-visible { 
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
         }
 
         /* Active state (when clicked/pressed) */
-        .bg-control-btn:active, .category-tab:active {
+        .category-tab:active {
             transform: scale(0.98); 
             opacity: 0.9; 
             box-shadow: inset 0 0 5px rgba(0,0,0,0.2); 
         }
-
-        /* .bg-control-btn is now mainly for general category tab styles */
-        /* If no other elements use .bg-control-btn, these can be merged into .category-tab */
-        /* For now, leaving as is for clarity */
-
 
         #category-tabs {
             margin-bottom: 20px;
@@ -167,6 +151,7 @@
             align-items: flex-start;
             z-index: 2; 
         }
+        /* เปลี่ยน .channel จาก <a> เป็น <div> */
         .channel {
             cursor: pointer;
             width: 70px;
@@ -181,15 +166,26 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-decoration: none;
-            color: inherit;
-            box-shadow: 0 0 5px rgba(255, 255, 255, 0);
-            transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+            /* เนื่องจากเป็น div ต้องกำหนดให้สามารถรับโฟกัสได้ */
+            outline: none; /* ลบ outline เริ่มต้น */
+            transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
         }
-        .channel:hover {
+        .channel:hover,
+        .channel:focus-visible { /* เพิ่ม focus-visible สำหรับ keyboard navigation */
             background: var(--channel-hover-bg);
             border-color: var(--channel-hover-border);
             box-shadow: 0 0 15px var(--glow-color);
+        }
+        .channel:focus-visible { /* สำหรับเมื่อมีการโฟกัสด้วย keyboard */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
+        }
+        .channel.non-playable-channel {
+            opacity: 0.6; /* ทำให้ดูจางลง */
+            border-color: #f00; /* เปลี่ยนสีขอบเป็นสีแดง */
+            cursor: help; /* เปลี่ยนเคอร์เซอร์เป็นเครื่องหมายคำถาม */
+        }
+        .channel.non-playable-channel:hover {
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.7); /* เงาสีแดงเมื่อ hover */
         }
         .channel img {
             width: 70px;
@@ -224,15 +220,6 @@
                 padding-top: 15px;
             }
 
-            /* bg-image-controls section ถูกลบไปแล้ว */
-
-            /* .bg-control-btn (general) is adjusted here, now applies mostly to category tabs */
-            .bg-control-btn { 
-                font-size: 14px; 
-                padding: 8px 10px; 
-                box-sizing: border-box; 
-            }
-
             #category-tabs {
                 gap: 6px;
                 padding: 0 5px;
@@ -243,7 +230,7 @@
                 border-radius: 8px; 
             }
             .category-tab.active {
-                 transform: scale(1.03);
+                transform: scale(1.03);
             }
 
             #channel-list {
@@ -266,62 +253,63 @@
     <h1>เลือกช่องเพื่อเปิดใน Wiseplay</h1>
     
     <div id="category-tabs">
-        </div>
+    </div>
 
     <div id="channel-list"></div>
 
     <script>
         // === Channel Data ===
+        // ***** สำคัญมาก: เพื่อให้ Wiseplay ทำงานได้เต็มประสิทธิภาพ
+        // ควรเปลี่ยน URL ใน 'file:' เป็น URL ของไฟล์สตรีมมิ่งโดยตรง (.m3u8, .mpd) แทน URL ของหน้าเว็บ
+        // ตัวอย่าง: file: "https://dkl-o53d.cdn.akamaiz.com/dookeela/ch3hd/chunks.m3u8"
+        // หากเป็น URL ของหน้าเว็บ Wiseplay จะไม่สามารถเล่นได้
         const allChannels = [
             {
                 name: "ช่อง 3 HD",
                 logo: "https://dookeela.live/uploads/1685812254.png",
-                // ***** สำคัญมาก: เพื่อลดแสงขาวและเพิ่มประสิทธิภาพ Wiseplay ให้ใช้ URL ตรงนี้ *****
-                // ใช้ URL ของไฟล์สตรีมมิ่งโดยตรง (เช่น .m3u8 หรือ .mpd) แทน URL ของหน้าเว็บ
-                // ตัวอย่าง: file: "https://dkl-o53d.cdn.akamaiz.com/dookeela/ch3hd/chunks.m3u8?nimblesessionid=...", 
-                file: "https://dookeela.live/live-tv/ch3hd", // <--- ปัจจุบันยังเป็น URL ของหน้าเว็บ
+                file: "https://dookeela.live/live-tv/ch3hd", 
                 category: "ทั่วไป"
             },
             {
                 name: "Ch5HD",
                 logo: "https://dookeela.live/uploads/1664574997.png",
-                file: "https://dookeela.live/live-tv/ch5hd", // URL ของหน้าเว็บ
+                file: "https://dookeela.live/live-tv/ch5hd", 
                 category: "ทั่วไป"
             },
             {
                 name: "Ch7HD",
                 logo: "https://dookeela.live/uploads/1688059473.png",
-                file: "https://dookeela.live/live-tv/ch7hd", // URL ของหน้าเว็บ
+                file: "https://dookeela.live/live-tv/ch7hd", 
                 category: "ทั่วไป"
             },
             {
                 name: "T-Sports 7",
                 logo: "https://dookeela.live/uploads/1673134276.png",
-                file: "https://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7", // URL ของหน้าเว็บ
+                file: "https://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7", 
                 category: "กีฬา"
             },
             {
                 name: "True Ball Thai 9",
                 logo: "https://dookeela.live/uploads/1723660123.png",
-                file: "https://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9", // URL ของหน้าเว็บ
+                file: "https://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9", 
                 category: "กีฬา"
             },
             {
                 name: "Cartoon Club",
                 logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cartoon_Club_logo.png/800px-Cartoon_Club_logo.png",
-                file: "https://example.com/cartoonclub.m3u8", // URL ตัวอย่าง
+                file: "https://example.com/cartoonclub.m3u8", 
                 category: "การ์ตูน"
             },
             {
                 name: "หนังดี",
                 logo: "https://via.placeholder.com/70?text=Movie",
-                file: "https://example.com/moviechannel.m3u8", // URL ตัวอย่าง
+                file: "https://example.com/moviechannel.m3u8", 
                 category: "ภาพยนตร์"
             },
             {
                 name: "ช่องข่าวว่าง",
                 logo: "https://via.placeholder.com/70?text=News",
-                file: "https://example.com/newschannel.m3u8", // URL ตัวอย่าง
+                file: "https://example.com/newschannel.m3u8", 
                 category: "ข่าว" 
             }
         ];
@@ -338,56 +326,48 @@
             "ข่าว": "ข่าวล่าสุด" 
         };
 
-        const actualCategories = [...new Set(allChannels.map(channel => channel.category))];
-
         const categoryTabsContainer = document.getElementById("category-tabs");
         const channelListContainer = document.getElementById("channel-list");
 
-        let currentSelectedCategory = null; 
-
+        // Function to create category tabs dynamically
         function createCategoryTabs() {
+            categoryTabsContainer.innerHTML = ''; // Clear existing tabs
             categoryOrder.forEach(category => {
-                const tab = document.createElement("div");
-                tab.className = "category-tab";
-                tab.textContent = categoryDisplayNames[category] || category; 
-                tab.dataset.category = category;
-                tab.onclick = () => {
-                    filterChannels(category.trim()); 
-                };
-                categoryTabsContainer.appendChild(tab);
+                const hasChannels = allChannels.some(channel => channel.category.trim() === category.trim());
+                if (hasChannels) { // Only create a tab if there are channels in that category
+                    const tab = document.createElement("div");
+                    tab.className = "category-tab";
+                    tab.textContent = categoryDisplayNames[category] || category; 
+                    tab.dataset.category = category.trim(); 
+                    tab.onclick = () => {
+                        filterChannels(category.trim()); 
+                    };
+                    categoryTabsContainer.appendChild(tab);
+                }
             });
         }
 
+        // Function to filter and display channels based on selected category
         function filterChannels(selectedCategory) {
-            console.log('--- filterChannels called ---');
-            console.log('Selected Category (raw):', selectedCategory);
             const trimmedSelectedCategory = selectedCategory.trim();
-            console.log('Selected Category (trimmed):', trimmedSelectedCategory);
 
-            currentSelectedCategory = trimmedSelectedCategory; 
-
+            // Remove 'active' class from all tabs and reset transform
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
                 tab.style.transform = 'scale(1)'; 
             });
             
+            // Add 'active' class to the selected tab
             const selectedTab = document.querySelector(`.category-tab[data-category="${trimmedSelectedCategory}"]`);
             if (selectedTab) {
                 selectedTab.classList.add('active');
             }
 
-            channelListContainer.innerHTML = ''; 
+            channelListContainer.innerHTML = ''; // Clear previous channels
             
-            let filteredChannels = allChannels.filter(channel => {
-                const channelCategoryTrimmed = channel.category.trim(); 
-                const isMatch = channelCategoryTrimmed === trimmedSelectedCategory;
-                console.log(`Comparing channel category "${channel.category}" with selected "${trimmedSelectedCategory}": ${isMatch}`);
-                return isMatch;
-            });
-
-            console.log('Filtered Channels Count:', filteredChannels.length);
-            console.log('Filtered Channels:', filteredChannels);
-
+            const filteredChannels = allChannels.filter(channel => 
+                channel.category.trim() === trimmedSelectedCategory
+            );
 
             if (filteredChannels.length === 0) {
                 const messageDiv = document.createElement("div");
@@ -396,48 +376,82 @@
                 channelListContainer.appendChild(messageDiv);
             } else {
                 filteredChannels.forEach(channel => {
-                    const encodedFileUrl = encodeURIComponent(channel.file);
-                    const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
+                    let wiseplayIntentUri;
+                    let isDirectStream = false;
+                    let tooltipText = channel.name; // Default tooltip text
 
-                    const a = document.createElement("a");
-                    a.href = wiseplayIntentUri;
-                    a.className = "channel";
-                    a.target = "_blank";
+                    // Check if the URL is a direct stream (e.g., .m3u8, .mpd)
+                    const isStreamUrl = channel.file.endsWith('.m3u8') || 
+                                        channel.file.endsWith('.mpd') || 
+                                        channel.file.includes('googlevideo.com'); 
 
-                    a.innerHTML = `
+                    if (isStreamUrl) {
+                        isDirectStream = true;
+                        const encodedFileUrl = encodeURIComponent(channel.file);
+                        wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
+                    } else {
+                        // If not a direct stream, still try to open Wiseplay but inform the user
+                        const encodedFileUrl = encodeURIComponent(channel.file);
+                        wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
+                        tooltipText = `ช่องนี้อาจเล่นไม่ได้โดยตรงใน Wiseplay (ไม่ใช่ URL สตรีม)\n(ปัจจุบัน: ${channel.file})`;
+                    }
+
+                    // *** การเปลี่ยนแปลงหลัก: เปลี่ยน <a> เป็น <div> และใช้ JavaScript สำหรับ onClick ***
+                    const channelDiv = document.createElement("div");
+                    channelDiv.className = "channel";
+                    channelDiv.tabIndex = 0; // ทำให้ div สามารถรับโฟกัสได้ด้วย keyboard
+                    channelDiv.title = tooltipText; // Set tooltip for more info
+
+                    // Event listener สำหรับการคลิก
+                    channelDiv.onclick = () => {
+                        window.location.href = wiseplayIntentUri; // Trigger the Wiseplay Intent
+                    };
+                    
+                    // Event listener สำหรับการกดปุ่ม Enter (เพื่อ Accessibility)
+                    channelDiv.onkeydown = (event) => {
+                        if (event.key === 'Enter') {
+                            window.location.href = wiseplayIntentUri;
+                        }
+                    };
+
+                    if (!isDirectStream) {
+                        channelDiv.classList.add('non-playable-channel'); // Add class for specific styling
+                    }
+
+                    channelDiv.innerHTML = `
                         <img src="${channel.logo}" alt="${channel.name}">
                         <div class="channel-name">${channel.name}</div>
                     `;
-                    channelListContainer.appendChild(a);
+                    channelListContainer.appendChild(channelDiv);
                 });
             }
         }
 
+        // --- Initialize the page ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Background Image Logic - ถูกลบออกไปแล้ว
-            
-            // Initial category filter
+            // 1. Create all category tabs first
+            createCategoryTabs();
+
+            // 2. Determine the initial category to display
             let initialCategoryToShow = null;
             for (let i = 0; i < categoryOrder.length; i++) {
                 const category = categoryOrder[i];
-                const channelsInCategory = allChannels.filter(channel => channel.category === category);
+                // Find if there are any channels in this category
+                const channelsInCategory = allChannels.filter(channel => channel.category.trim() === category.trim());
                 if (channelsInCategory.length > 0) {
                     initialCategoryToShow = category.trim(); 
-                    break;
+                    break; 
                 }
             }
             
+            // 3. Filter and display channels for the initial category
             if (initialCategoryToShow) {
                 filterChannels(initialCategoryToShow);
             } else {
+                // If no channels exist in any category (allChannels is empty or all categories are empty)
                 channelListContainer.innerHTML = '<p class="no-channels-message">ยังไม่มีช่องรายการในระบบ</p>';
             }
-
-            createCategoryTabs();
         });
-
-        // Event listeners for background image controls - ถูกลบออกไปแล้ว
-
     </script>
 </body>
 </html>
