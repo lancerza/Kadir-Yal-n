@@ -96,7 +96,7 @@
                     // *** โค้ดที่ปรับปรุง: สร้าง wiseplayIntentUri พร้อมพารามิเตอร์ใหม่ ***
                     const encodedFileUrl = encodeURIComponent(channel.file);
                     const encodedUserAgent = encodeURIComponent("exo_player");
-                    const encodedReferer = encodeURIComponent("https://dookeela.live/live-tv"); // แก้ไข URL referer ที่ผิดพลาด
+                    
                     const encodedTitle = encodeURIComponent(channel.name); // นำชื่อช่องกลับมาเป็น Title
 
                     const wiseplayIntentUri = `intent://${encodedFileUrl}#Intent;package=com.wiseplay;S.userAgent=${encodedUserAgent};S.title=${encodedTitle};S.referer=${encodedReferer};scheme=https;type=video/mp4;end`;
