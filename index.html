@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>เลือกช่องเพื่อเปิดใน Wiseplay</h1>
-
+    
     <div id="category-tabs">
     </div>
 
@@ -19,7 +19,7 @@
     <script>
         // === Channel Data (จะถูกดึงมาจาก channels.js) ===
         // allChannels ถูกประกาศใน channels.js
-
+        
         // === Category Management ===
         const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"];
 
@@ -74,7 +74,7 @@
                 tab.classList.remove('active');
                 tab.style.transform = 'scale(1)'; 
             });
-
+            
             const selectedTab = document.querySelector(`.category-tab[data-category="${trimmedSelectedCategory}"]`);
             if (selectedTab) {
                 selectedTab.classList.add('active');
@@ -94,23 +94,24 @@
 
                 filteredChannels.forEach(channel => {
                     const encodedFileUrl = encodeURIComponent(channel.file);
-                    const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
-
+                    // *** ปรับปรุง wiseplayIntentUri เพื่อลบ channel.name ออกจากส่วน Host/Path และ Title ***
+                    const wiseplayIntentUri = `intent://#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=;scheme=https;type=video/mp4;end`;
+                    
                     const channelLink = document.createElement("a");
                     channelLink.className = "channel";
                     channelLink.href = wiseplayIntentUri;
-
+                    
                     const img = document.createElement("img");
                     img.src = channel.logo;
                     img.alt = channel.name;
-
+                    
                     const divName = document.createElement("div");
                     divName.className = "channel-name";
                     divName.textContent = channel.name; 
 
                     channelLink.appendChild(img);
                     channelLink.appendChild(divName);
-
+                    
                     fragment.appendChild(channelLink); 
                 });
                 channelListContainer.appendChild(fragment); 
@@ -130,7 +131,7 @@
                     break; 
                 }
             }
-
+            
             // แสดงช่องสำหรับหมวดหมู่เริ่มต้น
             if (initialCategoryToShow) {
                 filterChannels(initialCategoryToShow);
