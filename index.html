@@ -4,261 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายการช่อง Wiseplay</title>
-    <style>
-        /* ... (CSS code remains unchanged) ... */
-        /* ==================== */
-        /* Global Box Sizing */
-        /* ==================== */
-        html {
-            box-sizing: border-box;
-            background-color: #000 !important; /* บังคับพื้นหลังของ html เป็นสีดำ */
-        }
-        *, *::before, *::after {
-            box-sizing: inherit;
-        }
-
-        :root {
-            /* Always Dark Mode Defaults */
-            --bg-color: #000;
-            --text-color: #fff;
-            --channel-bg: #222;
-            --channel-border: #444;
-            --channel-hover-bg: #555;
-            --channel-hover-border: #666;
-            --category-tab-bg: #333;
-            --category-tab-border: #333;
-            --category-tab-text: #e0e0e0;
-            --category-tab-hover-bg: #555;
-            --category-tab-hover-text: #fff;
-            --category-tab-active-bg: #007bff;
-            --category-tab-active-border: #fff; /* เปลี่ยนสีขอบ Active เป็นสีขาว */
-            --category-tab-active-shadow-color: rgba(255, 255, 255, 0.7); /* เปลี่ยนสีเงา Active เป็นสีขาวเรืองแสง */
-            --glow-color: rgba(255, 255, 255, 0.9);
-            --no-channels-text: #ccc;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color) !important; /* บังคับพื้นหลังของ body เป็นสีดำ */
-            color: var(--text-color);
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            justify-content: flex-start;
-            padding-top: 20px;
-        }
-
-        h1 {
-            margin-top: 0px;
-            margin-bottom: 20px;
-        }
-
-        /* ==================== */
-        /* Button Styling - General Enhancements */
-        /* ==================== */
-        .category-tab {
-            /* General button reset */
-            -webkit-appearance: none; 
-            -moz-appearance: none; 
-            appearance: none; 
-            border: none;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            user-select: none; /* ป้องกันการเลือกข้อความ */
-            outline: none; /* ลบ outline เริ่มต้น */
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.1s ease; 
-        }
-
-        /* Focus state for accessibility (keyboard navigation) */
-        .category-tab:focus-visible { 
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
-        }
-
-        /* Active state (when clicked/pressed) */
-        .category-tab:active {
-            transform: scale(0.98); 
-            opacity: 0.9; 
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2); 
-        }
-
-        #category-tabs {
-            margin-bottom: 20px;
-            display: flex;
-            flex-wrap: nowrap;
-            justify-content: center;
-            gap: 12px;
-            padding: 0 10px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: var(--category-tab-hover-bg) var(--category-tab-bg);
-            z-index: 2; /* ทำให้แท็บอยู่เหนือเนื้อหา */
-        }
-        #category-tabs::-webkit-scrollbar {
-            height: 8px;
-        }
-        #category-tabs::-webkit-scrollbar-track {
-            background: var(--category-tab-bg);
-            border-radius: 10px;
-        }
-        #category-tabs::-webkit-scrollbar-thumb {
-            background: var(--category-tab-hover-bg);
-            border-radius: 10px;
-        }
-        #category-tabs::-webkit-scrollbar-thumb:hover {
-            background: var(--category-tab-active-bg);
-        }
-
-        .category-tab {
-            padding: 10px 20px;
-            background-color: var(--category-tab-bg);
-            border: 1px solid var(--category-tab-border);
-            border-radius: 8px; 
-            font-size: 15px;
-            font-weight: normal;
-            color: var(--category-tab-text);
-            white-space: nowrap;
-            flex-shrink: 0;
-            text-shadow: 0 0 2px rgba(0,0,0,0.2); 
-        }
-        .category-tab:hover {
-            background-color: var(--category-tab-hover-bg);
-            color: var(--category-tab-hover-text);
-            border-color: var(--category-tab-hover-border);
-        }
-        .category-tab.active {
-            background-color: var(--category-tab-active-bg);
-            border-color: #fff; /* เปลี่ยนสีขอบ Active เป็นสีขาว */
-            font-weight: bold;
-            color: var(--category-tab-hover-text); 
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* เปลี่ยนเงาเป็นสีขาวเรืองแสง */
-            transform: scale(1.05);
-            text-shadow: 0 0 3px rgba(0,0,0,0.3); 
-        }
-
-        #channel-list {
-            margin: 0px auto;
-            max-width: 800px;
-            width: 90%; 
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            min-height: 80px;
-            align-items: flex-start;
-            z-index: 2; 
-        }
-        /* เปลี่ยน .channel จาก <div> เป็น <a> */
-        .channel {
-            display: flex; /* ทำให้เนื้อหาภายในอยู่ตรงกลาง */
-            flex-direction: column; /* วางรูปและชื่อซ้อนกัน */
-            align-items: center; /* จัดให้อยู่กึ่งกลางในแนวนอน */
-            justify-content: center; /* จัดให้อยู่กึ่งกลางในแนวตั้ง */
-            cursor: pointer;
-            width: 70px;
-            height: 70px;
-            padding: 0;
-            background: var(--channel-bg);
-            border: 1px solid var(--channel-border); /* ใช้ตัวแปร border */
-            border-radius: 10px; 
-            text-align: center;
-            box-sizing: border-box;
-            text-decoration: none; /* ลบขีดเส้นใต้ของลิงก์ */
-            color: inherit; /* ใช้สีตัวอักษรจาก parent (body) */
-            outline: none; /* ลบ outline เริ่มต้นของ <a> */
-            transition: box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
-        }
-        .channel:hover,
-        .channel:focus-visible { /* เพิ่ม focus-visible สำหรับ keyboard navigation */
-            background: var(--channel-hover-bg);
-            border-color: var(--channel-hover-border);
-            box-shadow: 0 0 15px var(--glow-color);
-        }
-        .channel:focus-visible { /* สำหรับเมื่อมีการโฟกัสด้วย keyboard */
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5); 
-        }
-        /* *** ลบ CSS สำหรับ .non-playable-channel ออกไปทั้งหมด *** */
-        /*
-        .channel.non-playable-channel {
-            opacity: 0.6;
-            border: 2px dashed #ff0;
-            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
-            cursor: help;
-        }
-        .channel.non-playable-channel:hover {
-            opacity: 0.8;
-            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8);
-        }
-        */
-        .channel img {
-            width: 70px;
-            height: 70px;
-            margin: 0;
-            object-fit: contain;
-            border-radius: 0;
-            background-color: transparent;
-            border: none;
-            padding: 0;
-        }
-        .channel-name {
-            display: none;
-        }
-        .no-channels-message {
-            color: var(--no-channels-text);
-            text-align: center;
-            width: 100%;
-            margin-top: 20px;
-            font-size: 16px;
-        }
-
-        /* ==================== */
-        /* Responsive Adjustments for Smaller Screens (e.g., Mobile Portrait < 480px) */
-        /* ==================== */
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 22px;
-                margin-bottom: 10px;
-            }
-            body {
-                padding-top: 15px;
-            }
-
-            #category-tabs {
-                gap: 6px;
-                padding: 0 5px;
-            }
-            .category-tab {
-                padding: 7px 12px;
-                font-size: 13px;
-                border-radius: 8px; 
-            }
-            .category-tab.active {
-                transform: scale(1.03);
-            }
-
-            #channel-list {
-                gap: 8px;
-                width: 95%; 
-            }
-            .channel {
-                width: 60px; 
-                height: 60px;
-                border-radius: 8px; 
-            }
-            .channel img {
-                width: 60px;
-                height: 60px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
     <h1>เลือกช่องเพื่อเปิดใน Wiseplay</h1>
-    
+
     <div id="category-tabs">
     </div>
 
@@ -269,7 +19,7 @@
     <script>
         // === Channel Data (จะถูกดึงมาจาก channels.js) ===
         // allChannels ถูกประกาศใน channels.js
-        
+
         // === Category Management ===
         const categoryOrder = ["ทั่วไป", "กีฬา", "การ์ตูน", "ภาพยนตร์", "รายการพิเศษ", "ข่าว"];
 
@@ -324,7 +74,7 @@
                 tab.classList.remove('active');
                 tab.style.transform = 'scale(1)'; 
             });
-            
+
             const selectedTab = document.querySelector(`.category-tab[data-category="${trimmedSelectedCategory}"]`);
             if (selectedTab) {
                 selectedTab.classList.add('active');
@@ -344,34 +94,23 @@
 
                 filteredChannels.forEach(channel => {
                     const encodedFileUrl = encodeURIComponent(channel.file);
-                    // Wiseplay Intent URI ยังคงต้องมี S.url และ S.title
                     const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
-                    
-                    // *** ลบโค้ดส่วน isDirectStream ทั้งหมด ***
-                    // let isDirectStream = false;
-                    // const isStreamUrl = channel.file.endsWith('.m3u8') || ...;
-                    // if (isStreamUrl) { isDirectStream = true; }
 
                     const channelLink = document.createElement("a");
                     channelLink.className = "channel";
                     channelLink.href = wiseplayIntentUri;
-                    
-                    // *** ลบเงื่อนไขการเพิ่ม class 'non-playable-channel' ***
-                    // if (!isDirectStream) {
-                    //     channelLink.classList.add('non-playable-channel');
-                    // }
 
                     const img = document.createElement("img");
                     img.src = channel.logo;
                     img.alt = channel.name;
-                    
+
                     const divName = document.createElement("div");
                     divName.className = "channel-name";
                     divName.textContent = channel.name; 
 
                     channelLink.appendChild(img);
                     channelLink.appendChild(divName);
-                    
+
                     fragment.appendChild(channelLink); 
                 });
                 channelListContainer.appendChild(fragment); 
@@ -391,7 +130,7 @@
                     break; 
                 }
             }
-            
+
             // แสดงช่องสำหรับหมวดหมู่เริ่มต้น
             if (initialCategoryToShow) {
                 filterChannels(initialCategoryToShow);
