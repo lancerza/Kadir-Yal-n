@@ -88,7 +88,7 @@
                 filteredChannels.forEach(channel => {
                     const encodedFileUrl = encodeURIComponent(channel.file);
                     // *** บรรทัดที่ถูกปรับ: ลบ S.title= ออกไปเลย ***
-                    const wiseplayIntentUri = `intent://#Intent;package=com.wiseplay;S.url=${encodedFileUrl};scheme=https;type=video/mp4;end`;
+                    const wiseplayIntentUri = `https://#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
                     
                     const channelLink = document.createElement("a");
                     channelLink.className = "channel";
