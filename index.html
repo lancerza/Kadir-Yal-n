@@ -95,7 +95,7 @@
                 filteredChannels.forEach(channel => {
                     const encodedFileUrl = encodeURIComponent(channel.file);
                     // *** ปรับปรุง wiseplayIntentUri เพื่อลบ channel.name ออกจากส่วน Host/Path และ Title ***
-                    const wiseplayIntentUri = `intent://#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=;scheme=https;type=video/mp4;end`;
+                    const wiseplayIntentUri = `#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=;scheme=https;type=video/mp4;end`;
                     
                     const channelLink = document.createElement("a");
                     channelLink.className = "channel";
