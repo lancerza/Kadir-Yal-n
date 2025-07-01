@@ -338,7 +338,7 @@
 
         // Function to create category tabs dynamically
         function createCategoryTabs() {
-            // *** การปรับปรุง: ใช้ Document Fragment สำหรับแท็บหมวดหมู่ด้วย ***
+            // ใช้ Document Fragment สำหรับแท็บหมวดหมู่ด้วย
             const fragment = document.createDocumentFragment();
             categoryTabsContainer.innerHTML = ''; // Clear existing tabs
 
@@ -384,7 +384,84 @@
                 messageDiv.textContent = `ไม่พบช่องในหมวดหมู่ "${categoryDisplayNames[trimmedSelectedCategory] || trimmedSelectedCategory}" นี้`; 
                 channelListContainer.appendChild(messageDiv);
             } else {
-                // *** การปรับปรุงหลัก: ใช้ Document Fragment สำหรับรายการช่อง ***
+                // ใช้ Document Fragment สำหรับรายการช่อง
                 const fragment = document.createDocumentFragment();
 
                 filteredChannels.forEach(channel => {
+                    const encodedFileUrl = encodeURIComponent(channel.file);
+                    const wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
+                    
+                    let isDirectStream = false;
+                    let tooltipText = channel.name; 
+
+                    // เพิ่มประเภทไฟล์ที่ Wiseplay รองรับ
+                    const isStreamUrl = channel.file.endsWith('.m3u8') || 
+                                        channel.file.endsWith('.mpd') || 
+                                        channel.file.endsWith('.ts') || 
+                                        channel.file.endsWith('.mp4') ||
+                                        channel.file.endsWith('.m3u') || 
+                                        channel.file.includes('googlevideo.com') ||
+                                        channel.file.includes('.avi') || // ตัวอย่างเพิ่มเติม
+                                        channel.file.includes('.webm'); // ตัวอย่างเพิ่มเติม
+
+                    if (isStreamUrl) {
+                        isDirectStream = true;
+                        tooltipText = `คลิกเพื่อเปิด ${channel.name} ใน Wiseplay`;
+                    } else {
+                        tooltipText = `⚠️ ช่องนี้อาจเล่นไม่ได้โดยตรงใน Wiseplay (ไม่ใช่ URL สตรีมโดยตรง)\n(URL ปัจจุบัน: ${channel.file})`;
+                    }
+
+                    const channelLink = document.createElement("a");
+                    channelLink.className = "channel";
+                    channelLink.href = wiseplayIntentUri;
+                    channelLink.title = tooltipText;
+
+                    if (!isDirectStream) {
+                        channelLink.classList.add('non-playable-channel');
+                    }
+
+                    // *** การปรับปรุงสำคัญ: สร้าง Element ด้วย createElement และ appendChild แทน innerHTML ***
+                    const img = document.createElement("img");
+                    img.src = channel.logo;
+                    img.alt = channel.name;
+                    
+                    const divName = document.createElement("div");
+                    divName.className = "channel-name";
+                    divName.textContent = channel.name; // ใช้ textContent เพื่อความปลอดภัย
+
+                    channelLink.appendChild(img);
+                    channelLink.appendChild(divName);
+                    // *** สิ้นสุดการปรับปรุง ***
+
+                    fragment.appendChild(channelLink); // เพิ่มช่องลงใน fragment
+                });
+                channelListContainer.appendChild(fragment); // เพิ่ม fragment เข้า DOM เพียงครั้งเดียว
+            }
+        }
+
+        // --- Initialize the page ---
+        document.addEventListener('DOMContentLoaded', () => {
+            createCategoryTabs();
+
+            let initialCategoryToShow = null;
+            // หาหมวดหมู่แรกที่มีช่องอยู่
+            for (let i = 0; i < categoryOrder.length; i++) {
+                const category = categoryOrder[i];
+                const channelsInCategory = allChannels.filter(channel => channel.category.trim() === category.trim());
+                if (channelsInCategory.length > 0) {
+                    initialCategoryToShow = category.trim(); 
+                    break; 
+                }
+            }
+            
+            // แสดงช่องสำหรับหมวดหมู่เริ่มต้น
+            if (initialCategoryToShow) {
+                filterChannels(initialCategoryToShow);
+            } else {
+                // หากไม่มีช่องเลยในข้อมูล
+                channelListContainer.innerHTML = '<p class="no-channels-message">ยังไม่มีช่องรายการในระบบ</p>';
+            }
+        });
+    </script>
+</body>
+</html>
