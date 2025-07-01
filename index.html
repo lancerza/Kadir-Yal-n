@@ -158,7 +158,7 @@
             height: 70px;
             padding: 0;
             background: var(--channel-bg);
-            border: 1px solid #444;
+            border: 1px solid var(--channel-border); /* ใช้ตัวแปร border */
             border-radius: 10px; 
             text-align: center;
             box-sizing: border-box;
@@ -181,11 +181,13 @@
         }
         .channel.non-playable-channel {
             opacity: 0.6; /* ทำให้ดูจางลง */
-            border-color: #f00; /* เปลี่ยนสีขอบเป็นสีแดง */
+            border: 2px dashed #ff0; /* เปลี่ยนขอบเป็นเส้นประสีเหลือง */
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5); /* เงาสีเหลือง */
             cursor: help; /* เปลี่ยนเคอร์เซอร์เป็นเครื่องหมายคำถาม */
         }
         .channel.non-playable-channel:hover {
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.7); /* เงาสีแดงเมื่อ hover */
+            opacity: 0.8;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8); /* เงาสีเหลืองเข้มขึ้นเมื่อ hover */
         }
         .channel img {
             width: 70px;
@@ -259,57 +261,61 @@
 
     <script>
         // === Channel Data ===
-        // ***** สำคัญมาก: เพื่อให้ Wiseplay ทำงานได้เต็มประสิทธิภาพ
-        // ควรเปลี่ยน URL ใน 'file:' เป็น URL ของไฟล์สตรีมมิ่งโดยตรง (.m3u8, .mpd) แทน URL ของหน้าเว็บ
-        // ตัวอย่าง: file: "https://dkl-o53d.cdn.akamaiz.com/dookeela/ch3hd/chunks.m3u8"
-        // หากเป็น URL ของหน้าเว็บ Wiseplay จะไม่สามารถเล่นได้
+        // ***** สำคัญมาก: เพื่อให้ Wiseplay ทำงานได้เต็มประสิทธิภาพและเล่นช่องได้
+        // คุณต้องเปลี่ยน URL ใน 'file:' ของแต่ละช่อง
+        // ให้เป็น URL ของไฟล์สตรีมมิ่งโดยตรงเท่านั้น (.m3u8, .mpd, .ts, .mp4 ที่สามารถเล่นได้โดยตรง)
+        // หากยังเป็น URL ของหน้าเว็บ (เช่น dookeela.live/live-tv/ch3hd หรือ goal-th.com/...)
+        // Wiseplay จะไม่สามารถเล่นได้และจะแจ้งว่า "กดเข้าช่องไม่ได้" หรือ "ไม่สามารถเล่นวิดีโอได้"
         const allChannels = [
             {
                 name: "ช่อง 3 HD",
                 logo: "https://dookeela.live/uploads/1685812254.png",
-                file: "https://dookeela.live/live-tv/ch3hd", 
+                // ตัวอย่าง URL ที่ Wiseplay อาจเล่นได้:
+                // file: "https://example.com/live/ch3hd/playlist.m3u8", 
+                // file: "https://mycdn.tv/ch3/stream.mpd",
+                file: "https://dookeela.live/live-tv/ch3hd", // <--- ต้องแก้ไขตรงนี้!
                 category: "ทั่วไป"
             },
             {
                 name: "Ch5HD",
                 logo: "https://dookeela.live/uploads/1664574997.png",
-                file: "https://dookeela.live/live-tv/ch5hd", 
+                file: "https://dookeela.live/live-tv/ch5hd", // <--- ต้องแก้ไขตรงนี้!
                 category: "ทั่วไป"
             },
             {
                 name: "Ch7HD",
                 logo: "https://dookeela.live/uploads/1688059473.png",
-                file: "https://dookeela.live/live-tv/ch7hd", 
+                file: "https://dookeela.live/live-tv/ch7hd", // <--- ต้องแก้ไขตรงนี้!
                 category: "ทั่วไป"
             },
             {
                 name: "T-Sports 7",
                 logo: "https://dookeela.live/uploads/1673134276.png",
-                file: "https://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7", 
+                file: "https://goal-th.com/ช่องรายการทีวี/?id=135&tv=TSports7", // <--- ต้องแก้ไขตรงนี้!
                 category: "กีฬา"
             },
             {
                 name: "True Ball Thai 9",
                 logo: "https://dookeela.live/uploads/1723660123.png",
-                file: "https://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9", 
+                file: "https://goal-th.com/ช่องรายการทีวี/?id=468&tv=TrueBallThai9", // <--- ต้องแก้ไขตรงนี้!
                 category: "กีฬา"
             },
             {
                 name: "Cartoon Club",
                 logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cartoon_Club_logo.png/800px-Cartoon_Club_logo.png",
-                file: "https://example.com/cartoonclub.m3u8", 
+                file: "https://example.com/cartoonclub.m3u8", // <--- ตัวอย่าง URL ที่ถูกต้องแล้ว
                 category: "การ์ตูน"
             },
             {
                 name: "หนังดี",
                 logo: "https://via.placeholder.com/70?text=Movie",
-                file: "https://example.com/moviechannel.m3u8", 
+                file: "https://example.com/moviechannel.m3u8", // <--- ตัวอย่าง URL ที่ถูกต้องแล้ว
                 category: "ภาพยนตร์"
             },
             {
                 name: "ช่องข่าวว่าง",
                 logo: "https://via.placeholder.com/70?text=News",
-                file: "https://example.com/newschannel.m3u8", 
+                file: "https://example.com/newschannel.m3u8", // <--- ตัวอย่าง URL ที่ถูกต้องแล้ว
                 category: "ข่าว" 
             }
         ];
@@ -378,25 +384,30 @@
                 filteredChannels.forEach(channel => {
                     let wiseplayIntentUri;
                     let isDirectStream = false;
-                    let tooltipText = channel.name; // Default tooltip text
+                    let tooltipText = channel.name; // Default tooltip text for hover
 
-                    // Check if the URL is a direct stream (e.g., .m3u8, .mpd)
+                    // ตรวจสอบว่า URL เป็น URL ของไฟล์สตรีมมิ่งโดยตรงหรือไม่
+                    // เพิ่มนามสกุลไฟล์หรือรูปแบบ URL ที่ Wiseplay รองรับที่นี่
                     const isStreamUrl = channel.file.endsWith('.m3u8') || 
                                         channel.file.endsWith('.mpd') || 
-                                        channel.file.includes('googlevideo.com'); 
+                                        channel.file.endsWith('.ts') || 
+                                        channel.file.endsWith('.mp4') ||
+                                        channel.file.includes('googlevideo.com') ||
+                                        channel.file.includes('.m3u'); // บางทีอาจเป็น .m3u ธรรมดา
 
                     if (isStreamUrl) {
                         isDirectStream = true;
                         const encodedFileUrl = encodeURIComponent(channel.file);
                         wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
+                        tooltipText = `คลิกเพื่อเปิด ${channel.name} ใน Wiseplay`;
                     } else {
-                        // If not a direct stream, still try to open Wiseplay but inform the user
+                        // ถ้าไม่ใช่ URL สตรีมโดยตรง
                         const encodedFileUrl = encodeURIComponent(channel.file);
                         wiseplayIntentUri = `intent://${encodeURIComponent(channel.name)}#Intent;package=com.wiseplay;S.url=${encodedFileUrl};S.title=${encodeURIComponent(channel.name)};scheme=https;type=video/mp4;end`;
-                        tooltipText = `ช่องนี้อาจเล่นไม่ได้โดยตรงใน Wiseplay (ไม่ใช่ URL สตรีม)\n(ปัจจุบัน: ${channel.file})`;
+                        tooltipText = `⚠️ ช่องนี้อาจเล่นไม่ได้โดยตรงใน Wiseplay (ไม่ใช่ URL สตรีมโดยตรง)\n(URL ปัจจุบัน: ${channel.file})`;
                     }
 
-                    // *** การเปลี่ยนแปลงหลัก: เปลี่ยน <a> เป็น <div> และใช้ JavaScript สำหรับ onClick ***
+                    // *** การเปลี่ยนแปลงหลัก: ใช้ <div> และ JavaScript สำหรับ onClick ***
                     const channelDiv = document.createElement("div");
                     channelDiv.className = "channel";
                     channelDiv.tabIndex = 0; // ทำให้ div สามารถรับโฟกัสได้ด้วย keyboard
