@@ -37,6 +37,8 @@
             --spacing-xl: 20px;
             --component-bg: #333;
             --border-color: #555;
+            --header-bg: rgba(26, 26, 26, 0.7);
+            --popup-bg: rgba(44, 44, 44, 0.75);
         }
         
         body.light-theme {
@@ -44,6 +46,8 @@
             --light-text: #333333;
             --component-bg: #e9e9e9;
             --border-color: #ccc;
+            --header-bg: rgba(244, 244, 244, 0.7);
+            --popup-bg: rgba(255, 255, 255, 0.75);
         }
 
         html, body {
@@ -84,7 +88,20 @@
             40%, 60% { transform: translate3d(4px, 0, 0) scale(1); }
         }
 
-        header { background-color: transparent; color: var(--white); padding: 2vw 4vw; border-radius: var(--border-radius); margin: 5vh 0 2vh 0; animation: fadeIn 3s ease-out; width: 100%; box-sizing: border-box; position: relative; }
+        header {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--white);
+            padding: 2vw 4vw;
+            border-radius: var(--border-radius);
+            margin: 5vh 0 2vh 0;
+            animation: fadeIn 3s ease-out;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
         h1 {
             color: var(--light-text);
@@ -103,9 +120,9 @@
             animation: gradient-animation 10s ease infinite;
         }
         body.light-theme h1 {
-             background: -webkit-linear-gradient(45deg, #2196F3, #ff4d4d);
-             -webkit-background-clip: text;
-             background-clip: text;
+            background: -webkit-linear-gradient(45deg, #2196F3, #ff4d4d);
+            -webkit-background-clip: text;
+            background-clip: text;
         }
 
         #running-text-container, #current-datetime, #line-group-info { color: var(--light-text); }
@@ -119,14 +136,14 @@
         #line-group-info i { font-size: 25px; vertical-align: middle; color: var(--line-green); }
         #line-group-info i.fa-brands.fa-line.left-icon { margin-right: var(--spacing-sm); }
         #line-group-info i.fa-brands.fa-line.right-icon { margin-left: var(--spacing-sm); }
-
+        
         .ad-container { width: 100%; margin: var(--spacing-md) 0; display: flex; justify-content: center; align-items: center; background-color: #2b2b2b; border-radius: var(--border-radius); }
         .ad-container-top { min-height: 100px; }
         .ad-container-bottom { min-height: 250px; }
         body.light-theme .ad-container { background-color: #e0e0e0; }
         
         main.categories-container { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--spacing-lg); width: 100%; max-width: 1200px; margin-top: clamp(30px, 6vw, 50px); padding-bottom: var(--spacing-md); flex-grow: 1; align-items: flex-start; }
-        
+
         .category {
             background-color: transparent;
             border-radius: var(--border-radius);
@@ -140,14 +157,16 @@
             border: 1px solid transparent;
             height: auto;
             box-shadow: none;
-            transition: transform 0.3s ease, 
-                        background-color 0.3s ease, 
-                        border-color 0.3s ease, 
-                        box-shadow 0.3s ease,
-                        width 0.4s ease;
+            transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, flex-grow 0.4s ease, width 0.4s ease;
         }
 
         .category:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+        
+        .category.active-category {
+            width: 100%;
+            max-width: 1200px;
+            flex-grow: 1;
+        }
 
         .accordion-button {
             position: relative;
@@ -197,7 +216,13 @@
         }
 
         main img { border-radius: var(--border-radius); border: 1px solid var(--border-color); padding: 3px; margin: 0; height: 50px; width: 50px; object-fit: cover; vertical-align: middle; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; cursor: pointer; user-select: none; }
-        main img:hover { transform: scale(1.1); border-color: var(--line-blue); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); }
+        
+        main img:hover {
+            transform: scale(1.1);
+            border-color: var(--line-blue);
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
+        }
+
         .channel-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--light-text); position: relative; }
         .channel-name { font-size: 12px; margin-top: 4px; text-align: center; max-width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -249,7 +274,7 @@
             width: auto;
             display: flex;
             flex-direction: column;
-            gap: 0;
+            gap: var(--spacing-md);
             opacity: 0;
             visibility: hidden;
             transform: translateY(10px);
@@ -264,7 +289,7 @@
 
         .settings-popup .setting-item {
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: center;
             gap: var(--spacing-lg);
             font-family: 'Kanit', sans-serif;
@@ -282,10 +307,55 @@
         input:checked + .slider { background-color: var(--line-blue); }
         input:checked + .slider:before { content: "☀️"; transform: translateX(22px); }
 
+        .view-toggle { display: flex; gap: 5px; }
+        .view-btn {
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--light-text);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .view-btn.active {
+            background: var(--line-blue);
+            color: var(--white);
+            border-color: var(--line-blue);
+        }
+        .accordion-content.list-view {
+            gap: var(--spacing-md);
+        }
+        .accordion-content.list-view .channel-link {
+            width: calc(50% - var(--spacing-md));
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 5px;
+            background-color: rgba(128, 128, 128, 0.1);
+            border-radius: var(--border-radius);
+        }
+        .accordion-content.list-view .channel-name {
+            max-width: none;
+            white-space: normal;
+            text-align: left;
+            margin-left: 10px;
+            margin-top: 0;
+        }
+        .accordion-content.list-view .favorite-icon {
+            position: static;
+            margin-left: auto;
+            padding: 5px;
+            background-color: transparent;
+        }
+
+
         @media (max-width: 768px) { 
             .categories-container .category { 
                 width: calc(50% - var(--spacing-lg)); 
                 max-width: unset; 
+            }
+            .category.active-category {
+                width: calc(100% - var(--spacing-md));
             }
         }
         @media (max-width: 480px) { 
@@ -303,8 +373,8 @@
                 font-size: 14px; 
                 bottom: 10px; 
             }
-            .popup-buttons {
-                flex-direction: column-reverse;
+            .accordion-content.list-view .channel-link {
+                width: 100%;
             }
         }
         @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
@@ -312,8 +382,18 @@
         .skeleton-item .skeleton-img { width: 50px; height: 50px; border-radius: 8px; background-color: #333; background-image: linear-gradient(90deg, #333, #444, #333); background-size: 200px 100%; animation: shimmer 1.5s infinite linear; }
         .skeleton-item .skeleton-text { width: 40px; height: 12px; border-radius: 4px; background-color: #333; background-image: linear-gradient(90deg, #333, #444, #333); background-size: 200px 100%; animation: shimmer 1.5s infinite linear; }
         body.light-theme .skeleton-item .skeleton-img, body.light-theme .skeleton-item .skeleton-text { background-color: #e0e0e0; background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0); }
+        
+        @keyframes slideUpFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
 
-        /* --- Popup Disclaimer Styles --- */
         .popup-overlay {
             position: fixed;
             top: 0;
@@ -327,42 +407,46 @@
             align-items: center;
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            transition: background-color 0.3s ease-out, backdrop-filter 0.3s ease-out;
-        }
-        .popup-overlay:not(.show) {
-            background-color: rgba(0, 0, 0, 0);
-            backdrop-filter: blur(0px);
         }
 
         .popup-box {
-            background: #2c2c2c;
-            color: #f0f0f0;
-            padding: 30px 35px;
+            background: var(--popup-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--light-text);
+            padding: 25px 30px;
             border-radius: 15px;
             width: 90%;
-            max-width: 450px;
+            max-width: 420px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             text-align: center;
             font-family: 'Kanit', sans-serif;
-            border: 1px solid #444;
-            transform: scale(0.9);
-            opacity: 0;
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-        }
-        
-        .popup-overlay.show .popup-box {
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transform: scale(1);
+            opacity: 0;
+            animation: none;
+        }
+
+        .popup-overlay.show .popup-box {
             opacity: 1;
+            animation: slideUpFadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
         }
         
         .popup-box.shake {
             animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
         }
 
+        .popup-icon {
+            font-size: 48px;
+            color: var(--line-blue);
+            line-height: 1;
+            margin-bottom: 15px;
+        }
+
         .popup-box h2 {
             margin-top: 0;
-            font-size: 1.5em;
-            color: #FFFFFF;
+            font-size: 1.6em;
+            color: var(--light-text);
             font-weight: 700;
         }
 
@@ -370,14 +454,14 @@
             margin: 15px 0 25px;
             font-size: 0.95em;
             line-height: 1.6;
-            opacity: 0.9;
+            opacity: 0.8;
         }
         
         .popup-options {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             font-size: 0.9em;
         }
         #dont-show-again {
@@ -387,12 +471,12 @@
 
         .popup-buttons {
             display: flex;
-            justify-content: space-around;
-            gap: 15px;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .popup-btn {
-            flex-grow: 1;
+            width: 100%;
             padding: 12px 20px;
             border: none;
             border-radius: 8px;
@@ -401,30 +485,45 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-family: 'Kanit', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .popup-btn:hover {
             transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .btn-accept {
-            background-color: #28a745;
+            background-color: #2196F3;
             color: white;
-            border: 2px solid #28a745;
+            order: 2;
         }
         .btn-accept:hover {
-            background-color: #34c759;
-            border-color: #34c759;
+            background-color: #1976D2;
         }
 
         .btn-decline {
-            background-color: transparent;
-            color: var(--red-accent);
-            border: 2px solid var(--red-accent);
+            background-color: var(--component-bg);
+            color: var(--light-text);
+            order: 1;
         }
         .btn-decline:hover {
-            background-color: var(--red-accent);
-            color: white;
+            background-color: var(--border-color);
+        }
+
+        @media (max-width: 480px) {
+             .popup-buttons {
+                 flex-direction: column-reverse;
+            }
+            .btn-accept {
+                order: 0;
+            }
+            .btn-decline {
+                 order: 0;
+            }
         }
     </style>
 </head>
@@ -432,6 +531,7 @@
     <header>
         <div id="running-text-container"><div id="running-text"></div></div>
         <h1>เชิญดูฟรีไม่เสียรายเดือน</h1>
+
         <div class="header-controls">
             <i class="fas fa-cog" id="settings-toggle-btn" title="การตั้งค่า"></i>
             <div id="settings-popup" class="settings-popup">
@@ -441,6 +541,13 @@
                         <input type="checkbox" id="theme-toggle">
                         <div class="slider"></div>
                     </label>
+                </div>
+                <div class="setting-item">
+                    <span>มุมมอง</span>
+                    <div class="view-toggle">
+                        <button id="grid-view-btn" class="view-btn" title="มุมมองตาราง"><i class="fas fa-th-large"></i></button>
+                        <button id="list-view-btn" class="view-btn" title="มุมมองรายการ"><i class="fas fa-bars"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -458,7 +565,7 @@
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
     
-    <main class="categories-container">
+    <main class="categories-container" id="categories-list">
         <div class="category" id="category-favorites">
             <button class="accordion-button" data-category="ช่องโปรด" aria-expanded="false" aria-controls="content-favorites"><i class="fas fa-star"></i> ช่องโปรด<i class="fas fa-chevron-right accordion-icon"></i></button>
             <div id="content-favorites" class="accordion-content">
@@ -519,6 +626,9 @@
 
     <div class="popup-overlay" id="disclaimer-popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
         <div class="popup-box">
+            <div class="popup-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
             <h2 id="popup-title">ข้อจำกัดความรับผิดชอบ</h2>
             <p>
                 เว็บไซต์นี้เป็นเพียงผู้รวบรวมลิงก์ ไม่ได้จัดเก็บไฟล์ใดๆ และไม่รับผิดชอบต่อเนื้อหาของลิงก์ปลายทาง ผู้ใช้งานโปรดยอมรับความเสี่ยงในการใช้งานด้วยตนเอง
@@ -528,8 +638,8 @@
                 <label for="dont-show-again">ไม่ต้องแสดงข้อความนี้อีก</label>
             </div>
             <div class="popup-buttons">
-                <button class="popup-btn btn-decline" id="decline-btn">❌ ออกจากแอป</button>
-                <button class="popup-btn btn-accept" id="accept-btn">✅ เข้าใช้งาน</button>
+                <button class="popup-btn btn-decline" id="decline-btn"><i class="fas fa-times"></i> ไม่ยอมรับ</button>
+                <button class="popup-btn btn-accept" id="accept-btn"><i class="fas fa-check"></i> ยอมรับและเข้าใช้งาน</button>
             </div>
         </div>
     </div>
@@ -537,7 +647,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // --- Data Sources ---
-        const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน!    👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น    ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
+        const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน!   👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น   ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
         
         const categoryStyles = {
             "ทีวีดิจิตอล": { color: "#42A5F5" },
@@ -586,6 +696,33 @@
         settingsPopup.addEventListener('click', (event) => {
             event.stopPropagation();
         });
+
+        // --- Grid/List View Logic ---
+        const gridViewBtn = document.getElementById('grid-view-btn');
+        const listViewBtn = document.getElementById('list-view-btn');
+
+        function setView(view) {
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                if (view === 'list') {
+                    content.classList.add('list-view');
+                } else {
+                    content.classList.remove('list-view');
+                }
+            });
+            gridViewBtn.classList.toggle('active', view === 'grid');
+            listViewBtn.classList.toggle('active', view === 'list');
+            localStorage.setItem('appView', view);
+
+            const openAccordion = document.querySelector('.accordion-content.show');
+            if(openAccordion) {
+                requestAnimationFrame(() => {
+                    openAccordion.style.maxHeight = (openAccordion.scrollHeight + 16) + 'px';
+                });
+            }
+        }
+        gridViewBtn.addEventListener('click', () => setView('grid'));
+        listViewBtn.addEventListener('click', () => setView('list'));
+
 
         // --- Favorites System Functions ---
         function getFavorites() { return JSON.parse(localStorage.getItem('favoriteChannels') || '[]'); }
@@ -726,10 +863,17 @@
         function clearMessages(container) { container.querySelector('.loading-indicator').classList.remove('active'); container.querySelector('.no-channels-message').classList.remove('active'); }
         function formatDateTime(date) { const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }; const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false }; return { display: `${date.toLocaleDateString('th-TH', optionsDate)} ${date.toLocaleTimeString('th-TH', optionsTime)}`, iso: date.toISOString() }; }
         function updateDateTime() { const datetimeDisplay = document.getElementById('current-datetime'); const now = new Date(); const formatted = formatDateTime(now); datetimeDisplay.textContent = formatted.display; datetimeDisplay.setAttribute('datetime', formatted.iso); }
-        function closeAccordion(contentElement, buttonElement) { contentElement.classList.remove('show'); contentElement.style.maxHeight = '0px'; buttonElement.setAttribute('aria-expanded', 'false'); buttonElement.classList.remove('active'); }
+        function closeAccordion(contentElement, buttonElement) {
+            contentElement.classList.remove('show');
+            contentElement.style.maxHeight = '0px';
+            buttonElement.setAttribute('aria-expanded', 'false');
+            buttonElement.classList.remove('active');
+            buttonElement.parentElement.classList.remove('active-category');
+        }
         function createSkeletonElement() { const skeleton = document.createElement('div'); skeleton.className = 'skeleton-item'; const img = document.createElement('div'); img.className = 'skeleton-img'; const text = document.createElement('div'); text.className = 'skeleton-text'; skeleton.appendChild(img); skeleton.appendChild(text); return skeleton; }
 
         async function openAccordion(contentElement, buttonElement) {
+            buttonElement.parentElement.classList.add('active-category');
             contentElement.style.display = 'flex';
             buttonElement.setAttribute('aria-expanded', 'true');
             buttonElement.classList.add('active');
@@ -762,7 +906,7 @@
         }
 
         // --- Initialization & Event Listeners ---
-        const mainContainer = document.querySelector('.categories-container');
+        const mainContainer = document.querySelector('main');
         mainContainer.addEventListener('click', function(event) {
             const favoriteIcon = event.target.closest('.favorite-icon');
             if (favoriteIcon) {
@@ -810,6 +954,10 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
         loadTextsData();
+
+        const savedView = localStorage.getItem('appView') || 'grid';
+        setView(savedView);
+
 
         const allAccordionButtons = document.querySelectorAll('.accordion-button');
         
@@ -864,17 +1012,15 @@
             }
         });
 
-        // --- Popup Disclaimer Logic (Final Version) ---
+        // --- Popup Disclaimer Logic ---
         const popup = document.getElementById('disclaimer-popup');
         const acceptBtn = document.getElementById('accept-btn');
         const declineBtn = document.getElementById('decline-btn');
         const dontShowAgainCheckbox = document.getElementById('dont-show-again');
 
-        // ✨ ตรวจสอบจาก localStorage
         const hasAcceptedPermanently = localStorage.getItem('disclaimerAccepted');
         
         function showPopup() {
-            // จะแสดงก็ต่อเมื่อยังไม่เคยยอมรับแบบถาวรเท่านั้น
             if (!hasAcceptedPermanently) {
                 document.body.classList.add('popup-open');
                 popup.style.display = 'flex';
@@ -893,17 +1039,15 @@
             }, 300);
         }
 
-        showPopup(); // แสดงทันที ไม่มี delay
+        showPopup(); 
 
         acceptBtn.addEventListener('click', () => {
-            // ถ้าผู้ใช้ติ๊กถูก, ให้บันทึกใน localStorage
             if (dontShowAgainCheckbox.checked) {
                 localStorage.setItem('disclaimerAccepted', 'true');
             }
             
             hidePopup();
 
-            // ส่ง event ไปที่ Google Analytics
             if (typeof gtag === 'function') {
                 gtag('event', 'accept_disclaimer', {
                     'event_category': 'Popup Interaction',
@@ -911,25 +1055,20 @@
                 });
             }
         });
-
+        
+        // ✨ Final "Decline" Button Behavior with Workaround
         declineBtn.addEventListener('click', () => {
-            // ส่ง event ไปที่ Google Analytics
             if (typeof gtag === 'function') {
-                gtag('event', 'decline_disclaimer', {
+                gtag('event', 'decline_disclaimer_redirect', {
                     'event_category': 'Popup Interaction',
-                    'event_label': 'User declined and exited'
+                    'event_label': 'User declined and was redirected away from the app'
                 });
             }
 
-            if (typeof AndroidBridge !== 'undefined' && typeof AndroidBridge.exitApp === 'function') {
-                AndroidBridge.exitApp();
-            } else {
-                window.close();
-                window.location.href = 'about:blank';
-            }
+            // The guaranteed workaround: Navigate the user away from the app.
+            window.location.href = 'https://www.google.com';
         });
         
-        // Focus Trap and Interaction Logic
         const focusableElements = 'input[type="checkbox"], button';
         const focusableContent = popup.querySelectorAll(focusableElements);
         const firstFocusableElement = focusableContent[0];
