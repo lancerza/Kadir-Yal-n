@@ -3,11 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ทีวีออนไลน์ รวมลิงก์ดูทีวี กีฬา และหนังออนไลน์ในที่เดียว">
+    <meta name="keywords" content="ทีวีออนไลน์, ดูหนัง, กีฬา, YouTube">
     <title>ทีวีออนไลน์ ดูฟรีไม่เสียรายเดือน</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KBRV24KW7F"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-KBRV24KW7F');
+    </script>
+
     <style>
-        /* ... CSS ทั้งหมดของคุณ ... */
         :root {
             --dark-bg: #1a1a1a;
             --light-text: #f0f0f0;
@@ -16,14 +30,490 @@
             --line-blue: #2196F3;
             --line-green: #00B900;
             --border-radius: 8px;
+            --spacing-xs: 5px;
+            --spacing-sm: 8px;
+            --spacing-md: 10px;
+            --spacing-lg: 15px;
+            --spacing-xl: 20px;
             --component-bg: #333;
             --border-color: #555;
         }
-        body.popup-open { overflow: hidden; }
-        /* ... (CSS อื่นๆ ทั้งหมด) ... */
+        
+        body.light-theme {
+            --dark-bg: #f4f4f4;
+            --light-text: #333333;
+            --component-bg: #e9e9e9;
+            --border-color: #ccc;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0 var(--spacing-md);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.popup-open {
+            overflow: hidden;
+        }
+
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes gradient-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes heart-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0) scale(1); }
+            20%, 80% { transform: translate3d(2px, 0, 0) scale(1); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0) scale(1); }
+            40%, 60% { transform: translate3d(4px, 0, 0) scale(1); }
+        }
+
+        header { background-color: transparent; color: var(--white); padding: 2vw 4vw; border-radius: var(--border-radius); margin: 5vh 0 2vh 0; animation: fadeIn 3s ease-out; width: 100%; box-sizing: border-box; position: relative; }
+
+        h1 {
+            color: var(--light-text);
+            font-family: 'Kanit', sans-serif;
+            font-size: clamp(24px, 5vw, 40px);
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-top: 1px;
+            margin-bottom: var(--spacing-md);
+            background: -webkit-linear-gradient(45deg, #2196F3, #ff4d4d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            background-size: 200% auto;
+            animation: gradient-animation 10s ease infinite;
+        }
+        body.light-theme h1 {
+             background: -webkit-linear-gradient(45deg, #2196F3, #ff4d4d);
+             -webkit-background-clip: text;
+             background-clip: text;
+        }
+
+        #running-text-container, #current-datetime, #line-group-info { color: var(--light-text); }
+        #running-text { color: var(--red-accent); }
+        #line-group-info { color: var(--line-blue); }
+        #running-text-container { width: 100%; margin-bottom: var(--spacing-xs); position: relative; min-height: 20px; overflow: hidden; }
+        #running-text { display: inline-block; white-space: nowrap; font-family: 'Kanit', sans-serif; font-size: clamp(12px, 2vw, 16px); font-weight: 700; animation: marquee 15s linear infinite; position: absolute; top: 0; left: 0; min-width: 100%; cursor: default; }
+        #current-datetime { font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 20px); margin-top: var(--spacing-md); margin-bottom: var(--spacing-md); text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); font-weight: 400; }
+        #line-group-info { font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 20px); margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl); text-shadow: 0 0 5px rgba(0, 0, 0, 0.3); font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; }
+        #line-group-info:hover { color: #1976D2; }
+        #line-group-info i { font-size: 25px; vertical-align: middle; color: var(--line-green); }
+        #line-group-info i.fa-brands.fa-line.left-icon { margin-right: var(--spacing-sm); }
+        #line-group-info i.fa-brands.fa-line.right-icon { margin-left: var(--spacing-sm); }
+
+        .ad-container { width: 100%; margin: var(--spacing-md) 0; display: flex; justify-content: center; align-items: center; background-color: #2b2b2b; border-radius: var(--border-radius); }
+        .ad-container-top { min-height: 100px; }
+        .ad-container-bottom { min-height: 250px; }
+        body.light-theme .ad-container { background-color: #e0e0e0; }
+        
+        main.categories-container { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--spacing-lg); width: 100%; max-width: 1200px; margin-top: clamp(30px, 6vw, 50px); padding-bottom: var(--spacing-md); flex-grow: 1; align-items: flex-start; }
+        
+        .category {
+            background-color: transparent;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-xs);
+            flex: 0 0 auto;
+            width: 220px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid transparent;
+            height: auto;
+            box-shadow: none;
+            transition: transform 0.3s ease, 
+                        background-color 0.3s ease, 
+                        border-color 0.3s ease, 
+                        box-shadow 0.3s ease,
+                        width 0.4s ease;
+        }
+
+        .category:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+
+        .accordion-button {
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+            background: linear-gradient(145deg, #424242, #333333);
+            color: var(--light-text);
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 7px 40px 7px 14px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s ease, background 0.3s ease, box-shadow 0.3s ease;
+            --category-color: var(--light-text);
+        }
+        
+        .accordion-button > i:first-of-type {
+            color: var(--category-color);
+            margin-right: var(--spacing-sm);
+        }
+
+        .accordion-button:hover { background: linear-gradient(145deg, #616161, #505050); transform: translateY(-3px); }
+        .accordion-button.active { background: linear-gradient(145deg, #f44336, #d32f2f); border-color: var(--white); color: var(--white); box-shadow: 0 4px 10px rgba(255, 77, 77, 0.4); }
+        
+        body.light-theme .accordion-button { background: linear-gradient(145deg, #e9e9e9, #f5f5f5); color: var(--light-text); text-shadow: none; }
+        body.light-theme .accordion-button:hover { background: linear-gradient(145deg, #f5f5f5, #e0e0e0); }
+        body.light-theme .accordion-button.active { background: linear-gradient(145deg, #ff4d4d, #f44336); color: var(--white); }
+        
+        .accordion-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); transition: transform 0.3s ease; font-size: 0.8em; }
+        .accordion-button.active .accordion-icon { transform: translateY(-50%) rotate(90deg); }
+        .accordion-content { max-height: 0; padding: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out; display: none; opacity: 0; width: 100%; flex-wrap: wrap; justify-content: center; gap: var(--spacing-sm); position: relative; }
+        .accordion-content.show { display: flex; opacity: 1; padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
+        .accordion-content.show .channel-link { animation: popIn 0.4s ease-out forwards; }
+
+        .channel-count {
+            font-size: 0.8em;
+            font-weight: 400;
+            margin-left: var(--spacing-xs);
+            opacity: 0.7;
+        }
+
+        main img { border-radius: var(--border-radius); border: 1px solid var(--border-color); padding: 3px; margin: 0; height: 50px; width: 50px; object-fit: cover; vertical-align: middle; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; cursor: pointer; user-select: none; }
+        main img:hover { transform: scale(1.1); border-color: var(--line-blue); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); }
+        .channel-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--light-text); position: relative; }
+        .channel-name { font-size: 12px; margin-top: 4px; text-align: center; max-width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .favorite-icon { color: #555; font-size: 16px; position: absolute; top: 2px; right: 2px; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; padding: 5px; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; line-height: 1; }
+        body.light-theme .favorite-icon { background-color: rgba(255, 255, 255, 0.5); }
+        .favorite-icon:hover { transform: scale(1.2); }
+        .favorite-icon.is-favorite { color: var(--red-accent); }
+        #category-favorites { display: none; }
+        #category-favorites.has-favorites { display: flex; }
+        .favorite-icon.popping { animation: heart-pop 0.3s ease-in-out; }
+
+        footer { margin-top: auto; padding: var(--spacing-xl); color: var(--light-text); background-color: transparent; width: 100%; text-align: center; border-top: none; }
+        .loading-indicator, .no-channels-message { width: 100%; text-align: center; padding: var(--spacing-md); color: var(--light-text); font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 18px); display: none; }
+        .loading-indicator.active, .no-channels-message.active { display: block; }
+        .loading-indicator i.fa-spinner { animation: spin 1s linear infinite; margin-right: var(--spacing-xs); }
+        .empty-state-icon { font-size: 48px; color: #555; margin-bottom: var(--spacing-md); }
+        
+        #notification-bar { position: fixed; bottom: 20px; left: 50%; transform: translate(-50%, 150%); background-color: var(--component-bg); color: var(--light-text); padding: 12px 24px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.4); font-family: 'Kanit', sans-serif; font-size: 16px; z-index: 1000; transition: transform 0.5s ease-in-out, background-color 0.3s ease, color 0.3s ease; display: flex; align-items: center; flex-direction: column; gap: 10px; }
+        #notification-bar.show { transform: translate(-50%, 0); }
+        #notification-link { display: none; background-color: var(--line-green); color: var(--white); text-decoration: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; }
+        
+        .header-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        #settings-toggle-btn {
+            font-size: 1.5em;
+            color: var(--light-text);
+            cursor: pointer;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        #settings-toggle-btn:hover {
+            color: var(--line-blue);
+            transform: rotate(90deg);
+        }
+
+        .settings-popup {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--component-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-sm) var(--spacing-md);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+            width: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+        }
+
+        .settings-popup.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .settings-popup .setting-item {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: var(--spacing-lg);
+            font-family: 'Kanit', sans-serif;
+            font-size: 14px;
+        }
+
+        .settings-popup .setting-item > span {
+            white-space: nowrap;
+        }
+
+        .theme-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .theme-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 26px; }
+        .slider:before { position: absolute; content: "🌙"; height: 20px; width: 20px; left: 4px; bottom: 3px; font-size: 14px; text-align: center; line-height: 20px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--line-blue); }
+        input:checked + .slider:before { content: "☀️"; transform: translateX(22px); }
+
+        @media (max-width: 768px) { 
+            .categories-container .category { 
+                width: calc(50% - var(--spacing-lg)); 
+                max-width: unset; 
+            }
+        }
+        @media (max-width: 480px) { 
+            body { 
+                padding: 0 var(--spacing-xs); 
+            } 
+            .categories-container .category { 
+                width: calc(100% - var(--spacing-md)); 
+                margin-left: auto; 
+                margin-right: auto; 
+            } 
+            #notification-bar { 
+                width: 90%; 
+                padding: 12px; 
+                font-size: 14px; 
+                bottom: 10px; 
+            }
+            .popup-buttons {
+                flex-direction: column-reverse;
+            }
+        }
+        @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+        .skeleton-item { display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.7; }
+        .skeleton-item .skeleton-img { width: 50px; height: 50px; border-radius: 8px; background-color: #333; background-image: linear-gradient(90deg, #333, #444, #333); background-size: 200px 100%; animation: shimmer 1.5s infinite linear; }
+        .skeleton-item .skeleton-text { width: 40px; height: 12px; border-radius: 4px; background-color: #333; background-image: linear-gradient(90deg, #333, #444, #333); background-size: 200px 100%; animation: shimmer 1.5s infinite linear; }
+        body.light-theme .skeleton-item .skeleton-img, body.light-theme .skeleton-item .skeleton-text { background-color: #e0e0e0; background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0); }
+
+        /* --- Popup Disclaimer Styles --- */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: background-color 0.3s ease-out, backdrop-filter 0.3s ease-out;
+        }
+        .popup-overlay:not(.show) {
+            background-color: rgba(0, 0, 0, 0);
+            backdrop-filter: blur(0px);
+        }
+
+        .popup-box {
+            background: #2c2c2c;
+            color: #f0f0f0;
+            padding: 30px 35px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            font-family: 'Kanit', sans-serif;
+            border: 1px solid #444;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        
+        .popup-overlay.show .popup-box {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .popup-box.shake {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        .popup-box h2 {
+            margin-top: 0;
+            font-size: 1.5em;
+            color: #FFFFFF;
+            font-weight: 700;
+            min-height: 1.2em;
+        }
+
+        .popup-box p {
+            margin: 15px 0 25px;
+            font-size: 0.95em;
+            line-height: 1.6;
+            opacity: 0.9;
+            min-height: 1.2em;
+        }
+        
+        .popup-options {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        #dont-show-again {
+            margin-right: 8px;
+            accent-color: var(--line-blue);
+        }
+
+        .popup-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .popup-btn {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        .popup-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .btn-accept {
+            background-color: #28a745;
+            color: white;
+            border: 2px solid #28a745;
+        }
+        .btn-accept:hover {
+            background-color: #34c759;
+            border-color: #34c759;
+        }
+
+        .btn-decline {
+            background-color: transparent;
+            color: var(--red-accent);
+            border: 2px solid var(--red-accent);
+        }
+        .btn-decline:hover {
+            background-color: var(--red-accent);
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <div id="running-text-container"><div id="running-text"></div></div>
+        <h1>เชิญดูฟรีไม่เสียรายเดือน</h1>
+        <div class="header-controls">
+            <i class="fas fa-cog" id="settings-toggle-btn" title="การตั้งค่า"></i>
+            <div id="settings-popup" class="settings-popup">
+                <div class="setting-item">
+                    <span>สลับธีม</span>
+                    <label class="theme-switch" for="theme-toggle">
+                        <input type="checkbox" id="theme-toggle">
+                        <div class="slider"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <time id="current-datetime" aria-live="polite"></time>
+        <a href="intent://ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA#Intent;scheme=line;package=jp.naver.line.android;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.linecorp.line;end" id="line-group-info" rel="noopener noreferrer">
+            <i class="fa-brands fa-line left-icon"></i> 
+            เข้ากลุ่มไลน์อัพเดทต่างๆ
+            <i class="fa-brands fa-line right-icon"></i>
+        </a>
+    </header>
+
+    <div class="ad-container ad-container-top">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6694890026488371" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6694890026488371" data-ad-slot="7851244249" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    
+    <main class="categories-container">
+        <div class="category" id="category-favorites">
+            <button class="accordion-button" data-category="ช่องโปรด" aria-expanded="false" aria-controls="content-favorites"><i class="fas fa-star"></i> ช่องโปรด<i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-favorites" class="accordion-content">
+                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ยังไม่มีช่องโปรด<br>กดรูปหัวใจเพื่อเพิ่ม</div>
+            </div>
+        </div>
+        <div class="category">
+            <button class="accordion-button" data-category="ทีวีดิจิตอล" aria-expanded="false" aria-controls="content-thai-tv"><i class="fas fa-tv"></i> ทีวีดิจิตอล<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-thai-tv" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+            </div>
+        </div>
+        <div class="category">
+            <button class="accordion-button" data-category="กีฬา" aria-expanded="false" aria-controls="content-sport"><i class="fas fa-running"></i> กีฬา<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-sport" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+            </div>
+        </div>
+        <div class="category">
+            <button class="accordion-button" data-category="หนังทีวี" aria-expanded="false" aria-controls="content-movies"><i class="fas fa-film"></i> หนังทีวี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-movies" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+            </div>
+        </div>
+        <div class="category">
+            <button class="accordion-button" data-category="สารคดี" aria-expanded="false" aria-controls="content-documentary"><i class="fas fa-book"></i> สารคดี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-documentary" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+            </div>
+        </div>
+        <div class="category">
+            <button class="accordion-button" data-category="IPTV" aria-expanded="false" aria-controls="content-iptv"><i class="fas fa-network-wired"></i> IPTV<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-iptv" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+            </div>
+        </div>
+    </main>
+
+    <div class="ad-container ad-container-bottom">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6694890026488371" data-ad-slot="3108933890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    
+    <footer><p id="footer-text"></p></footer>
+    
+    <div id="notification-bar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fas fa-info-circle"></i>
+              <span id="notification-text"></span>
+        </div>
+        <a id="notification-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+    </div>
+
     <div class="popup-overlay" id="disclaimer-popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
         <div class="popup-box">
             <h2 id="popup-title"></h2>
@@ -44,17 +534,54 @@
         // --- Element Variables & Global State ---
         let channelsData = [];
         let configData = {};
+        const categoryStyles = {
+            "ทีวีดิจิตอล": { color: "#42A5F5" },
+            "กีฬา": { color: "#66BB6A" },
+            "หนังทีวี": { color: "#AB47BC" },
+            "สารคดี": { color: "#FFCA28" },
+            "IPTV": { color: "#8D6E63" },
+            "ช่องโปรด": { color: "#F06292" }
+        };
 
-        // ... (โค้ดส่วนอื่น ๆ ที่ไม่เปลี่ยนแปลง) ...
-        function applyTheme(theme) { /* ... */ }
-        function getFavorites() { /* ... */ }
-        // ... (ฯลฯ) ...
+        // --- Utility Functions (จัดเรียงใหม่) ---
+        function showNotification(message, { duration = 4000, linkText = '', linkUrl = '' } = {}) {
+            const notificationBar = document.getElementById('notification-bar');
+            const notificationText = document.getElementById('notification-text');
+            const notificationLink = document.getElementById('notification-link');
+            if (notificationBar.notificationTimer) clearTimeout(notificationBar.notificationTimer);
+            
+            notificationText.textContent = message;
+            if (linkText && linkUrl) {
+                notificationLink.textContent = linkText;
+                notificationLink.href = linkUrl;
+                notificationLink.style.display = 'inline-block';
+            } else {
+                notificationLink.style.display = 'none';
+            }
+            
+            notificationBar.classList.add('show');
+            notificationBar.notificationTimer = setTimeout(() => {
+                notificationBar.classList.remove('show');
+            }, duration);
+        }
 
-        // ✨ --- ฟังก์ชันที่อัปเดตใหม่ --- ✨
+        function applyTheme(theme) {
+            const body = document.body;
+            const themeToggle = document.getElementById('theme-toggle');
+            if (theme === 'light') {
+                body.classList.add('light-theme');
+                if(themeToggle) themeToggle.checked = true;
+            } else {
+                body.classList.remove('light-theme');
+                if(themeToggle) themeToggle.checked = false;
+            }
+        }
+
+        // --- Core Application Functions ---
         async function loadAppData() {
-            // !! สำคัญมาก: แก้ไข URL ทั้ง 2 บรรทัดนี้ให้เป็นลิงก์ RAW Gist ของคุณ
-            const configUrl = 'https://raw.githubusercontent.com/ahmed9qn223/backend/refs/heads/main/config.json';
-            const channelsUrl = 'https://raw.githubusercontent.com/ahmed9qn223/backend/refs/heads/main/channels.json';
+            // !! สำคัญมาก: แก้ไข URL ทั้ง 2 บรรทัดนี้ให้เป็นลิงก์ RAW Gist ที่ถูกต้องของคุณ
+            const configUrl = 'https://raw.githubusercontent.com/ahmed9qn223/backend/main/config.json';
+            const channelsUrl = 'https://raw.githubusercontent.com/ahmed9qn223/backend/main/channels.json';
 
             try {
                 const [configResponse, channelsResponse] = await Promise.all([
@@ -83,45 +610,372 @@
                 showNotification('เกิดข้อผิดพลาดในการโหลดข้อมูลหลัก');
             }
         }
+        
+        function createChannelElement(channel) {
+            const link = document.createElement('a');
+            link.href = "#";
+            link.classList.add('channel-link');
+            link.dataset.url = channel.data_url;
+            link.setAttribute('aria-label', channel.aria_label);
+            
+            const img = document.createElement('img');
+            img.src = channel.img_src;
+            img.alt = channel.name;
+            img.loading = "lazy";
+            img.onerror = function() {
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzU1NSI+PHBhdGggZD0iTTE5IDNINWMtMS4xIDAtMiAuOS0yIDJ2MTRjMCAxLjEuOSAyIDIgMmgxNGMxLjEgMCAyLS45IDItMlY1YzAtMS4xLS45LTItMi0yem0wIDE2SDVWNWgxNHYxNHptLTUuMDQtNi4yMWwtMi43NSAzLjU0LTEuOTYtMi4zNkw2IDE4aDEybC0zLjA0LTQuNzF6Ii8+PC9zdmc+';
+                this.onerror = null;
+            };
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'channel-name';
+            nameSpan.textContent = channel.name;
+            
+            const favoriteIcon = document.createElement('i');
+            favoriteIcon.className = 'fas fa-heart favorite-icon';
+            if (JSON.parse(localStorage.getItem('favoriteChannels') || '[]').includes(channel.name)) {
+                favoriteIcon.classList.add('is-favorite');
+            }
 
-        function populatePopupContent(disclaimerConfig) {
-            const config = disclaimerConfig || {};
-            document.getElementById('popup-title').textContent = config.title || 'ข้อจำกัดความรับผิดชอบ';
-            document.getElementById('popup-message').textContent = config.message || 'ไม่สามารถโหลดเนื้อหาได้ โปรดตรวจสอบไฟล์ JSON';
-            document.getElementById('popup-checkbox-label').textContent = config.checkboxLabel || 'ไม่ต้องแสดงอีก';
-            document.getElementById('accept-btn').textContent = config.acceptText || '✅ ยอมรับ';
-            document.getElementById('decline-btn').textContent = config.declineText || '❌ ปิด';
+            link.appendChild(img);
+            link.appendChild(nameSpan);
+            link.appendChild(favoriteIcon);
+            return link;
         }
 
+        function updateFavoritesCategory() {
+            const favorites = JSON.parse(localStorage.getItem('favoriteChannels') || '[]');
+            const favoritesCategory = document.getElementById('category-favorites');
+            const favoritesContent = document.getElementById('content-favorites');
+            const noChannelsMessage = favoritesContent.querySelector('.no-channels-message');
+            
+            favoritesCategory.classList.toggle('has-favorites', favorites.length > 0);
+            
+            favoritesContent.innerHTML = ''; // Clear previous content
+            if (favorites.length > 0) {
+                const favoriteChannels = channelsData.filter(ch => favorites.includes(ch.name));
+                favoriteChannels.forEach(channel => {
+                    favoritesContent.appendChild(createChannelElement(channel));
+                });
+            } else {
+                 favoritesContent.appendChild(noChannelsMessage);
+            }
+            
+            if (favoritesContent.classList.contains('show')) {
+                requestAnimationFrame(() => {
+                    const currentHeight = favoritesContent.scrollHeight;
+                    favoritesContent.style.maxHeight = (currentHeight > 20 ? currentHeight + 16 : 100) + 'px';
+                });
+            }
+        }
+        
+        function toggleFavorite(channelName) {
+            let favorites = JSON.parse(localStorage.getItem('favoriteChannels') || '[]');
+            const isFavorited = favorites.includes(channelName);
+
+            if (isFavorited) {
+                favorites = favorites.filter(name => name !== channelName);
+            } else {
+                favorites.push(channelName);
+            }
+            localStorage.setItem('favoriteChannels', JSON.stringify(favorites));
+
+            document.querySelectorAll('.channel-link').forEach(link => {
+                if (link.querySelector('.channel-name').textContent === channelName) {
+                    link.querySelector('.favorite-icon').classList.toggle('is-favorite', !isFavorited);
+                }
+            });
+
+            updateFavoritesCategory();
+        }
+
+        function openAccordion(contentElement, buttonElement) {
+            contentElement.style.display = 'flex';
+            buttonElement.setAttribute('aria-expanded', 'true');
+            buttonElement.classList.add('active');
+
+            if (buttonElement.dataset.category === 'ช่องโปรด') {
+                updateFavoritesCategory();
+            } else {
+                const alreadyHasContent = contentElement.querySelector('.channel-link') || contentElement.querySelector('.no-channels-message');
+                if (!alreadyHasContent) {
+                    contentElement.innerHTML = ''; 
+                    const loadingIndicator = contentElement.querySelector('.loading-indicator');
+                    if(loadingIndicator) loadingIndicator.style.display = 'block';
+
+                    requestAnimationFrame(() => {
+                        const categoryText = buttonElement.dataset.category;
+                        const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
+                        
+                        if(loadingIndicator) loadingIndicator.style.display = 'none';
+
+                        if (filteredChannels.length === 0) {
+                            const noChannelsMessage = document.createElement('div');
+                            noChannelsMessage.className = 'no-channels-message active';
+                            noChannelsMessage.innerHTML = `<i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้`;
+                            contentElement.appendChild(noChannelsMessage);
+                        } else {
+                            filteredChannels.forEach(channel => {
+                                contentElement.appendChild(createChannelElement(channel));
+                            });
+                        }
+
+                        contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px';
+                        contentElement.classList.add('show');
+                    });
+                }
+            }
+            if(!contentElement.classList.contains('show')){
+                 requestAnimationFrame(() => {
+                    contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px';
+                    contentElement.classList.add('show');
+                });
+            }
+            localStorage.setItem('lastOpenedCategory', contentElement.id);
+        }
+        
+        function closeAccordion(contentElement, buttonElement) {
+            contentElement.classList.remove('show');
+            contentElement.style.maxHeight = '0px';
+            buttonElement.setAttribute('aria-expanded', 'false');
+            buttonElement.classList.remove('active');
+        }
+
+        // --- Popup Disclaimer Logic ---
         function setupPopup() {
+            const popup = document.getElementById('disclaimer-popup');
+            const acceptBtn = document.getElementById('accept-btn');
+            const declineBtn = document.getElementById('decline-btn');
+            const dontShowAgainCheckbox = document.getElementById('dont-show-again');
+            
+            function populatePopupContent(disclaimerConfig) {
+                const config = disclaimerConfig || {};
+                document.getElementById('popup-title').textContent = config.title || 'ข้อจำกัดความรับผิดชอบ';
+                document.getElementById('popup-message').textContent = config.message || 'กำลังโหลดเนื้อหา...';
+                document.getElementById('popup-checkbox-label').textContent = config.checkboxLabel || 'ไม่ต้องแสดงอีก';
+                acceptBtn.textContent = config.acceptText || '✅ ยอมรับ';
+                declineBtn.textContent = config.declineText || '❌ ปิด';
+            }
+
             const hasAcceptedPermanently = localStorage.getItem('disclaimerAccepted');
             if (hasAcceptedPermanently) return;
 
-            // ตอนนี้ configData มาจากไฟล์แยก
             populatePopupContent(configData.disclaimer);
 
-            // ... (โค้ด Popup ที่เหลือเหมือนเดิม) ...
-            function showPopup() { /* ... */ }
-            function hidePopup() { /* ... */ }
+            function showPopup() {
+                document.body.classList.add('popup-open');
+                popup.style.display = 'flex';
+                setTimeout(() => {
+                    popup.classList.add('show');
+                    acceptBtn.focus();
+                }, 10);
+            }
+            
+            function hidePopup() {
+                document.body.classList.remove('popup-open');
+                popup.classList.remove('show');
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 300);
+            }
+
             showPopup();
-            // ... (Event Listeners ของ Popup) ...
+
+            acceptBtn.addEventListener('click', () => {
+                if (dontShowAgainCheckbox.checked) {
+                    localStorage.setItem('disclaimerAccepted', 'true');
+                }
+                hidePopup();
+                if (typeof gtag === 'function') {
+                    gtag('event', 'accept_disclaimer', {
+                        'event_category': 'Popup Interaction',
+                        'event_label': `User accepted (Don't show again: ${dontShowAgainCheckbox.checked})`
+                    });
+                }
+            });
+
+            declineBtn.addEventListener('click', () => {
+                if (typeof gtag === 'function') {
+                    gtag('event', 'decline_disclaimer', {
+                        'event_category': 'Popup Interaction',
+                        'event_label': 'User declined and exited'
+                    });
+                }
+                if (typeof AndroidBridge !== 'undefined' && typeof AndroidBridge.exitApp === 'function') {
+                    AndroidBridge.exitApp();
+                } else {
+                    window.close();
+                    window.location.href = 'about:blank';
+                }
+            });
+
+            const focusableElements = 'input[type="checkbox"], button';
+            const focusableContent = popup.querySelectorAll(focusableElements);
+            const firstFocusableElement = focusableContent[0];
+            const lastFocusableElement = focusableContent[focusableContent.length - 1];
+
+            popup.addEventListener('click', (event) => {
+                if (event.target === popup) {
+                    const popupBox = popup.querySelector('.popup-box');
+                    popupBox.classList.add('shake');
+                    setTimeout(() => popupBox.classList.remove('shake'), 820);
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (popup.style.display !== 'flex') return;
+                if (e.key === 'Escape') { acceptBtn.click(); return; }
+                if (e.key !== 'Tab') return;
+
+                if (e.shiftKey) {
+                    if (document.activeElement === firstFocusableElement) {
+                        lastFocusableElement.focus();
+                        e.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === lastFocusableElement) {
+                        firstFocusableElement.focus();
+                        e.preventDefault();
+                    }
+                }
+            });
         }
 
+        // --- Main Application Initialization ---
         function initializeApp() {
-            // ... (โค้ดส่วนต้นของ initializeApp เหมือนเดิม) ...
+            const savedTheme = localStorage.getItem('appTheme') || 'dark';
+            applyTheme(savedTheme);
+            const datetimeDisplay = document.getElementById('current-datetime');
+            const updateDateTime = () => {
+                 const now = new Date();
+                 const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                 const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false };
+                 if(datetimeDisplay) datetimeDisplay.textContent = `${now.toLocaleDateString('th-TH', optionsDate)} ${now.toLocaleTimeString('th-TH', optionsTime)}`;
+            };
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
             
+            const runningTextEl = document.getElementById('running-text');
+            if(runningTextEl) runningTextEl.textContent = "✅ แอปดูฟรี ไม่เสียรายเดือน!    👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น    ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!";
+            
+            const footerTextEl = document.getElementById('footer-text');
+            if(footerTextEl) footerTextEl.textContent = "© OK TV Copyright 2025 - All rights reserved.";
+
+            const themeToggle = document.getElementById('theme-toggle');
+            if(themeToggle) {
+                themeToggle.addEventListener('change', () => {
+                    const newTheme = themeToggle.checked ? 'light' : 'dark';
+                    localStorage.setItem('appTheme', newTheme);
+                    applyTheme(newTheme);
+                });
+            }
+
+            const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+            const settingsPopup = document.getElementById('settings-popup');
+            if(settingsToggleBtn && settingsPopup) {
+                settingsToggleBtn.addEventListener('click', (event) => {
+                    event.stopPropagation(); 
+                    settingsPopup.classList.toggle('show');
+                });
+                window.addEventListener('click', () => {
+                    if (settingsPopup.classList.contains('show')) {
+                        settingsPopup.classList.remove('show');
+                    }
+                });
+                settingsPopup.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                });
+            }
+
+
             loadAppData().then(() => {
-                // ... (โค้ดส่วนท้ายของ initializeApp ที่ต้องใช้ข้อมูลที่โหลดมาแล้ว) ...
                 setupPopup();
-                // ... (โค้ดสร้าง accordion, favorites ฯลฯ) ...
+                
+                const allAccordionButtons = document.querySelectorAll('.accordion-button');
+                allAccordionButtons.forEach(button => {
+                    const categoryName = button.dataset.category;
+                    const style = categoryStyles[categoryName];
+                    if (style) button.style.setProperty('--category-color', style.color);
+
+                    if (categoryName && categoryName !== 'ช่องโปรด') {
+                        const count = channelsData.filter(ch => ch.category === categoryName).length;
+                        const countSpan = button.querySelector('.channel-count');
+                        if (countSpan && count > 0) countSpan.textContent = `(${count})`;
+                    }
+                });
+
+                allAccordionButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const content = this.nextElementSibling;
+                        const isOpening = !content.classList.contains('show');
+                        allAccordionButtons.forEach(otherButton => { if (otherButton !== this) closeAccordion(otherButton.nextElementSibling, otherButton); });
+                        if (isOpening) {
+                            openAccordion(content, this);
+                        } else {
+                            closeAccordion(content, this);
+                        }
+                    });
+                });
+                
+                updateFavoritesCategory();
+
+                const lastCategoryId = localStorage.getItem('lastOpenedCategory');
+                let categoryOpened = false;
+                if (lastCategoryId && document.getElementById(lastCategoryId)) {
+                    const lastButtonElement = document.getElementById(lastCategoryId).previousElementSibling;
+                    if (lastButtonElement) {
+                        openAccordion(lastButtonElement.nextElementSibling, lastButtonElement);
+                        categoryOpened = true;
+                    }
+                }
+                if (!categoryOpened) {
+                    const firstButton = document.querySelector('.category:not(#category-favorites) .accordion-button');
+                    if (firstButton) openAccordion(firstButton.nextElementSibling, firstButton);
+                }
+                
+                const mainContainer = document.querySelector('.categories-container');
+                mainContainer.addEventListener('click', function(event) {
+                    const favoriteIcon = event.target.closest('.favorite-icon');
+                    if (favoriteIcon) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const channelLink = favoriteIcon.closest('.channel-link');
+                        const channelName = channelLink.querySelector('.channel-name').textContent;
+                        toggleFavorite(channelName);
+                        favoriteIcon.classList.add('popping');
+                        favoriteIcon.addEventListener('animationend', () => favoriteIcon.classList.remove('popping'), { once: true });
+                        return;
+                    }
+
+                    const link = event.target.closest('.channel-link');
+                    if (link) {
+                        event.preventDefault();
+                        const url = link.dataset.url;
+                        const isAndroid = /Android/i.test(navigator.userAgent);
+                        if (isAndroid) {
+                            const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.wiseplay&hl=th';
+                            let appLaunchFailed = true;
+                            const visibilityChangeHandler = () => { if (document.visibilityState === 'hidden') { appLaunchFailed = false; document.removeEventListener('visibilitychange', visibilityChangeHandler); } };
+                            document.addEventListener('visibilitychange', visibilityChangeHandler);
+                            
+                            const iframe = document.createElement('iframe');
+                            iframe.style.cssText = 'border:none;width:1px;height:1px;position:absolute;top:-9999px;left:-9999px;';
+                            iframe.src = url;
+                            document.body.appendChild(iframe);
+                            
+                            setTimeout(() => {
+                                document.removeEventListener('visibilitychange', visibilityChangeHandler);
+                                if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                                if (appLaunchFailed) showNotification('ไม่พบแอปพลิเคชัน', { duration: 10000, linkText: 'ติดตั้ง Wiseplay', linkUrl: playStoreUrl });
+                            }, 2500);
+                        } else {
+                            showNotification('รองรับเฉพาะบนระบบ Android เท่านั้น');
+                        }
+                    }
+                });
             });
         }
         
-        // (ส่วนที่เหลือของโค้ด JS ทั้งหมดของคุณ)
-        // ...
-        
         initializeApp();
     });
-    </script>
-</body>
-</html>
+    </script></body></html>
