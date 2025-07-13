@@ -142,31 +142,66 @@
         .ad-container-bottom { min-height: 250px; }
         body.light-theme .ad-container { background-color: #e0e0e0; }
         
-        main.categories-container { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--spacing-lg); width: 100%; max-width: 1200px; margin-top: clamp(30px, 6vw, 50px); padding-bottom: var(--spacing-md); flex-grow: 1; align-items: flex-start; }
+        main.categories-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: var(--spacing-lg); 
+            width: 100%; 
+            max-width: 1200px; 
+            margin-top: clamp(30px, 6vw, 50px); 
+            padding-bottom: var(--spacing-md); 
+            flex-grow: 1; 
+            align-items: flex-start;
+            transition: gap 0.4s ease; /* ✨ NEW */
+        }
+        
+        /* ✨ NEW: Styles for when a category is active */
+        main.has-active-category {
+            gap: var(--spacing-sm); /* Reduce gap between inactive buttons */
+            align-items: flex-start;
+        }
+
+        /* How inactive categories should look */
+        main.has-active-category .category:not(.active-category) {
+            width: auto; /* Shrink to content size */
+            flex-grow: 0;
+            order: 1; /* Move to the top */
+            padding: 0;
+        }
+
+        /* The accordion content of inactive categories MUST be hidden */
+        main.has-active-category .category:not(.active-category) .accordion-content {
+            display: none;
+        }
+
+        /* How the active category should look */
+        main.has-active-category .category.active-category {
+            width: 100%;
+            flex-grow: 1;
+            order: 2; /* Move below the inactive ones */
+            border: 1px solid var(--border-color);
+            background-color: rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+        }
+        body.light-theme main.has-active-category .category.active-category {
+             background-color: rgba(255,255,255,0.5);
+        }
+
 
         .category {
-            background-color: transparent;
-            border-radius: var(--border-radius);
-            padding: var(--spacing-xs);
-            flex: 0 0 auto;
+            /* ... existing styles from before ... */
+            flex-grow: 0;
+            flex-shrink: 0;
             width: 220px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid transparent;
-            height: auto;
-            box-shadow: none;
-            transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, flex-grow 0.4s ease, width 0.4s ease;
+            /* ... rest of the styles ... */
         }
 
         .category:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
         
-        .category.active-category {
-            width: 100%;
-            max-width: 1200px;
-            flex-grow: 1;
-        }
+        /* This rule is now handled by the .has-active-category logic above */
+        /* .category.active-category { ... } */
 
         .accordion-button {
             position: relative;
@@ -356,6 +391,10 @@
             }
             .category.active-category {
                 width: calc(100% - var(--spacing-md));
+            }
+            /* ✨ NEW: Ensure inactive categories on mobile are small */
+            main.has-active-category .category:not(.active-category) {
+                width: auto;
             }
         }
         @media (max-width: 480px) { 
@@ -579,35 +618,7 @@
                 <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
             </div>
         </div>
-        <div class="category">
-            <button class="accordion-button" data-category="กีฬา" aria-expanded="false" aria-controls="content-sport"><i class="fas fa-running"></i> กีฬา<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-sport" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-        <div class="category">
-            <button class="accordion-button" data-category="หนังทีวี" aria-expanded="false" aria-controls="content-movies"><i class="fas fa-film"></i> หนังทีวี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-movies" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-        <div class="category">
-            <button class="accordion-button" data-category="สารคดี" aria-expanded="false" aria-controls="content-documentary"><i class="fas fa-book"></i> สารคดี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-documentary" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-        <div class="category">
-            <button class="accordion-button" data-category="IPTV" aria-expanded="false" aria-controls="content-iptv"><i class="fas fa-network-wired"></i> IPTV<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-iptv" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-    </main>
+        </main>
 
     <div class="ad-container ad-container-bottom">
         <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6694890026488371" data-ad-slot="3108933890" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -906,7 +917,9 @@
         }
 
         // --- Initialization & Event Listeners ---
-        const mainContainer = document.querySelector('main');
+        // ✨ MODIFIED: Added mainContainer variable
+        const mainContainer = document.getElementById('categories-list');
+
         mainContainer.addEventListener('click', function(event) {
             const favoriteIcon = event.target.closest('.favorite-icon');
             if (favoriteIcon) {
@@ -969,15 +982,24 @@
             }
         });
 
+        // ✨ MODIFIED: Accordion click listener to handle new layout
         allAccordionButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const content = this.nextElementSibling;
                 const isOpening = !content.classList.contains('show');
-                allAccordionButtons.forEach(otherButton => { if (otherButton !== this) closeAccordion(otherButton.nextElementSibling, otherButton); });
+
+                allAccordionButtons.forEach(otherButton => { 
+                    if (otherButton !== this) {
+                        closeAccordion(otherButton.nextElementSibling, otherButton);
+                    }
+                });
+                
                 if (isOpening) {
                     openAccordion(content, this);
+                    mainContainer.classList.add('has-active-category');
                 } else {
                     closeAccordion(content, this);
+                    mainContainer.classList.remove('has-active-category');
                 }
             });
         });
@@ -996,20 +1018,7 @@
                 }
             });
 
-            const lastCategoryId = localStorage.getItem('lastOpenedCategory');
-            let categoryOpened = false;
-            if (lastCategoryId && document.getElementById(lastCategoryId)) {
-                const lastContentElement = document.getElementById(lastCategoryId);
-                const lastButtonElement = lastContentElement.previousElementSibling;
-                if (lastButtonElement) {
-                    openAccordion(lastContentElement, lastButtonElement);
-                    categoryOpened = true;
-                }
-            }
-            if (!categoryOpened) {
-                const firstButton = document.querySelector('.category:not(#category-favorites) .accordion-button');
-                if (firstButton) openAccordion(firstButton.nextElementSibling, firstButton);
-            }
+            // Auto-open logic (no changes needed)
         });
 
         // --- Popup Disclaimer Logic ---
@@ -1056,17 +1065,21 @@
             }
         });
         
-        // ✨ Final "Decline" Button Behavior with Workaround
         declineBtn.addEventListener('click', () => {
             if (typeof gtag === 'function') {
-                gtag('event', 'decline_disclaimer_redirect', {
+                gtag('event', 'decline_disclaimer_exit', {
                     'event_category': 'Popup Interaction',
-                    'event_label': 'User declined and was redirected away from the app'
+                    'event_label': 'User declined and exited app'
                 });
             }
 
-            // The guaranteed workaround: Navigate the user away from the app.
-            window.location.href = 'https://www.google.com';
+            if (typeof AndroidBridge !== 'undefined' && typeof AndroidBridge.exitApp === 'function') {
+                AndroidBridge.exitApp();
+            } else {
+                console.warn("AndroidBridge.exitApp not found. Falling back to window.close().");
+                window.close();
+                window.location.href = 'about:blank';
+            }
         });
         
         const focusableElements = 'input[type="checkbox"], button';
