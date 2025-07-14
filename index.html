@@ -729,6 +729,7 @@
             "หนังทีวี": { icon: "fas fa-film", color: "#AB47BC" },
             "สารคดี": { icon: "fas fa-book", color: "#FFCA28" },
             "IPTV": { icon: "fas fa-network-wired", color: "#8D6E63" },
+            "TEST": { icon: "fas fa-vial", color: "#78909C"}
         };
 
         let channelsData = null; 
@@ -790,9 +791,8 @@
 
         function createChannelElement(channel) {
             const link = document.createElement('a');
-            link.href = "#";
+            link.href = channel.data_url || "#";
             link.classList.add('channel-link');
-            link.dataset.url = channel.data_url;
             link.setAttribute('aria-label', channel.aria_label || channel.name);
             
             const img = document.createElement('img');
@@ -922,17 +922,15 @@
         mainContainer.addEventListener('click', function(event) {
             const link = event.target.closest('.channel-link');
             if (link) {
-                event.preventDefault();
-
-                // --- เพิ่มโค้ดตรวจสอบตรงนี้ ---
+                // event.preventDefault(); // Let the browser handle the click by default
+                
                 if (!channelsData || !userKey) {
+                    event.preventDefault(); // ONLY prevent default if not ready
                     showNotification('ยังไม่พร้อมใช้งาน กรุณารอสักครู่...');
                     console.log('User clicked before Firebase/channels data was ready.');
-                    return; // หยุดการทำงานถ้ายังไม่พร้อม
+                    return; 
                 }
-                // -------------------------
 
-                // อัปเดตตัวนับคนดู
                 const countSpan = link.querySelector('.view-count');
                 if (countSpan) {
                     const channelId = countSpan.id.replace('view-count-', '');
@@ -944,29 +942,6 @@
                     newChannelRef.onDisconnect().remove(); 
                     newChannelRef.set(true);
                     currentWatchingChannel = channelId;
-                }
-                
-                // เปิดแอปภายนอก (Wiseplay)
-                const url = link.dataset.url;
-                if (url) {
-                    const isAndroid = /Android/i.test(navigator.userAgent);
-                    if (isAndroid) {
-                        const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.wiseplay&hl=th';
-                        let appLaunchFailed = true;
-                        const visibilityChangeHandler = () => { if (document.visibilityState === 'hidden') { appLaunchFailed = false; document.removeEventListener('visibilitychange', visibilityChangeHandler); } };
-                        document.addEventListener('visibilitychange', visibilityChangeHandler);
-                        const iframe = document.createElement('iframe');
-                        iframe.style.cssText = 'border:none;width:1px;height:1px;position:absolute;top:-9999px;left:-9999px;';
-                        iframe.src = url;
-                        document.body.appendChild(iframe);
-                        setTimeout(() => {
-                            document.removeEventListener('visibilitychange', visibilityChangeHandler);
-                            if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                            if (appLaunchFailed) showNotification('ไม่พบแอปพลิเคชัน', { duration: 10000, linkText: 'ติดตั้ง Wiseplay', linkUrl: playStoreUrl });
-                        }, 2500);
-                    } else {
-                        showNotification('รองรับเฉพาะบนระบบ Android เท่านั้น');
-                    }
                 }
             }
         });
@@ -983,7 +958,7 @@
             await loadChannelsData();
             
             const categoriesList = document.getElementById('categories-list');
-            categoriesList.innerHTML = ''; // Clear existing static HTML
+            categoriesList.innerHTML = ''; 
 
             const uniqueCategories = [...new Set(channelsData.map(ch => ch.category))];
 
