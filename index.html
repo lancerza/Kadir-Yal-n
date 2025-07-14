@@ -13,6 +13,9 @@
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-KBRV24KW7F"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
@@ -101,6 +104,9 @@
             box-sizing: border-box;
             position: relative;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         h1 {
@@ -129,80 +135,88 @@
         #running-text { color: var(--red-accent); }
         #line-group-info { color: var(--line-blue); }
         #running-text-container { width: 100%; margin-bottom: var(--spacing-xs); position: relative; min-height: 20px; overflow: hidden; }
-        #running-text { display: inline-block; white-space: nowrap; font-family: 'Kanit', sans-serif; font-size: clamp(12px, 2vw, 16px); font-weight: 700; animation: marquee 15s linear infinite; position: absolute; top: 0; left: 0; min-width: 100%; cursor: default; }
+        #running-text { 
+            display: inline-block;
+            white-space: pre; 
+            font-family: 'Kanit', sans-serif;
+            font-size: clamp(12px, 2vw, 16px);
+            font-weight: 700;
+            animation: marquee 15s linear infinite;
+            position: absolute;
+            top: 0;
+            left: 0;
+            min-width: 100%;
+            cursor: default;
+            padding-right: 100px;
+        }
         #current-datetime { font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 20px); margin-top: var(--spacing-md); margin-bottom: var(--spacing-md); text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); font-weight: 400; }
-        #line-group-info { font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 20px); margin-top: var(--spacing-xl); margin-bottom: var(--spacing-xl); text-shadow: 0 0 5px rgba(0, 0, 0, 0.3); font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; }
+        #line-group-info { font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 20px); margin-top: var(--spacing-xl); margin-bottom: 0; text-shadow: 0 0 5px rgba(0, 0, 0, 0.3); font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; }
         #line-group-info:hover { color: #1976D2; }
         #line-group-info i { font-size: 25px; vertical-align: middle; color: var(--line-green); }
         #line-group-info i.fa-brands.fa-line.left-icon { margin-right: var(--spacing-sm); }
         #line-group-info i.fa-brands.fa-line.right-icon { margin-left: var(--spacing-sm); }
         
+        #online-counter {
+            display: flex;
+            align-items: center;
+            gap: 8px; 
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--light-text);
+            transition: all 0.3s ease;
+            margin-top: 15px; 
+        }
+        #online-counter i {
+            color: var(--line-green); 
+        }
+        #online-count.updated {
+            transform: scale(1.3);
+            color: #fff;
+            transition: transform 0.1s ease-in-out;
+        }
+
         .ad-container { width: 100%; margin: var(--spacing-md) 0; display: flex; justify-content: center; align-items: center; background-color: #2b2b2b; border-radius: var(--border-radius); }
         .ad-container-top { min-height: 100px; }
         .ad-container-bottom { min-height: 250px; }
         body.light-theme .ad-container { background-color: #e0e0e0; }
         
-        main.categories-container { 
-            display: flex; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-            gap: var(--spacing-lg); 
-            width: 100%; 
-            max-width: 1200px; 
-            margin-top: clamp(30px, 6vw, 50px); 
-            padding-bottom: var(--spacing-md); 
-            flex-grow: 1; 
-            align-items: flex-start;
-            transition: gap 0.4s ease; /* ✨ NEW */
-        }
-        
-        /* ✨ NEW: Styles for when a category is active */
-        main.has-active-category {
-            gap: var(--spacing-sm); /* Reduce gap between inactive buttons */
-            align-items: flex-start;
-        }
-
-        /* How inactive categories should look */
-        main.has-active-category .category:not(.active-category) {
-            width: auto; /* Shrink to content size */
-            flex-grow: 0;
-            order: 1; /* Move to the top */
-            padding: 0;
-        }
-
-        /* The accordion content of inactive categories MUST be hidden */
-        main.has-active-category .category:not(.active-category) .accordion-content {
-            display: none;
-        }
-
-        /* How the active category should look */
-        main.has-active-category .category.active-category {
+        main.categories-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-md);
             width: 100%;
+            max-width: 1200px;
+            margin-top: clamp(30px, 6vw, 50px);
+            padding-bottom: var(--spacing-md);
             flex-grow: 1;
-            order: 2; /* Move below the inactive ones */
-            border: 1px solid var(--border-color);
-            background-color: rgba(0,0,0,0.1);
-            border-radius: var(--border-radius);
-            padding: var(--spacing-md);
         }
-        body.light-theme main.has-active-category .category.active-category {
-             background-color: rgba(255,255,255,0.5);
-        }
-
 
         .category {
-            /* ... existing styles from before ... */
-            flex-grow: 0;
-            flex-shrink: 0;
-            width: 220px;
-            /* ... rest of the styles ... */
+            background-color: transparent;
+            border-radius: var(--border-radius);
+            padding: var(--spacing-xs);
+            flex: 0 0 auto;
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid transparent;
+            height: auto;
+            box-shadow: none;
+            transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .category:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+        .category:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
+        }
         
-        /* This rule is now handled by the .has-active-category logic above */
-        /* .category.active-category { ... } */
-
         .accordion-button {
             position: relative;
             -webkit-tap-highlight-color: transparent;
@@ -260,6 +274,26 @@
 
         .channel-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--light-text); position: relative; }
         .channel-name { font-size: 12px; margin-top: 4px; text-align: center; max-width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .channel-view-counter {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            pointer-events: none; 
+        }
+
+        .channel-view-counter .fa-eye {
+            color: var(--line-green);
+        }
 
         .favorite-icon { color: #555; font-size: 16px; position: absolute; top: 2px; right: 2px; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; padding: 5px; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; line-height: 1; }
         body.light-theme .favorite-icon { background-color: rgba(255, 255, 255, 0.5); }
@@ -383,28 +417,21 @@
             background-color: transparent;
         }
 
+        @media (orientation: landscape) {
+            main.categories-container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
 
-        @media (max-width: 768px) { 
-            .categories-container .category { 
-                width: calc(50% - var(--spacing-lg)); 
-                max-width: unset; 
-            }
-            .category.active-category {
-                width: calc(100% - var(--spacing-md));
-            }
-            /* ✨ NEW: Ensure inactive categories on mobile are small */
-            main.has-active-category .category:not(.active-category) {
-                width: auto;
+            .category {
+                width: 300px;
             }
         }
+
         @media (max-width: 480px) { 
             body { 
                 padding: 0 var(--spacing-xs); 
-            } 
-            .categories-container .category { 
-                width: calc(100% - var(--spacing-md)); 
-                margin-left: auto; 
-                margin-right: auto; 
             } 
             #notification-bar { 
                 width: 90%; 
@@ -556,12 +583,12 @@
         @media (max-width: 480px) {
              .popup-buttons {
                  flex-direction: column-reverse;
-            }
+             }
             .btn-accept {
                 order: 0;
             }
             .btn-decline {
-                 order: 0;
+                order: 0;
             }
         }
     </style>
@@ -596,6 +623,10 @@
             เข้ากลุ่มไลน์อัพเดทต่างๆ
             <i class="fa-brands fa-line right-icon"></i>
         </a>
+        <div id="online-counter" title="จำนวนผู้ใช้งานออนไลน์">
+            <i class="fas fa-eye"></i>
+            <span id="online-count">1</span>
+        </div>
     </header>
 
     <div class="ad-container ad-container-top">
@@ -605,48 +636,49 @@
     </div>
     
     <main class="categories-container" id="categories-list">
-    <div class="category" id="category-favorites">
-        <button class="accordion-button" data-category="ช่องโปรด" aria-expanded="false" aria-controls="content-favorites"><i class="fas fa-star"></i> ช่องโปรด<i class="fas fa-chevron-right accordion-icon"></i></button>
-        <div id="content-favorites" class="accordion-content">
-            <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ยังไม่มีช่องโปรด<br>กดรูปหัวใจเพื่อเพิ่ม</div>
+        <div class="category">
+            <button class="accordion-button" data-category="ทีวีดิจิตอล" aria-expanded="false" aria-controls="content-thai-tv"><i class="fas fa-tv"></i> ทีวีดิจิตอล<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-thai-tv" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+            </div>
         </div>
-    </div>
-    <div class="category">
-        <button class="accordion-button" data-category="ทีวีดิจิตอล" aria-expanded="false" aria-controls="content-thai-tv"><i class="fas fa-tv"></i> ทีวีดิจิตอล<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-        <div id="content-thai-tv" class="accordion-content">
-            <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-            <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+        <div class="category">
+            <button class="accordion-button" data-category="กีฬา" aria-expanded="false" aria-controls="content-sport"><i class="fas fa-running"></i> กีฬา<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-sport" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+            </div>
         </div>
-    </div>
-    <div class="category">
-        <button class="accordion-button" data-category="กีฬา" aria-expanded="false" aria-controls="content-sport"><i class="fas fa-running"></i> กีฬา<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-        <div id="content-sport" class="accordion-content">
-            <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-            <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+        <div class="category">
+            <button class="accordion-button" data-category="หนังทีวี" aria-expanded="false" aria-controls="content-movies"><i class="fas fa-film"></i> หนังทีวี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-movies" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+            </div>
         </div>
-    </div>
-    <div class="category">
-        <button class="accordion-button" data-category="หนังทีวี" aria-expanded="false" aria-controls="content-movies"><i class="fas fa-film"></i> หนังทีวี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-        <div id="content-movies" class="accordion-content">
-            <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-            <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+        <div class="category">
+            <button class="accordion-button" data-category="สารคดี" aria-expanded="false" aria-controls="content-documentary"><i class="fas fa-book"></i> สารคดี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-documentary" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+            </div>
         </div>
-    </div>
-    <div class="category">
-        <button class="accordion-button" data-category="สารคดี" aria-expanded="false" aria-controls="content-documentary"><i class="fas fa-book"></i> สารคดี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-        <div id="content-documentary" class="accordion-content">
-            <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-            <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+        <div class="category">
+            <button class="accordion-button" data-category="IPTV" aria-expanded="false" aria-controls="content-iptv"><i class="fas fa-network-wired"></i> IPTV<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-iptv" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+            </div>
         </div>
-    </div>
-    <div class="category">
-        <button class="accordion-button" data-category="IPTV" aria-expanded="false" aria-controls="content-iptv"><i class="fas fa-network-wired"></i> IPTV<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-        <div id="content-iptv" class="accordion-content">
-            <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-            <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-        </div>
-    </div>
-</main>
+         <div class="category">
+            <button class="accordion-button" data-category="TEST" aria-expanded="false" aria-controls="content-test"><i class="fas fa-vial"></i> TEST<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
+            <div id="content-test" class="accordion-content">
+                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+            </div>
+        </div>
+    </main>
 
     <div class="ad-container ad-container-bottom">
         <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6694890026488371" data-ad-slot="3108933890" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -685,25 +717,89 @@
     
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Data Sources ---
-        const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน!   👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น   ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
-        
+        // --- Online Counter Logic using Firebase ---
+        try {
+            // ****** แก้ไขตรงนี้ ******
+           const firebaseConfig = {
+  apiKey: "AIzaSyD-kOR_HxnVLp03ocfmniTvsIZb7lx2g1I",
+  authDomain: "oktv-4e6e4.firebaseapp.com",
+  databaseURL: "https://oktv-4e6e4-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "oktv-4e6e4",
+  storageBucket: "oktv-4e6e4.appspot.com",
+  messagingSenderId: "1035035792142",
+  appId: "1:1035035792142:web:df5eeb383ec3ddbb3fbd5f"
+};
+
+
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            const onlineRef = database.ref('.info/connected');
+            const userListRef = database.ref('onlineUsers');
+            const onlineCounterElement = document.getElementById('online-count');
+            
+            const channelViewersRef = database.ref('channelViewers');
+            let currentWatchingChannel = null;
+            let userKey = null;
+
+            onlineRef.on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    const userRef = userListRef.push();
+                    userKey = userRef.key;
+                    
+                    userRef.onDisconnect().remove(); 
+                    if (currentWatchingChannel) {
+                         database.ref(`channelViewers/${currentWatchingChannel}/${userKey}`).onDisconnect().remove();
+                    }
+                    userRef.set(true);
+                }
+            });
+            userListRef.on('value', (snapshot) => {
+                const count = snapshot.numChildren();
+                if(onlineCounterElement) {
+                    onlineCounterElement.textContent = count;
+                    onlineCounterElement.classList.add('updated');
+                    setTimeout(() => {
+                        onlineCounterElement.classList.remove('updated');
+                    }, 200);
+                }
+            });
+
+            channelViewersRef.on('value', (snapshot) => {
+                const allCounts = snapshot.val() || {};
+                document.querySelectorAll('.view-count').forEach(span => {
+                    span.textContent = '0';
+                });
+                for (const channelId in allCounts) {
+                    const count = Object.keys(allCounts[channelId]).length;
+                    const countSpan = document.getElementById(`view-count-${channelId}`);
+                    if (countSpan) {
+                        countSpan.textContent = count;
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            const onlineCounterContainer = document.getElementById('online-counter');
+            if(onlineCounterContainer) onlineCounterContainer.style.display = 'none';
+        }
+        // --- End of Firebase Logic ---
+
+
+        const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน! &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
         const categoryStyles = {
             "ทีวีดิจิตอล": { color: "#42A5F5" },
             "กีฬา": { color: "#66BB6A" },
             "หนังทีวี": { color: "#AB47BC" },
             "สารคดี": { color: "#FFCA28" },
             "IPTV": { color: "#8D6E63" },
-            "ช่องโปรด": { color: "#F06292" }
         };
 
-        // --- Element Variables ---
         let channelsData = null; 
 
-        // --- Theme Toggle Logic ---
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-
         function applyTheme(theme) {
             if (theme === 'light') {
                 body.classList.add('light-theme');
@@ -719,10 +815,8 @@
             applyTheme(newTheme);
         });
 
-        // --- Settings Popup Logic ---
         const settingsToggleBtn = document.getElementById('settings-toggle-btn');
         const settingsPopup = document.getElementById('settings-popup');
-
         settingsToggleBtn.addEventListener('click', (event) => {
             event.stopPropagation(); 
             settingsPopup.classList.toggle('show');
@@ -736,10 +830,8 @@
             event.stopPropagation();
         });
 
-        // --- Grid/List View Logic ---
         const gridViewBtn = document.getElementById('grid-view-btn');
         const listViewBtn = document.getElementById('list-view-btn');
-
         function setView(view) {
             document.querySelectorAll('.accordion-content').forEach(content => {
                 if (view === 'list') {
@@ -751,7 +843,6 @@
             gridViewBtn.classList.toggle('active', view === 'grid');
             listViewBtn.classList.toggle('active', view === 'list');
             localStorage.setItem('appView', view);
-
             const openAccordion = document.querySelector('.accordion-content.show');
             if(openAccordion) {
                 requestAnimationFrame(() => {
@@ -762,17 +853,12 @@
         gridViewBtn.addEventListener('click', () => setView('grid'));
         listViewBtn.addEventListener('click', () => setView('list'));
 
-
-        // --- Favorites System Functions ---
-        function getFavorites() { return JSON.parse(localStorage.getItem('favoriteChannels') || '[]'); }
-        function saveFavorites(favorites) { localStorage.setItem('favoriteChannels', JSON.stringify(favorites)); }
-
         function createChannelElement(channel) {
             const link = document.createElement('a');
             link.href = "#";
             link.classList.add('channel-link');
             link.dataset.url = channel.data_url;
-            link.setAttribute('aria-label', channel.aria_label);
+            link.setAttribute('aria-label', channel.aria_label || channel.name);
             
             const img = document.createElement('img');
             img.src = channel.img_src;
@@ -787,91 +873,50 @@
             nameSpan.className = 'channel-name';
             nameSpan.textContent = channel.name;
             
-            const favoriteIcon = document.createElement('i');
-            favoriteIcon.className = 'fas fa-heart favorite-icon';
-            if (getFavorites().includes(channel.name)) {
-                favoriteIcon.classList.add('is-favorite');
-            }
+            const counterDiv = document.createElement('div');
+            counterDiv.className = 'channel-view-counter';
+            const eyeIcon = document.createElement('i');
+            eyeIcon.className = 'fas fa-eye';
+            const countSpan = document.createElement('span');
+            countSpan.className = 'view-count';
+            countSpan.id = `view-count-${channel.id}`;
+            countSpan.textContent = '0';
+            counterDiv.appendChild(eyeIcon);
+            counterDiv.appendChild(countSpan);
 
             link.appendChild(img);
             link.appendChild(nameSpan);
-            link.appendChild(favoriteIcon);
+            link.appendChild(counterDiv); 
+
             return link;
         }
 
-        function updateFavoritesCategory() {
-            if (!channelsData) return;
-            const favorites = getFavorites();
-            const favoritesCategory = document.getElementById('category-favorites');
-            const favoritesContent = document.getElementById('content-favorites');
-            const noChannelsMessage = favoritesContent.querySelector('.no-channels-message');
-            
-            if (favorites.length > 0) {
-                favoritesCategory.classList.add('has-favorites');
-            } else {
-                favoritesCategory.classList.remove('has-favorites');
-            }
-            
-            favoritesContent.querySelectorAll('.channel-link').forEach(link => link.remove());
-            const favoriteChannels = channelsData.filter(ch => favorites.includes(ch.name));
-            
-            if (favoriteChannels.length > 0) {
-                noChannelsMessage.style.display = 'none';
-                favoriteChannels.forEach(channel => {
-                    favoritesContent.appendChild(createChannelElement(channel));
-                });
-            } else {
-                noChannelsMessage.style.display = 'block';
-            }
-            
-            if (favoritesContent.classList.contains('show')) {
-                requestAnimationFrame(() => {
-                    const currentHeight = favoritesContent.scrollHeight;
-                    favoritesContent.style.maxHeight = (currentHeight > 20 ? currentHeight + 16 : 100) + 'px';
-                });
-            }
-        }
-        
-        function toggleFavorite(channelName) {
-            let favorites = getFavorites();
-            const isFavorited = favorites.includes(channelName);
-
-            if (isFavorited) {
-                favorites = favorites.filter(name => name !== channelName);
-            } else {
-                favorites.push(channelName);
-            }
-            saveFavorites(favorites);
-
-            document.querySelectorAll('.channel-link').forEach(link => {
-                if (link.querySelector('.channel-name').textContent === channelName) {
-                    const icon = link.querySelector('.favorite-icon');
-                    icon.classList.toggle('is-favorite', !isFavorited);
-                }
-            });
-
-            updateFavoritesCategory();
-        }
-
-        // --- Core Functions ---
         async function loadChannelsData() {
             if (channelsData) return;
-            const gistUrl = 'https://raw.githubusercontent.com/ahmed9qn223/backend/refs/heads/main/channels.json';
+            const gistUrl = 'https://raw.githubusercontent.com/ahmed9qn223/backend/main/channels.json';
             try {
                 const response = await fetch(gistUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                channelsData = await response.json();
+                const freshData = await response.json();
+                channelsData = freshData;
+                localStorage.setItem('cachedChannels', JSON.stringify(freshData));
             } catch (error) {
                 console.error('Error loading data from Gist:', error);
-                channelsData = []; 
-                showNotification('เกิดข้อผิดพลาดในการโหลดข้อมูลช่อง', { duration: 5000 });
+                const cachedData = localStorage.getItem('cachedChannels');
+                if (cachedData) {
+                    channelsData = JSON.parse(cachedData);
+                    showNotification('ไม่สามารถเชื่อมต่อได้ กำลังแสดงข้อมูลล่าสุด', { duration: 3000 });
+                } else {
+                    channelsData = []; 
+                    showNotification('เกิดข้อผิดพลาดในการโหลดข้อมูลช่อง', { duration: 5000 });
+                }
             }
         }
 
         function loadTextsData() {
             const runningTextElement = document.getElementById('running-text');
             const footerTextElement = document.getElementById('footer-text');
-            if (runningTextElement && textsData.runningText) runningTextElement.textContent = textsData.runningText;
+            if (runningTextElement && textsData.runningText) runningTextElement.innerHTML = textsData.runningText;
             if (footerTextElement && textsData.footerText) footerTextElement.textContent = textsData.footerText;
         }
 
@@ -907,85 +952,80 @@
             contentElement.style.maxHeight = '0px';
             buttonElement.setAttribute('aria-expanded', 'false');
             buttonElement.classList.remove('active');
-            buttonElement.parentElement.classList.remove('active-category');
         }
         function createSkeletonElement() { const skeleton = document.createElement('div'); skeleton.className = 'skeleton-item'; const img = document.createElement('div'); img.className = 'skeleton-img'; const text = document.createElement('div'); text.className = 'skeleton-text'; skeleton.appendChild(img); skeleton.appendChild(text); return skeleton; }
 
         async function openAccordion(contentElement, buttonElement) {
-            buttonElement.parentElement.classList.add('active-category');
             contentElement.style.display = 'flex';
             buttonElement.setAttribute('aria-expanded', 'true');
             buttonElement.classList.add('active');
 
-            if (buttonElement.dataset.category === 'ช่องโปรด') {
-                updateFavoritesCategory();
-            } else {
-                const alreadyHasContent = contentElement.querySelector('.channel-link') !== null;
-                if (!alreadyHasContent) {
-                    clearMessages(contentElement);
-                    for (let i = 0; i < 12; i++) { contentElement.appendChild(createSkeletonElement()); }
-                    requestAnimationFrame(() => { contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px'; contentElement.classList.add('show'); });
-                    
-                    if (!channelsData) await loadChannelsData();
-                    contentElement.querySelectorAll('.skeleton-item').forEach(item => item.remove());
-                    if (!channelsData) return;
-                    
-                    const categoryText = buttonElement.dataset.category;
-                    const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
-                    
-                    if (filteredChannels.length === 0) {
-                        showNoChannelsMessage(contentElement);
-                    } else {
-                        filteredChannels.forEach(channel => { contentElement.appendChild(createChannelElement(channel)); });
-                    }
+            const alreadyHasContent = contentElement.querySelector('.channel-link') !== null;
+            if (!alreadyHasContent) {
+                clearMessages(contentElement);
+                for (let i = 0; i < 12; i++) { contentElement.appendChild(createSkeletonElement()); }
+                requestAnimationFrame(() => { contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px'; contentElement.classList.add('show'); });
+                
+                if (!channelsData) await loadChannelsData();
+                contentElement.querySelectorAll('.skeleton-item').forEach(item => item.remove());
+                if (!channelsData) return;
+                
+                const categoryText = buttonElement.dataset.category;
+                const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
+                
+                if (filteredChannels.length === 0) {
+                    showNoChannelsMessage(contentElement);
+                } else {
+                    filteredChannels.forEach(channel => { contentElement.appendChild(createChannelElement(channel)); });
                 }
             }
             requestAnimationFrame(() => { contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px'; contentElement.classList.add('show'); });
             localStorage.setItem('lastOpenedCategory', contentElement.id);
         }
 
-        // --- Initialization & Event Listeners ---
-        // ✨ MODIFIED: Added mainContainer variable
-        const mainContainer = document.getElementById('categories-list');
-
+        const mainContainer = document.querySelector('main');
         mainContainer.addEventListener('click', function(event) {
-            const favoriteIcon = event.target.closest('.favorite-icon');
-            if (favoriteIcon) {
-                event.preventDefault();
-                event.stopPropagation();
-                const channelLink = favoriteIcon.closest('.channel-link');
-                const channelName = channelLink.querySelector('.channel-name').textContent;
-                toggleFavorite(channelName);
-                favoriteIcon.classList.add('popping');
-                favoriteIcon.addEventListener('animationend', () => {
-                    favoriteIcon.classList.remove('popping');
-                }, { once: true });
-                return;
-            }
-
             const link = event.target.closest('.channel-link');
             if (link) {
                 event.preventDefault();
+
+                // อัปเดตตัวนับคนดู
+                if (channelsData && userKey) {
+                    const countSpan = link.querySelector('.view-count');
+                    if (countSpan) {
+                        const channelId = countSpan.id.replace('view-count-', '');
+                        const database = firebase.database();
+                        if (currentWatchingChannel && currentWatchingChannel !== channelId) {
+                            database.ref(`channelViewers/${currentWatchingChannel}/${userKey}`).remove();
+                        }
+                        const newChannelRef = database.ref(`channelViewers/${channelId}/${userKey}`);
+                        newChannelRef.onDisconnect().remove(); 
+                        newChannelRef.set(true);
+                        currentWatchingChannel = channelId;
+                    }
+                }
+                
+                // เปิดแอปภายนอก (Wiseplay)
                 const url = link.dataset.url;
-                const isAndroid = /Android/i.test(navigator.userAgent);
-                if (isAndroid) {
-                    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.wiseplay&hl=th';
-                    let appLaunchFailed = true;
-                    const visibilityChangeHandler = () => { if (document.visibilityState === 'hidden') { appLaunchFailed = false; document.removeEventListener('visibilitychange', visibilityChangeHandler); } };
-                    document.addEventListener('visibilitychange', visibilityChangeHandler);
-                    
-                    const iframe = document.createElement('iframe');
-                    iframe.style.cssText = 'border:none;width:1px;height:1px;position:absolute;top:-9999px;left:-9999px;';
-                    iframe.src = url;
-                    document.body.appendChild(iframe);
-                    
-                    setTimeout(() => {
-                        document.removeEventListener('visibilitychange', visibilityChangeHandler);
-                        if (document.body.contains(iframe)) document.body.removeChild(iframe);
-                        if (appLaunchFailed) showNotification('ไม่พบแอปพลิเคชัน', { duration: 10000, linkText: 'ติดตั้ง Wiseplay', linkUrl: playStoreUrl });
-                    }, 2500);
-                } else {
-                    showNotification('รองรับเฉพาะบนระบบ Android เท่านั้น');
+                if (url) {
+                    const isAndroid = /Android/i.test(navigator.userAgent);
+                    if (isAndroid) {
+                        const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.wiseplay&hl=th';
+                        let appLaunchFailed = true;
+                        const visibilityChangeHandler = () => { if (document.visibilityState === 'hidden') { appLaunchFailed = false; document.removeEventListener('visibilitychange', visibilityChangeHandler); } };
+                        document.addEventListener('visibilitychange', visibilityChangeHandler);
+                        const iframe = document.createElement('iframe');
+                        iframe.style.cssText = 'border:none;width:1px;height:1px;position:absolute;top:-9999px;left:-9999px;';
+                        iframe.src = url;
+                        document.body.appendChild(iframe);
+                        setTimeout(() => {
+                            document.removeEventListener('visibilitychange', visibilityChangeHandler);
+                            if (document.body.contains(iframe)) document.body.removeChild(iframe);
+                            if (appLaunchFailed) showNotification('ไม่พบแอปพลิเคชัน', { duration: 10000, linkText: 'ติดตั้ง Wiseplay', linkUrl: playStoreUrl });
+                        }, 2500);
+                    } else {
+                        showNotification('รองรับเฉพาะบนระบบ Android เท่านั้น');
+                    }
                 }
             }
         });
@@ -995,13 +1035,9 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
         loadTextsData();
-
         const savedView = localStorage.getItem('appView') || 'grid';
         setView(savedView);
-
-
         const allAccordionButtons = document.querySelectorAll('.accordion-button');
-        
         allAccordionButtons.forEach(button => {
             const categoryName = button.dataset.category;
             const style = categoryStyles[categoryName];
@@ -1009,35 +1045,24 @@
                 button.style.setProperty('--category-color', style.color);
             }
         });
-
-        // ✨ MODIFIED: Accordion click listener to handle new layout
         allAccordionButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const content = this.nextElementSibling;
                 const isOpening = !content.classList.contains('show');
-
-                allAccordionButtons.forEach(otherButton => { 
-                    if (otherButton !== this) {
-                        closeAccordion(otherButton.nextElementSibling, otherButton);
-                    }
-                });
-                
+                allAccordionButtons.forEach(otherButton => { if (otherButton !== this) closeAccordion(otherButton.nextElementSibling, otherButton); });
                 if (isOpening) {
                     openAccordion(content, this);
-                    mainContainer.classList.add('has-active-category');
                 } else {
                     closeAccordion(content, this);
-                    mainContainer.classList.remove('has-active-category');
                 }
             });
         });
         
         loadChannelsData().then(() => {
-            updateFavoritesCategory();
-            
+            // updateFavoritesCategory(); // We don't call this anymore
             allAccordionButtons.forEach(button => {
                 const categoryName = button.dataset.category;
-                if (categoryName && categoryName !== 'ช่องโปรด') {
+                if (categoryName !== 'ช่องโปรด' && channelsData) {
                     const count = channelsData.filter(ch => ch.category === categoryName).length;
                     const countSpan = button.querySelector('.channel-count');
                     if (countSpan && count > 0) {
@@ -1045,16 +1070,26 @@
                     }
                 }
             });
-
-            // Auto-open logic (no changes needed)
+            const lastCategoryId = localStorage.getItem('lastOpenedCategory');
+            let categoryOpened = false;
+            if (lastCategoryId && document.getElementById(lastCategoryId)) {
+                const lastContentElement = document.getElementById(lastCategoryId);
+                const lastButtonElement = lastContentElement.previousElementSibling;
+                if (lastButtonElement) {
+                    openAccordion(lastContentElement, lastButtonElement);
+                    categoryOpened = true;
+                }
+            }
+            if (!categoryOpened) {
+                const firstButton = document.querySelector('.category:not(#category-favorites) .accordion-button');
+                if (firstButton) openAccordion(firstButton.nextElementSibling, firstButton);
+            }
         });
 
-        // --- Popup Disclaimer Logic ---
         const popup = document.getElementById('disclaimer-popup');
         const acceptBtn = document.getElementById('accept-btn');
         const declineBtn = document.getElementById('decline-btn');
         const dontShowAgainCheckbox = document.getElementById('dont-show-again');
-
         const hasAcceptedPermanently = localStorage.getItem('disclaimerAccepted');
         
         function showPopup() {
@@ -1075,46 +1110,21 @@
                 popup.style.display = 'none';
             }, 300);
         }
-
         showPopup(); 
-
         acceptBtn.addEventListener('click', () => {
             if (dontShowAgainCheckbox.checked) {
                 localStorage.setItem('disclaimerAccepted', 'true');
             }
-            
             hidePopup();
-
-            if (typeof gtag === 'function') {
-                gtag('event', 'accept_disclaimer', {
-                    'event_category': 'Popup Interaction',
-                    'event_label': `User accepted (Don't show again: ${dontShowAgainCheckbox.checked})`
-                });
-            }
         });
-        
         declineBtn.addEventListener('click', () => {
-            if (typeof gtag === 'function') {
-                gtag('event', 'decline_disclaimer_exit', {
-                    'event_category': 'Popup Interaction',
-                    'event_label': 'User declined and exited app'
-                });
-            }
-
-            if (typeof AndroidBridge !== 'undefined' && typeof AndroidBridge.exitApp === 'function') {
-                AndroidBridge.exitApp();
-            } else {
-                console.warn("AndroidBridge.exitApp not found. Falling back to window.close().");
-                window.close();
-                window.location.href = 'about:blank';
-            }
+            window.location.href = 'https://www.google.com';
         });
         
         const focusableElements = 'input[type="checkbox"], button';
         const focusableContent = popup.querySelectorAll(focusableElements);
         const firstFocusableElement = focusableContent[0];
         const lastFocusableElement = focusableContent[focusableContent.length - 1];
-
         popup.addEventListener('click', (event) => {
             if (event.target === popup) {
                 const popupBox = popup.querySelector('.popup-box');
@@ -1124,18 +1134,14 @@
                 }, 820);
             }
         });
-
         document.addEventListener('keydown', function(e) {
-            if (popup.style.display !== 'flex') return;
-
+            if (!popup.classList.contains('show')) return;
             if (e.key === 'Escape') {
                 acceptBtn.click();
                 return;
             }
-
             let isTabPressed = e.key === 'Tab' || e.keyCode === 9;
             if (!isTabPressed) return;
-
             if (e.shiftKey) {
                 if (document.activeElement === firstFocusableElement) {
                     lastFocusableElement.focus();
@@ -1148,7 +1154,6 @@
                 }
             }
         });
-
     });
     </script>
 </body>
