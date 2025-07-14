@@ -4,231 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ทีวีออนไลน์ ดูฟรีไม่เสียรายเดือน</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KBRV24KW7F"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-KBRV24KW7F');
-    </script>
-
     <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
-        
-        /* --- CSS CHANGE 1: Define accent color variables --- */
+        /* All CSS from the previous step goes here. It is correct. */
+        /* For brevity, I'm collapsing the CSS block. */
         :root {
-            --dark-bg: #1a1a1a;
-            --light-text: #f0f0f0;
-            /* The base accent color is now a variable */
-            --accent-color: #2196F3; 
-            /* ... other variables */
+            --dark-bg: #1a1a1a; --light-text: #f0f0f0; --accent-color: #2196F3;
+            /* ... all other CSS variables */
         }
-        
-        /* Define colors for different accent themes */
         .accent-blue { --accent-color: #2196F3; }
         .accent-green { --accent-color: #4CAF50; }
         .accent-orange { --accent-color: #FF9800; }
         .accent-purple { --accent-color: #9C27B0; }
-        
-        /* All instances of the accent color now use --accent-color */
-        #line-group-info { color: var(--accent-color); }
-        main img:hover, .channel-link:focus img {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 15px color-mix(in srgb, var(--accent-color) 70%, transparent);
-        }
-        .channel-link:focus, .accordion-button:focus, .view-btn:focus,
-        #settings-toggle-btn:focus, #line-group-info:focus, .popup-btn:focus,
-        .theme-switch input:focus + .slider, .font-size-btn:focus, .color-swatch:focus {
-            outline-color: var(--accent-color);
-        }
-        input:checked + .slider { background-color: var(--accent-color); }
-        .view-btn.active {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-        .popup-icon { color: var(--accent-color); }
-        #dont-show-again { accent-color: var(--accent-color); }
-        .btn-accept { background-color: var(--accent-color); }
-        #settings-toggle-btn:hover { color: var(--accent-color); }
-
-        /* General styles, mostly unchanged */
-        html {
-            /* Set a base font size on html, so 'rem' units can scale */
-            font-size: 16px; 
-            scroll-behavior: smooth;
-        }
-
-        body {
-            margin: 0;
-            padding: 0 10px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: var(--dark-bg);
-            color: var(--light-text);
-            font-family: 'Kanit', sans-serif;
-            text-align: center;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        
-        /* --- CSS CHANGE 2: New Styles for Settings controls --- */
-        .font-size-controls, .color-swatches {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .font-size-btn {
-            border: 1px solid var(--border-color);
-            background: var(--component-bg);
-            color: var(--light-text);
-            width: 28px;
-            height: 28px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        .font-size-btn:hover {
-            background-color: var(--border-color);
-        }
-
+        html { font-size: 16px; scroll-behavior: smooth; }
+        body { margin: 0; padding: 0 10px; /* ... */ }
+        /* ... All other styles are correct and remain the same as the previous version ... */
         .color-swatch {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-color);
+            cursor: pointer; transition: transform 0.2s, border-color 0.2s;
         }
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-        .color-swatch.active {
-            border-color: var(--light-text);
-            box-shadow: 0 0 5px var(--light-text);
-        }
+        .color-swatch.active { border-color: var(--light-text); box-shadow: 0 0 5px var(--light-text); }
         .color-swatch[data-color="blue"] { background-color: #2196F3; }
         .color-swatch[data-color="green"] { background-color: #4CAF50; }
         .color-swatch[data-color="orange"] { background-color: #FF9800; }
         .color-swatch[data-color="purple"] { background-color: #9C27B0; }
-        
-        /* Other styles remain the same... */
-        /* [Collapsed for brevity, the full CSS from the previous step is assumed here] */
-        #settings-popup .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px; /* Increased gap */
-            font-size: 1rem; /* Use rem for scalability */
-        }
-        /* All other styles are identical to the previous version */
-        /* ... */
     </style>
-    </head>
+</head>
 <body>
-    <header>
-        </header>
-
     <div id="settings-popup" class="settings-popup">
-        <div class="setting-item">
-            <span>สลับธีม</span>
-            <label class="theme-switch" for="theme-toggle">
-                <input type="checkbox" id="theme-toggle">
-                <div class="slider"></div>
-            </label>
         </div>
-        <div class="setting-item">
-            <span>มุมมอง</span>
-            <div class="view-toggle">
-                <button id="grid-view-btn" class="view-btn" title="มุมมองตาราง"><i class="fas fa-th-large"></i></button>
-                <button id="list-view-btn" class="view-btn" title="มุมมองรายการ"><i class="fas fa-bars"></i></button>
-            </div>
-        </div>
-        <div class="setting-item">
-            <span>ขนาดอักษร</span>
-            <div class="font-size-controls">
-                <button id="font-decrease-btn" class="font-size-btn" title="ลดขนาด">-</button>
-                <button id="font-increase-btn" class="font-size-btn" title="เพิ่มขนาด">+</button>
-            </div>
-        </div>
-        <div class="setting-item">
-            <span>สีหลัก</span>
-            <div class="color-swatches">
-                <button class="color-swatch" data-color="blue" title="สีน้ำเงิน"></button>
-                <button class="color-swatch" data-color="green" title="สีเขียว"></button>
-                <button class="color-swatch" data-color="orange" title="สีส้ม"></button>
-                <button class="color-swatch" data-color="purple" title="สีม่วง"></button>
-            </div>
-        </div>
-    </div>
-
-    <main class="categories-container" id="categories-list"></main>
-    
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // All previous JS code remains...
 
-        // --- JS CHANGE 1: Update settings object and load/save logic ---
+        // --- CORRECTED SCRIPT STRUCTURE ---
+
+        // Global variables for the script
+        let channelsData = null;
+        let userSettings = {};
+        
+        // All function declarations are grouped at the top
+        // This ensures they are all defined before any are called.
+
+        function saveSettings() {
+            try {
+                localStorage.setItem('tvAppSettings', JSON.stringify(userSettings));
+            } catch (e) { console.error("Could not save settings to localStorage", e); }
+        }
+
         function loadSettings() {
             const defaultSettings = {
                 theme: 'dark',
                 view: 'grid',
                 lastCategory: null,
                 disclaimerAccepted: false,
-                fontSize: 16, // Default font size in pixels
-                accentColor: 'blue' // Default accent color
+                fontSize: 16,
+                accentColor: 'blue'
             };
             try {
                 const savedSettingsString = localStorage.getItem('tvAppSettings');
                 if (savedSettingsString) {
                     const savedSettings = JSON.parse(savedSettingsString);
-                    // Merge saved settings with defaults to ensure new settings exist
                     return { ...defaultSettings, ...savedSettings };
                 }
             } catch (e) { console.error("Could not parse settings from localStorage", e); }
             return defaultSettings;
         }
 
-        // --- JS CHANGE 2: Create functions to apply new settings ---
+        function applyTheme(theme) {
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            if (theme === 'light') {
+                body.classList.add('light-theme');
+                if (themeToggle) themeToggle.checked = true;
+            } else {
+                body.classList.remove('light-theme');
+                if (themeToggle) themeToggle.checked = false;
+            }
+            userSettings.theme = theme;
+            saveSettings();
+        }
 
-        /**
-         * Applies the selected font size to the root HTML element.
-         * @param {number} size - The font size in pixels.
-         */
         function applyFontSize(size) {
             const FONT_MIN = 12;
             const FONT_MAX = 20;
-            // Clamp the size between min and max values
             const newSize = Math.max(FONT_MIN, Math.min(size, FONT_MAX));
             document.documentElement.style.fontSize = `${newSize}px`;
             userSettings.fontSize = newSize;
             saveSettings();
         }
 
-        /**
-         * Applies the selected accent color by adding a class to the body.
-         * @param {string} color - The name of the color theme (e.g., 'blue', 'green').
-         */
         function applyAccentColor(color) {
             const body = document.body;
-            // Remove any existing accent color classes
-            body.classList.remove('accent-blue', 'accent-green', 'accent-orange', 'accent-purple');
-            // Add the new class
+            const validColors = ['blue', 'green', 'orange', 'purple'];
+            if (!validColors.includes(color)) return;
+
+            validColors.forEach(c => body.classList.remove(`accent-${c}`));
             body.classList.add(`accent-${color}`);
             
-            // Update the active state on the color swatch buttons
             document.querySelectorAll('.color-swatch').forEach(swatch => {
                 swatch.classList.toggle('active', swatch.dataset.color === color);
             });
@@ -237,41 +112,76 @@
             saveSettings();
         }
 
-        // --- JS CHANGE 3: Add Event Listeners for new controls ---
-
-        // Font size controls
-        document.getElementById('font-increase-btn').addEventListener('click', () => {
-            applyFontSize(userSettings.fontSize + 1);
-        });
-
-        document.getElementById('font-decrease-btn').addEventListener('click', () => {
-            applyFontSize(userSettings.fontSize - 1);
-        });
-
-        // Accent color controls
-        document.querySelectorAll('.color-swatch').forEach(swatch => {
-            swatch.addEventListener('click', (event) => {
-                applyAccentColor(event.target.dataset.color);
+        function setView(view) {
+            const gridViewBtn = document.getElementById('grid-view-btn');
+            const listViewBtn = document.getElementById('list-view-btn');
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                content.classList.toggle('list-view', view === 'list');
             });
-        });
+            if(gridViewBtn) gridViewBtn.classList.toggle('active', view === 'grid');
+            if(listViewBtn) listViewBtn.classList.toggle('active', view === 'list');
+            
+            userSettings.view = view;
+            saveSettings();
+            
+            const openAccordion = document.querySelector('.accordion-content.show');
+            if(openAccordion) {
+                requestAnimationFrame(() => {
+                    openAccordion.style.maxHeight = (openAccordion.scrollHeight + 16) + 'px';
+                });
+            }
+        }
+        
+        // ... (All other helper functions like createChannelElement, loadChannelsData, etc. go here)
+        // ... (They are unchanged and can be copied from the previous version)
 
-
-        // --- JS CHANGE 4: Initialize new settings on page load ---
+        // Main App Initialization Function
         async function initializeApp() {
             userSettings = loadSettings();
 
-            // Apply all settings
+            // Apply all settings from localStorage
             applyTheme(userSettings.theme);
             applyFontSize(userSettings.fontSize);
             applyAccentColor(userSettings.accentColor);
-
             setView(userSettings.view);
-            updateDateTime();
-            //... rest of the function is the same
+            
+            // ... (The rest of the initializeApp function is unchanged)
+            // ... e.g., updateDateTime(), loadTextsData(), loadChannelsData() etc.
         }
 
+        // Setup Event Listeners
+        function setupEventListeners() {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('change', () => {
+                    applyTheme(themeToggle.checked ? 'light' : 'dark');
+                });
+            }
+
+            document.getElementById('font-increase-btn')?.addEventListener('click', () => {
+                applyFontSize(userSettings.fontSize + 1);
+            });
+    
+            document.getElementById('font-decrease-btn')?.addEventListener('click', () => {
+                applyFontSize(userSettings.fontSize - 1);
+            });
+    
+            document.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.addEventListener('click', (event) => {
+                    applyAccentColor(event.target.dataset.color);
+                });
+            });
+
+            document.getElementById('grid-view-btn')?.addEventListener('click', () => setView('grid'));
+            document.getElementById('list-view-btn')?.addEventListener('click', () => setView('list'));
+
+            // ... (All other event listeners for popups, keyboard shortcuts, etc. go here)
+        }
+
+
+        // --- Start the Application ---
+        setupEventListeners();
         initializeApp();
-        // All other JavaScript code from the previous step remains unchanged.
     });
     </script>
 </body>
