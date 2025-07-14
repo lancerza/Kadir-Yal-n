@@ -10,9 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -295,14 +292,6 @@
             color: var(--line-green);
         }
 
-        .favorite-icon { color: #555; font-size: 16px; position: absolute; top: 2px; right: 2px; cursor: pointer; transition: color 0.2s ease, transform 0.2s ease; padding: 5px; background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; line-height: 1; }
-        body.light-theme .favorite-icon { background-color: rgba(255, 255, 255, 0.5); }
-        .favorite-icon:hover { transform: scale(1.2); }
-        .favorite-icon.is-favorite { color: var(--red-accent); }
-        #category-favorites { display: none; }
-        #category-favorites.has-favorites { display: flex; }
-        .favorite-icon.popping { animation: heart-pop 0.3s ease-in-out; }
-
         footer { margin-top: auto; padding: var(--spacing-xl); color: var(--light-text); background-color: transparent; width: 100%; text-align: center; border-top: none; }
         .loading-indicator, .no-channels-message { width: 100%; text-align: center; padding: var(--spacing-md); color: var(--light-text); font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 18px); display: none; }
         .loading-indicator.active, .no-channels-message.active { display: block; }
@@ -409,12 +398,6 @@
             text-align: left;
             margin-left: 10px;
             margin-top: 0;
-        }
-        .accordion-content.list-view .favorite-icon {
-            position: static;
-            margin-left: auto;
-            padding: 5px;
-            background-color: transparent;
         }
 
         @media (orientation: landscape) {
@@ -671,13 +654,6 @@
                 <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
             </div>
         </div>
-         <div class="category">
-            <button class="accordion-button" data-category="TEST" aria-expanded="false" aria-controls="content-test"><i class="fas fa-vial"></i> TEST<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-test" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
     </main>
 
     <div class="ad-container ad-container-bottom">
@@ -720,16 +696,15 @@
         // --- Online Counter Logic using Firebase ---
         try {
             // ****** แก้ไขตรงนี้ ******
-           const firebaseConfig = {
-  apiKey: "AIzaSyD-kOR_HxnVLp03ocfmniTvsIZb7lx2g1I",
-  authDomain: "oktv-4e6e4.firebaseapp.com",
-  databaseURL: "https://oktv-4e6e4-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "oktv-4e6e4",
-  storageBucket: "oktv-4e6e4.appspot.com",
-  messagingSenderId: "1035035792142",
-  appId: "1:1035035792142:web:df5eeb383ec3ddbb3fbd5f"
-};
-
+            const firebaseConfig = {
+  apiKey: "AIzaSyD-kOR_HxnVLp03ocfmniTvsIZb7lx2g1I",
+  authDomain: "oktv-4e6e4.firebaseapp.com",
+  databaseURL: "https://oktv-4e6e4-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "oktv-4e6e4",
+  storageBucket: "oktv-4e6e4.firebasestorage.app",
+  messagingSenderId: "1035035792142",
+  appId: "1:1035035792142:web:df5eeb383ec3ddbb3fbd5f"
+            };
 
             firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
