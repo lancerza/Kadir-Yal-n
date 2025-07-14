@@ -9,7 +9,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -655,6 +655,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // --- Online Counter Logic using Firebase ---
         try {
+            // ****** แก้ไขตรงนี้ ******
             const firebaseConfig = {
   apiKey: "AIzaSyD-kOR_HxnVLp03ocfmniTvsIZb7lx2g1I",
   authDomain: "oktv-4e6e4.firebaseapp.com",
@@ -723,11 +724,11 @@
 
         const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน! &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
         const categoryStyles = {
-            "ทีวีดิจิตอล": { color: "#42A5F5" },
-            "กีฬา": { color: "#66BB6A" },
-            "หนังทีวี": { color: "#AB47BC" },
-            "สารคดี": { color: "#FFCA28" },
-            "IPTV": { color: "#8D6E63" },
+            "ทีวีดิจิตอล": { icon: "fas fa-tv", color: "#42A5F5" },
+            "กีฬา": { icon: "fas fa-running", color: "#66BB6A" },
+            "หนังทีวี": { icon: "fas fa-film", color: "#AB47BC" },
+            "สารคดี": { icon: "fas fa-book", color: "#FFCA28" },
+            "IPTV": { icon: "fas fa-network-wired", color: "#8D6E63" },
         };
 
         let channelsData = null; 
@@ -982,6 +983,8 @@
             await loadChannelsData();
             
             const categoriesList = document.getElementById('categories-list');
+            categoriesList.innerHTML = ''; // Clear existing static HTML
+
             const uniqueCategories = [...new Set(channelsData.map(ch => ch.category))];
 
             uniqueCategories.forEach(categoryName => {
@@ -996,11 +999,11 @@
                 button.setAttribute('aria-controls', contentId);
                 
                 const style = categoryStyles[categoryName] || {};
+                const iconClass = style.icon || 'fas fa-question-circle';
                 button.style.setProperty('--category-color', style.color || '#f0f0f0');
 
                 const icon = document.createElement('i');
-                // You can add logic here to assign icons based on categoryName
-                icon.className = 'fas fa-tv'; 
+                icon.className = iconClass; 
                 
                 const count = channelsData.filter(ch => ch.category === categoryName).length;
                 const countSpan = document.createElement('span');
