@@ -75,11 +75,6 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
         @keyframes gradient-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes heart-pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.4); }
-            100% { transform: scale(1); }
-        }
         
         @keyframes shake {
             10%, 90% { transform: translate3d(-1px, 0, 0) scale(1); }
@@ -619,42 +614,7 @@
     </div>
     
     <main class="categories-container" id="categories-list">
-        <div class="category">
-            <button class="accordion-button" data-category="ทีวีดิจิตอล" aria-expanded="false" aria-controls="content-thai-tv"><i class="fas fa-tv"></i> ทีวีดิจิตอล<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-thai-tv" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-        <div class="category">
-            <button class="accordion-button" data-category="กีฬา" aria-expanded="false" aria-controls="content-sport"><i class="fas fa-running"></i> กีฬา<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-sport" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-        <div class="category">
-            <button class="accordion-button" data-category="หนังทีวี" aria-expanded="false" aria-controls="content-movies"><i class="fas fa-film"></i> หนังทีวี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-movies" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-        <div class="category">
-            <button class="accordion-button" data-category="สารคดี" aria-expanded="false" aria-controls="content-documentary"><i class="fas fa-book"></i> สารคดี<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-documentary" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-        <div class="category">
-            <button class="accordion-button" data-category="IPTV" aria-expanded="false" aria-controls="content-iptv"><i class="fas fa-network-wired"></i> IPTV<span class="channel-count"></span><i class="fas fa-chevron-right accordion-icon"></i></button>
-            <div id="content-iptv" class="accordion-content">
-                <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-            </div>
-        </div>
-    </main>
+        </main>
 
     <div class="ad-container ad-container-bottom">
         <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6694890026488371" data-ad-slot="3108933890" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -695,7 +655,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         // --- Online Counter Logic using Firebase ---
         try {
-            // ****** แก้ไขตรงนี้ ******
             const firebaseConfig = {
   apiKey: "AIzaSyD-kOR_HxnVLp03ocfmniTvsIZb7lx2g1I",
   authDomain: "oktv-4e6e4.firebaseapp.com",
@@ -964,20 +923,26 @@
             if (link) {
                 event.preventDefault();
 
+                // --- เพิ่มโค้ดตรวจสอบตรงนี้ ---
+                if (!channelsData || !userKey) {
+                    showNotification('ยังไม่พร้อมใช้งาน กรุณารอสักครู่...');
+                    console.log('User clicked before Firebase/channels data was ready.');
+                    return; // หยุดการทำงานถ้ายังไม่พร้อม
+                }
+                // -------------------------
+
                 // อัปเดตตัวนับคนดู
-                if (channelsData && userKey) {
-                    const countSpan = link.querySelector('.view-count');
-                    if (countSpan) {
-                        const channelId = countSpan.id.replace('view-count-', '');
-                        const database = firebase.database();
-                        if (currentWatchingChannel && currentWatchingChannel !== channelId) {
-                            database.ref(`channelViewers/${currentWatchingChannel}/${userKey}`).remove();
-                        }
-                        const newChannelRef = database.ref(`channelViewers/${channelId}/${userKey}`);
-                        newChannelRef.onDisconnect().remove(); 
-                        newChannelRef.set(true);
-                        currentWatchingChannel = channelId;
+                const countSpan = link.querySelector('.view-count');
+                if (countSpan) {
+                    const channelId = countSpan.id.replace('view-count-', '');
+                    const database = firebase.database();
+                    if (currentWatchingChannel && currentWatchingChannel !== channelId) {
+                        database.ref(`channelViewers/${currentWatchingChannel}/${userKey}`).remove();
                     }
+                    const newChannelRef = database.ref(`channelViewers/${channelId}/${userKey}`);
+                    newChannelRef.onDisconnect().remove(); 
+                    newChannelRef.set(true);
+                    currentWatchingChannel = channelId;
                 }
                 
                 // เปิดแอปภายนอก (Wiseplay)
@@ -1012,39 +977,73 @@
         loadTextsData();
         const savedView = localStorage.getItem('appView') || 'grid';
         setView(savedView);
-        const allAccordionButtons = document.querySelectorAll('.accordion-button');
-        allAccordionButtons.forEach(button => {
-            const categoryName = button.dataset.category;
-            const style = categoryStyles[categoryName];
-            if (style) {
-                button.style.setProperty('--category-color', style.color);
-            }
-        });
-        allAccordionButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const content = this.nextElementSibling;
-                const isOpening = !content.classList.contains('show');
-                allAccordionButtons.forEach(otherButton => { if (otherButton !== this) closeAccordion(otherButton.nextElementSibling, otherButton); });
-                if (isOpening) {
-                    openAccordion(content, this);
-                } else {
-                    closeAccordion(content, this);
-                }
-            });
-        });
         
-        loadChannelsData().then(() => {
-            // updateFavoritesCategory(); // We don't call this anymore
-            allAccordionButtons.forEach(button => {
-                const categoryName = button.dataset.category;
-                if (categoryName !== 'ช่องโปรด' && channelsData) {
-                    const count = channelsData.filter(ch => ch.category === categoryName).length;
-                    const countSpan = button.querySelector('.channel-count');
-                    if (countSpan && count > 0) {
-                        countSpan.textContent = `(${count})`;
-                    }
+        async function initializeApp() {
+            await loadChannelsData();
+            
+            const categoriesList = document.getElementById('categories-list');
+            const uniqueCategories = [...new Set(channelsData.map(ch => ch.category))];
+
+            uniqueCategories.forEach(categoryName => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+
+                const button = document.createElement('button');
+                button.className = 'accordion-button';
+                button.dataset.category = categoryName;
+                button.setAttribute('aria-expanded', 'false');
+                const contentId = `content-${categoryName.toLowerCase().replace(/\s+/g, '-')}`;
+                button.setAttribute('aria-controls', contentId);
+                
+                const style = categoryStyles[categoryName] || {};
+                button.style.setProperty('--category-color', style.color || '#f0f0f0');
+
+                const icon = document.createElement('i');
+                // You can add logic here to assign icons based on categoryName
+                icon.className = 'fas fa-tv'; 
+                
+                const count = channelsData.filter(ch => ch.category === categoryName).length;
+                const countSpan = document.createElement('span');
+                countSpan.className = 'channel-count';
+                if (count > 0) {
+                    countSpan.textContent = `(${count})`;
                 }
+                
+                const accordionIcon = document.createElement('i');
+                accordionIcon.className = 'fas fa-chevron-right accordion-icon';
+
+                button.appendChild(icon);
+                button.append(` ${categoryName} `);
+                button.appendChild(countSpan);
+                button.appendChild(accordionIcon);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.id = contentId;
+                contentDiv.className = 'accordion-content';
+                contentDiv.innerHTML = `
+                    <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+                    <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+                `;
+
+                categoryDiv.appendChild(button);
+                categoryDiv.appendChild(contentDiv);
+                categoriesList.appendChild(categoryDiv);
             });
+
+            const allAccordionButtons = document.querySelectorAll('.accordion-button');
+            allAccordionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const isOpening = !content.classList.contains('show');
+                    allAccordionButtons.forEach(otherButton => { if (otherButton !== this) closeAccordion(otherButton.nextElementSibling, otherButton); });
+                    if (isOpening) {
+                        openAccordion(content, this);
+                    } else {
+                        closeAccordion(content, this);
+                    }
+                });
+            });
+
             const lastCategoryId = localStorage.getItem('lastOpenedCategory');
             let categoryOpened = false;
             if (lastCategoryId && document.getElementById(lastCategoryId)) {
@@ -1056,10 +1055,12 @@
                 }
             }
             if (!categoryOpened) {
-                const firstButton = document.querySelector('.category:not(#category-favorites) .accordion-button');
+                const firstButton = document.querySelector('.category .accordion-button');
                 if (firstButton) openAccordion(firstButton.nextElementSibling, firstButton);
             }
-        });
+        }
+
+        initializeApp();
 
         const popup = document.getElementById('disclaimer-popup');
         const acceptBtn = document.getElementById('accept-btn');
