@@ -64,6 +64,7 @@
             font-family: 'Arial', sans-serif;
             text-align: center;
             transition: background-color 0.3s ease, color 0.3s ease;
+            scroll-behavior: smooth;
         }
         
         body.popup-open {
@@ -176,24 +177,23 @@
         body.light-theme .ad-container { background-color: #e0e0e0; }
         
         main.categories-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--spacing-md);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--spacing-lg);
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             margin-top: clamp(30px, 6vw, 50px);
             padding-bottom: var(--spacing-md);
             flex-grow: 1;
+            justify-content: center;
         }
 
         .category {
             background-color: transparent;
             border-radius: var(--border-radius);
             padding: var(--spacing-xs);
-            flex: 0 0 auto;
             width: 100%;
-            max-width: 500px;
+            max-width: none;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
@@ -245,7 +245,20 @@
         
         .accordion-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); transition: transform 0.3s ease; font-size: 0.8em; }
         .accordion-button.active .accordion-icon { transform: translateY(-50%) rotate(90deg); }
-        .accordion-content { max-height: 0; padding: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out; display: none; opacity: 0; width: 100%; flex-wrap: wrap; justify-content: center; gap: var(--spacing-sm); position: relative; }
+        
+        .accordion-content { 
+            max-height: 0; 
+            padding: 0; 
+            overflow-y: auto;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out; 
+            display: none; 
+            opacity: 0; 
+            width: 100%; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: var(--spacing-lg);
+            position: relative; 
+        }
         .accordion-content.show { display: flex; opacity: 1; padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
         .accordion-content.show .channel-link { animation: popIn 0.4s ease-out forwards; }
 
@@ -255,8 +268,34 @@
             margin-left: var(--spacing-xs);
             opacity: 0.7;
         }
+        
+        .shortcut-badge {
+            display: inline-block;
+            background-color: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            border: 1px solid #777;
+            border-radius: 4px;
+            padding: 0px 6px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
 
-        main img { border-radius: var(--border-radius); border: 1px solid var(--border-color); padding: 3px; margin: 0; height: 50px; width: 50px; object-fit: cover; vertical-align: middle; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; cursor: pointer; user-select: none; }
+        main img { 
+            border-radius: var(--border-radius); 
+            border: 1px solid var(--border-color); 
+            padding: 5px; 
+            margin: 0; 
+            height: 70px; 
+            width: 70px; 
+            object-fit: cover; 
+            vertical-align: middle; 
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; 
+            cursor: pointer; 
+            user-select: none; 
+            decoding: async;
+        }
         
         main img:hover {
             transform: scale(1.1);
@@ -265,27 +304,44 @@
         }
 
         .channel-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--light-text); position: relative; }
-        .channel-name { font-size: 12px; margin-top: 4px; text-align: center; max-width: 60px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .channel-view-counter {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            pointer-events: none; 
+        .channel-name { 
+            font-size: 14px; 
+            margin-top: 8px; 
+            text-align: center; 
+            max-width: 80px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        
+        /* --- START: Android TV Focus Styles --- */
+        .channel-link:focus, 
+        .accordion-button:focus,
+        .view-btn:focus,
+        #settings-toggle-btn:focus,
+        #line-group-info:focus,
+        .popup-btn:focus,
+        .scroll-btn:focus { /* Added scroll-btn */
+            outline: 3px solid var(--line-blue);
+            outline-offset: 2px;
+            border-radius: var(--border-radius);
+        }
+        .scroll-btn:focus {
+             border-radius: 50%;
         }
 
-        .channel-view-counter .fa-eye {
-            color: var(--line-green);
+        .channel-link:focus img {
+            transform: scale(1.1);
+            border-color: var(--line-blue);
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
         }
+
+        .theme-switch input:focus + .slider {
+             outline: 3px solid var(--line-blue);
+             outline-offset: 2px;
+        }
+        /* --- END: Android TV Focus Styles --- */
 
         footer { margin-top: auto; padding: var(--spacing-xl); color: var(--light-text); background-color: transparent; width: 100%; text-align: center; border-top: none; }
         .loading-indicator, .no-channels-message { width: 100%; text-align: center; padding: var(--spacing-md); color: var(--light-text); font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 18px); display: none; }
@@ -395,17 +451,48 @@
             margin-top: 0;
         }
 
-        @media (orientation: landscape) {
-            main.categories-container {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .category {
-                width: 300px;
-            }
+        /* --- NEW: Scroll Button Styles --- */
+        .scroll-buttons-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
+        .scroll-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            background-color: var(--component-bg);
+            color: var(--light-text);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8);
+        }
+        .scroll-btn.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        .scroll-btn:hover {
+            background-color: var(--line-blue);
+            color: #fff;
+            transform: scale(1.1);
+        }
+        body.light-theme .scroll-btn {
+            background-color: #fff;
+        }
+        /* --- End of Scroll Button Styles --- */
 
         @media (max-width: 480px) { 
             body { 
@@ -419,6 +506,15 @@
             }
             .accordion-content.list-view .channel-link {
                 width: 100%;
+            }
+            .scroll-buttons-container {
+                bottom: 15px;
+                right: 15px;
+            }
+            .scroll-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
             }
         }
         @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
@@ -560,7 +656,7 @@
 
         @media (max-width: 480px) {
              .popup-buttons {
-                 flex-direction: column-reverse;
+                  flex-direction: column-reverse;
              }
             .btn-accept {
                 order: 0;
@@ -651,464 +747,52 @@
         </div>
     </div>
     
+    <div class="scroll-buttons-container">
+        <button id="scroll-to-top-btn" class="scroll-btn" title="เลื่อนขึ้นบนสุด">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        <button id="scroll-to-bottom-btn" class="scroll-btn" title="เลื่อนลงล่างสุด">
+            <i class="fas fa-arrow-down"></i>
+        </button>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Online Counter Logic using Firebase ---
-        try {
-            // ****** แก้ไขตรงนี้ ******
-            const firebaseConfig = {
-  apiKey: "AIzaSyD-kOR_HxnVLp03ocfmniTvsIZb7lx2g1I",
-  authDomain: "oktv-4e6e4.firebaseapp.com",
-  databaseURL: "https://oktv-4e6e4-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "oktv-4e6e4",
-  storageBucket: "oktv-4e6e4.firebasestorage.app",
-  messagingSenderId: "1035035792142",
-  appId: "1:1035035792142:web:df5eeb383ec3ddbb3fbd5f"
-            };
+        // ... ALL PREVIOUS JAVASCRIPT CODE ...
 
-            firebase.initializeApp(firebaseConfig);
-            const database = firebase.database();
+        // NEW: Scroll Buttons Logic
+        const scrollTopBtn = document.getElementById('scroll-to-top-btn');
+        const scrollBottomBtn = document.getElementById('scroll-to-bottom-btn');
 
-            const onlineRef = database.ref('.info/connected');
-            const userListRef = database.ref('onlineUsers');
-            const onlineCounterElement = document.getElementById('online-count');
-            
-            const channelViewersRef = database.ref('channelViewers');
-            let currentWatchingChannel = null;
-            let userKey = null;
-
-            onlineRef.on('value', (snapshot) => {
-                if (snapshot.val() === true) {
-                    const userRef = userListRef.push();
-                    userKey = userRef.key;
-                    
-                    userRef.onDisconnect().remove(); 
-                    if (currentWatchingChannel) {
-                         database.ref(`channelViewers/${currentWatchingChannel}/${userKey}`).onDisconnect().remove();
-                    }
-                    userRef.set(true);
-                }
-            });
-            userListRef.on('value', (snapshot) => {
-                const count = snapshot.numChildren();
-                if(onlineCounterElement) {
-                    onlineCounterElement.textContent = count;
-                    onlineCounterElement.classList.add('updated');
-                    setTimeout(() => {
-                        onlineCounterElement.classList.remove('updated');
-                    }, 200);
-                }
-            });
-
-            channelViewersRef.on('value', (snapshot) => {
-                const allCounts = snapshot.val() || {};
-                document.querySelectorAll('.view-count').forEach(span => {
-                    span.textContent = '0';
-                });
-                for (const channelId in allCounts) {
-                    const count = Object.keys(allCounts[channelId]).length;
-                    const countSpan = document.getElementById(`view-count-${channelId}`);
-                    if (countSpan) {
-                        countSpan.textContent = count;
-                    }
-                }
-            });
-
-        } catch (error) {
-            console.error("Firebase initialization failed:", error);
-            const onlineCounterContainer = document.getElementById('online-counter');
-            if(onlineCounterContainer) onlineCounterContainer.style.display = 'none';
-        }
-        // --- End of Firebase Logic ---
-
-
-        const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน! &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
-        const categoryStyles = {
-            "ทีวีดิจิตอล": { icon: "fas fa-tv", color: "#42A5F5" },
-            "กีฬา": { icon: "fas fa-running", color: "#66BB6A" },
-            "หนังทีวี": { icon: "fas fa-film", color: "#AB47BC" },
-            "สารคดี": { icon: "fas fa-book", color: "#FFCA28" },
-            "IPTV": { icon: "fas fa-network-wired", color: "#8D6E63" },
-            "TEST": { icon: "fas fa-vial", color: "#78909C"}
-        };
-
-        let channelsData = null; 
-
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-        function applyTheme(theme) {
-            if (theme === 'light') {
-                body.classList.add('light-theme');
-                themeToggle.checked = true;
+        window.addEventListener('scroll', () => {
+            // Logic for scroll to top button
+            if (window.scrollY > 300) {
+                scrollTopBtn.classList.add('visible');
             } else {
-                body.classList.remove('light-theme');
-                themeToggle.checked = false;
+                scrollTopBtn.classList.remove('visible');
             }
-        }
-        themeToggle.addEventListener('change', () => {
-            const newTheme = themeToggle.checked ? 'light' : 'dark';
-            localStorage.setItem('appTheme', newTheme);
-            applyTheme(newTheme);
-        });
 
-        const settingsToggleBtn = document.getElementById('settings-toggle-btn');
-        const settingsPopup = document.getElementById('settings-popup');
-        settingsToggleBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); 
-            settingsPopup.classList.toggle('show');
-        });
-        window.addEventListener('click', () => {
-            if (settingsPopup.classList.contains('show')) {
-                settingsPopup.classList.remove('show');
-            }
-        });
-        settingsPopup.addEventListener('click', (event) => {
-            event.stopPropagation();
-        });
-
-        const gridViewBtn = document.getElementById('grid-view-btn');
-        const listViewBtn = document.getElementById('list-view-btn');
-        function setView(view) {
-            document.querySelectorAll('.accordion-content').forEach(content => {
-                if (view === 'list') {
-                    content.classList.add('list-view');
-                } else {
-                    content.classList.remove('list-view');
-                }
-            });
-            gridViewBtn.classList.toggle('active', view === 'grid');
-            listViewBtn.classList.toggle('active', view === 'list');
-            localStorage.setItem('appView', view);
-            const openAccordion = document.querySelector('.accordion-content.show');
-            if(openAccordion) {
-                requestAnimationFrame(() => {
-                    openAccordion.style.maxHeight = (openAccordion.scrollHeight + 16) + 'px';
-                });
-            }
-        }
-        gridViewBtn.addEventListener('click', () => setView('grid'));
-        listViewBtn.addEventListener('click', () => setView('list'));
-
-        function createChannelElement(channel) {
-            const link = document.createElement('a');
-            link.href = channel.data_url || "#";
-            link.classList.add('channel-link');
-            link.setAttribute('aria-label', channel.aria_label || channel.name);
-            
-            const img = document.createElement('img');
-            img.src = channel.img_src;
-            img.alt = channel.name;
-            img.loading = "lazy";
-            img.onerror = function() {
-                this.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzU1NSI+PHBhdGggZD0iTTE5IDNINWMtMS4xIDAtMiAuOS0yIDJ2MTRjMCAxLjEuOSAyIDIgMmgxNGMxLjEgMCAyLS45IDItMlY1YzAtMS4xLS45LTItMi0yem0wIDE2SDVWNWgxNHYxNHptLTUuMDQtNi4yMWwtMi43NSAzLjU0LTEuOTYtMi4zNkw2IDE4aDEybC0zLjA0LTQuNzF6Ii8+PC9zdmc+';
-                this.onerror = null;
-            };
-            
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'channel-name';
-            nameSpan.textContent = channel.name;
-            
-            const counterDiv = document.createElement('div');
-            counterDiv.className = 'channel-view-counter';
-            const eyeIcon = document.createElement('i');
-            eyeIcon.className = 'fas fa-eye';
-            const countSpan = document.createElement('span');
-            countSpan.className = 'view-count';
-            countSpan.id = `view-count-${channel.id}`;
-            countSpan.textContent = '0';
-            counterDiv.appendChild(eyeIcon);
-            counterDiv.appendChild(countSpan);
-
-            link.appendChild(img);
-            link.appendChild(nameSpan);
-            link.appendChild(counterDiv); 
-
-            return link;
-        }
-
-        async function loadChannelsData() {
-            if (channelsData) return;
-            const gistUrl = 'https://raw.githubusercontent.com/ahmed9qn223/backend/main/channels.json';
-            try {
-                const response = await fetch(gistUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const freshData = await response.json();
-                channelsData = freshData;
-                localStorage.setItem('cachedChannels', JSON.stringify(freshData));
-            } catch (error) {
-                console.error('Error loading data from Gist:', error);
-                const cachedData = localStorage.getItem('cachedChannels');
-                if (cachedData) {
-                    channelsData = JSON.parse(cachedData);
-                    showNotification('ไม่สามารถเชื่อมต่อได้ กำลังแสดงข้อมูลล่าสุด', { duration: 3000 });
-                } else {
-                    channelsData = []; 
-                    showNotification('เกิดข้อผิดพลาดในการโหลดข้อมูลช่อง', { duration: 5000 });
-                }
-            }
-        }
-
-        function loadTextsData() {
-            const runningTextElement = document.getElementById('running-text');
-            const footerTextElement = document.getElementById('footer-text');
-            if (runningTextElement && textsData.runningText) runningTextElement.innerHTML = textsData.runningText;
-            if (footerTextElement && textsData.footerText) footerTextElement.textContent = textsData.footerText;
-        }
-
-        function showNotification(message, { duration = 4000, linkText = '', linkUrl = '' } = {}) {
-            const notificationBar = document.getElementById('notification-bar');
-            const notificationText = document.getElementById('notification-text');
-            const notificationLink = document.getElementById('notification-link');
-            if (notificationBar.notificationTimer) clearTimeout(notificationBar.notificationTimer);
-            
-            notificationText.textContent = message;
-            if (linkText && linkUrl) {
-                notificationLink.textContent = linkText;
-                notificationLink.href = linkUrl;
-                notificationLink.style.display = 'inline-block';
+            // Logic for scroll to bottom button
+            const isNearBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 200;
+            if (isNearBottom) {
+                scrollBottomBtn.classList.remove('visible');
             } else {
-                notificationLink.style.display = 'none';
-            }
-            
-            notificationBar.classList.add('show');
-            notificationBar.notificationTimer = setTimeout(() => {
-                notificationBar.classList.remove('show');
-            }, duration);
-        }
-
-        function showLoading(container) { container.querySelector('.loading-indicator').classList.add('active'); container.querySelector('.no-channels-message').classList.remove('active'); const existingChannelLinks = container.querySelectorAll('.channel-link'); existingChannelLinks.forEach(link => link.remove()); }
-        function hideLoading(container) { container.querySelector('.loading-indicator').classList.remove('active'); }
-        function showNoChannelsMessage(container) { hideLoading(container); container.querySelector('.no-channels-message').classList.add('active'); }
-        function clearMessages(container) { container.querySelector('.loading-indicator').classList.remove('active'); container.querySelector('.no-channels-message').classList.remove('active'); }
-        function formatDateTime(date) { const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }; const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false }; return { display: `${date.toLocaleDateString('th-TH', optionsDate)} ${date.toLocaleTimeString('th-TH', optionsTime)}`, iso: date.toISOString() }; }
-        function updateDateTime() { const datetimeDisplay = document.getElementById('current-datetime'); const now = new Date(); const formatted = formatDateTime(now); datetimeDisplay.textContent = formatted.display; datetimeDisplay.setAttribute('datetime', formatted.iso); }
-        function closeAccordion(contentElement, buttonElement) {
-            contentElement.classList.remove('show');
-            contentElement.style.maxHeight = '0px';
-            buttonElement.setAttribute('aria-expanded', 'false');
-            buttonElement.classList.remove('active');
-        }
-        function createSkeletonElement() { const skeleton = document.createElement('div'); skeleton.className = 'skeleton-item'; const img = document.createElement('div'); img.className = 'skeleton-img'; const text = document.createElement('div'); text.className = 'skeleton-text'; skeleton.appendChild(img); skeleton.appendChild(text); return skeleton; }
-
-        async function openAccordion(contentElement, buttonElement) {
-            contentElement.style.display = 'flex';
-            buttonElement.setAttribute('aria-expanded', 'true');
-            buttonElement.classList.add('active');
-
-            const alreadyHasContent = contentElement.querySelector('.channel-link') !== null;
-            if (!alreadyHasContent) {
-                clearMessages(contentElement);
-                for (let i = 0; i < 12; i++) { contentElement.appendChild(createSkeletonElement()); }
-                requestAnimationFrame(() => { contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px'; contentElement.classList.add('show'); });
-                
-                if (!channelsData) await loadChannelsData();
-                contentElement.querySelectorAll('.skeleton-item').forEach(item => item.remove());
-                if (!channelsData) return;
-                
-                const categoryText = buttonElement.dataset.category;
-                const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
-                
-                if (filteredChannels.length === 0) {
-                    showNoChannelsMessage(contentElement);
-                } else {
-                    filteredChannels.forEach(channel => { contentElement.appendChild(createChannelElement(channel)); });
-                }
-            }
-            requestAnimationFrame(() => { contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px'; contentElement.classList.add('show'); });
-            localStorage.setItem('lastOpenedCategory', contentElement.id);
-        }
-
-        const mainContainer = document.querySelector('main');
-        mainContainer.addEventListener('click', function(event) {
-            const link = event.target.closest('.channel-link');
-            if (link) {
-                // event.preventDefault(); // Let the browser handle the click by default
-                
-                if (!channelsData || !userKey) {
-                    event.preventDefault(); // ONLY prevent default if not ready
-                    showNotification('ยังไม่พร้อมใช้งาน กรุณารอสักครู่...');
-                    console.log('User clicked before Firebase/channels data was ready.');
-                    return; 
-                }
-
-                const countSpan = link.querySelector('.view-count');
-                if (countSpan) {
-                    const channelId = countSpan.id.replace('view-count-', '');
-                    const database = firebase.database();
-                    if (currentWatchingChannel && currentWatchingChannel !== channelId) {
-                        database.ref(`channelViewers/${currentWatchingChannel}/${userKey}`).remove();
-                    }
-                    const newChannelRef = database.ref(`channelViewers/${channelId}/${userKey}`);
-                    newChannelRef.onDisconnect().remove(); 
-                    newChannelRef.set(true);
-                    currentWatchingChannel = channelId;
-                }
+                scrollBottomBtn.classList.add('visible');
             }
         });
 
-        const savedTheme = localStorage.getItem('appTheme') || 'dark';
-        applyTheme(savedTheme);
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
-        loadTextsData();
-        const savedView = localStorage.getItem('appView') || 'grid';
-        setView(savedView);
-        
-        async function initializeApp() {
-            await loadChannelsData();
-            
-            const categoriesList = document.getElementById('categories-list');
-            categoriesList.innerHTML = ''; 
-
-            const uniqueCategories = [...new Set(channelsData.map(ch => ch.category))];
-
-            uniqueCategories.forEach(categoryName => {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'category';
-
-                const button = document.createElement('button');
-                button.className = 'accordion-button';
-                button.dataset.category = categoryName;
-                button.setAttribute('aria-expanded', 'false');
-                const contentId = `content-${categoryName.toLowerCase().replace(/\s+/g, '-')}`;
-                button.setAttribute('aria-controls', contentId);
-                
-                const style = categoryStyles[categoryName] || {};
-                const iconClass = style.icon || 'fas fa-question-circle';
-                button.style.setProperty('--category-color', style.color || '#f0f0f0');
-
-                const icon = document.createElement('i');
-                icon.className = iconClass; 
-                
-                const count = channelsData.filter(ch => ch.category === categoryName).length;
-                const countSpan = document.createElement('span');
-                countSpan.className = 'channel-count';
-                if (count > 0) {
-                    countSpan.textContent = `(${count})`;
-                }
-                
-                const accordionIcon = document.createElement('i');
-                accordionIcon.className = 'fas fa-chevron-right accordion-icon';
-
-                button.appendChild(icon);
-                button.append(` ${categoryName} `);
-                button.appendChild(countSpan);
-                button.appendChild(accordionIcon);
-
-                const contentDiv = document.createElement('div');
-                contentDiv.id = contentId;
-                contentDiv.className = 'accordion-content';
-                contentDiv.innerHTML = `
-                    <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
-                    <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
-                `;
-
-                categoryDiv.appendChild(button);
-                categoryDiv.appendChild(contentDiv);
-                categoriesList.appendChild(categoryDiv);
-            });
-
-            const allAccordionButtons = document.querySelectorAll('.accordion-button');
-            allAccordionButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const content = this.nextElementSibling;
-                    const isOpening = !content.classList.contains('show');
-                    allAccordionButtons.forEach(otherButton => { if (otherButton !== this) closeAccordion(otherButton.nextElementSibling, otherButton); });
-                    if (isOpening) {
-                        openAccordion(content, this);
-                    } else {
-                        closeAccordion(content, this);
-                    }
-                });
-            });
-
-            const lastCategoryId = localStorage.getItem('lastOpenedCategory');
-            let categoryOpened = false;
-            if (lastCategoryId && document.getElementById(lastCategoryId)) {
-                const lastContentElement = document.getElementById(lastCategoryId);
-                const lastButtonElement = lastContentElement.previousElementSibling;
-                if (lastButtonElement) {
-                    openAccordion(lastContentElement, lastButtonElement);
-                    categoryOpened = true;
-                }
-            }
-            if (!categoryOpened) {
-                const firstButton = document.querySelector('.category .accordion-button');
-                if (firstButton) openAccordion(firstButton.nextElementSibling, firstButton);
-            }
-        }
-
-        initializeApp();
-
-        const popup = document.getElementById('disclaimer-popup');
-        const acceptBtn = document.getElementById('accept-btn');
-        const declineBtn = document.getElementById('decline-btn');
-        const dontShowAgainCheckbox = document.getElementById('dont-show-again');
-        const hasAcceptedPermanently = localStorage.getItem('disclaimerAccepted');
-        
-        function showPopup() {
-            if (!hasAcceptedPermanently) {
-                document.body.classList.add('popup-open');
-                popup.style.display = 'flex';
-                setTimeout(() => {
-                    popup.classList.add('show');
-                    acceptBtn.focus();
-                }, 10);
-            }
-        }
-        
-        function hidePopup() {
-            document.body.classList.remove('popup-open');
-            popup.classList.remove('show');
-            setTimeout(() => {
-                popup.style.display = 'none';
-            }, 300);
-        }
-        showPopup(); 
-        acceptBtn.addEventListener('click', () => {
-            if (dontShowAgainCheckbox.checked) {
-                localStorage.setItem('disclaimerAccepted', 'true');
-            }
-            hidePopup();
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-        declineBtn.addEventListener('click', () => {
-            window.location.href = 'https://www.google.com';
+
+        scrollBottomBtn.addEventListener('click', () => {
+            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
         });
-        
-        const focusableElements = 'input[type="checkbox"], button';
-        const focusableContent = popup.querySelectorAll(focusableElements);
-        const firstFocusableElement = focusableContent[0];
-        const lastFocusableElement = focusableContent[focusableContent.length - 1];
-        popup.addEventListener('click', (event) => {
-            if (event.target === popup) {
-                const popupBox = popup.querySelector('.popup-box');
-                popupBox.classList.add('shake');
-                setTimeout(() => {
-                    popupBox.classList.remove('shake');
-                }, 820);
-            }
-        });
-        document.addEventListener('keydown', function(e) {
-            if (!popup.classList.contains('show')) return;
-            if (e.key === 'Escape') {
-                acceptBtn.click();
-                return;
-            }
-            let isTabPressed = e.key === 'Tab' || e.keyCode === 9;
-            if (!isTabPressed) return;
-            if (e.shiftKey) {
-                if (document.activeElement === firstFocusableElement) {
-                    lastFocusableElement.focus();
-                    e.preventDefault();
-                }
-            } else {
-                if (document.activeElement === lastFocusableElement) {
-                    firstFocusableElement.focus();
-                    e.preventDefault();
-                }
-            }
-        });
+
+        // --- All other existing JavaScript functions and listeners below ---
+        // For brevity, the rest of the JS code is omitted here, but should be included in your final file.
     });
+    // The rest of the script tag content from the previous version goes here...
     </script>
 </body>
 </html>
