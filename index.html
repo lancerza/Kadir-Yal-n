@@ -37,8 +37,8 @@
             --border-color: #555;
             --header-bg: rgba(26, 26, 26, 0.7);
             --popup-bg: rgba(44, 44, 44, 0.75);
-            --shortcut-bg: rgba(0, 0, 0, 0.4);
-            --shortcut-border: #777;
+            /* --shortcut-bg: rgba(0, 0, 0, 0.4); -- REMOVED */
+            /* --shortcut-border: #777; -- REMOVED */
             --main-font: 'Kanit', sans-serif;
             --font-size-multiplier: 1;
             --accent-color: #2196F3;
@@ -52,8 +52,8 @@
             --border-color: #ccc;
             --header-bg: rgba(244, 244, 244, 0.7);
             --popup-bg: rgba(255, 255, 255, 0.75);
-            --shortcut-bg: rgba(0, 0, 0, 0.1);
-            --shortcut-border: #bbb;
+            /* --shortcut-bg: rgba(0, 0, 0, 0.1); -- REMOVED */
+            /* --shortcut-border: #bbb; -- REMOVED */
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -170,7 +170,7 @@
 
         .channel-count { font-size: 0.8em; font-weight: 400; margin-left: var(--spacing-xs); opacity: 0.7; }
         
-        .shortcut-badge { display: inline-block; background-color: var(--shortcut-bg); color: #fff; border: 1px solid var(--shortcut-border); border-radius: 4px; padding: 0px 6px; font-size: 0.8em; font-weight: bold; margin-right: 8px; vertical-align: middle; }
+        /* .shortcut-badge REMOVED */
 
         main img { border-radius: var(--border-radius); border: 1px solid var(--border-color); padding: 5px; margin: 0; height: 70px; width: 70px; object-fit: cover; vertical-align: middle; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; cursor: pointer; user-select: none; decoding: async; }
         main img:hover { transform: scale(1.1); border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
@@ -250,19 +250,18 @@
         .color-dot:hover { transform: scale(1.2); }
         .color-dot.active { border-color: var(--white); box-shadow: 0 0 5px rgba(255, 255, 255, 0.7); }
 
-        /* --- MOBILE RESPONSIVE ADJUSTMENTS --- */
         @media (max-width: 480px) { 
             body { padding: 0 var(--spacing-md); }
-            header { margin-top: 2vh; /* Reduced top margin */ }
+            header { margin-top: 2vh; }
             main.categories-container { 
-                grid-template-columns: 1fr; /* Force single column layout */
-                gap: var(--spacing-md); /* Tighter gap between categories */
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
             }
             .accordion-content {
-                gap: var(--spacing-md); /* Tighter gap between channel icons */
+                gap: var(--spacing-md);
             }
             #notification-bar { width: 90%; padding: 12px; font-size: 14px; bottom: 10px; }
-            .accordion-content.list-view .channel-link { width: 100%; /* Full width list items */ }
+            .accordion-content.list-view .channel-link { width: 100%; }
             .popup-buttons { flex-direction: column-reverse; }
             .btn-accept, .btn-decline { order: 0; }
         }
@@ -419,20 +418,19 @@
 
         const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน!         👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น         ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
         
+        // REMOVED 'shortcut' property from the styles object
         const categoryStyles = {
-            "ทีวีดิจิตอล": { icon: "fas fa-tv", color: "#42A5F5", shortcut: "1" },
-            "กีฬา": { icon: "fas fa-running", color: "#66BB6A", shortcut: "2" },
-            "หนังทีวี": { icon: "fas fa-film", color: "#AB47BC", shortcut: "3" },
-            "สารคดี": { icon: "fas fa-book", color: "#FFCA28", shortcut: "4" },
-            "IPTV": { icon: "fas fa-network-wired", color: "#8D6E63", shortcut: "5" },
-            "TEST": { icon: "fas fa-vial", color: "#78909C", shortcut: null }
+            "ทีวีดิจิตอล": { icon: "fas fa-tv", color: "#42A5F5" },
+            "กีฬา": { icon: "fas fa-running", color: "#66BB6A" },
+            "หนังทีวี": { icon: "fas fa-film", color: "#AB47BC" },
+            "สารคดี": { icon: "fas fa-book", color: "#FFCA28" },
+            "IPTV": { icon: "fas fa-network-wired", color: "#8D6E63" },
+            "TEST": { icon: "fas fa-vial", color: "#78909C" }
         };
 
         let channelsData = null; 
         let userSettings = {};
 
-        // ===== UPDATED SETTINGS MANAGEMENT =====
-        
         function loadSettings() {
             const defaultSettings = {
                 theme: 'dark',
@@ -459,7 +457,6 @@
             } catch (e) { console.error("Could not save settings to localStorage", e); }
         }
 
-        // --- Theme ---
         const themeToggle = document.getElementById('theme-toggle');
         function applyTheme(theme) {
             document.body.classList.toggle('light-theme', theme === 'light');
@@ -472,7 +469,6 @@
             saveSettings();
         });
 
-        // --- View ---
         const gridViewBtn = document.getElementById('grid-view-btn');
         const listViewBtn = document.getElementById('list-view-btn');
         function setView(view) {
@@ -494,7 +490,6 @@
         gridViewBtn.addEventListener('click', () => setView('grid'));
         listViewBtn.addEventListener('click', () => setView('list'));
 
-        // --- Font, Font Size, Accent Color ---
         const fontSelector = document.getElementById('font-selector');
         const increaseFontBtn = document.getElementById('increase-font-btn');
         const decreaseFontBtn = document.getElementById('decrease-font-btn');
@@ -539,7 +534,6 @@
             }
         });
         
-        // --- Settings Popup Toggle ---
         const settingsToggleBtn = document.getElementById('settings-toggle-btn');
         const settingsPopup = document.getElementById('settings-popup');
         settingsToggleBtn.addEventListener('click', (event) => {
@@ -555,8 +549,6 @@
             event.stopPropagation();
         });
 
-
-        // --- Core Application Logic (Channel Loading, UI Rendering, etc.) ---
         function createChannelElement(channel) {
             const link = document.createElement('a');
             link.href = channel.data_url || "#";
@@ -638,12 +630,7 @@
                 icon.className = iconClass;
                 button.appendChild(icon);
 
-                if (style.shortcut) {
-                    const shortcutSpan = document.createElement('span');
-                    shortcutSpan.className = 'shortcut-badge';
-                    shortcutSpan.textContent = style.shortcut;
-                    button.appendChild(shortcutSpan);
-                }
+                // REMOVED shortcut badge creation logic
                 
                 button.append(` ${categoryName} `);
                 
@@ -736,7 +723,7 @@
                     contentElement.classList.add('show');
                 });
                 
-                await new Promise(resolve => setTimeout(resolve, 200)); // Simulate loading
+                await new Promise(resolve => setTimeout(resolve, 200));
                 
                 skeletons.forEach(sk => sk.remove());
                 
@@ -802,7 +789,6 @@
             if (footerTextElement && textsData.footerText) footerTextElement.textContent = textsData.footerText;
         }
 
-        // --- Disclaimer Popup Logic ---
         const popup = document.getElementById('disclaimer-popup');
         const acceptBtn = document.getElementById('accept-btn');
         const declineBtn = document.getElementById('decline-btn');
@@ -836,11 +822,8 @@
             window.location.href = 'https://www.google.com';
         });
 
-        // ===== INITIALIZE APP =====
         async function initializeApp() {
             userSettings = loadSettings();
-
-            // Apply all loaded settings
             applyTheme(userSettings.theme);
             applyFont(userSettings.font);
             applyFontSize(userSettings.fontSize);
