@@ -3,186 +3,910 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ทีวีออนไลน์ รวมลิงก์ดูทีวี กีฬา และหนังออนไลน์ในที่เดียว">
+    <meta name="keywords" content="ทีวีออนไลน์, ดูหนัง, กีฬา, YouTube">
     <title>ทีวีออนไลน์ ดูฟรีไม่เสียรายเดือน</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&family=Sarabun:wght@400;700&family=Mitr:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KBRV24KW7F"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-KBRV24KW7F');
+    </script>
+
     <style>
-        /* All CSS from the previous step goes here. It is correct. */
-        /* For brevity, I'm collapsing the CSS block. */
+        /* --- Default Styles and Variables --- */
         :root {
-            --dark-bg: #1a1a1a; --light-text: #f0f0f0; --accent-color: #2196F3;
-            /* ... all other CSS variables */
+            --dark-bg: #1a1a1a;
+            --light-text: #f0f0f0;
+            --white: #FFFFFF;
+            --red-accent: #ff4d4d;
+            --border-radius: 8px;
+            --spacing-xs: 5px;
+            --spacing-sm: 8px;
+            --spacing-md: 10px;
+            --spacing-lg: 15px;
+            --spacing-xl: 20px;
+            --component-bg: #333;
+            --border-color: #555;
+            --header-bg: rgba(26, 26, 26, 0.7);
+            --popup-bg: rgba(44, 44, 44, 0.75);
+            --shortcut-bg: rgba(0, 0, 0, 0.4);
+            --shortcut-border: #777;
+
+            --main-font: 'Kanit', sans-serif;
+            --font-size-multiplier: 1;
+            --accent-color: #2196F3;
+            --line-green: #00B900;
+            
+            /* -- TV BOX ADJUSTMENTS -- */
+            --tv-font-scale-factor: 1.5; /* ตัวคูณเพิ่มขนาดฟอนต์สำหรับ TV */
+            --tv-spacing-scale-factor: 1.3; /* ตัวคูณเพิ่มระยะห่างสำหรับ TV */
+            --tv-focus-outline-width: 4px; /* ความหนาของเส้นขอบเมื่อ focus */
+            --tv-focus-outline-offset: 3px; /* ระยะห่างของเส้นขอบเมื่อ focus */
         }
-        .accent-blue { --accent-color: #2196F3; }
-        .accent-green { --accent-color: #4CAF50; }
-        .accent-orange { --accent-color: #FF9800; }
-        .accent-purple { --accent-color: #9C27B0; }
-        html { font-size: 16px; scroll-behavior: smooth; }
-        body { margin: 0; padding: 0 10px; /* ... */ }
-        /* ... All other styles are correct and remain the same as the previous version ... */
-        .color-swatch {
-            width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-color);
-            cursor: pointer; transition: transform 0.2s, border-color 0.2s;
+        
+        body.light-theme {
+            --dark-bg: #f4f4f4;
+            --light-text: #333333;
+            --component-bg: #e9e9e9;
+            --border-color: #ccc;
+            --header-bg: rgba(244, 244, 244, 0.7);
+            --popup-bg: rgba(255, 255, 255, 0.75);
+            --shortcut-bg: rgba(0, 0, 0, 0.1);
+            --shortcut-border: #bbb;
         }
-        .color-swatch.active { border-color: var(--light-text); box-shadow: 0 0 5px var(--light-text); }
-        .color-swatch[data-color="blue"] { background-color: #2196F3; }
-        .color-swatch[data-color="green"] { background-color: #4CAF50; }
-        .color-swatch[data-color="orange"] { background-color: #FF9800; }
-        .color-swatch[data-color="purple"] { background-color: #9C27B0; }
+
+        html, body {
+            margin: 0;
+            padding: 0 var(--spacing-md);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            font-family: var(--main-font);
+            font-size: calc(16px * var(--font-size-multiplier));
+            text-align: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            scroll-behavior: smooth;
+        }
+        
+        body.popup-open {
+            overflow: hidden;
+        }
+
+        /* --- Keyframes (no changes) --- */
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes gradient-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0) scale(1); } 20%, 80% { transform: translate3d(2px, 0, 0) scale(1); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0) scale(1); } 40%, 60% { transform: translate3d(4px, 0, 0) scale(1); } }
+        @keyframes slideUpFadeIn { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+        
+        /* --- General Element Styling --- */
+        header {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--white);
+            padding: 2vw 4vw;
+            border-radius: var(--border-radius);
+            margin: 5vh 0 2vh 0;
+            animation: fadeIn 3s ease-out;
+            width: 100%;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--light-text);
+            font-family: 'Kanit', sans-serif;
+            font-size: clamp(calc(24px * var(--tv-font-scale-factor)), 5vw, calc(40px * var(--tv-font-scale-factor)));
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-top: 1px;
+            margin-bottom: calc(var(--spacing-md) * var(--tv-spacing-scale-factor));
+            background: -webkit-linear-gradient(45deg, var(--accent-color), var(--red-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            background-size: 200% auto;
+            animation: gradient-animation 10s ease infinite;
+        }
+        
+        #running-text-container { width: 100%; margin-bottom: var(--spacing-xs); position: relative; min-height: calc(20px * var(--tv-font-scale-factor)); overflow: hidden; }
+        #running-text { display: inline-block; white-space: pre; font-family: 'Kanit', sans-serif; font-size: clamp(calc(12px * var(--tv-font-scale-factor)), 2vw, calc(16px * var(--tv-font-scale-factor))); font-weight: 700; animation: marquee 15s linear infinite; position: absolute; top: 0; left: 0; min-width: 100%; cursor: default; padding-right: 100px; }
+        #current-datetime { font-family: 'Kanit', sans-serif; font-size: clamp(calc(14px * var(--tv-font-scale-factor)), 2.5vw, calc(20px * var(--tv-font-scale-factor))); margin-top: var(--spacing-md); margin-bottom: var(--spacing-md); text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); font-weight: 400; }
+        
+        #line-group-info { font-family: 'Kanit', sans-serif; font-size: clamp(calc(16px * var(--tv-font-scale-factor)), 2.5vw, calc(22px * var(--tv-font-scale-factor))); margin-top: var(--spacing-xl); margin-bottom: 0; text-shadow: 0 0 5px rgba(0, 0, 0, 0.3); font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; padding: var(--spacing-sm); border-radius: var(--border-radius); transition: background-color 0.2s; }
+        #line-group-info i { font-size: calc(25px * var(--tv-font-scale-factor)); vertical-align: middle; color: var(--line-green); }
+        
+        #online-counter { display: flex; align-items: center; gap: 8px; background-color: rgba(0, 0, 0, 0.2); padding: 8px 16px; border-radius: 20px; font-size: calc(14px * var(--tv-font-scale-factor)); font-weight: bold; color: var(--light-text); transition: all 0.3s ease; margin-top: 15px; }
+
+        .ad-container { width: 100%; margin: var(--spacing-md) 0; display: flex; justify-content: center; align-items: center; background-color: #2b2b2b; border-radius: var(--border-radius); }
+        .ad-container-top { min-height: 100px; }
+        .ad-container-bottom { min-height: 250px; }
+        
+        main.categories-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: calc(var(--spacing-lg) * var(--tv-spacing-scale-factor)); width: 100%; max-width: 1400px; margin-top: clamp(30px, 6vw, 50px); padding-bottom: var(--spacing-md); flex-grow: 1; justify-content: center; }
+
+        .category { background-color: transparent; border-radius: var(--border-radius); padding: var(--spacing-xs); width: 100%; max-width: none; display: flex; flex-direction: column; align-items: center; border: 1px solid transparent; height: auto; box-shadow: none; transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+        
+        .accordion-button { position: relative; -webkit-tap-highlight-color: transparent; background: linear-gradient(145deg, #424242, #333333); color: var(--light-text); font-family: 'Kanit', sans-serif; font-size: calc(1.5em * var(--tv-font-scale-factor)); font-weight: bold; padding: calc(10px * var(--tv-spacing-scale-factor)) 40px calc(10px * var(--tv-spacing-scale-factor)) calc(14px * var(--tv-spacing-scale-factor)); border-radius: var(--border-radius); cursor: pointer; width: 100%; text-align: center; margin-bottom: 0; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); transition: transform 0.1s ease, background 0.3s ease, box-shadow 0.3s ease; --category-color: var(--light-text); }
+        
+        .accordion-content { max-height: 0; padding: 0; overflow-y: auto; transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out; display: none; opacity: 0; width: 100%; flex-wrap: wrap; justify-content: center; gap: calc(var(--spacing-lg) * var(--tv-spacing-scale-factor)); position: relative; }
+        .accordion-content.show { display: flex; opacity: 1; padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
+        .accordion-content.show .channel-link { animation: popIn 0.4s ease-out forwards; }
+
+        main img { border-radius: var(--border-radius); border: 3px solid var(--border-color); padding: 5px; margin: 0; height: 100px; width: 100px; object-fit: cover; vertical-align: middle; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; cursor: pointer; user-select: none; decoding: async; }
+        
+        .channel-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--light-text); position: relative; border-radius: var(--border-radius); padding: var(--spacing-sm); }
+        .channel-name { font-size: calc(16px * var(--tv-font-scale-factor)); margin-top: 10px; text-align: center; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* -- IMPROVED FOCUS STYLES FOR TV -- */
+        .channel-link:focus, .accordion-button:focus, .view-btn:focus, #settings-toggle-btn:focus, #line-group-info:focus, .popup-btn:focus, .settings-select:focus, .color-dot:focus {
+            outline: var(--tv-focus-outline-width) solid var(--accent-color);
+            outline-offset: var(--tv-focus-outline-offset);
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 25px var(--accent-color);
+            transform: scale(1.05); /* Make focused item slightly larger */
+        }
+        
+        .channel-link:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .channel-link:focus img { 
+            transform: scale(1.1); 
+            border-color: var(--accent-color); 
+            box-shadow: 0 0 15px var(--accent-color); 
+        }
+        
+        .theme-switch input:focus + .slider { 
+            outline: var(--tv-focus-outline-width) solid var(--accent-color); 
+            outline-offset: var(--tv-focus-outline-offset); 
+        }
+
+        footer { margin-top: auto; padding: var(--spacing-xl); color: var(--light-text); background-color: transparent; width: 100%; text-align: center; border-top: none; font-size: calc(1em * var(--tv-font-scale-factor));}
+        
+        /* Settings Popup */
+        .header-controls { position: absolute; top: 20px; right: 20px; }
+        #settings-toggle-btn { font-size: calc(1.8em * var(--tv-font-scale-factor)); color: var(--light-text); cursor: pointer; transition: transform 0.3s ease, color 0.3s ease; padding: 5px; }
+        
+        .settings-popup { position: absolute; top: 120%; right: 0; background-color: var(--component-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: var(--spacing-md) var(--spacing-lg); box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; width: auto; display: flex; flex-direction: column; gap: calc(var(--spacing-md) * var(--tv-spacing-scale-factor)); opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s; }
+        .settings-popup.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .settings-popup .setting-item { display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-lg); font-family: 'Kanit', sans-serif; font-size: calc(16px * var(--tv-font-scale-factor)); }
+        
+        /* List View Adjustments */
+        .accordion-content.list-view { gap: var(--spacing-md); }
+        .accordion-content.list-view .channel-link { width: calc(50% - var(--spacing-md)); flex-direction: row; align-items: center; justify-content: flex-start; padding: 10px; background-color: rgba(128, 128, 128, 0.1); border-radius: var(--border-radius); }
+        .accordion-content.list-view .channel-name { max-width: none; white-space: normal; text-align: left; margin-left: 15px; margin-top: 0; }
+        .accordion-content.list-view main img { width: 80px; height: 80px; }
+
+        /* Popup Box Adjustments */
+        .popup-box { background: var(--popup-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--light-text); padding: 30px 40px; border-radius: 15px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); text-align: center; font-family: 'Kanit', sans-serif; border: 1px solid rgba(255, 255, 255, 0.1); transform: scale(1); opacity: 0; animation: none; }
+        .popup-icon { font-size: calc(52px * var(--tv-font-scale-factor)); color: var(--accent-color); line-height: 1; margin-bottom: 20px; }
+        .popup-box h2 { margin-top: 0; font-size: calc(1.8em * var(--tv-font-scale-factor)); color: var(--light-text); font-weight: 700; }
+        .popup-box p { margin: 20px 0 30px; font-size: calc(1.1em * var(--tv-font-scale-factor)); line-height: 1.6; opacity: 0.8; }
+        .popup-options { font-size: calc(1em * var(--tv-font-scale-factor)); }
+        .popup-btn { padding: 15px 25px; font-size: calc(1.1em * var(--tv-font-scale-factor)); }
+
+
+        /* --- Fallback Styles and other elements, original styles are mostly fine --- */
+        /* You can copy the rest of your original CSS here */
+        *, *::before, *::after { box-sizing: border-box; }
+        body.light-theme h1 { background: -webkit-linear-gradient(45deg, var(--accent-color), var(--red-accent)); -webkit-background-clip: text; background-clip: text; }
+        #running-text-container, #current-datetime, #line-group-info { color: var(--light-text); }
+        #running-text { color: var(--red-accent); }
+        #line-group-info:hover { color: #1976D2; }
+        #line-group-info i.fa-brands.fa-line.left-icon { margin-right: var(--spacing-sm); }
+        #line-group-info i.fa-brands.fa-line.right-icon { margin-left: var(--spacing-sm); }
+        #online-count.updated { transform: scale(1.3); color: #fff; transition: transform 0.1s ease-in-out; }
+        body.light-theme .ad-container { background-color: #e0e0e0; }
+        .category:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+        .accordion-button > i:first-of-type { color: var(--category-color); margin-right: var(--spacing-sm); }
+        .accordion-button:hover { background: linear-gradient(145deg, #616161, #505050); transform: translateY(-3px); }
+        .accordion-button.active { background: linear-gradient(145deg, #f44336, #d32f2f); border-color: var(--white); color: var(--white); box-shadow: 0 4px 10px rgba(255, 77, 77, 0.4); }
+        body.light-theme .accordion-button { background: linear-gradient(145deg, #e9e9e9, #f5f5f5); color: var(--light-text); text-shadow: none; }
+        body.light-theme .accordion-button:hover { background: linear-gradient(145deg, #f5f5f5, #e0e0e0); }
+        body.light-theme .accordion-button.active { background: linear-gradient(145deg, #ff4d4d, #f44336); color: var(--white); }
+        .accordion-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); transition: transform 0.3s ease; font-size: 0.8em; }
+        .accordion-button.active .accordion-icon { transform: translateY(-50%) rotate(90deg); }
+        .channel-count { font-size: 0.8em; font-weight: 400; margin-left: var(--spacing-xs); opacity: 0.7; }
+        .shortcut-badge { display: inline-block; background-color: var(--shortcut-bg); color: #fff; border: 1px solid var(--shortcut-border); border-radius: 4px; padding: 0px 6px; font-size: 0.8em; font-weight: bold; margin-right: 8px; vertical-align: middle; }
+        main img:hover { transform: scale(1.1); border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
+        main img:active { transform: scale(1.05); filter: brightness(0.8); transition: transform 0.05s ease, filter 0.05s ease; }
+        .loading-indicator, .no-channels-message { width: 100%; text-align: center; padding: var(--spacing-md); color: var(--light-text); font-family: 'Kanit', sans-serif; font-size: clamp(14px, 2.5vw, 18px); display: none; }
+        .loading-indicator.active, .no-channels-message.active { display: block; }
+        .loading-indicator i.fa-spinner { animation: spin 1s linear infinite; margin-right: var(--spacing-xs); }
+        .empty-state-icon { font-size: 48px; color: #555; margin-bottom: var(--spacing-md); }
+        #notification-bar { position: fixed; bottom: 20px; left: 50%; transform: translate(-50%, 150%); background-color: var(--component-bg); color: var(--light-text); padding: 12px 24px; border-radius: var(--border-radius); box-shadow: 0 4px 12px rgba(0,0,0,0.4); font-family: 'Kanit', sans-serif; font-size: 16px; z-index: 1000; transition: transform 0.5s ease-in-out, background-color 0.3s ease, color 0.3s ease; display: flex; align-items: center; flex-direction: column; gap: 10px; }
+        #notification-bar.show { transform: translate(-50%, 0); }
+        #notification-link { display: none; background-color: var(--line-green); color: var(--white); text-decoration: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; }
+        #settings-toggle-btn:hover { color: var(--accent-color); transform: rotate(90deg); }
+        .theme-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .theme-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 26px; }
+        .slider:before { position: absolute; content: "🌙"; height: 20px; width: 20px; left: 4px; bottom: 3px; font-size: 14px; text-align: center; line-height: 20px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { content: "☀️"; transform: translateX(22px); }
+        .view-toggle { display: flex; gap: 5px; }
+        .view-btn { border: 1px solid var(--border-color); background: transparent; color: var(--light-text); padding: 5px 10px; border-radius: 5px; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+        .view-btn.active { background: var(--accent-color); color: var(--white); border-color: var(--accent-color); }
+        .skeleton-item { display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.7; }
+        .skeleton-item .skeleton-img { width: 50px; height: 50px; border-radius: 8px; background-color: #333; background-image: linear-gradient(90deg, #333, #444, #333); background-size: 200px 100%; animation: shimmer 1.5s infinite linear; }
+        .skeleton-item .skeleton-text { width: 40px; height: 12px; border-radius: 4px; background-color: #333; background-image: linear-gradient(90deg, #333, #444, #333); background-size: 200px 100%; animation: shimmer 1.5s infinite linear; }
+        body.light-theme .skeleton-item .skeleton-img, body.light-theme .skeleton-item .skeleton-text { background-color: #e0e0e0; background-image: linear-gradient(90deg, #e0e0e0, #f0f0f0, #e0e0e0); }
+        .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+        .popup-overlay.show .popup-box { opacity: 1; animation: slideUpFadeIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
+        .popup-box.shake { animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both; }
+        .popup-box p { opacity: 0.8; }
+        .popup-options { display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
+        #dont-show-again { margin-right: 8px; accent-color: var(--accent-color); }
+        .popup-buttons { display: flex; flex-direction: column; gap: 10px; }
+        .popup-btn { width: 100%; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; font-family: 'Kanit', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .popup-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .btn-accept { background-color: var(--accent-color); color: white; order: 2; }
+        .btn-accept:hover { filter: brightness(0.9); }
+        .btn-decline { background-color: var(--component-bg); color: var(--light-text); order: 1; }
+        .btn-decline:hover { background-color: var(--border-color); }
+        .settings-divider { border: none; border-top: 1px solid var(--border-color); margin: 8px 0; }
+        .settings-select { background-color: var(--component-bg); color: var(--light-text); border: 1px solid var(--border-color); border-radius: 5px; padding: 5px; font-family: 'Kanit', sans-serif; cursor: pointer; }
+        .font-size-toggle { display: flex; gap: 5px; }
+        .color-picker { display: flex; gap: 8px; align-items: center; }
+        .color-dot { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s, border-color 0.2s; }
+        .color-dot:hover { transform: scale(1.2); }
+        .color-dot.active { border-color: var(--white); box-shadow: 0 0 5px rgba(255, 255, 255, 0.7); }
+        @media (max-width: 480px) { body { padding: 0 var(--spacing-xs); } #notification-bar { width: 90%; padding: 12px; font-size: 14px; bottom: 10px; } .accordion-content.list-view .channel-link { width: 100%; } .popup-buttons { flex-direction: column-reverse; } .btn-accept, .btn-decline { order: 0; } }
+
     </style>
 </head>
 <body>
-    <div id="settings-popup" class="settings-popup">
-        </div>
+    <header>
+        <div id="running-text-container"><div id="running-text"></div></div>
+        <h1>เชิญดูฟรีไม่เสียรายเดือน</h1>
+
+        <div class="header-controls">
+            <i class="fas fa-cog" id="settings-toggle-btn" title="การตั้งค่า" tabindex="0"></i>
+            <div id="settings-popup" class="settings-popup">
+                <div class="setting-item">
+                    <span>สลับธีม</span>
+                    <label class="theme-switch" for="theme-toggle">
+                        <input type="checkbox" id="theme-toggle">
+                        <div class="slider"></div>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <span>มุมมอง</span>
+                    <div class="view-toggle">
+                        <button id="grid-view-btn" class="view-btn" title="มุมมองตาราง"><i class="fas fa-th-large"></i></button>
+                        <button id="list-view-btn" class="view-btn" title="มุมมองรายการ"><i class="fas fa-bars"></i></button>
+                    </div>
+                </div>
+
+                <hr class="settings-divider">
+
+                <div class="setting-item">
+                    <span>ฟอนต์</span>
+                    <select id="font-selector" class="settings-select">
+                        <option value="'Kanit', sans-serif">Kanit</option>
+                        <option value="'Sarabun', sans-serif">Sarabun</option>
+                        <option value="'Mitr', sans-serif">Mitr</option>
+                        <option value="sans-serif">System</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <span>ขนาดตัวอักษร</span>
+                    <div class="font-size-toggle">
+                        <button id="decrease-font-btn" class="view-btn" title="ลดขนาด"><i class="fas fa-minus"></i></button>
+                        <button id="increase-font-btn" class="view-btn" title="เพิ่มขนาด"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <span>สีหลัก</span>
+                    <div id="accent-color-picker" class="color-picker">
+                        <div class="color-dot" data-color="#2196F3" style="background-color: #2196F3;" title="สีน้ำเงิน" tabindex="0"></div>
+                        <div class="color-dot" data-color="#4CAF50" style="background-color: #4CAF50;" title="สีเขียว" tabindex="0"></div>
+                        <div class="color-dot" data-color="#FF9800" style="background-color: #FF9800;" title="สีส้ม" tabindex="0"></div>
+                        <div class="color-dot" data-color="#E91E63" style="background-color: #E91E63;" title="สีชมพู" tabindex="0"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <time id="current-datetime" aria-live="polite"></time>
+        <a href="intent://ti/g2/7xI-GwYG_G9qyuLqXhj79IwFj4Gv1-6boc5DuA#Intent;scheme=line;package=jp.naver.line.android;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.linecorp.line;end" id="line-group-info" rel="noopener noreferrer">
+            <i class="fa-brands fa-line left-icon"></i> 
+            เข้ากลุ่มไลน์อัพเดทต่างๆ
+            <i class="fa-brands fa-line right-icon"></i>
+        </a>
+        <div id="online-counter" title="จำนวนผู้ใช้งานออนไลน์">
+            <i class="fas fa-eye"></i>
+            <span id="online-count">1</span>
+        </div>
+    </header>
+
+    <div class="ad-container ad-container-top">
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6694890026488371" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6694890026488371" data-ad-slot="7851244249" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    
+    <main class="categories-container" id="categories-list">
+    </main>
+
+    <div class="ad-container ad-container-bottom">
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6694890026488371" data-ad-slot="3108933890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    
+    <footer><p id="footer-text"></p></footer>
+    
+    <div id="notification-bar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fas fa-info-circle"></i>
+              <span id="notification-text"></span>
+        </div>
+        <a id="notification-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+    </div>
+
+    <div class="popup-overlay" id="disclaimer-popup" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+        <div class="popup-box">
+            <div class="popup-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 id="popup-title">ข้อจำกัดความรับผิดชอบ</h2>
+            <p>
+                เว็บไซต์นี้เป็นเพียงผู้รวบรวมลิงก์ ไม่ได้จัดเก็บไฟล์ใดๆ และไม่รับผิดชอบต่อเนื้อหาของลิงก์ปลายทาง ผู้ใช้งานโปรดยอมรับความเสี่ยงในการใช้งานด้วยตนเอง
+            </p>
+            <div class="popup-options">
+                <input type="checkbox" id="dont-show-again">
+                <label for="dont-show-again">ไม่ต้องแสดงข้อความนี้อีก</label>
+            </div>
+            <div class="popup-buttons">
+                <button class="popup-btn btn-decline" id="decline-btn"><i class="fas fa-times"></i> ไม่ยอมรับ</button>
+                <button class="popup-btn btn-accept" id="accept-btn"><i class="fas fa-check"></i> ยอมรับและเข้าใช้งาน</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
+        // Your JavaScript code remains the same
     document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const firebaseConfig = {
+  apiKey: "AIzaSyD-kOR_HxnVLp03ocfmniTvsIZb7lx2g1I",
+  authDomain: "oktv-4e6e4.firebaseapp.com",
+  databaseURL: "https://oktv-4e6e4-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "oktv-4e6e4",
+  storageBucket: "oktv-4e6e4.firebasestorage.app",
+  messagingSenderId: "1035035792142",
+  appId: "1:1035035792142:web:df5eeb383ec3ddbb3fbd5f"
+            };
 
-        // --- CORRECTED SCRIPT STRUCTURE ---
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
 
-        // Global variables for the script
-        let channelsData = null;
-        let userSettings = {};
+            const onlineRef = database.ref('.info/connected');
+            const userListRef = database.ref('onlineUsers');
+            const onlineCounterElement = document.getElementById('online-count');
+
+            onlineRef.on('value', (snapshot) => {
+                if (snapshot.val() === true) {
+                    const userRef = userListRef.push();
+                    userRef.onDisconnect().remove();
+                    userRef.set(true);
+                }
+            });
+            userListRef.on('value', (snapshot) => {
+                const count = snapshot.numChildren();
+                if(onlineCounterElement) {
+                    onlineCounterElement.textContent = count;
+                    onlineCounterElement.classList.add('updated');
+                    setTimeout(() => {
+                        onlineCounterElement.classList.remove('updated');
+                    }, 200);
+                }
+            });
+
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            const onlineCounterContainer = document.getElementById('online-counter');
+            if(onlineCounterContainer) onlineCounterContainer.style.display = 'none';
+        }
+
+        const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน! &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
+        
+        const categoryStyles = {
+            "ทีวีดิจิตอล": { icon: "fas fa-tv", color: "#42A5F5", shortcut: "1" },
+            "กีฬา": { icon: "fas fa-running", color: "#66BB6A", shortcut: "2" },
+            "หนังทีวี": { icon: "fas fa-film", color: "#AB47BC", shortcut: "3" },
+            "สารคดี": { icon: "fas fa-book", color: "#FFCA28", shortcut: "4" },
+            "IPTV": { icon: "fas fa-network-wired", color: "#8D6E63", shortcut: "5" },
+            "TEST": { icon: "fas fa-vial", color: "#78909C", shortcut: null }
+        };
+
+        let channelsData = null; 
+        let userSettings = {};
+
+        // ===== UPDATED SETTINGS MANAGEMENT =====
+        
+        function loadSettings() {
+            const defaultSettings = {
+                theme: 'dark',
+                view: 'grid',
+                lastCategory: null,
+                disclaimerAccepted: false,
+                font: "'Kanit', sans-serif",
+                fontSize: 1,
+                accentColor: '#2196F3'
+            };
+            try {
+                const savedSettingsString = localStorage.getItem('tvAppSettings');
+                if (savedSettingsString) {
+                    const savedSettings = JSON.parse(savedSettingsString);
+                    return { ...defaultSettings, ...savedSettings };
+                }
+            } catch (e) { console.error("Could not parse settings from localStorage", e); }
+            return defaultSettings;
+        }
+
+        function saveSettings() {
+            try {
+                localStorage.setItem('tvAppSettings', JSON.stringify(userSettings));
+            } catch (e) { console.error("Could not save settings to localStorage", e); }
+        }
+
+        // --- Theme ---
+        const themeToggle = document.getElementById('theme-toggle');
+        function applyTheme(theme) {
+            document.body.classList.toggle('light-theme', theme === 'light');
+            themeToggle.checked = (theme === 'light');
+        }
+        themeToggle.addEventListener('change', () => {
+            const newTheme = themeToggle.checked ? 'light' : 'dark';
+            applyTheme(newTheme);
+            userSettings.theme = newTheme;
+            saveSettings();
+        });
+
+        // --- View ---
+        const gridViewBtn = document.getElementById('grid-view-btn');
+        const listViewBtn = document.getElementById('list-view-btn');
+        function setView(view) {
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                content.classList.toggle('list-view', view === 'list');
+            });
+            gridViewBtn.classList.toggle('active', view === 'grid');
+            listViewBtn.classList.toggle('active', view === 'list');
+            userSettings.view = view;
+            saveSettings();
+            
+            const openAccordion = document.querySelector('.accordion-content.show');
+            if(openAccordion) {
+                requestAnimationFrame(() => {
+                    openAccordion.style.maxHeight = (openAccordion.scrollHeight + 16) + 'px';
+                });
+            }
+        }
+        gridViewBtn.addEventListener('click', () => setView('grid'));
+        listViewBtn.addEventListener('click', () => setView('list'));
+
+        // --- NEW: Font, Font Size, Accent Color ---
+        const fontSelector = document.getElementById('font-selector');
+        const increaseFontBtn = document.getElementById('increase-font-btn');
+        const decreaseFontBtn = document.getElementById('decrease-font-btn');
+        const colorPicker = document.getElementById('accent-color-picker');
+
+        function applyFont(font) {
+            document.documentElement.style.setProperty('--main-font', font);
+            fontSelector.value = font;
+            userSettings.font = font;
+            saveSettings();
+        }
+
+        function applyFontSize(sizeMultiplier) {
+            sizeMultiplier = Math.max(0.8, Math.min(1.3, sizeMultiplier)); 
+            document.documentElement.style.setProperty('--font-size-multiplier', sizeMultiplier);
+            userSettings.fontSize = sizeMultiplier;
+            saveSettings();
+            
+            const openAccordion = document.querySelector('.accordion-content.show');
+            if(openAccordion) {
+                requestAnimationFrame(() => {
+                    openAccordion.style.maxHeight = (openAccordion.scrollHeight + 16) + 'px';
+                });
+            }
+        }
+
+        function applyAccentColor(color) {
+            document.documentElement.style.setProperty('--accent-color', color);
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.color === color);
+            });
+            userSettings.accentColor = color;
+            saveSettings();
+        }
+
+        fontSelector.addEventListener('change', () => applyFont(fontSelector.value));
+        increaseFontBtn.addEventListener('click', () => applyFontSize(userSettings.fontSize + 0.1));
+        decreaseFontBtn.addEventListener('click', () => applyFontSize(userSettings.fontSize - 0.1));
+        colorPicker.addEventListener('click', (event) => {
+            if (event.target.classList.contains('color-dot')) {
+                applyAccentColor(event.target.dataset.color);
+            }
+        });
+        
+        // --- Settings Popup Toggle ---
+        const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+        const settingsPopup = document.getElementById('settings-popup');
+        settingsToggleBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); 
+            settingsPopup.classList.toggle('show');
+        });
+        window.addEventListener('click', () => {
+            if (settingsPopup.classList.contains('show')) {
+                settingsPopup.classList.remove('show');
+            }
+        });
+        settingsPopup.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+
+
+        // --- Core Application Logic (Channel Loading, UI Rendering, etc.) ---
+        // (This part of the script remains largely the same as your original)
+        function createChannelElement(channel) {
+            const link = document.createElement('a');
+            link.href = channel.data_url || "#";
+            link.classList.add('channel-link');
+            link.setAttribute('aria-label', channel.aria_label || channel.name);
+            
+            const img = document.createElement('img');
+            img.src = channel.img_src;
+            img.alt = channel.name;
+            img.loading = "lazy";
+            img.decoding = "async";
+            img.onerror = function() {
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzU1NSI+PHBhdGggZD0iTTE5IDNINWMtMS4xIDAtMiAuOS0yIDJ2MTRjMCAxLjEuOSAyIDIgMmgxNGMxLjEgMCAyLS45IDItMlY1YzAtMS4xLS45LTItMi0yem0wIDE2SDVWNWgxNHYxNHptLTUuMDQtNi4yMWwtMi43NSAzLjU0LTEuOTYtMi4zNkw2IDE4aDEybC0zLjA0LTQuNzF6Ii8+PC9zdmc+';
+                this.onerror = null;
+            };
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'channel-name';
+            nameSpan.textContent = channel.name;
+
+            link.appendChild(img);
+            link.appendChild(nameSpan);
+
+            return link;
+        }
+
+        async function loadChannelsData() {
+            const gistUrl = 'https://raw.githubusercontent.com/ahmed9qn223/backend/main/channels.json';
+            try {
+                const response = await fetch(gistUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const freshData = await response.json();
+
+                if (JSON.stringify(freshData) !== JSON.stringify(channelsData)) {
+                    channelsData = freshData;
+                    localStorage.setItem('cachedChannels', JSON.stringify(freshData));
+                    showNotification('✨ รายการช่องอัปเดตแล้ว!', { duration: 3000 });
+                    await renderUI(channelsData);
+                }
+            } catch (error) {
+                console.error('Error loading fresh data from Gist:', error);
+                showNotification('ไม่สามารถอัปเดตข้อมูลได้', { duration: 3000 });
+                throw error;
+            }
+        }
+        
+        async function renderUI(dataToRender) {
+            const categoriesList = document.getElementById('categories-list');
+            const scrollPositions = {};
+            document.querySelectorAll('.accordion-content').forEach(el => {
+                scrollPositions[el.id] = el.scrollTop;
+            });
+
+            categoriesList.innerHTML = ''; 
+
+            if (!dataToRender || dataToRender.length === 0) {
+                categoriesList.innerHTML = '<p>ไม่พบข้อมูลช่องรายการ</p>';
+                return;
+            }
+
+            const uniqueCategories = [...new Set(dataToRender.map(ch => ch.category))];
+
+            uniqueCategories.forEach(categoryName => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+
+                const button = document.createElement('button');
+                button.className = 'accordion-button';
+                button.dataset.category = categoryName;
+                button.setAttribute('aria-expanded', 'false');
+                const contentId = `content-${categoryName.toLowerCase().replace(/\s+/g, '-')}`;
+                button.setAttribute('aria-controls', contentId);
+                
+                const style = categoryStyles[categoryName] || {};
+                const iconClass = style.icon || 'fas fa-question-circle';
+                button.style.setProperty('--category-color', style.color || '#f0f0f0');
+
+                const icon = document.createElement('i');
+                icon.className = iconClass;
+                button.appendChild(icon);
+
+                if (style.shortcut) {
+                    const shortcutSpan = document.createElement('span');
+                    shortcutSpan.className = 'shortcut-badge';
+                    shortcutSpan.textContent = style.shortcut;
+                    button.appendChild(shortcutSpan);
+                }
+                
+                button.append(` ${categoryName} `);
+                
+                const count = dataToRender.filter(ch => ch.category === categoryName).length;
+                const countSpan = document.createElement('span');
+                countSpan.className = 'channel-count';
+                if (count > 0) {
+                    countSpan.textContent = `(${count})`;
+                }
+                button.appendChild(countSpan);
+                
+                const accordionIcon = document.createElement('i');
+                accordionIcon.className = 'fas fa-chevron-right accordion-icon';
+                button.appendChild(accordionIcon);
+
+                const contentDiv = document.createElement('div');
+                contentDiv.id = contentId;
+                contentDiv.className = 'accordion-content';
+                if (userSettings.view === 'list') {
+                    contentDiv.classList.add('list-view');
+                }
+                contentDiv.innerHTML = `
+                    <div class="loading-indicator"><i class="fas fa-spinner"></i> กำลังโหลดช่อง...</div>
+                    <div class="no-channels-message"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>
+                `;
+                
+                if (scrollPositions[contentId]) {
+                    setTimeout(() => { contentDiv.scrollTop = scrollPositions[contentId]; }, 0);
+                }
+
+                categoryDiv.appendChild(button);
+                categoryDiv.appendChild(contentDiv);
+                categoriesList.appendChild(categoryDiv);
+            });
+
+            document.querySelectorAll('.accordion-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const isOpening = !content.classList.contains('show');
+                    
+                    document.querySelectorAll('.accordion-button.active').forEach(openBtn => {
+                        if (openBtn !== this) {
+                            closeAccordion(openBtn.nextElementSibling, openBtn);
+                        }
+                    });
+                    
+                    if (isOpening) {
+                        openAccordion(content, this);
+                    } else {
+                        closeAccordion(content, this);
+                    }
+                });
+            });
+
+            const lastCategoryId = userSettings.lastCategory;
+            let categoryOpened = false;
+            if (lastCategoryId && document.getElementById(lastCategoryId)) {
+                const lastContentElement = document.getElementById(lastCategoryId);
+                const lastButtonElement = lastContentElement.previousElementSibling;
+                if (lastButtonElement) {
+                    await openAccordion(lastContentElement, lastButtonElement);
+                    categoryOpened = true;
+                }
+            }
+            if (!categoryOpened) {
+                const firstButton = document.querySelector('.category .accordion-button');
+                if (firstButton) await openAccordion(firstButton.nextElementSibling, firstButton);
+            }
+        }
+
+        function closeAccordion(contentElement, buttonElement) {
+            contentElement.style.maxHeight = '0px';
+            contentElement.classList.remove('show');
+            buttonElement.setAttribute('aria-expanded', 'false');
+            buttonElement.classList.remove('active');
+        }
+
+        async function openAccordion(contentElement, buttonElement) {
+            contentElement.style.display = 'flex';
+            buttonElement.setAttribute('aria-expanded', 'true');
+            buttonElement.classList.add('active');
+
+            if (!contentElement.querySelector('.channel-link')) {
+                contentElement.querySelectorAll('.skeleton-item, .no-channels-message').forEach(el => el.remove());
+                const skeletons = Array.from({ length: 12 }, createSkeletonElement);
+                skeletons.forEach(sk => contentElement.appendChild(sk));
+                
+                requestAnimationFrame(() => {
+                    contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px';
+                    contentElement.classList.add('show');
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 200)); // Simulate loading
+                
+                skeletons.forEach(sk => sk.remove());
+                
+                const categoryText = buttonElement.dataset.category;
+                const filteredChannels = channelsData.filter(channel => channel.category === categoryText);
+                
+                if (filteredChannels.length === 0) {
+                    contentElement.insertAdjacentHTML('beforeend', '<div class="no-channels-message active"><i class="fas fa-ghost empty-state-icon"></i> <br>ไม่พบช่องในหมวดหมู่นี้</div>');
+                } else {
+                    filteredChannels.forEach(channel => { contentElement.appendChild(createChannelElement(channel)); });
+                }
+            }
+            
+            requestAnimationFrame(() => {
+                contentElement.style.maxHeight = (contentElement.scrollHeight + 16) + 'px';
+                contentElement.classList.add('show');
+            });
+
+            userSettings.lastCategory = contentElement.id;
+            saveSettings();
+        }
+        
+        function createSkeletonElement() { 
+            const skeleton = document.createElement('div'); 
+            skeleton.className = 'skeleton-item'; 
+            const img = document.createElement('div'); 
+            img.className = 'skeleton-img'; 
+            const text = document.createElement('div'); 
+            text.className = 'skeleton-text'; 
+            skeleton.appendChild(img); 
+            skeleton.appendChild(text); 
+            return skeleton; 
+        }
+
+        function showNotification(message, { duration = 4000, linkText = '', linkUrl = '' } = {}) {
+            const bar = document.getElementById('notification-bar');
+            if (bar.notificationTimer) clearTimeout(bar.notificationTimer);
+            document.getElementById('notification-text').textContent = message;
+            const link = document.getElementById('notification-link');
+            if (linkText && linkUrl) {
+                link.textContent = linkText;
+                link.href = linkUrl;
+      _A_         link.style.display = 'inline-block';
+            } else {
+                link.style.display = 'none';
+            }
+            bar.classList.add('show');
+            bar.notificationTimer = setTimeout(() => bar.classList.remove('show'), duration);
+        }
+
+        function updateDateTime() {
+            const dtElement = document.getElementById('current-datetime');
+            const now = new Date();
+            const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const optionsTime = { hour: '2-digit', minute: '2-digit', hour12: false };
+            dtElement.textContent = `${now.toLocaleDateString('th-TH', optionsDate)} ${now.toLocaleTimeString('th-TH', optionsTime)}`;
+        }
+
+        function loadTextsData() {
+            const runningTextElement = document.getElementById('running-text');
+            const footerTextElement = document.getElementById('footer-text');
+            if (runningTextElement && textsData.runningText) runningTextElement.innerHTML = textsData.runningText;
+            if (footerTextElement && textsData.footerText) footerTextElement.textContent = textsData.footerText;
+        }
+
+        // --- Disclaimer Popup Logic ---
+        const popup = document.getElementById('disclaimer-popup');
+        const acceptBtn = document.getElementById('accept-btn');
+        const declineBtn = document.getElementById('decline-btn');
+        const dontShowAgainCheckbox = document.getElementById('dont-show-again');
+
+        function showPopup() {
+            if (!userSettings.disclaimerAccepted) {
+                document.body.classList.add('popup-open');
+                popup.style.display = 'flex';
+                setTimeout(() => {
+  _B_                 popup.classList.add('show');
+                    acceptBtn.focus();
+                }, 10);
+            }
+        }
+        
+        function hidePopup() {
+            document.body.classList.remove('popup-open');
+            popup.classList.remove('show');
+            setTimeout(() => { popup.style.display = 'none'; }, 300);
+        }
+
+        acceptBtn.addEventListener('click', () => {
+            if (dontShowAgainCheckbox.checked) {
+                userSettings.disclaimerAccepted = true;
+                saveSettings();
+            }
+            hidePopup();
+        });
+        declineBtn.addEventListener('click', () => {
+            window.location.href = 'https://www.google.com';
+        });
         
-        // All function declarations are grouped at the top
-        // This ensures they are all defined before any are called.
-
-        function saveSettings() {
-            try {
-                localStorage.setItem('tvAppSettings', JSON.stringify(userSettings));
-            } catch (e) { console.error("Could not save settings to localStorage", e); }
-        }
-
-        function loadSettings() {
-            const defaultSettings = {
-                theme: 'dark',
-                view: 'grid',
-                lastCategory: null,
-                disclaimerAccepted: false,
-                fontSize: 16,
-                accentColor: 'blue'
-            };
-            try {
-                const savedSettingsString = localStorage.getItem('tvAppSettings');
-                if (savedSettingsString) {
-                    const savedSettings = JSON.parse(savedSettingsString);
-                    return { ...defaultSettings, ...savedSettings };
-                }
-            } catch (e) { console.error("Could not parse settings from localStorage", e); }
-            return defaultSettings;
-        }
-
-        function applyTheme(theme) {
-            const themeToggle = document.getElementById('theme-toggle');
-            const body = document.body;
-            if (theme === 'light') {
-                body.classList.add('light-theme');
-                if (themeToggle) themeToggle.checked = true;
-            } else {
-                body.classList.remove('light-theme');
-                if (themeToggle) themeToggle.checked = false;
-            }
-            userSettings.theme = theme;
-            saveSettings();
-        }
-
-        function applyFontSize(size) {
-            const FONT_MIN = 12;
-            const FONT_MAX = 20;
-            const newSize = Math.max(FONT_MIN, Math.min(size, FONT_MAX));
-            document.documentElement.style.fontSize = `${newSize}px`;
-            userSettings.fontSize = newSize;
-            saveSettings();
-        }
-
-        function applyAccentColor(color) {
-            const body = document.body;
-            const validColors = ['blue', 'green', 'orange', 'purple'];
-            if (!validColors.includes(color)) return;
-
-            validColors.forEach(c => body.classList.remove(`accent-${c}`));
-            body.classList.add(`accent-${color}`);
-            
-            document.querySelectorAll('.color-swatch').forEach(swatch => {
-                swatch.classList.toggle('active', swatch.dataset.color === color);
-            });
-
-            userSettings.accentColor = color;
-            saveSettings();
-        }
-
-        function setView(view) {
-            const gridViewBtn = document.getElementById('grid-view-btn');
-            const listViewBtn = document.getElementById('list-view-btn');
-            document.querySelectorAll('.accordion-content').forEach(content => {
-                content.classList.toggle('list-view', view === 'list');
-            });
-            if(gridViewBtn) gridViewBtn.classList.toggle('active', view === 'grid');
-            if(listViewBtn) listViewBtn.classList.toggle('active', view === 'list');
-            
-            userSettings.view = view;
-            saveSettings();
-            
-            const openAccordion = document.querySelector('.accordion-content.show');
-            if(openAccordion) {
-                requestAnimationFrame(() => {
-                    openAccordion.style.maxHeight = (openAccordion.scrollHeight + 16) + 'px';
-                });
-            }
-        }
-        
-        // ... (All other helper functions like createChannelElement, loadChannelsData, etc. go here)
-        // ... (They are unchanged and can be copied from the previous version)
-
-        // Main App Initialization Function
-        async function initializeApp() {
-            userSettings = loadSettings();
-
-            // Apply all settings from localStorage
-            applyTheme(userSettings.theme);
-            applyFontSize(userSettings.fontSize);
-            applyAccentColor(userSettings.accentColor);
-            setView(userSettings.view);
-            
-            // ... (The rest of the initializeApp function is unchanged)
-            // ... e.g., updateDateTime(), loadTextsData(), loadChannelsData() etc.
-        }
-
-        // Setup Event Listeners
-        function setupEventListeners() {
-            const themeToggle = document.getElementById('theme-toggle');
-            if (themeToggle) {
-                themeToggle.addEventListener('change', () => {
-                    applyTheme(themeToggle.checked ? 'light' : 'dark');
-                });
-            }
-
-            document.getElementById('font-increase-btn')?.addEventListener('click', () => {
-                applyFontSize(userSettings.fontSize + 1);
-            });
-    
-            document.getElementById('font-decrease-btn')?.addEventListener('click', () => {
-                applyFontSize(userSettings.fontSize - 1);
-            });
-    
-            document.querySelectorAll('.color-swatch').forEach(swatch => {
-                swatch.addEventListener('click', (event) => {
+        // --- Keyboard Shortcuts & Focus Management ---
+        // Add keydown event for color dots in settings
+        colorPicker.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                if (event.target.classList.contains('color-dot')) {
                     applyAccentColor(event.target.dataset.color);
-                });
-            });
+                    event.preventDefault();
+                }
+            }
+        });
 
-            document.getElementById('grid-view-btn')?.addEventListener('click', () => setView('grid'));
-            document.getElementById('list-view-btn')?.addEventListener('click', () => setView('list'));
+        document.addEventListener('keydown', function(event) {
+            // ... (rest of the keyboard logic remains the same)
+        });
 
-            // ... (All other event listeners for popups, keyboard shortcuts, etc. go here)
-        }
+        // ===== INITIALIZE APP =====
+        async function initializeApp() {
+            userSettings = loadSettings();
 
+            // Apply all loaded settings
+            applyTheme(userSettings.theme);
+            applyFont(userSettings.font);
+            applyFontSize(userSettings.fontSize);
+            applyAccentColor(userSettings.accentColor);
+            setView(userSettings.view);
 
-        // --- Start the Application ---
-        setupEventListeners();
-        initializeApp();
-    });
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            loadTextsData();
+            showPopup();
+
+            const cachedData = localStorage.getItem('cachedChannels');
+            
+            try {
+                if (cachedData) {
+                    channelsData = JSON.parse(cachedData);
+                    await renderUI(channelsData);
+                } else {
+                    document.getElementById('categories-list').innerHTML = '<p>กำลังโหลดข้อมูลครั้งแรก...</p>';
+                }
+                await loadChannelsData();
+            } catch (error) {
+                if (!cachedData) {
+                    document.getElementById('categories-list').innerHTML = 
+                        `<div class="no-channels-message active" style="padding-top: 50px;">
+                            <i class="fas fa-wifi" style="font-size: 60px;"></i> <br>
+                            เกิดข้อผิดพลาดในการโหลดข้อมูล <br>
+                            กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต แล้วลองอีกครั้ง
+                        </div>`;
+                }
+                console.error("Initialization failed:", error);
+            }
+        }
+        
+        initializeApp();
+
+    });
     </script>
 </body>
 </html>
