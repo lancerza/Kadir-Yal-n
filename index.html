@@ -37,8 +37,6 @@
             --border-color: #555;
             --header-bg: rgba(26, 26, 26, 0.7);
             --popup-bg: rgba(44, 44, 44, 0.75);
-            /* --shortcut-bg: rgba(0, 0, 0, 0.4); -- REMOVED */
-            /* --shortcut-border: #777; -- REMOVED */
             --main-font: 'Kanit', sans-serif;
             --font-size-multiplier: 1;
             --accent-color: #2196F3;
@@ -52,8 +50,6 @@
             --border-color: #ccc;
             --header-bg: rgba(244, 244, 244, 0.7);
             --popup-bg: rgba(255, 255, 255, 0.75);
-            /* --shortcut-bg: rgba(0, 0, 0, 0.1); -- REMOVED */
-            /* --shortcut-border: #bbb; -- REMOVED */
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -164,13 +160,31 @@
         .accordion-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); transition: transform 0.3s ease; font-size: 0.8em; }
         .accordion-button.active .accordion-icon { transform: translateY(-50%) rotate(90deg); }
         
-        .accordion-content { max-height: 0; padding: 0; overflow-y: auto; transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out; display: none; opacity: 0; width: 100%; flex-wrap: wrap; justify-content: center; gap: var(--spacing-lg); position: relative; }
+        .accordion-content {
+            max-height: 0;
+            padding: 0;
+            overflow-y: auto;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out, opacity 0.3s ease-out;
+            display: none;
+            opacity: 0;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: var(--spacing-lg);
+            position: relative;
+            /* --- HIDE SCROLLBAR --- */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        /* --- HIDE SCROLLBAR FOR WEBKIT BROWSERS --- */
+        .accordion-content::-webkit-scrollbar {
+            display: none;
+        }
+
         .accordion-content.show { display: flex; opacity: 1; padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
         .accordion-content.show .channel-link { animation: popIn 0.4s ease-out forwards; }
 
         .channel-count { font-size: 0.8em; font-weight: 400; margin-left: var(--spacing-xs); opacity: 0.7; }
-        
-        /* .shortcut-badge REMOVED */
 
         main img { border-radius: var(--border-radius); border: 1px solid var(--border-color); padding: 5px; margin: 0; height: 70px; width: 70px; object-fit: cover; vertical-align: middle; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; cursor: pointer; user-select: none; decoding: async; }
         main img:hover { transform: scale(1.1); border-color: var(--accent-color); box-shadow: 0 0 15px var(--accent-color); }
@@ -418,7 +432,6 @@
 
         const textsData = { "runningText": "✅ แอปดูฟรี ไม่เสียรายเดือน!         👨‍👩‍👧‍👦 ใช้เพื่อความบันเทิงในครอบครัวเท่านั้น         ⚠️ ห้ามนำไปหลอกขายเด็ดขาด!", "footerText": "© OK TV Copyright 2025 - All rights reserved." };
         
-        // REMOVED 'shortcut' property from the styles object
         const categoryStyles = {
             "ทีวีดิจิตอล": { icon: "fas fa-tv", color: "#42A5F5" },
             "กีฬา": { icon: "fas fa-running", color: "#66BB6A" },
@@ -629,8 +642,6 @@
                 const icon = document.createElement('i');
                 icon.className = iconClass;
                 button.appendChild(icon);
-
-                // REMOVED shortcut badge creation logic
                 
                 button.append(` ${categoryName} `);
                 
