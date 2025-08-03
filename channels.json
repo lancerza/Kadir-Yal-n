@@ -104,13 +104,6 @@
   "hls_truehd1": {
     "name": "ทรูสปอร์ตHD1",
     "category": "กีฬา",
-    "url": "https://dolive.thaim3u.com/doodii-live/siamsport-4/playlist.m3u8",
-    "logo": "https://img5.pic.in.th/file/secure-sv1/true1.webp"
-    }
-  },
-  "hls_truehd1": {
-    "name": "ทรูสปอร์ตHD1",
-    "category": "กีฬา",
     "url_parts": [
       "https://dolive.thaim3u.com/",
       "doodii-live/siamsport-4/",
