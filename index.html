@@ -9,39 +9,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav id="category-sidebar" class="category-sidebar"></nav>
-
     <div class="container">
-        <div class="header-container">
-            <div id="datetime-display"></div>
-            <div class="header-buttons">
-                <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="สลับธีม">☀️</button>
-                <button id="refresh-channels-btn" class="theme-toggle-btn" aria-label="รีเฟรชรายการช่อง">🔄</button>
-            </div>
-        </div>
+        <div id="datetime-display"></div>
         
         <div class="main-layout">
             <div class="player-wrapper">
                 <video id="video" autoplay muted playsinline></video>
                 
-                <div id="play-overlay" class="play-overlay hidden">
-                    <button id="big-play-btn" class="big-play-btn" aria-label="เล่นวิดีโอ">
-                        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path></svg>
-                    </button>
-                </div>
-                
                 <div id="loading-indicator" class="loading-indicator hidden">
-                    <div class="spinner"></div>
-                    <p id="loading-message" class="loading-message"></p>
+                    <video id="loading-video" loop muted playsinline src="assets/loading.mp4"></video>
                 </div>
 
                 <div id="error-overlay" class="error-overlay hidden">
-                    <div class="error-content">
-                        <div class="error-icon">⚠️</div>
-                        <h4 id="error-channel-name" class="error-channel-name"></h4>
-                        <p id="error-message"></p>
-                        <button id="retry-btn" class="retry-button">ลองอีกครั้ง</button>
-                    </div>
+                    <div id="error-message"></div>
                 </div>
 
                 <div class="custom-controls">
@@ -59,9 +39,6 @@
                     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" aria-label="แถบปรับระดับเสียง">
                     <button id="fullscreen-btn" class="control-btn" aria-label="สลับโหมดเต็มจอ">
                         <svg class="icon-fullscreen" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"></path></svg>
-                    </button>
-                    <button id="pip-btn" class="control-btn" aria-label="Picture-in-Picture">
-                        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5v-9zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"></path><path d="M8 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5-.5h-5a.5.5 0 0 1-.5-.5v-3z"></path></svg>
                     </button>
                 </div>
             </div>
