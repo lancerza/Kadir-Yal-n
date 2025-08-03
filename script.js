@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const customControls = document.querySelector('.custom-controls');
     const channelButtonsContainer = document.getElementById('channel-buttons-container');
     const loadingIndicator = document.getElementById('loading-indicator');
-    const loadingVideo = document.getElementById('loading-video');
     const errorOverlay = document.getElementById('error-overlay');
     const errorMessage = document.getElementById('error-message');
     const playPauseBtn = document.getElementById('play-pause-btn');
@@ -21,22 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Player Logic ---
     function showLoadingIndicator(isLoading) {
-        if (isLoading) {
-            loadingIndicator.classList.remove('hidden');
-            if (loadingVideo) loadingVideo.play().catch(() => {});
-        } else {
-            loadingIndicator.classList.add('hidden');
-            if (loadingVideo) {
-                loadingVideo.pause();
-                loadingVideo.currentTime = 0;
-            }
-        }
+        loadingIndicator.classList.toggle('hidden', !isLoading);
     }
 
     const playerControls = {
         showError: (message) => {
             if (errorMessage) errorMessage.textContent = message;
             if (errorOverlay) errorOverlay.classList.remove('hidden');
+            showLoadingIndicator(false);
         },
         hideError: () => {
             if (errorOverlay) errorOverlay.classList.add('hidden');
@@ -48,10 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 video.pause();
             }
         },
-        updatePlayButton: () => {
-            playPauseBtn.querySelector('.icon-play').classList.toggle('hidden', !video.paused);
-            playPauseBtn.querySelector('.icon-pause').classList.toggle('hidden', video.paused);
-        },
+        updatePlayButton: () => playPauseBtn.textContent = video.paused ? '▶️' : '⏸️',
         formatTime: (time) => {
             const minutes = Math.floor(time / 60);
             const seconds = Math.floor(time % 60);
@@ -63,11 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         setProgress: () => video.currentTime = (progressBar.value / 100) * video.duration,
         toggleMute: () => video.muted = !video.muted,
-        updateMuteButton: () => {
-            const isMuted = video.muted || video.volume === 0;
-            muteBtn.querySelector('.icon-volume-high').classList.toggle('hidden', isMuted);
-            muteBtn.querySelector('.icon-volume-off').classList.toggle('hidden', !isMuted);
-        },
+        updateMuteButton: () => muteBtn.textContent = video.muted || video.volume === 0 ? '🔇' : '🔊',
         setVolume: () => {
             video.volume = volumeSlider.value;
             video.muted = Number(volumeSlider.value) === 0;
@@ -86,12 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
             playerWrapper.classList.remove('hide-cursor');
             clearTimeout(controlsTimeout);
             controlsTimeout = setTimeout(playerControls.hideControls, 3000);
-        },
-        checkIfLive: () => {
-            const isLive = !isFinite(video.duration);
-            progressBar.style.display = isLive ? 'none' : 'flex';
-            timeDisplay.style.display = isLive ? 'none' : 'block';
-            document.getElementById('live-indicator').classList.toggle('hidden', !isLive);
         }
     };
 
@@ -145,29 +123,36 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     
                     grid.appendChild(tile);
-
-                    setTimeout(() => {
-                        tile.classList.add('visible');
-                    }, index * 50);
                 });
                 channelButtonsContainer.appendChild(grid);
             }
         },
         loadChannel: async (channelId) => {
-            if (!channels[channelId] || currentChannelId === channelId) return;
+            if (!channels[channelId]) return;
+
+            const channel = channels[channelId];
+
+            if (!channel.url || typeof channel.url !== 'string') {
+                playerControls.showError(`URL for "${channel.name}" is missing or invalid.`);
+                return;
+            }
+            
+            if (currentChannelId === channelId) return;
+
             video.classList.remove('visible');
             playerControls.hideError();
             showLoadingIndicator(true);
             await new Promise(resolve => setTimeout(resolve, 300));
             currentChannelId = channelId;
-            const channel = channels[channelId];
-            document.title = `▶️ ${channel.name} - Flow TV`;
+            
+            document.title = `▶️ ${channel.name} - Web TV Player`;
             channelManager.updateActiveButton();
             try {
                 if (hls) hls.loadSource(channel.url);
                 video.play().catch(e => { if (e.name !== 'AbortError') console.error("Error playing video:", e); });
             } catch (error) {
                 console.error("Error loading channel:", error);
+                playerControls.showError(`Could not load channel: ${channel.name}`);
             }
         }
     };
@@ -203,7 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
             playerControls.updatePlayButton();
             playerControls.showControls();
         });
-        video.addEventListener('loadedmetadata', playerControls.checkIfLive);
         progressBar.addEventListener('input', playerControls.setProgress);
         video.addEventListener('timeupdate', playerControls.updateProgress);
         muteBtn.addEventListener('click', playerControls.toggleMute);
@@ -256,11 +240,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.fatal) {
                     switch(data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
-                            playerControls.showError('เกิดข้อผิดพลาดในการโหลดวิดีโอ\n(Network Error)');
+                            playerControls.showError('เกิดข้อผิดพลาดในการโหลดวิดีโอ (Network Error)');
                             hls.startLoad();
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
-                             playerControls.showError('เกิดข้อผิดพลาดในการเล่นวิดีโอ\n(Media Error)');
+                             playerControls.showError('เกิดข้อผิดพลาดในการเล่นวิดีโอ (Media Error)');
                             hls.recoverMediaError();
                             break;
                         default:
