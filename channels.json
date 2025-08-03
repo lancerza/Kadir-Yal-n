@@ -164,12 +164,6 @@
     "logo": "https://img2.pic.in.th/pic/true3.webp",
     "badge": "สำรอง"
   },
-  "hls_truehd4": {
-    "name": "ทรูสปอร์ตHD4",
-    "category": "กีฬา",
-    "url": "https://mooseven.ddns.net:9090/memfs/1c3ad503-2c97-4157-8047-e1538bdc5f36.m3u8",
-    "logo": "https://img2.pic.in.th/pic/true4.webp"
-  },
   "hls_truehd42": {
     "name": "ทรูสปอร์ตHD4",
     "category": "กีฬา",
@@ -178,8 +172,7 @@
       "doodii-live/siamsport-7/",
       "playlist.m3u8"
     ],
-    "logo": "https://img2.pic.in.th/pic/true4.webp",
-    "badge": "สำรอง"
+    "logo": "https://img2.pic.in.th/pic/true4.webp"
   },
   "hls_truehd5": {
     "name": "ทรูสปอร์ตHD5",
