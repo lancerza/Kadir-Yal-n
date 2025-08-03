@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let hls, channels = {}, currentChannelId = null;
     let controlsTimeout;
     let isAudioUnlocked = false;
-    let triedChannelIds = []; // เพิ่มตัวแปรสำหรับระบบ Fallback
+    let triedChannelIds = []; // สำหรับระบบ Fallback
 
     // --- DOM Elements ---
     const body = document.body;
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     logoWrapper.appendChild(logoImg);
                     tile.appendChild(logoWrapper);
 
-                    // (UPDATED) Logic for channel name display
+                    // Logic for channel name display (handles movies)
                     if (category === 'หนัง' && channel.details) {
                         const nameSpan = document.createElement('span');
                         nameSpan.className = 'channel-tile-name movie-title';
@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             setupCategorySidebar(categories);
         },
-        // (UPDATED) Added isFallback parameter for automatic fallback system
+        // Added isFallback parameter for automatic fallback system
         loadChannel: async (channelId, isFallback = false) => {
             // Reset tried channels list if it's a new user selection
             if (!isFallback) {
@@ -266,21 +266,21 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem('webtv_lastChannelId', channelId);
             const channel = channels[channelId];
             
+            // (UPDATED) Flexible URL Handling
             let streamUrl = '';
+
+            // Priority 1: Use url_parts if it exists and is a valid array
             if (channel.url_parts && Array.isArray(channel.url_parts)) {
                 streamUrl = channel.url_parts.join('');
-            } else if (channel.url) {
-                try {
-                    streamUrl = atob(channel.url);
-                } catch (e) {
-                    console.error("Failed to decode Base64 URL:", e);
-                    playerControls.showError("URL ของช่องไม่ถูกต้อง (Invalid Encoding)");
-                    return;
-                }
+            } 
+            // Priority 2: Use a direct url if it exists
+            else if (channel.url && typeof channel.url === 'string') {
+                streamUrl = channel.url; 
             }
 
+            // If no valid URL could be constructed, show an error
             if (!streamUrl) {
-                playerControls.showError("ไม่พบ URL ของช่องนี้");
+                playerControls.showError("ไม่พบ URL ของช่องนี้ (url or url_parts is missing)");
                 return;
             }
 
@@ -472,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
-            // (UPDATED) HLS Error handling with automatic fallback
+            // HLS Error handling with automatic fallback
             hls.on(Hls.Events.ERROR, (event, data) => {
                 if (data.fatal) {
                     if (currentChannelId && !triedChannelIds.includes(currentChannelId)) {
