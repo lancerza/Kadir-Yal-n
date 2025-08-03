@@ -1,4 +1,113 @@
 {
+  "3bb_5hd": {
+    "name": "5HD",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd",
+    "drm": {
+      "type": "clearkey",
+      "keyId": "87db4361f7894655a4656e9c8b935a02",
+      "key": "b025a4b950df41158a87cfc8d6f2ac34"
+    }
+  },
+  "3bb_nbt": {
+    "name": "NBT",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/2/2.mpd",
+    "drm": {
+      "type": "clearkey",
+      "keyId": "ca20a93cf8e3421dafbd5bdb1990081b",
+      "key": "86ae86a7391c481ea93eecdb740f0a14"
+    }
+  },
+  "3bb_tpbs": {
+    "name": "TPBS",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0014.png",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/3/3.mpd",
+    "drm": {
+      "type": "clearkey",
+      "keyId": "4d4426a505f64382a9841155d721cee6",
+      "key": "0f4770219ccb4be5836a7517057e51c3"
+    }
+  },
+  "3bb_one31": {
+    "name": "ONE31",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0012.png",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/31/31.mpd"
+  },
+  "3bb_thairath": {
+    "name": "ไทยรัฐ",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0013_R.png",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/32/32.mpd"
+  },
+  "3bb_3hd": {
+    "name": "3HD",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/LOGO3HD.PNG",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd"
+  },
+  "3bb_amarin": {
+    "name": "Amarintv",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/AmarinTV_NEW512.png",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/34/34.mpd"
+  },
+  "3bb_7hd": {
+    "name": "7HD",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0018.png",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/35/35.mpd"
+  },
+  "3bb_pptv": {
+    "name": "PPTV",
+    "category": "ทีวีดิจิทัล",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/PPTV_2024e.jpg",
+    "url": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/36/36.mpd"
+  },
+  "3bb_asianhit": {
+    "name": "AsianHiT",
+    "category": "ภาพยนตร์",
+    "logo": "https://img2.pic.in.th/pic/AsianHit.png",
+    "url": "https://cco-streamer1.cdn.3bbtv.com:8443/3bb/live/101/101.mpd",
+    "drm": {
+      "type": "clearkey",
+      "keyId": "dac6cbd9d17a451bb76386f52469e0e9",
+      "key": "2e2ac52cadf843459915eaa1a9b95e48"
+    }
+  },
+  "3bb_hbohd": {
+    "name": "HBOHD",
+    "category": "ภาพยนตร์",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/R_0148.png",
+    "url": "https://cco-streamer1.cdn.3bbtv.com:8443/3bb/live/103/103.mpd",
+    "drm": {
+      "type": "clearkey",
+      "keyId": "9c5735afb4fd402580360aed8364469c",
+      "key": "128d55d9ac2b47ad85f86b5d08320179"
+    }
+  },
+  "3bb_cn": {
+    "name": "CN",
+    "category": "การ์ตูน",
+    "logo": "https://58-64-52-73-rewriter.ais-vidnt.com/ais/play/origin/LIVE///channelicon//0171.png",
+    "url": "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/301/301.mpd",
+    "drm": {
+      "type": "clearkey",
+      "keyId": "f140b94c73ab4ef5b96da7f49afb1154",
+      "key": "85e4ef232c6e460f888eb20f651d66e3"
+    }
+  },
+  "hls_truehd1": {
+    "name": "ทรูสปอร์ตHD1",
+    "category": "กีฬา",
+    "url": "https://dolive.thaim3u.com/doodii-live/siamsport-4/playlist.m3u8",
+    "logo": "https://img5.pic.in.th/file/secure-sv1/true1.webp"
+    }
+  },
   "hls_truehd1": {
     "name": "ทรูสปอร์ตHD1",
     "category": "กีฬา",
