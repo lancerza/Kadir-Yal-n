@@ -125,12 +125,11 @@ document.addEventListener("DOMContentLoaded", () => {
             container.innerHTML = '';
             sidebar.innerHTML = '';
             
-            const groupedChannels = Object.values(channels).reduce((acc, channel) => {
+            const groupedChannels = Object.keys(channels).reduce((acc, channelId) => {
+                const channel = { id: channelId, ...channels[channelId] };
                 const category = channel.category || 'ทั่วไป';
                 if (!acc[category]) acc[category] = [];
-                // Add channel id to the object for easier access
-                const channelId = Object.keys(channels).find(key => channels[key] === channel);
-                acc[category].push({ id: channelId, ...channel });
+                acc[category].push(channel);
                 return acc;
             }, {});
 
@@ -220,17 +219,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log("Loading DASH stream...");
                 dashPlayer = dashjs.MediaPlayer().create();
                 
-                // --- (FIXED) Correct DRM configuration for dash.js ---
                 if (channel.drm && channel.drm.type === 'clearkey') {
-    const drmConfig = {
-        'org.w3.clearkey': {
-            'clearkeys': {
-                [channel.drm.keyId]: channel.drm.key
-            }
-        }
-    };
-    dashPlayer.setProtectionData(drmConfig);
-}
+                    const drmConfig = {
+                        'org.w3.clearkey': {
+                            'clearkeys': {
+                                [channel.drm.keyId]: channel.drm.key
+                            }
+                        }
                     };
                     dashPlayer.setProtectionData(drmConfig);
                 }
@@ -238,7 +233,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 dashPlayer.initialize(video, streamUrl, true);
                 dashPlayer.on(dashjs.MediaPlayer.events.ERROR, (e) => {
                     console.error("DashJS Error", e);
-                    playerControls.showError(`Dash.js Error: ${e.error.message}`);
+                    if (e && e.error && e.error.message) {
+                        playerControls.showError(`Dash.js Error: ${e.error.message}`);
+                    }
                 });
 
             } else {
@@ -252,7 +249,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (data.fatal) playerControls.showError("เกิดข้อผิดพลาดในการเล่น HLS");
                     });
                 } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = streamUrl; // สำหรับ Safari และ iOS
+                    video.src = streamUrl;
                 }
             }
 
@@ -262,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- Datetime Logic ---
+    // --- Datetime, Sidebar, and other UI functions ---
     const timeManager = {
         update: () => {
             const now = new Date();
@@ -276,7 +273,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- Sidebar Logic ---
     function setupCategorySidebar(categories) {
         const sidebar = document.getElementById('category-sidebar');
         sidebar.innerHTML = '';
@@ -293,7 +289,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- Event Listeners and Initialization ---
+    async function fetchAndRenderChannels() {
+        showLoadingIndicator(true, 'กำลังโหลดรายการช่อง...');
+        try {
+            const response = await fetch('channels.json', { cache: 'no-store' });
+            if (!response.ok) throw new Error('Network response was not ok');
+            channels = await response.json();
+            channelManager.createChannelButtons();
+        } catch (e) {
+            console.error("Could not fetch channels:", e);
+            playerControls.showError("ไม่สามารถโหลดรายการช่องได้: " + e.message);
+        } finally {
+            showLoadingIndicator(false);
+        }
+    }
+
     async function init() {
         // Setup Event Listeners
         playPauseBtn.addEventListener('click', playerControls.togglePlay);
@@ -318,45 +328,29 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('refresh-channels-btn').addEventListener('click', fetchAndRenderChannels);
 
         // Load theme
-        if (localStorage.getItem('webtv_theme') === 'light') body.classList.add('light-theme');
+        if (localStorage.getItem('webtv_theme') === 'light') {
+            body.classList.add('light-theme');
+            document.getElementById('theme-toggle-btn').textContent = '🌙';
+        }
 
-        // Fetch channel data
         await fetchAndRenderChannels();
-
-        // Setup other UI components
+        
         timeManager.start();
 
-        // Restore player state
         const savedVolume = localStorage.getItem('webtv_volume');
-        video.volume = savedVolume !== null ? savedVolume : 0.5;
+        video.volume = savedVolume !== null ? parseFloat(savedVolume) : 0.5;
         volumeSlider.value = video.volume;
         
         const savedMuted = localStorage.getItem('webtv_muted') === 'true';
         video.muted = savedMuted;
         playerControls.updateMuteButton();
         
-        // Load initial channel
         const lastChannelId = localStorage.getItem('webtv_lastChannelId');
         const firstChannelId = Object.keys(channels)[0];
         if (lastChannelId && channels[lastChannelId]) {
             channelManager.loadChannel(lastChannelId);
         } else if (firstChannelId) {
             channelManager.loadChannel(firstChannelId);
-        }
-    }
-
-    async function fetchAndRenderChannels() {
-        showLoadingIndicator(true, 'กำลังโหลดรายการช่อง...');
-        try {
-            const response = await fetch('channels.json', { cache: 'no-store' });
-            if (!response.ok) throw new Error('Network response was not ok');
-            channels = await response.json();
-            channelManager.createChannelButtons();
-        } catch (e) {
-            console.error("Could not fetch channels:", e);
-            playerControls.showError("ไม่สามารถโหลดรายการช่องได้");
-        } finally {
-            showLoadingIndicator(false);
         }
     }
 
