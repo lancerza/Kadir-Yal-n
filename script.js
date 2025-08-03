@@ -410,7 +410,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         shaka.polyfill.installAll();
         if (shaka.Player.isBrowserSupported()) {
-            player = new shaka.Player(video);
+            player = new shaka.Player();
+            await player.attach(video);
             player.addEventListener('error', event => {
                  console.error('Shaka Player Error:', event.detail);
                  playerControls.showError(`เกิดข้อผิดพลาดจาก Player: ${event.detail.code}`);
