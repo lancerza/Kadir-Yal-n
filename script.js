@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     // --- Global Variables ---
     let player, channels = {}, currentChannelId = null;
+    let controlsTimeout;
 
     // --- Helper Function for DRM Key Conversion ---
     function hexToBase64Url(hexString) {
@@ -45,8 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.channel-tile').forEach(tile => tile.classList.toggle('active', tile.dataset.channelId === currentChannelId));
         },
         createChannelButtons: () => {
-            channelButtonsContainer.innerHTML = '';
-            categorySidebar.innerHTML = '';
+            const container = document.getElementById('channel-buttons-container');
+            const sidebar = document.getElementById('category-sidebar');
+            container.innerHTML = '';
+            sidebar.innerHTML = '';
             
             const groupedChannels = Object.keys(channels).reduce((acc, channelId) => {
                 const channel = { id: channelId, ...channels[channelId] };
@@ -61,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 header.className = 'channel-category-header';
                 header.textContent = category;
                 header.id = `category-${category.replace(/\s+/g, '-')}`;
-                channelButtonsContainer.appendChild(header);
+                container.appendChild(header);
                 
                 const grid = document.createElement('div');
                 grid.className = 'channel-buttons';
@@ -138,23 +141,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 type: streamUrl.includes('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL'
             };
 
-            // --- (FIXED) ตั้งค่า DRM สำหรับ Video.js EME Plugin ---
             if (channel.drm && channel.drm.type === 'clearkey') {
                 source.keySystems = {
                     'org.w3.clearkey': {
-                        // สร้างฟังก์ชัน getLicense ตามที่ปลั๊กอินต้องการ
                         getLicense: function(emeOptions, keyMessage, callback) {
-                            // สร้าง JSON Web Key (JWK)
                             const jwk = {
                                 kty: 'oct',
                                 k: hexToBase64Url(channel.drm.key),
                                 kid: hexToBase64Url(channel.drm.keyId)
                             };
-
-                            // ปลั๊กอินต้องการ response เป็น ArrayBuffer
                             const jwkSet = { keys: [jwk] };
                             const license = new TextEncoder().encode(JSON.stringify(jwkSet));
-                            
                             callback(null, license);
                         }
                     }
@@ -165,7 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // --- Datetime, Sidebar, and other UI functions ---
     const timeManager = {
         update: () => {
             const now = new Date();
@@ -208,12 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function init() {
-        player = videojs('video', {
-            autoplay: true,
-            muted: true,
-            controls: true,
-            html5: { vhs: { overrideNative: true } }
-        });
+        player = videojs('video');
         player.eme();
 
         player.on('error', () => {
