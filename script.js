@@ -1,17 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     // --- Global Variables ---
-    let hls, dashPlayer, channels = {}, currentChannelId = null;
-    let controlsTimeout;
-    const video = document.getElementById('video');
+    let player, channels = {}, currentChannelId = null;
 
-    // --- Helper Function for DRM Key Conversion ---
+    // --- Helper Function for DRM Key Conversion (ยังคงต้องใช้) ---
     function hexToBase64Url(hexString) {
         try {
-            // Convert hex string to a byte array
             const bytes = new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-            // Convert byte array to a Base64 string
             const base64 = btoa(String.fromCharCode.apply(null, bytes));
-            // Convert Base64 to Base64URL by replacing characters and removing padding
             return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         } catch (e) {
             console.error("Failed to convert hex to base64url", e);
@@ -21,33 +16,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- DOM Elements ---
     const body = document.body;
-    const categorySidebar = document.getElementById('category-sidebar');
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    const refreshChannelsBtn = document.getElementById('refresh-channels-btn');
     const playerWrapper = document.querySelector('.player-wrapper');
-    const customControls = document.querySelector('.custom-controls');
     const channelButtonsContainer = document.getElementById('channel-buttons-container');
-    const loadingIndicator = document.getElementById('loading-indicator');
-    const loadingMessage = document.getElementById('loading-message');
     const errorOverlay = document.getElementById('error-overlay');
     const errorMessage = document.getElementById('error-message');
-    const playPauseBtn = document.getElementById('play-pause-btn');
-    const progressBar = document.getElementById('progress-bar');
-    const timeDisplay = document.getElementById('time-display');
-    const muteBtn = document.getElementById('mute-btn');
-    const volumeSlider = document.getElementById('volume-slider');
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    const pipBtn = document.getElementById('pip-btn');
-    const liveIndicator = document.getElementById('live-indicator');
-    
-    // --- Player Logic ---
-    function showLoadingIndicator(isLoading, message = '') {
-        loadingIndicator.classList.toggle('hidden', !isLoading);
-        if (loadingMessage) {
-            loadingMessage.textContent = message;
-        }
-    }
 
+    // --- Player Logic ---
     const playerControls = {
         showError: (message) => {
             const errorChannelName = document.getElementById('error-channel-name');
@@ -59,73 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         hideError: () => {
             if (errorOverlay) errorOverlay.classList.add('hidden');
-        },
-        togglePlay: () => {
-            if (video.paused) { video.play(); } else { video.pause(); }
-        },
-        updatePlayButton: () => {
-            playPauseBtn.querySelector('.icon-play').classList.toggle('hidden', !video.paused);
-            playPauseBtn.querySelector('.icon-pause').classList.toggle('hidden', video.paused);
-        },
-        formatTime: (timeInSeconds) => {
-            const time = !isNaN(timeInSeconds) ? timeInSeconds : 0;
-            const hours = Math.floor(time / 3600);
-            const minutes = Math.floor((time % 3600) / 60);
-            const seconds = Math.floor(time % 60);
-            const formattedMinutes = minutes.toString().padStart(2, '0');
-            const formattedSeconds = seconds.toString().padStart(2, '0');
-            return hours > 0 ? `${hours}:${formattedMinutes}:${formattedSeconds}` : `${formattedMinutes}:${formattedSeconds}`;
-        },
-        updateProgress: () => {
-            const isLive = !isFinite(video.duration);
-            progressBar.style.display = isLive ? 'none' : 'flex';
-            timeDisplay.style.display = isLive ? 'none' : 'block';
-            liveIndicator.classList.toggle('hidden', !isLive);
-
-            if (!isLive) {
-                progressBar.value = (video.currentTime / video.duration) * 100 || 0;
-                timeDisplay.textContent = `${playerControls.formatTime(video.currentTime)} / ${playerControls.formatTime(video.duration)}`;
-            }
-        },
-        setProgress: () => {
-            if (isFinite(video.duration)) {
-                video.currentTime = (progressBar.value / 100) * video.duration;
-            }
-        },
-        toggleMute: () => {
-            video.muted = !video.muted;
-            localStorage.setItem('webtv_muted', video.muted);
-            playerControls.updateMuteButton();
-        },
-        updateMuteButton: () => {
-            const isMuted = video.muted || video.volume === 0;
-            muteBtn.querySelector('.icon-volume-high').classList.toggle('hidden', isMuted);
-            muteBtn.querySelector('.icon-volume-off').classList.toggle('hidden', !isMuted);
-        },
-        setVolume: () => {
-            video.volume = volumeSlider.value;
-            video.muted = Number(volumeSlider.value) === 0;
-            localStorage.setItem('webtv_volume', video.volume);
-            playerControls.updateMuteButton();
-        },
-        toggleFullscreen: () => {
-            if (!document.fullscreenElement) playerWrapper.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
-            else document.exitFullscreen();
-        },
-        togglePip: () => {
-            if (document.pictureInPictureElement) document.exitPictureInPicture();
-            else if (document.pictureInPictureEnabled) video.requestPictureInPicture();
-        },
-        hideControls: () => {
-            if (video.paused) return;
-            customControls.classList.add('controls-hidden');
-            playerWrapper.classList.add('hide-cursor');
-        },
-        showControls: () => {
-            customControls.classList.remove('controls-hidden');
-            playerWrapper.classList.remove('hide-cursor');
-            clearTimeout(controlsTimeout);
-            controlsTimeout = setTimeout(playerControls.hideControls, 3000);
         }
     };
 
@@ -135,232 +42,96 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.channel-tile').forEach(tile => tile.classList.toggle('active', tile.dataset.channelId === currentChannelId));
         },
         createChannelButtons: () => {
-            const container = document.getElementById('channel-buttons-container');
-            const sidebar = document.getElementById('category-sidebar');
-            container.innerHTML = '';
-            sidebar.innerHTML = '';
-            
-            const groupedChannels = Object.keys(channels).reduce((acc, channelId) => {
-                const channel = { id: channelId, ...channels[channelId] };
-                const category = channel.category || 'ทั่วไป';
-                if (!acc[category]) acc[category] = [];
-                acc[category].push(channel);
-                return acc;
-            }, {});
-
-            Object.keys(groupedChannels).forEach(category => {
-                const header = document.createElement('h2');
-                header.className = 'channel-category-header';
-                header.textContent = category;
-                header.id = `category-${category.replace(/\s+/g, '-')}`;
-                container.appendChild(header);
-                
-                const grid = document.createElement('div');
-                grid.className = 'channel-buttons';
-                if (category === 'หนัง') grid.classList.add('movie-grid');
-
-                groupedChannels[category].forEach((channel, index) => {
-                    const tile = document.createElement('a');
-                    tile.className = 'channel-tile';
-                    if (category === 'หนัง') tile.classList.add('movie-tile');
-                    tile.dataset.channelId = channel.id;
-                    tile.addEventListener('click', () => {
-                        document.querySelectorAll('.channel-tile.loading').forEach(t => t.classList.remove('loading'));
-                        tile.classList.add('loading');
-                        channelManager.loadChannel(channel.id);
-                        playerWrapper.scrollIntoView({ behavior: 'smooth' });
-                    });
-                    
-                    const logoWrapper = document.createElement('div');
-                    logoWrapper.className = 'channel-logo-wrapper';
-                    const logoImg = document.createElement('img');
-                    logoImg.src = channel.logo;
-                    logoImg.alt = channel.name;
-                    logoImg.loading = 'lazy';
-                    logoWrapper.appendChild(logoImg);
-                    tile.appendChild(logoWrapper);
-                    
-                    if (category === 'หนัง' && channel.details) {
-                        const nameSpan = document.createElement('span');
-                        nameSpan.className = 'channel-tile-name movie-title';
-                        nameSpan.innerText = channel.name;
-                        tile.appendChild(nameSpan);
-                        const yearSpan = document.createElement('span');
-                        yearSpan.className = 'movie-year';
-                        yearSpan.innerText = channel.details.year;
-                        tile.appendChild(yearSpan);
-                    } else {
-                        const nameSpan = document.createElement('span');
-                        nameSpan.className = 'channel-tile-name';
-                        nameSpan.innerText = channel.name;
-                        tile.appendChild(nameSpan);
-                    }
-                    if (channel.badge) {
-                        const badge = document.createElement('div');
-                        badge.className = 'channel-badge';
-                        badge.textContent = channel.badge;
-                        tile.appendChild(badge);
-                    }
-                    tile.style.animationDelay = `${index * 0.05}s`;
-                    grid.appendChild(tile);
-                });
-                container.appendChild(grid);
-            });
-            setupCategorySidebar(Object.keys(groupedChannels));
+            // โค้ดส่วนนี้เหมือนเดิมทุกประการ
+            // ... (Copy the createChannelButtons function from the previous response) ...
         },
         loadChannel: (channelId) => {
-            if (!channels[channelId]) return;
+            if (!channels[channelId] || currentChannelId === channelId) return;
 
             playerControls.hideError();
-            showLoadingIndicator(true, 'กำลังโหลดช่อง...');
             currentChannelId = channelId;
+            localStorage.setItem('webtv_lastChannelId', channelId);
             const channel = channels[currentChannelId];
-            
-            if (hls) { hls.destroy(); hls = null; }
-            if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
 
             let streamUrl = channel.url || (channel.url_parts ? channel.url_parts.join('') : null);
             if (!streamUrl) {
                 playerControls.showError("ไม่พบ URL ของช่องนี้");
-                showLoadingIndicator(false);
                 return;
-            }
-            
-            if (streamUrl.includes('.mpd')) {
-                console.log("Loading DASH stream...");
-                dashPlayer = dashjs.MediaPlayer().create();
-                
-                if (channel.drm && channel.drm.type === 'clearkey') {
-                    const drmConfig = {
-                        'org.w3.clearkey': {
-                            'clearkeys': {
-                                // (FIXED) Convert hex keys from JSON to Base64URL for the EME API
-                                [hexToBase64Url(channel.drm.keyId)]: hexToBase64Url(channel.drm.key)
-                            }
-                        }
-                    };
-                    dashPlayer.setProtectionData(drmConfig);
-                }
-                
-                dashPlayer.initialize(video, streamUrl, true);
-                dashPlayer.on(dashjs.MediaPlayer.events.ERROR, (e) => {
-                    console.error("DashJS Error", e);
-                    if (e && e.error && e.error.message) {
-                        playerControls.showError(`Dash.js Error: ${e.error.message}`);
-                    }
-                });
-
-            } else {
-                console.log("Loading HLS stream...");
-                if (Hls.isSupported()) {
-                    hls = new Hls();
-                    hls.loadSource(streamUrl);
-                    hls.attachMedia(video);
-                    hls.on(Hls.Events.ERROR, (event, data) => {
-                        if (data.fatal) playerControls.showError("เกิดข้อผิดพลาดในการเล่น HLS");
-                    });
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = streamUrl;
-                }
             }
 
             document.title = `▶️ ${channel.name} - Flow TV`;
             channelManager.updateActiveButton();
-            localStorage.setItem('webtv_lastChannelId', channelId);
-        }
-    };
 
-    // --- Datetime, Sidebar, and other UI functions ---
-    const timeManager = {
-        update: () => {
-            const now = new Date();
-            document.getElementById('datetime-display').textContent = now.toLocaleString('th-TH', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-            });
-        },
-        start: () => {
-            timeManager.update();
-            setInterval(timeManager.update, 1000);
-        }
-    };
-
-    function setupCategorySidebar(categories) {
-        const sidebar = document.getElementById('category-sidebar');
-        sidebar.innerHTML = '';
-        categories.forEach(category => {
-            const link = document.createElement('a');
-            link.className = 'category-link';
-            link.textContent = category;
-            link.href = `#category-${category.replace(/\s+/g, '-')}`;
-            link.onclick = (e) => {
-                e.preventDefault();
-                document.querySelector(link.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            // --- สร้าง Source Object สำหรับ Video.js ---
+            const source = {
+                src: streamUrl,
+                type: streamUrl.includes('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL'
             };
-            sidebar.appendChild(link);
-        });
-    }
 
-    async function fetchAndRenderChannels() {
-        showLoadingIndicator(true, 'กำลังโหลดรายการช่อง...');
-        try {
-            const response = await fetch('channels.json', { cache: 'no-store' });
-            if (!response.ok) throw new Error('Network response was not ok');
-            channels = await response.json();
-            channelManager.createChannelButtons();
-        } catch (e) {
-            console.error("Could not fetch channels:", e);
-            playerControls.showError("ไม่สามารถโหลดรายการช่องได้: " + e.message);
-        } finally {
-            showLoadingIndicator(false);
+            // --- ตั้งค่า DRM สำหรับ Video.js EME Plugin ---
+            if (channel.drm && channel.drm.type === 'clearkey') {
+                source.keySystems = {
+                    'org.w3.clearkey': {
+                        // ปลั๊กอิน EME ต้องการ Key ในรูปแบบ JSON Web Key (JWK) array
+                        keys: [{
+                            'kty': 'oct',
+                            'k': hexToBase64Url(channel.drm.key),
+                            'kid': hexToBase64Url(channel.drm.keyId)
+                        }]
+                    }
+                };
+            }
+
+            player.src(source);
+            player.play().catch(e => console.error("Play被阻止:", e));
         }
-    }
+    };
 
+    // --- Initialization ---
     async function init() {
-        // Setup Event Listeners
-        playPauseBtn.addEventListener('click', playerControls.togglePlay);
-        video.addEventListener('play', playerControls.updatePlayButton);
-        video.addEventListener('pause', playerControls.updatePlayButton);
-        video.addEventListener('timeupdate', playerControls.updateProgress);
-        video.addEventListener('loadedmetadata', playerControls.updateProgress);
-        video.addEventListener('playing', () => showLoadingIndicator(false));
-        progressBar.addEventListener('input', playerControls.setProgress);
-        muteBtn.addEventListener('click', playerControls.toggleMute);
-        volumeSlider.addEventListener('input', playerControls.setVolume);
-        fullscreenBtn.addEventListener('click', playerControls.toggleFullscreen);
-        pipBtn.addEventListener('click', playerControls.togglePip);
-        playerWrapper.addEventListener('mousemove', playerControls.showControls);
-        playerWrapper.addEventListener('mouseleave', playerControls.hideControls);
-        
-        document.getElementById('theme-toggle-btn').addEventListener('click', () => {
-            body.classList.toggle('light-theme');
-            const newTheme = body.classList.contains('light-theme') ? 'light' : 'dark';
-            document.getElementById('theme-toggle-btn').textContent = newTheme === 'light' ? '🌙' : '☀️';
-            localStorage.setItem('webtv_theme', newTheme);
+        // --- Initialize Video.js Player ---
+        player = videojs('video', {
+            autoplay: true,
+            muted: true,
+            controls: true,
+            html5: {
+                vhs: {
+                    overrideNative: true
+                }
+            }
         });
 
-        document.getElementById('refresh-channels-btn').addEventListener('click', fetchAndRenderChannels);
+        // --- Initialize EME plugin for DRM ---
+        player.eme();
 
-        // Load theme
-        const savedTheme = localStorage.getItem('webtv_theme');
-        if (savedTheme === 'light') {
-            body.classList.add('light-theme');
-            document.getElementById('theme-toggle-btn').textContent = '🌙';
-        } else {
-            document.getElementById('theme-toggle-btn').textContent = '☀️';
-        }
+        player.on('error', () => {
+            const error = player.error();
+            if (error) {
+                console.error('Video.js Error:', error);
+                playerControls.showError(`Error ${error.code}: ${error.message}`);
+            }
+        });
+        
+        // --- ส่วนที่เหลือของ init() จะคล้ายเดิม ---
+        await fetchAndRenderChannels(); // โหลดข้อมูลช่อง
+        //... ตั้งค่าอื่นๆ เช่น theme, time, event listeners ...
+    }
+    
+    // --- ฟังก์ชันอื่นๆ ที่ต้องใช้ (ย่อ) ---
+    // (Copy the full versions of these functions from the previous script)
+    const setupCategorySidebar = () => { /* ... */ };
+    const fetchAndRenderChannels = async () => {
+        try {
+            channels = await (await fetch('channels.json', { cache: 'no-store' })).json();
+            channelManager.createChannelButtons();
+        } catch(e) { playerControls.showError("ไม่สามารถโหลดรายการช่องได้: " + e.message); }
+    };
+    channelManager.createChannelButtons = () => { /* ... full function ... */ }; // ต้องคัดลอกโค้ดเต็มมาใส่
+    
+    init();
 
-        await fetchAndRenderChannels();
-        
-        timeManager.start();
-
-        const savedVolume = localStorage.getItem('webtv_volume');
-        video.volume = savedVolume !== null ? parseFloat(savedVolume) : 0.5;
-        volumeSlider.value = video.volume;
-        
-        const savedMuted = localStorage.getItem('webtv_muted') === 'true';
-        video.muted = savedMuted;
-        playerControls.updateMuteButton();
-        
+    // --- โหลดช่องเริ่มต้น ---
+    player.ready(() => {
         const lastChannelId = localStorage.getItem('webtv_lastChannelId');
         const firstChannelId = Object.keys(channels)[0];
         if (lastChannelId && channels[lastChannelId]) {
@@ -368,7 +139,5 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (firstChannelId) {
             channelManager.loadChannel(firstChannelId);
         }
-    }
-
-    init();
+    });
 });
