@@ -4,6 +4,21 @@ document.addEventListener("DOMContentLoaded", () => {
     let controlsTimeout;
     const video = document.getElementById('video');
 
+    // --- Helper Function for DRM Key Conversion ---
+    function hexToBase64Url(hexString) {
+        try {
+            // Convert hex string to a byte array
+            const bytes = new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+            // Convert byte array to a Base64 string
+            const base64 = btoa(String.fromCharCode.apply(null, bytes));
+            // Convert Base64 to Base64URL by replacing characters and removing padding
+            return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        } catch (e) {
+            console.error("Failed to convert hex to base64url", e);
+            return "";
+        }
+    }
+
     // --- DOM Elements ---
     const body = document.body;
     const categorySidebar = document.getElementById('category-sidebar');
@@ -215,19 +230,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log("Loading DASH stream...");
                 dashPlayer = dashjs.MediaPlayer().create();
                 
-                // --- NEW APPROACH: Configure DRM before initialization ---
                 if (channel.drm && channel.drm.type === 'clearkey') {
-                    dashPlayer.updateSettings({
-                        'streaming': {
-                            'protection': {
-                                'org.w3.clearkey': {
-                                    'clearkeys': {
-                                        [channel.drm.keyId]: channel.drm.key
-                                    }
-                                }
+                    const drmConfig = {
+                        'org.w3.clearkey': {
+                            'clearkeys': {
+                                // (FIXED) Convert hex keys from JSON to Base64URL for the EME API
+                                [hexToBase64Url(channel.drm.keyId)]: hexToBase64Url(channel.drm.key)
                             }
                         }
-                    });
+                    };
+                    dashPlayer.setProtectionData(drmConfig);
                 }
                 
                 dashPlayer.initialize(video, streamUrl, true);
