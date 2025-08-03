@@ -7,6 +7,7 @@
     <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.7.12/dist/shaka-player.compiled.js"></script>
 </head>
 <body>
     <nav id="category-sidebar" class="category-sidebar"></nav>
@@ -22,7 +23,7 @@
         
         <div class="main-layout">
             <div class="player-wrapper">
-                <video id="video" autoplay muted playsinline></video>
+                <video id="video" autoplay muted playsinline style="width:100%; height:100%;"></video>
                 
                 <div id="play-overlay" class="play-overlay hidden">
                     <button id="big-play-btn" class="big-play-btn" aria-label="เล่นวิดีโอ">
@@ -69,8 +70,7 @@
             <div id="channel-buttons-container"></div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
     <script src="script.js" defer></script>
 </body>
 </html>
