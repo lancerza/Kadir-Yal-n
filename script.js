@@ -180,9 +180,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 const grid = document.createElement('div');
                 grid.className = 'channel-buttons';
                 
+                if (category === 'หนัง') {
+                    grid.classList.add('movie-grid');
+                }
+
                 groupedChannels[category].forEach((channel, index) => {
                     const tile = document.createElement('a');
                     tile.className = 'channel-tile';
+                     if (category === 'หนัง') {
+                        tile.classList.add('movie-tile');
+                    }
 
                     tile.dataset.channelId = channel.id;
                     tile.addEventListener('click', () => {
@@ -202,11 +209,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     logoWrapper.appendChild(logoImg);
                     tile.appendChild(logoWrapper);
-
-                    const nameSpan = document.createElement('span');
-                    nameSpan.className = 'channel-tile-name';
-                    nameSpan.innerText = channel.name;
-                    tile.appendChild(nameSpan);
+                    
+                    if (category === 'หนัง' && channel.details) {
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'channel-tile-name movie-title';
+                        nameSpan.innerText = channel.name;
+                        tile.appendChild(nameSpan);
+                        
+                        const yearSpan = document.createElement('span');
+                        yearSpan.className = 'movie-year';
+                        yearSpan.innerText = channel.details.year;
+                        tile.appendChild(yearSpan);
+                    } else {
+                        const nameSpan = document.createElement('span');
+                        nameSpan.className = 'channel-tile-name';
+                        nameSpan.innerText = channel.name;
+                        tile.appendChild(nameSpan);
+                    }
 
                     if (channel.badge) {
                         const badge = document.createElement('div');
@@ -232,7 +251,15 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem('webtv_lastChannelId', channelId);
             const channel = channels[channelId];
             
-            if (!channel.url) {
+            // 1. หา Stream URL ที่ถูกต้อง (จาก url หรือ url_parts)
+            let streamUrl = '';
+            if (channel.url && typeof channel.url === 'string') {
+                streamUrl = channel.url;
+            } else if (channel.url_parts && Array.isArray(channel.url_parts)) {
+                streamUrl = channel.url_parts.join('');
+            }
+            
+            if (!streamUrl) {
                 playerControls.showError("ไม่พบ URL ของช่องนี้");
                 showLoadingIndicator(false);
                 return;
@@ -242,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
             channelManager.updateActiveButton();
 
             try {
-                // --- ส่วนที่แก้ไขเพื่อรองรับ Clear Key DRM ---
+                // 2. ตั้งค่า DRM ตามประเภทช่อง
                 if (channel.drm && channel.drm.type === 'clearkey') {
                     console.log("Configuring Clear Key DRM...");
                     player.configure({
@@ -262,13 +289,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 }
                 
-                await player.load(channel.url);
+                // 3. โหลดวิดีโอด้วย Shaka Player
+                await player.load(streamUrl);
                 showLoadingIndicator(false);
                 video.classList.add('visible');
                 playerControls.checkIfLive();
             } catch (error) {
                 console.error('Error loading video:', error);
-                playerControls.showError(`ไม่สามารถเล่นช่องนี้ได้: ${error.code} - ${error.message}`);
+                playerControls.showError(`ไม่สามารถเล่นช่องนี้ได้: ${error.code}`);
                 showLoadingIndicator(false);
             }
         }
@@ -390,6 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function fetchAndRenderChannels() {
         console.log("Fetching channel list...");
         try {
+            // ใช้ไฟล์ JSON ที่คุณให้มา
             const response = await fetch('channels.json', { cache: 'no-store' });
             if (!response.ok) throw new Error('Network response was not ok');
             channels = await response.json();
@@ -412,6 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (shaka.Player.isBrowserSupported()) {
             player = new shaka.Player();
             await player.attach(video);
+            
             player.addEventListener('error', event => {
                  console.error('Shaka Player Error:', event.detail);
                  playerControls.showError(`เกิดข้อผิดพลาดจาก Player: ${event.detail.code}`);
