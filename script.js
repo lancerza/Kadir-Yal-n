@@ -222,12 +222,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 // --- (FIXED) Correct DRM configuration for dash.js ---
                 if (channel.drm && channel.drm.type === 'clearkey') {
-                    const keySystem = 'org.w3.clearkey';
-                    const drmConfig = {
-                        [keySystem]: {
-                            "kids": [channel.drm.keyId],
-                            "keys": [channel.drm.key]
-                        }
+    const drmConfig = {
+        'org.w3.clearkey': {
+            'clearkeys': {
+                [channel.drm.keyId]: channel.drm.key
+            }
+        }
+    };
+    dashPlayer.setProtectionData(drmConfig);
+}
                     };
                     dashPlayer.setProtectionData(drmConfig);
                 }
