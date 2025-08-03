@@ -242,7 +242,8 @@ document.addEventListener("DOMContentLoaded", () => {
             currentChannelId = channelId;
             localStorage.setItem('webtv_lastChannelId', channelId);
             const channel = channels[channelId];
-            
+
+            // --- ส่วนที่แก้ไข ---
             let streamUrl = '';
             if (channel.url_parts && Array.isArray(channel.url_parts)) {
                 streamUrl = channel.url_parts.join('');
@@ -250,9 +251,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     streamUrl = atob(channel.url);
                 } catch (e) {
-                    console.error("Failed to decode Base64 URL:", e);
-                    playerControls.showError("URL ของช่องไม่ถูกต้อง (Invalid Encoding)");
-                    return;
+                    console.error("Failed to decode Base64 URL, assuming it's a plain URL:", channel.url);
+                    streamUrl = channel.url; // ถ้าถอดรหัสไม่ได้ ให้ใช้เป็น URL ตรงๆ
                 }
             }
 
@@ -260,6 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 playerControls.showError("ไม่พบ URL ของช่องนี้");
                 return;
             }
+            // --- สิ้นสุดการแก้ไข ---
 
             document.title = `▶️ ${channel.name} - Flow TV`;
             channelManager.updateActiveButton();
