@@ -201,11 +201,9 @@ document.addEventListener("DOMContentLoaded", () => {
             currentChannelId = channelId;
             const channel = channels[currentChannelId];
             
-            // 1. ทำลาย instance ของ player เก่า
             if (hls) { hls.destroy(); hls = null; }
             if (dashPlayer) { dashPlayer.reset(); dashPlayer = null; }
 
-            // 2. หา Stream URL
             let streamUrl = channel.url || (channel.url_parts ? channel.url_parts.join('') : null);
             if (!streamUrl) {
                 playerControls.showError("ไม่พบ URL ของช่องนี้");
@@ -213,21 +211,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
             
-            // 3. ตรวจสอบประเภทและเรียกใช้ Player ที่ถูกต้อง
             if (streamUrl.includes('.mpd')) {
-                // --- ใช้ dash.js ---
                 console.log("Loading DASH stream...");
                 dashPlayer = dashjs.MediaPlayer().create();
                 
+                // --- NEW APPROACH: Configure DRM before initialization ---
                 if (channel.drm && channel.drm.type === 'clearkey') {
-                    const drmConfig = {
-                        'org.w3.clearkey': {
-                            'clearkeys': {
-                                [channel.drm.keyId]: channel.drm.key
+                    dashPlayer.updateSettings({
+                        'streaming': {
+                            'protection': {
+                                'org.w3.clearkey': {
+                                    'clearkeys': {
+                                        [channel.drm.keyId]: channel.drm.key
+                                    }
+                                }
                             }
                         }
-                    };
-                    dashPlayer.setProtectionData(drmConfig);
+                    });
                 }
                 
                 dashPlayer.initialize(video, streamUrl, true);
@@ -239,7 +239,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
             } else {
-                // --- ใช้ hls.js ---
                 console.log("Loading HLS stream...");
                 if (Hls.isSupported()) {
                     hls = new Hls();
@@ -322,15 +321,20 @@ document.addEventListener("DOMContentLoaded", () => {
         
         document.getElementById('theme-toggle-btn').addEventListener('click', () => {
             body.classList.toggle('light-theme');
-            localStorage.setItem('webtv_theme', body.classList.contains('light-theme') ? 'light' : 'dark');
+            const newTheme = body.classList.contains('light-theme') ? 'light' : 'dark';
+            document.getElementById('theme-toggle-btn').textContent = newTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('webtv_theme', newTheme);
         });
 
         document.getElementById('refresh-channels-btn').addEventListener('click', fetchAndRenderChannels);
 
         // Load theme
-        if (localStorage.getItem('webtv_theme') === 'light') {
+        const savedTheme = localStorage.getItem('webtv_theme');
+        if (savedTheme === 'light') {
             body.classList.add('light-theme');
             document.getElementById('theme-toggle-btn').textContent = '🌙';
+        } else {
+            document.getElementById('theme-toggle-btn').textContent = '☀️';
         }
 
         await fetchAndRenderChannels();
