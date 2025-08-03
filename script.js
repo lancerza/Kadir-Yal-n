@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     tile.style.animationDelay = `${index * 0.05}s`;
                     grid.appendChild(tile);
                 });
-                channelButtonsContainer.appendChild(grid);
+                container.appendChild(grid);
             });
             setupCategorySidebar(Object.keys(groupedChannels));
         },
@@ -138,14 +138,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 type: streamUrl.includes('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL'
             };
 
+            // --- (FIXED) ตั้งค่า DRM สำหรับ Video.js EME Plugin ---
             if (channel.drm && channel.drm.type === 'clearkey') {
                 source.keySystems = {
                     'org.w3.clearkey': {
-                        keys: [{
-                            'kty': 'oct',
-                            'k': hexToBase64Url(channel.drm.key),
-                            'kid': hexToBase64Url(channel.drm.keyId)
-                        }]
+                        // สร้างฟังก์ชัน getLicense ตามที่ปลั๊กอินต้องการ
+                        getLicense: function(emeOptions, keyMessage, callback) {
+                            // สร้าง JSON Web Key (JWK)
+                            const jwk = {
+                                kty: 'oct',
+                                k: hexToBase64Url(channel.drm.key),
+                                kid: hexToBase64Url(channel.drm.keyId)
+                            };
+
+                            // ปลั๊กอินต้องการ response เป็น ArrayBuffer
+                            const jwkSet = { keys: [jwk] };
+                            const license = new TextEncoder().encode(JSON.stringify(jwkSet));
+                            
+                            callback(null, license);
+                        }
                     }
                 };
             }
@@ -154,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // --- Datetime, Sidebar, and other UI functions ---
     const timeManager = {
         update: () => {
             const now = new Date();
@@ -196,7 +208,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function init() {
-        player = videojs('video');
+        player = videojs('video', {
+            autoplay: true,
+            muted: true,
+            controls: true,
+            html5: { vhs: { overrideNative: true } }
+        });
         player.eme();
 
         player.on('error', () => {
