@@ -38,7 +38,7 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* (ADDED) Main App Layout for Desktop */
+/* --- Main App Layout for Desktop --- */
 .app-layout {
     display: flex;
     gap: 20px;
@@ -51,7 +51,7 @@ body {
 
 .container { 
     width: 100%;
-    flex-grow: 1; /* ให้ container ขยายเต็มพื้นที่ที่เหลือ */
+    flex-grow: 1;
 }
 
 /* --- ซ่อน Scrollbar --- */
@@ -63,23 +63,21 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-/* --- Category Sidebar Styles (MODIFIED) --- */
+/* --- Category Sidebar Styles (Balanced Padding) --- */
 .category-sidebar {
-    /* --- Desktop Styles --- */
     position: sticky;
-    top: 20px;
+    top: 30px;
     align-self: flex-start;
-    flex-shrink: 0; /* ป้องกันไม่ให้ sidebar หด */
-    width: 180px;
-
+    flex-shrink: 0;
+    width: 200px;
     background-color: rgba(30, 30, 30, 0.5);
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
     border-radius: 20px;
-    padding: 10px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 10px;
     z-index: 100;
     transition: background-color 0.3s;
 }
@@ -91,9 +89,9 @@ body::-webkit-scrollbar {
 .category-link {
     color: var(--text-color);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
-    padding: 8px 15px;
+    padding: 10px 18px;
     border-radius: 15px;
     transition: background-color 0.2s, color 0.2s;
     white-space: nowrap;
@@ -118,7 +116,7 @@ body::-webkit-scrollbar {
     align-items: center;
     gap: 15px;
     padding-bottom: 20px;
-    position: relative; /* (ADDED) For positioning settings panel */
+    position: relative;
 }
 .theme-toggle-btn {
     background: var(--card-gradient);
@@ -142,7 +140,7 @@ body::-webkit-scrollbar {
     animation: spin 1s ease-in-out;
 }
 
-/* (ADDED) Settings Panel Styles */
+/* Settings Panel Styles */
 .settings-panel {
     position: absolute;
     top: 55px;
@@ -315,7 +313,6 @@ input[type="range"]::-moz-range-thumb { border: none; background-color: var(--pr
 
 /* --- Mobile Styles --- */
 @media (max-width: 1023px) {
-    /* (MODIFIED) Remove desktop grid layout on mobile */
     .app-layout {
         display: block;
         padding: 0 10px;
@@ -346,7 +343,7 @@ input[type="range"]::-moz-range-thumb { border: none; background-color: var(--pr
         overflow-x: auto;
         white-space: nowrap;
         justify-content: center;
-        align-self: unset; /* Override desktop style */
+        align-self: unset;
     }
     .category-sidebar::-webkit-scrollbar {
         display: none;
