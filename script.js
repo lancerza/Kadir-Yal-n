@@ -426,12 +426,55 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 }
             });
+            
+            // --- MODIFIED: Error Handling with Automatic Backup Switch ---
             hls.on(Hls.Events.ERROR, (event, data) => {
                 if (data.fatal) {
+                    console.error(`HLS Error: Type: ${data.type}, Details: ${data.details}`);
+                    const failedChannelId = currentChannelId;
+                    const failedChannel = channels[failedChannelId];
+
+                    // Only try to find a backup if the failed channel is a primary one (not already a backup)
+                    if (failedChannel && failedChannel.badge !== 'สำรอง' && (data.type === Hls.ErrorTypes.NETWORK_ERROR || data.type === Hls.ErrorTypes.MEDIA_ERROR)) {
+                        const backupChannelId = Object.keys(channels).find(key =>
+                            channels[key].name === failedChannel.name &&
+                            channels[key].badge === 'สำรอง' &&
+                            key !== failedChannelId
+                        );
+
+                        if (backupChannelId) {
+                            console.log(`Channel '${failedChannel.name}' failed. Attempting to switch to backup channel.`);
+                            showLoadingIndicator(true, `ช่องหลักล้มเหลว กำลังลองช่องสำรอง...`);
+                            
+                            // Load the backup channel
+                            setTimeout(() => {
+                                // Temporarily set currentChannelId to null to allow re-loading
+                                const oldChannelId = currentChannelId;
+                                currentChannelId = null; 
+                                channelManager.loadChannel(backupChannelId).catch(err => {
+                                    // If loading backup also fails, revert to showing error for the original channel
+                                    currentChannelId = oldChannelId;
+                                    playerControls.showError('ช่องสำรองล้มเหลว ไม่สามารถเล่นได้');
+                                });
+                            }, 500);
+                            return; // Exit to avoid showing the default error immediately
+                        }
+                    }
+
+                    // --- Default error handling if no backup is found or if the failed channel was a backup ---
                     switch(data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR: playerControls.showError('เกิดข้อผิดพลาดในการโหลดวิดีโอ'); hls.startLoad(); break;
-                        case Hls.ErrorTypes.MEDIA_ERROR: playerControls.showError('เกิดข้อผิดพลาดในการเล่นวิดีโอ'); hls.recoverMediaError(); break;
-                        default: playerControls.showError('เกิดข้อผิดพลาด ไม่สามารถเล่นวิดีโอได้'); hls.destroy(); break;
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            playerControls.showError('เกิดข้อผิดพลาดในการโหลดวิดีโอ (ไม่พบช่องสำรอง)');
+                            hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            playerControls.showError('เกิดข้อผิดพลาดในการเล่นวิดีโอ (ไม่พบช่องสำรอง)');
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            playerControls.showError('เกิดข้อผิดพลาดร้ายแรง ไม่สามารถเล่นวิดีโอได้');
+                            hls.destroy();
+                            break;
                     }
                 }
             });
