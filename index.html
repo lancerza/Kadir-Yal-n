@@ -16,113 +16,45 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.min.js"></script>
 
   <style>
-    :root {
-      --primary-color: #0d8eff;
-      --background-color: #121212;
-      --card-background: #1e1e1e;
-      --text-color: #e0e0e0;
-      --border-color: #333;
-    }
-    * { box-sizing: border-box }
-    body {
-      margin: 0; padding-bottom: 24px;
-      background: var(--background-color); color: var(--text-color);
-      font-family: 'Sarabun', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      display: flex; flex-direction: column; align-items: center;
-    }
-    .container { width: 95%; max-width: 1000px; }
-
-    .header { text-align: center; padding: 16px 0; }
-    #datetime-display {
-      font-size: 1.05em; background: var(--card-background); padding: 8px 14px;
-      border-radius: 20px; display: inline-block; border: 1px solid var(--border-color);
-    }
-
-    .video-container {
-      position: relative; width: 100%; border-radius: 12px; overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #000;
-    }
-    video { width: 100%; display: block; aspect-ratio: 16 / 9; background: #000; }
-
-    /* Channel badge (logo) */
-    #channel-logo {
-      position: absolute; top: 10px; left: 10px; z-index: 4;
-      width: 52px; height: 52px; border-radius: 12px; object-fit: contain;
-      background: rgba(0,0,0,0.35); padding: 6px; border: 1px solid rgba(255,255,255,0.15);
-      backdrop-filter: blur(2px);
-    }
-
-    .custom-controls {
-      position: absolute; left: 0; right: 0; bottom: 0; z-index: 3;
-      padding: 10px; display: flex; align-items: center; gap: 14px;
-      background: linear-gradient(to top, rgba(0,0,0,0.85), transparent 70%);
-      opacity: 0; transform: translateY(100%);
-      transition: opacity .25s ease, transform .25s ease;
-    }
-    .video-container:hover .custom-controls, .custom-controls.visible {
-      opacity: 1; transform: translateY(0);
-    }
-
-    .control-btn {
-      background: none; border: none; color: #fff; cursor: pointer; padding: 6px;
-      opacity: .85; transition: opacity .2s, transform .2s; border-radius: 8px;
-    }
-    .control-btn:hover { opacity: 1; transform: translateY(-2px) }
-    .control-btn svg { width: 24px; height: 24px; pointer-events: none }
-    .hidden { display: none !important }
-
-    #progress-bar, #volume-slider { accent-color: var(--primary-color) }
-    #progress-bar { flex-grow: 1 }
-    #volume-slider { width: 110px }
-
-    .go-live {
-      border: 1px solid rgba(255,255,255,.35);
-      padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: .9em;
-      background: rgba(255,255,255,.07); color: #fff; cursor: pointer;
-    }
-
-    #live-indicator {
-      background: red; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: .8em;
-    }
-
-    .overlay {
-      position: absolute; inset: 0; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      background: rgba(0,0,0,.7); color: #fff; font-size: 1.1em;
-      text-align: center; padding: 20px; pointer-events: none; opacity: 0;
-      transition: opacity .25s ease; z-index: 5;
-    }
-    .overlay.visible { opacity: 1; pointer-events: auto }
-    .spinner {
-      border: 4px solid rgba(255,255,255,.3); border-top: 4px solid var(--primary-color);
-      border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px;
-    }
-    @keyframes spin { to { transform: rotate(360deg) } }
-
-    .category-header {
-      width: 100%; margin: 26px 0 14px; padding-bottom: 6px;
-      font-size: 1.4em; font-weight: 700; color: var(--primary-color);
-      border-bottom: 2px solid var(--border-color); animation: fadeIn .5s ease forwards;
-    }
-    .channel-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;
-    }
-    .channel-grid button {
-      padding: 12px; font-size: 1em; border: 1px solid var(--border-color);
-      border-radius: 10px; background: var(--card-background); color: var(--text-color);
-      cursor: pointer; transition: all .18s ease; text-align: center; opacity: 0;
-      animation: fadeIn .5s ease forwards; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .channel-grid button:hover { border-color: var(--primary-color); transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.35) }
-    .channel-grid button.active { background: var(--primary-color); color: #fff; font-weight: 700; border-color: var(--primary-color); box-shadow: 0 0 16px rgba(13,142,255,.45) }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+    :root{--primary-color:#0d8eff;--background-color:#121212;--card-background:#1e1e1e;--text-color:#e0e0e0;--border-color:#333}
+    *{box-sizing:border-box}
+    body{margin:0;padding-bottom:24px;background:var(--background-color);color:var(--text-color);
+      font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;flex-direction:column;align-items:center}
+    .container{width:95%;max-width:1000px}
+    .header{text-align:center;padding:16px 0}
+    #datetime-display{font-size:1.05em;background:var(--card-background);padding:8px 14px;border-radius:20px;display:inline-block;border:1px solid var(--border-color)}
+    .video-container{position:relative;width:100%;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5);background:#000}
+    video{width:100%;display:block;aspect-ratio:16/9;background:#000}
+    #channel-logo{position:absolute;top:10px;left:10px;z-index:4;width:52px;height:52px;border-radius:12px;object-fit:contain;background:rgba(0,0,0,.35);padding:6px;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(2px)}
+    .custom-controls{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:10px;display:flex;align-items:center;gap:14px;
+      background:linear-gradient(to top,rgba(0,0,0,.85),transparent 70%);opacity:0;transform:translateY(100%);transition:opacity .25s,transform .25s}
+    .video-container:hover .custom-controls,.custom-controls.visible{opacity:1;transform:translateY(0)}
+    .control-btn{background:none;border:none;color:#fff;cursor:pointer;padding:6px;opacity:.85;transition:opacity .2s,transform .2s;border-radius:8px}
+    .control-btn:hover{opacity:1;transform:translateY(-2px)}
+    .control-btn svg{width:24px;height:24px;pointer-events:none}
+    .hidden{display:none!important}
+    #progress-bar,#volume-slider{accent-color:var(--primary-color)}
+    #progress-bar{flex-grow:1}
+    #volume-slider{width:110px}
+    .go-live{border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:8px;font-weight:600;font-size:.9em;background:rgba(255,255,255,.07);color:#fff;cursor:pointer}
+    #live-indicator{background:red;padding:4px 8px;border-radius:6px;font-weight:700;font-size:.8em}
+    .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.7);
+      color:#fff;font-size:1.1em;text-align:center;padding:20px;pointer-events:none;opacity:0;transition:opacity .25s;z-index:5}
+    .overlay.visible{opacity:1;pointer-events:auto}
+    .spinner{border:4px solid rgba(255,255,255,.3);border-top:4px solid var(--primary-color);border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin-bottom:10px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .category-header{width:100%;margin:26px 0 14px;padding-bottom:6px;font-size:1.4em;font-weight:700;color:var(--primary-color);border-bottom:2px solid var(--border-color);animation:fadeIn .5s ease forwards}
+    .channel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+    .channel-grid button{padding:12px;font-size:1em;border:1px solid var(--border-color);border-radius:10px;background:var(--card-background);color:var(--text-color);
+      cursor:pointer;transition:all .18s;text-align:center;opacity:0;animation:fadeIn .5s ease forwards;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .channel-grid button:hover{border-color:var(--primary-color);transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,.35)}
+    .channel-grid button.active{background:var(--primary-color);color:#fff;font-weight:700;border-color:var(--primary-color);box-shadow:0 0 16px rgba(13,142,255,.45)}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="header">
-    <div id="datetime-display">Loading time...</div>
-  </div>
+  <div class="header"><div id="datetime-display">Loading time...</div></div>
 
   <div class="video-container" id="video-container">
     <img id="channel-logo" alt="logo" src="" />
@@ -136,27 +68,22 @@
     </div>
 
     <div class="custom-controls" id="custom-controls" role="group" aria-label="ตัวควบคุมวิดีโอ">
-      <button id="play-pause-btn" class="control-btn" title="เล่น/หยุด (Space)" aria-label="เล่น/หยุด">
+      <button id="play-pause-btn" class="control-btn" title="เล่น/หยุด (Space)">
         <svg viewBox="0 0 24 24" fill="currentColor" class="icon-play"><path d="M8 5v14l11-7z"></path></svg>
         <svg viewBox="0 0 24 24" fill="currentColor" class="icon-pause hidden"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
       </button>
-
-      <input type="range" id="progress-bar" value="0" step="1" title="แถบเวลา" aria-label="แถบเวลา">
+      <input type="range" id="progress-bar" value="0" step="1" title="แถบเวลา">
       <span id="live-indicator" class="hidden">LIVE</span>
       <button id="go-live-btn" class="go-live hidden" title="ไปขอบสตรีม">Go Live</button>
-
-      <button id="mute-btn" class="control-btn" title="เปิด/ปิดเสียง (M)" aria-label="เปิด/ปิดเสียง">
+      <button id="mute-btn" class="control-btn" title="เปิด/ปิดเสียง (M)">
         <svg viewBox="0 0 24 24" fill="currentColor" class="icon-volume-on"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
         <svg viewBox="0 0 24 24" fill="currentColor" class="icon-volume-off hidden"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
       </button>
-
-      <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" title="ปรับเสียง" aria-label="ปรับเสียง">
-
-      <button id="pip-btn" class="control-btn" title="Picture-in-Picture" aria-label="PiP">
+      <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" title="ปรับเสียง">
+      <button id="pip-btn" class="control-btn" title="Picture-in-Picture">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"></path></svg>
       </button>
-
-      <button id="fullscreen-btn" class="control-btn" title="เต็มจอ (F)" aria-label="เต็มจอ">
+      <button id="fullscreen-btn" class="control-btn" title="เต็มจอ (F)">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
       </button>
     </div>
@@ -167,9 +94,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // =========================================================
-  // 1) รายการช่อง — ใช้ของคุณได้เลย (คงของเดิมให้ครบ)
-  // =========================================================
+  // ---------- 1) Channels ----------
   const channels = {
     "กีฬา": {
       "aff_u23": {
@@ -241,14 +166,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // =========================================================
-  // 2) ตัวแปรหลัก/DOM
-  // =========================================================
+  // ---------- 2) State & DOM ----------
   let shakaPlayer = null;
   let hls = null;
   let currentChannelId = null;
-  let controlsTimeout;
   let currentEngine = null; // 'shaka' | 'hls' | 'native'
+  let controlsTimeout;
+  let loadToken = 0; // ป้องกันการโหลดซ้อน
 
   const DOM = {
     video: document.getElementById('video'),
@@ -270,9 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
     fullscreenBtn: document.getElementById('fullscreen-btn'),
   };
 
-  // =========================================================
-  // 3) Util & Overlay
-  // =========================================================
+  // ---------- 3) Utils ----------
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   const isHlsUrl = (u) => /\.m3u8(\?|$)/i.test(u);
   const isDashUrl = (u) => /\.mpd(\?|$)/i.test(u);
   const showOverlay = (msg, spin=false) => {
@@ -282,127 +205,117 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   const hideOverlay = () => DOM.overlay.classList.remove('visible');
 
-  function getChannelById(id) {
-    for (const cat in channels) {
-      if (channels[cat][id]) return channels[cat][id];
-    }
+  function getChannelById(id){
+    for(const cat in channels){ if(channels[cat][id]) return channels[cat][id]; }
     return null;
   }
 
-  function isLive() {
-    if (currentEngine === 'shaka') {
-      return shakaPlayer ? shakaPlayer.isLive() : false;
-    }
-    // native/hls
+  function isLive(){
+    if(currentEngine==='shaka') return shakaPlayer ? shakaPlayer.isLive() : false;
     const v = DOM.video;
     return v.duration === Infinity || Number.isNaN(v.duration) || !isFinite(v.duration);
   }
 
-  function goLive() {
+  function goLive(){
     const v = DOM.video;
-    if (currentEngine === 'shaka' && shakaPlayer) {
-      try { shakaPlayer.seekRange && shakaPlayer.goToLive && shakaPlayer.goToLive(); } catch {}
-      // fallback: jump to seekable end
-      const end = v.seekable?.length ? v.seekable.end(v.seekable.length - 1) : null;
-      if (end) v.currentTime = end - 0.5;
-    } else {
-      const end = v.seekable?.length ? v.seekable.end(v.seekable.length - 1) : null;
-      if (end) v.currentTime = end - 0.5;
-    }
+    const end = v.seekable?.length ? v.seekable.end(v.seekable.length-1) : null;
+    if(end) v.currentTime = end - 0.5;
   }
 
-  function saveVolume(vol, muted) {
-    localStorage.setItem('otv_volume', JSON.stringify({ vol, muted }));
-  }
-  function restoreVolume() {
-    const s = localStorage.getItem('otv_volume');
-    if (!s) return;
-    try {
-      const { vol, muted } = JSON.parse(s);
-      if (typeof vol === 'number') DOM.video.volume = Math.min(1, Math.max(0, vol));
-      DOM.video.muted = !!muted;
-    } catch {}
+  function saveVolume(vol, muted){ localStorage.setItem('otv_volume', JSON.stringify({vol, muted})); }
+  function restoreVolume(){
+    try{
+      const s = JSON.parse(localStorage.getItem('otv_volume')||'null');
+      if(!s) return; DOM.video.volume = Math.min(1, Math.max(0, s.vol||1)); DOM.video.muted = !!s.muted;
+    }catch{}
   }
 
-  // =========================================================
-  // 4) Engines
-  // =========================================================
-  async function unloadEngines() {
-    if (hls) {
-      try { hls.destroy(); } catch {}
-      hls = null;
-    }
-    if (shakaPlayer) {
-      try { await shakaPlayer.unload(); } catch {}
-    }
-    DOM.video.removeAttribute('src');
-    DOM.video.load();
+  // ---------- 4) Engine cleanup/reset ----------
+  async function hardResetVideoElement(){
+    // เคลียร์ให้ MediaSource ปิดสนิทก่อนเริ่มใหม่ (แก้ not open)
+    const v = DOM.video;
+    try{ v.pause(); }catch{}
+    v.removeAttribute('src');
+    try{ v.load(); }catch{}
+    await sleep(120);
   }
 
-  async function playWithShaka(channel) {
-    if (!shakaPlayer) {
-      shaka.polyfill.installAll();
-      if (!shaka.Player.isBrowserSupported()) {
-        throw new Error('เบราว์เซอร์ไม่รองรับ Shaka Player');
+  async function unloadEngines(){
+    if(hls){ try{ hls.destroy(); }catch{} hls = null; }
+    if(shakaPlayer){ try{ await shakaPlayer.destroy(); }catch{} shakaPlayer = null; }
+    await hardResetVideoElement();
+  }
+
+  // ---------- 5) Load with retry ----------
+  async function withRetry(taskFn, {retries=3, baseDelay=300} = {}){
+    let attempt = 0, lastErr;
+    while(attempt < retries){
+      try{ return await taskFn(); }
+      catch(err){
+        lastErr = err;
+        // หน่วงแบบ exponential backoff
+        await sleep(baseDelay * Math.pow(2, attempt));
+        attempt++;
       }
-      shakaPlayer = new shaka.Player(DOM.video);
-      shakaPlayer.addEventListener('error', onShakaError);
-      // ปรับ Retry ให้ทนเน็ตแกว่ง
-      shakaPlayer.configure({
-        streaming: {
-          bufferingGoal: 30,
-          rebufferingGoal: 5,
-          retryParameters: { timeout: 0, maxAttempts: 5, baseDelay: 500, backoffFactor: 2, fuzzFactor: 0.5 }
-        },
-        manifest: {
-          retryParameters: { timeout: 0, maxAttempts: 5, baseDelay: 500, backoffFactor: 2, fuzzFactor: 0.5 }
-        }
-      });
     }
+    throw lastErr || new Error('Load failed');
+  }
 
-    // DRM (ClearKey) ถ้ามี
-    const cfg = { drm: { clearKeys: {} } };
-    if (channel.license_key) {
+  // ---------- 6) Play engines ----------
+  async function playWithShaka(channel){
+    // สร้าง instance ใหม่ทุกครั้ง เพื่อลดโอกาส MediaSource ค้าง
+    shaka.polyfill.installAll();
+    if(!shaka.Player.isBrowserSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ Shaka Player');
+
+    shakaPlayer = new shaka.Player(DOM.video);
+    shakaPlayer.addEventListener('error', (e)=>{
+      console.error('Shaka error:', e.detail);
+    });
+
+    // ปรับ retry ภายในตัว player ให้ทนเน็ตแกว่ง
+    shakaPlayer.configure({
+      streaming: {
+        bufferingGoal: 30, rebufferingGoal: 5,
+        retryParameters: { timeout: 0, maxAttempts: 5, baseDelay: 500, backoffFactor: 2, fuzzFactor: 0.5 }
+      },
+      manifest: {
+        retryParameters: { timeout: 0, maxAttempts: 5, baseDelay: 500, backoffFactor: 2, fuzzFactor: 0.5 }
+      },
+      drm: { clearKeys: {} }
+    });
+
+    if (channel.license_key){
       const [kid, key] = String(channel.license_key).split(':');
-      if (kid && key) cfg.drm.clearKeys[kid] = key;
+      if(kid && key) shakaPlayer.configure({ drm: { clearKeys: { [kid]: key } } });
     }
-    shakaPlayer.configure(cfg);
 
-    await shakaPlayer.load(channel.url);
+    await withRetry(async()=>{ 
+      await shakaPlayer.load(channel.url);
+      // รอให้ MediaSource เปิดจริง ๆ แล้วค่อยเล่น
+      await sleep(120);
+    }, {retries:3, baseDelay:300});
+
     currentEngine = 'shaka';
   }
 
-  async function playWithHls(channel) {
+  async function playWithHls(channel){
     const src = channel.url;
     const v = DOM.video;
 
     if (v.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari / Native HLS
       v.src = src;
       await v.play().catch(()=>{});
       currentEngine = 'native';
-    } else if (window.Hls && Hls.isSupported()) {
-      hls = new Hls({
-        lowLatencyMode: true,
-        backBufferLength: 60,
-        maxBufferLength: 30,
-        fragLoadingTimeOut: 20000,
-        manifestLoadingTimeOut: 20000,
-        enableWorker: true,
-      });
+    } else if (window.Hls && Hls.isSupported()){
+      hls = new Hls({lowLatencyMode:true, backBufferLength:60, maxBufferLength:30, enableWorker:true});
       hls.attachMedia(v);
-      hls.on(Hls.Events.MEDIA_ATTACHED, () => hls.loadSource(src));
-      hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              hls.startLoad(); break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              hls.recoverMediaError(); break;
-            default:
-              showOverlay('เกิดข้อผิดพลาด HLS (fatal)', false);
-              try { hls.destroy(); } catch {}
-          }
+      hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(src));
+      hls.on(Hls.Events.ERROR, (_, data)=>{
+        console.warn('HLS error', data);
+        if(data.fatal){
+          if(data.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+          else if(data.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+          else try{ hls.destroy(); }catch{}
         }
       });
       currentEngine = 'hls';
@@ -411,65 +324,71 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function onShakaError(e) {
-    console.error('Shaka error:', e.detail);
-    const code = e.detail?.code || 'UNKNOWN';
-    showOverlay(`ไม่สามารถเล่นได้\n(Error: ${code})`, false);
-  }
-
-  // =========================================================
-  // 5) สลับช่อง
-  // =========================================================
-  async function switchChannel(channelId) {
+  // ---------- 7) Switch channel (fix for MediaSource not open) ----------
+  async function switchChannel(channelId){
     if (currentChannelId === channelId) return;
 
+    const token = ++loadToken;       // กันซ้อน
     const channel = getChannelById(channelId);
-    if (!channel) {
-      showOverlay(`ไม่พบช่อง ${channelId}`, false);
-      return;
-    }
+    if(!channel){ showOverlay(`ไม่พบช่อง ${channelId}`, false); return; }
 
     currentChannelId = channelId;
     localStorage.setItem('lastWatchedChannel', channelId);
     updateActiveButton(channelId);
-
     DOM.channelLogo.src = channel.logo || '';
     showOverlay('กำลังโหลดช่อง...', true);
 
-    try {
+    try{
+      // 1) ปิดทุก engine + reset video + หน่วงเล็กน้อย
       await unloadEngines();
+      if (token !== loadToken) return;  // มีการสลับใหม่ทับ
 
+      // 2) เลือกเอนจิน
       if (isDashUrl(channel.url) || channel.license_key) {
         await playWithShaka(channel);
       } else if (isHlsUrl(channel.url)) {
         await playWithHls(channel);
       } else {
-        // ลอง Shaka เป็นค่าเริ่มถ้าไม่ชัดเจน
+        // fallback ลอง Shaka ก่อน
         await playWithShaka(channel);
       }
 
+      if (token !== loadToken) return;
       hideOverlay();
-      // เล่นอัตโนมัติถ้าไม่ได้เล่น
+
+      // 3) auto play
       if (DOM.video.paused) DOM.video.play().catch(()=>{});
-    } catch (err) {
+    } catch(err){
       console.error(err);
-      showOverlay(err.message || 'เกิดข้อผิดพลาดในการโหลดช่อง', false);
+      // ลองรีเซ็ตอีกรอบเผื่อ MediaSource ยังไม่ open
+      if (token === loadToken){
+        showOverlay('พยายามเชื่อมต่อใหม่...', true);
+        try{
+          await unloadEngines();
+          await sleep(300);
+          await (isDashUrl(channel.url) || channel.license_key ? playWithShaka(channel) : playWithHls(channel));
+          hideOverlay();
+          if (DOM.video.paused) DOM.video.play().catch(()=>{});
+          return;
+        }catch(e2){
+          console.error('Retry failed:', e2);
+          showOverlay(err?.message || 'เกิดข้อผิดพลาดในการโหลดช่อง', false);
+        }
+      }
     }
   }
 
-  function updateActiveButton(channelId) {
-    document.querySelectorAll('.channel-grid button').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.channelId === channelId);
-      btn.disabled = btn.dataset.channelId === channelId; // กันกดรัว
+  function updateActiveButton(id){
+    document.querySelectorAll('.channel-grid button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.channelId===id);
+      b.disabled = b.dataset.channelId===id;
     });
   }
 
-  // =========================================================
-  // 6) UI: สร้างปุ่มช่อง + นาฬิกา
-  // =========================================================
-  function generateChannelButtons() {
+  // ---------- 8) UI building ----------
+  function generateChannelButtons(){
     DOM.channelsContainer.innerHTML = '';
-    for (const categoryName in channels) {
+    for(const categoryName in channels){
       const header = document.createElement('h2');
       header.className = 'category-header';
       header.textContent = categoryName;
@@ -478,12 +397,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const grid = document.createElement('div');
       grid.className = 'channel-grid';
       let delay = 0;
-      for (const id in channels[categoryName]) {
+      for(const id in channels[categoryName]){
         const ch = channels[categoryName][id];
         const btn = document.createElement('button');
         btn.innerText = ch.name;
         btn.dataset.channelId = id;
-        btn.style.animationDelay = `${delay * 0.05}s`;
+        btn.style.animationDelay = `${delay*0.05}s`;
         btn.onclick = () => switchChannel(id);
         grid.appendChild(btn);
         delay++;
@@ -492,91 +411,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function startClock() {
-    function updateTime() {
+  function startClock(){
+    const update = ()=> {
       const now = new Date();
-      const opts = {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      };
+      const opts = {weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'};
       DOM.datetimeDisplay.textContent = now.toLocaleDateString('th-TH', opts);
-    }
-    updateTime();
-    setInterval(updateTime, 1000);
+    };
+    update(); setInterval(update, 1000);
   }
 
-  // =========================================================
-  // 7) Controls & Events
-  // =========================================================
-  function setupEventListeners() {
+  // ---------- 9) Controls / Events ----------
+  function setupEventListeners(){
     const v = DOM.video;
 
-    DOM.playPauseBtn.addEventListener('click', () => {
-      v.paused ? v.play() : v.pause();
-    });
+    DOM.playPauseBtn.addEventListener('click', ()=> v.paused ? v.play() : v.pause());
+    DOM.muteBtn.addEventListener('click', ()=> v.muted = !v.muted);
 
-    DOM.muteBtn.addEventListener('click', () => {
-      v.muted = !v.muted;
-    });
-
-    DOM.fullscreenBtn.addEventListener('click', async () => {
-      try {
-        if (!document.fullscreenElement) {
+    DOM.fullscreenBtn.addEventListener('click', async ()=>{
+      try{
+        if(!document.fullscreenElement){
           await DOM.videoContainer.requestFullscreen();
-          // ล็อกแนวนอนเมื่อเต็มจอ (ถ้าอนุญาต)
-          if (screen.orientation?.lock) {
-            screen.orientation.lock('landscape').catch(()=>{});
-          }
-        } else {
-          await document.exitFullscreen();
-        }
-      } catch {}
+          if(screen.orientation?.lock) screen.orientation.lock('landscape').catch(()=>{});
+        }else await document.exitFullscreen();
+      }catch{}
     });
 
-    DOM.pipBtn.addEventListener('click', async () => {
-      if ('requestPictureInPicture' in v) {
-        try { await v.requestPictureInPicture(); } catch (e) {}
-      }
+    DOM.pipBtn.addEventListener('click', async ()=>{
+      if('requestPictureInPicture' in v){ try{ await v.requestPictureInPicture(); }catch{} }
     });
-    if (!('requestPictureInPicture' in v)) {
-      DOM.pipBtn.disabled = true; DOM.pipBtn.title = 'อุปกรณ์นี้ไม่รองรับ PiP';
-    }
+    if(!('requestPictureInPicture' in v)){ DOM.pipBtn.disabled = true; DOM.pipBtn.title = 'อุปกรณ์นี้ไม่รองรับ PiP'; }
 
-    DOM.volumeSlider.addEventListener('input', e => {
-      v.volume = Number(e.target.value);
-      if (v.volume > 0 && v.muted) v.muted = false;
-      saveVolume(v.volume, v.muted);
-    });
-
-    DOM.progressBar.addEventListener('input', e => {
-      v.currentTime = Number(e.target.value);
-    });
-
+    DOM.volumeSlider.addEventListener('input', e => { v.volume = Number(e.target.value); if(v.volume>0 && v.muted) v.muted=false; saveVolume(v.volume, v.muted); });
+    DOM.progressBar.addEventListener('input', e => { v.currentTime = Number(e.target.value); });
     DOM.goLiveBtn.addEventListener('click', goLive);
 
-    // Video events
-    v.addEventListener('play', () => {
+    v.addEventListener('play', ()=>{
       DOM.playPauseBtn.querySelector('.icon-play').classList.add('hidden');
       DOM.playPauseBtn.querySelector('.icon-pause').classList.remove('hidden');
     });
-    v.addEventListener('pause', () => {
+    v.addEventListener('pause', ()=>{
       DOM.playPauseBtn.querySelector('.icon-play').classList.remove('hidden');
       DOM.playPauseBtn.querySelector('.icon-pause').classList.add('hidden');
     });
-    v.addEventListener('volumechange', () => {
+    v.addEventListener('volumechange', ()=>{
       DOM.volumeSlider.value = v.volume;
-      const isMuted = v.muted || v.volume === 0;
-      DOM.muteBtn.querySelector('.icon-volume-on').classList.toggle('hidden', isMuted);
-      DOM.muteBtn.querySelector('.icon-volume-off').classList.toggle('hidden', !isMuted);
+      const muted = v.muted || v.volume===0;
+      DOM.muteBtn.querySelector('.icon-volume-on').classList.toggle('hidden', muted);
+      DOM.muteBtn.querySelector('.icon-volume-off').classList.toggle('hidden', !muted);
       saveVolume(v.volume, v.muted);
     });
-    v.addEventListener('timeupdate', () => {
-      const live = isLive();
-      if (live) {
+    v.addEventListener('timeupdate', ()=>{
+      if(isLive()){
         DOM.progressBar.classList.add('hidden');
         DOM.liveIndicator.classList.remove('hidden');
         DOM.goLiveBtn.classList.remove('hidden');
-      } else {
+      }else{
         DOM.progressBar.classList.remove('hidden');
         DOM.liveIndicator.classList.add('hidden');
         DOM.goLiveBtn.classList.add('hidden');
@@ -585,54 +474,45 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // แสดง/ซ่อนคอนโทรล
-    const showControls = () => {
+    let controlsTimeout;
+    const showControls = ()=>{
       clearTimeout(controlsTimeout);
       DOM.customControls.classList.add('visible');
-      controlsTimeout = setTimeout(() => DOM.customControls.classList.remove('visible'), 2500);
+      controlsTimeout = setTimeout(()=> DOM.customControls.classList.remove('visible'), 2500);
     };
     DOM.videoContainer.addEventListener('mousemove', showControls);
     DOM.videoContainer.addEventListener('touchstart', showControls);
-    DOM.videoContainer.addEventListener('mouseleave', () => {
-      clearTimeout(controlsTimeout);
-      DOM.customControls.classList.remove('visible');
-    });
+    DOM.videoContainer.addEventListener('mouseleave', ()=>{ clearTimeout(controlsTimeout); DOM.customControls.classList.remove('visible'); });
 
-    // คีย์ลัด
-    document.addEventListener('keydown', (e) => {
+    // Shortcuts
+    document.addEventListener('keydown', (e)=>{
       const tag = document.activeElement?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
-      if (e.code === 'Space') { e.preventDefault(); v.paused ? v.play() : v.pause(); }
-      else if (e.key.toLowerCase() === 'm') v.muted = !v.muted;
-      else if (e.key.toLowerCase() === 'f') DOM.fullscreenBtn.click();
-      else if (e.key === 'ArrowRight') v.currentTime = (v.currentTime || 0) + 5;
-      else if (e.key === 'ArrowLeft') v.currentTime = Math.max(0, (v.currentTime || 0) - 5);
+      if(tag==='INPUT' || tag==='TEXTAREA') return;
+      if(e.code==='Space'){ e.preventDefault(); v.paused? v.play(): v.pause(); }
+      else if(e.key.toLowerCase()==='m') v.muted = !v.muted;
+      else if(e.key.toLowerCase()==='f') DOM.fullscreenBtn.click();
+      else if(e.key==='ArrowRight') v.currentTime = (v.currentTime||0)+5;
+      else if(e.key==='ArrowLeft') v.currentTime = Math.max(0,(v.currentTime||0)-5);
     });
 
-    // Auto pause เมื่อสลับแท็บนานๆ (ประหยัดเครื่อง)
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden && !isLive()) v.pause();
-    });
+    document.addEventListener('visibilitychange', ()=>{ if(document.hidden && !isLive()) v.pause(); });
   }
 
-  // =========================================================
-  // 8) Init
-  // =========================================================
-  async function init() {
-    try {
+  // ---------- 10) Init ----------
+  async function init(){
+    try{
       generateChannelButtons();
       startClock();
       setupEventListeners();
       restoreVolume();
 
-      // last channel หรือ ค่าเริ่มต้น
       const urlParams = new URLSearchParams(location.search);
       const fromUrl = urlParams.get('ch');
       const last = localStorage.getItem('lastWatchedChannel');
-      const defaultId = fromUrl || last || Object.values(channels)[0] && Object.keys(Object.values(channels)[0])[0];
-      if (defaultId) await switchChannel(defaultId);
-    } catch (e) {
+      const firstId = Object.values(channels)[0] && Object.keys(Object.values(channels)[0])[0];
+      const defaultId = fromUrl || last || firstId;
+      if(defaultId) await switchChannel(defaultId);
+    }catch(e){
       console.error(e);
       showOverlay('เกิดข้อผิดพลาดในการเริ่มต้น', false);
     }
