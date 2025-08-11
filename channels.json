@@ -28,14 +28,14 @@
   "hls_truehd12": {
     "name": "ทรูสปอร์ตHD1",
     "category": "กีฬา",
-    "url": "https://keela2.com/stream/4/index.m3u8?token=mvFWafOIir5JDlQN",
+    "url": "https://keela2.com/stream/4/index.m3u8",
     "logo": "https://img5.pic.in.th/file/secure-sv1/true1.webp",
     "badge": "สำรอง"
   },
   "hls_truehd21": {
     "name": "ทรูสปอร์ตHD2",
     "category": "กีฬา",
-    "url": "https://keela2.com/stream/17/index.m3u8?token=mvFWafOIir5JDlQN",
+    "url": "https://keela2.com/stream/17/index.m3u8",
     "logo": "https://img2.pic.in.th/pic/true2.webp" 
   },
   "hls_truehd22": {
@@ -48,7 +48,7 @@
   "hls_true3": {
     "name": "ทรูสปอร์ต3",
     "category": "กีฬา",
-    "url": "https://keela2.com/stream/18/index.m3u8?token=mvFWafOIir5JDlQN",
+    "url": "https://keela2.com/stream/18/index.m3u8",
     "logo": "https://img2.pic.in.th/pic/true3.webp"
   },
   "hls_truehd32": {
