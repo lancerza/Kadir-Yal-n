@@ -29,22 +29,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const refreshChannelsBtn = document.getElementById('refresh-channels-btn');
 
     // --- Initialize Video.js Player ---
-    // We disable default controls to use our own
     player = videojs(videoElement, {
         controls: false,
         autoplay: true,
         muted: true,
         playsinline: true
     });
-    // Initialize EME plugin for DRM
     player.eme();
+
+    // =================================================================
+    //  NEW HELPER FUNCTION: Convert Hex string to Base64URL string
+    // =================================================================
+    function hexToBase64Url(hexString) {
+        const bytes = [];
+        for (let i = 0; i < hexString.length; i += 2) {
+            bytes.push(parseInt(hexString.substr(i, 2), 16));
+        }
+        const base64 = btoa(String.fromCharCode.apply(null, bytes));
+        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
 
     function showLoadingIndicator(isLoading, message = '') {
         loadingIndicator.classList.toggle('hidden', !isLoading);
         if (isLoading) loadingMessage.textContent = message;
     }
 
-    // --- Player Logic (adapted for Video.js) ---
+    // --- Player Logic ---
     const playerControls = {
         showError: (message, channelName) => {
             const errorChannelName = document.getElementById('error-channel-name');
@@ -111,10 +121,14 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         toggleFullscreen: () => player.requestFullscreen(),
         togglePip: () => {
-            if (player.isInPictureInPicture()) {
-                player.exitPictureInPicture();
-            } else {
-                player.requestPictureInPicture();
+            try {
+                 if (player.isInPictureInPicture()) {
+                    player.exitPictureInPicture();
+                } else {
+                    player.requestPictureInPicture();
+                }
+            } catch (e) {
+                console.error("PiP Error:", e);
             }
         },
         hideControls: () => {
@@ -142,7 +156,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.channel-tile').forEach(tile => tile.classList.toggle('active', tile.dataset.channelId === currentChannelId));
         },
         createChannelButtons: () => {
-            // This function remains the same as before
             channelButtonsContainer.innerHTML = '';
             categorySidebar.innerHTML = '';
             const groupedChannels = {};
@@ -210,7 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.title = `▶️ ${channel.name} - Flow TV`;
             channelManager.updateActiveButton();
 
-            // --- Video.js Source Configuration ---
             let sourceType;
             if (channel.url.includes('.m3u8')) {
                 sourceType = 'application/x-mpegURL';
@@ -223,17 +235,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 type: sourceType,
             };
 
-            // --- Add DRM configuration if present ---
+            // =================================================================
+            //  UPDATED DRM CONFIGURATION
+            // =================================================================
             if (channel.drm === 'clearkey' && channel.keyId && channel.key) {
                 console.log(`Configuring Clearkey for ${channel.name}`);
+                
+                // Convert hex keys to Base64URL before passing to the player
+                const keyIdB64 = hexToBase64Url(channel.keyId);
+                const keyB64 = hexToBase64Url(channel.key);
+
                 source.keySystems = {
                     'org.w3.clearkey': {
-                        // For videojs-contrib-eme, the keys are passed as a JSON object
-                        // Note: Keys must be base64url encoded. Let's assume they are already.
                         keys: [{
                             "kty": "oct",
-                            "k": channel.key,
-                            "kid": channel.keyId
+                            "k": keyB64,
+                            "kid": keyIdB64
                         }]
                     }
                 };
@@ -244,9 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
     
-    // --- UI Logic ---
     function setupCategorySidebar(categories) {
-        // This function remains the same
         categorySidebar.innerHTML = '';
         categories.forEach(category => {
             const link = document.createElement('a');
@@ -277,7 +292,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Main Initialization ---
     async function init() {
-        // --- Event Listeners for Video.js Player ---
         player.on('play', playerControls.updatePlayButton);
         player.on('pause', playerControls.updatePlayButton);
         player.on('volumechange', playerControls.updateMuteButton);
@@ -296,7 +310,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // --- Event Listeners for Custom Controls ---
         playPauseBtn.addEventListener('click', playerControls.togglePlay);
         progressBar.addEventListener('input', playerControls.setProgress);
         muteBtn.addEventListener('click', playerControls.toggleMute);
@@ -304,11 +317,9 @@ document.addEventListener("DOMContentLoaded", () => {
         fullscreenBtn.addEventListener('click', playerControls.toggleFullscreen);
         pipBtn.addEventListener('click', playerControls.togglePip);
         playOverlay.addEventListener('click', () => player.play());
-
         playerWrapper.addEventListener('mousemove', playerControls.showControls);
         playerWrapper.addEventListener('mouseleave', playerControls.hideControls);
         
-        // --- General UI Listeners ---
         themeToggleBtn.addEventListener('click', () => {
             body.classList.toggle('light-theme');
             const isLight = body.classList.contains('light-theme');
@@ -321,7 +332,6 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => refreshChannelsBtn.classList.remove('refresh-active'), 1000);
         });
         
-        // --- Load Initial State ---
         const savedTheme = localStorage.getItem('webtv_theme');
         if (savedTheme === 'light') {
             body.classList.add('light-theme');
