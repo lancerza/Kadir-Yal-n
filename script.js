@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // --- Global Variables ---
-    let hls, channels = {}, currentChannelId = null;
+    let player, channels = {}, currentChannelId = null;
     let controlsTimeout;
     let isAudioUnlocked = false;
 
@@ -51,10 +51,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const playerControls = {
-        showError: (message) => {
+        showError: (message, channelName) => {
             const errorChannelName = document.getElementById('error-channel-name');
-            if (currentChannelId && channels[currentChannelId]) {
-                errorChannelName.textContent = channels[currentChannelId].name;
+            const nameToShow = channelName || (currentChannelId && channels[currentChannelId] ? channels[currentChannelId].name : null);
+            
+            if (nameToShow) {
+                errorChannelName.textContent = nameToShow;
                 errorChannelName.style.display = 'block';
             } else {
                 errorChannelName.style.display = 'none';
@@ -144,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
             controlsTimeout = setTimeout(playerControls.hideControls, 3000);
         },
         checkIfLive: () => {
-            const isLive = !isFinite(video.duration);
+            const isLive = player.isLive();
             progressBar.style.display = isLive ? 'none' : 'flex';
             timeDisplay.style.display = isLive ? 'none' : 'block';
             if (liveIndicator) liveIndicator.classList.toggle('hidden', !isLive);
@@ -231,23 +233,42 @@ document.addEventListener("DOMContentLoaded", () => {
             setupCategorySidebar(categories);
         },
         loadChannel: async (channelId) => {
-            if (!channels[channelId] || currentChannelId === channelId) return;
-            if (hls) {
-                hls.stopLoad();
-            }
+            if (currentChannelId === channelId) return;
+
             video.classList.remove('visible');
             playerControls.hideError();
             showLoadingIndicator(true, 'กำลังโหลดช่อง...');
             await new Promise(resolve => setTimeout(resolve, 300));
             currentChannelId = channelId;
             localStorage.setItem('webtv_lastChannelId', channelId);
+            
             const channel = channels[channelId];
+            if (!channel) {
+                playerControls.showError("ไม่พบข้อมูลช่อง", `ID: ${channelId}`);
+                return;
+            }
+            
             document.title = `▶️ ${channel.name} - Flow TV`;
             channelManager.updateActiveButton();
+
+            // --- Shaka Player Configuration ---
+            const config = { drm: { clearKeys: {} } };
+
+            // Check if channel is DRM protected
+            if (channel.type === 'dash' && channel.drm === 'clearkey' && channel.keyId && channel.key) {
+                console.log(`Configuring Clearkey for ${channel.name}`);
+                config.drm.clearKeys[channel.keyId] = channel.key;
+            }
+            
+            player.configure(config);
+            
             try {
-                if (hls) hls.loadSource(channel.url);
+                await player.load(channel.url);
+                console.log(`Channel "${channel.name}" loaded successfully.`);
+                playOverlay.classList.add('hidden');
             } catch (error) {
-                console.error("Error loading channel:", error);
+                console.error(`Error loading channel: ${channel.name}`, error);
+                playerControls.showError(`เกิดข้อผิดพลาดในการโหลดช่อง (code: ${error.code})`, channel.name);
             }
         }
     };
@@ -313,6 +334,37 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // --- Shaka Player Error Handler ---
+    function onPlayerError(error) {
+        console.error('Shaka Player Error:', error.detail);
+        
+        const failedChannelId = currentChannelId;
+        const failedChannel = channels[failedChannelId];
+        
+        // --- Automatic Backup Switch Logic ---
+        if (failedChannel && failedChannel.badge !== 'สำรอง') {
+            const backupChannelId = Object.keys(channels).find(key =>
+                channels[key].name === failedChannel.name &&
+                channels[key].badge === 'สำรอง' &&
+                key !== failedChannelId
+            );
+
+            if (backupChannelId) {
+                console.log(`Channel '${failedChannel.name}' failed. Attempting to switch to backup.`);
+                showLoadingIndicator(true, `ช่องหลักล้มเหลว กำลังลองช่องสำรอง...`);
+                
+                setTimeout(() => {
+                    channelManager.loadChannel(backupChannelId).catch(err => {
+                        playerControls.showError('ช่องสำรองล้มเหลว ไม่สามารถเล่นได้', failedChannel.name);
+                    });
+                }, 500);
+                return;
+            }
+        }
+        
+        playerControls.showError(`Error: ${error.detail.message} (code: ${error.detail.code})`, failedChannel.name);
+    }
+    
     // --- Event Listener Setup ---
     function setupEventListeners() {
         playPauseBtn.addEventListener('click', playerControls.togglePlay);
@@ -321,9 +373,14 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.channel-tile.loading').forEach(t => t.classList.remove('loading'));
             showLoadingIndicator(false);
             video.classList.add('visible'); 
+            playerControls.checkIfLive();
+        });
+        video.addEventListener('play', () => {
+            playOverlay.classList.add('hidden');
+            playerControls.updatePlayButton();
+            playerControls.showControls();
         });
         video.addEventListener('pause', () => { playerControls.updatePlayButton(); playerControls.showControls(); });
-        video.addEventListener('loadedmetadata', playerControls.checkIfLive);
         progressBar.addEventListener('input', playerControls.setProgress);
         video.addEventListener('timeupdate', playerControls.updateProgress);
         muteBtn.addEventListener('click', playerControls.toggleMute);
@@ -351,12 +408,6 @@ document.addEventListener("DOMContentLoaded", () => {
             playOverlay.classList.add('hidden');
             showLoadingIndicator(true, 'กำลังเชื่อมต่อ...');
             playerControls.togglePlay();
-        });
-
-        video.addEventListener('play', () => {
-            playOverlay.classList.add('hidden');
-            playerControls.updatePlayButton();
-            playerControls.showControls();
         });
 
         playerWrapper.addEventListener('mousemove', playerControls.showControls);
@@ -401,83 +452,14 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         });
 
-        if (Hls.isSupported()) {
-            hls = new Hls({
-                enableWorker: true,
-                maxBufferLength: 30,
-                maxMaxBufferLength: 600,
-                liveSyncDurationCount: 5,
-                liveMaxLatencyDurationCount: 10,
-                liveStartLatency: 1,
-                abrEwmaDefaultEstimate: 500000,
-            });
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
-                const playPromise = video.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        playOverlay.classList.add('hidden');
-                    }).catch(error => {
-                        if (error.name !== 'AbortError') {
-                            console.error("Autoplay was prevented:", error);
-                            playOverlay.classList.remove('hidden');
-                            playerControls.updatePlayButton();
-                        }
-                    });
-                }
-            });
-            
-            // --- MODIFIED: Error Handling with Automatic Backup Switch ---
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) {
-                    console.error(`HLS Error: Type: ${data.type}, Details: ${data.details}`);
-                    const failedChannelId = currentChannelId;
-                    const failedChannel = channels[failedChannelId];
-
-                    // Only try to find a backup if the failed channel is a primary one (not already a backup)
-                    if (failedChannel && failedChannel.badge !== 'สำรอง' && (data.type === Hls.ErrorTypes.NETWORK_ERROR || data.type === Hls.ErrorTypes.MEDIA_ERROR)) {
-                        const backupChannelId = Object.keys(channels).find(key =>
-                            channels[key].name === failedChannel.name &&
-                            channels[key].badge === 'สำรอง' &&
-                            key !== failedChannelId
-                        );
-
-                        if (backupChannelId) {
-                            console.log(`Channel '${failedChannel.name}' failed. Attempting to switch to backup channel.`);
-                            showLoadingIndicator(true, `ช่องหลักล้มเหลว กำลังลองช่องสำรอง...`);
-                            
-                            // Load the backup channel
-                            setTimeout(() => {
-                                // Temporarily set currentChannelId to null to allow re-loading
-                                const oldChannelId = currentChannelId;
-                                currentChannelId = null; 
-                                channelManager.loadChannel(backupChannelId).catch(err => {
-                                    // If loading backup also fails, revert to showing error for the original channel
-                                    currentChannelId = oldChannelId;
-                                    playerControls.showError('ช่องสำรองล้มเหลว ไม่สามารถเล่นได้');
-                                });
-                            }, 500);
-                            return; // Exit to avoid showing the default error immediately
-                        }
-                    }
-
-                    // --- Default error handling if no backup is found or if the failed channel was a backup ---
-                    switch(data.type) {
-                        case Hls.ErrorTypes.NETWORK_ERROR:
-                            playerControls.showError('เกิดข้อผิดพลาดในการโหลดวิดีโอ (ไม่พบช่องสำรอง)');
-                            hls.startLoad();
-                            break;
-                        case Hls.ErrorTypes.MEDIA_ERROR:
-                            playerControls.showError('เกิดข้อผิดพลาดในการเล่นวิดีโอ (ไม่พบช่องสำรอง)');
-                            hls.recoverMediaError();
-                            break;
-                        default:
-                            playerControls.showError('เกิดข้อผิดพลาดร้ายแรง ไม่สามารถเล่นวิดีโอได้');
-                            hls.destroy();
-                            break;
-                    }
-                }
-            });
+        // --- Initialize Shaka Player ---
+        shaka.polyfill.installAll();
+        if (shaka.Player.isBrowserSupported()) {
+            player = new shaka.Player(video);
+            player.addEventListener('error', onPlayerError);
+        } else {
+            console.error('Browser not supported by Shaka Player!');
+            playerControls.showError('เบราว์เซอร์นี้ไม่รองรับการเล่นวิดีโอ');
         }
         
         setupEventListeners();
