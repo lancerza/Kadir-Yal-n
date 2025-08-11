@@ -35,13 +35,25 @@ document.addEventListener("DOMContentLoaded", () => {
         muted: true,
         playsinline: true
     });
+    // Initialize EME plugin for DRM
+    player.eme();
+
+    // Helper Function: Convert Hex string to Base64URL string
+    function hexToBase64Url(hexString) {
+        const bytes = [];
+        for (let i = 0; i < hexString.length; i += 2) {
+            bytes.push(parseInt(hexString.substr(i, 2), 16));
+        }
+        const base64 = btoa(String.fromCharCode.apply(null, bytes));
+        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
 
     function showLoadingIndicator(isLoading, message = '') {
         loadingIndicator.classList.toggle('hidden', !isLoading);
         if (isLoading) loadingMessage.textContent = message;
     }
 
-    // --- Player Logic (adapted for Video.js) ---
+    // --- Player Logic ---
     const playerControls = {
         showError: (message, channelName) => {
             const errorChannelName = document.getElementById('error-channel-name');
@@ -143,7 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.channel-tile').forEach(tile => tile.classList.toggle('active', tile.dataset.channelId === currentChannelId));
         },
         createChannelButtons: () => {
-            // This function remains the same as before
             channelButtonsContainer.innerHTML = '';
             categorySidebar.innerHTML = '';
             const groupedChannels = {};
@@ -211,41 +222,34 @@ document.addEventListener("DOMContentLoaded", () => {
             document.title = `▶️ ${channel.name} - Flow TV`;
             channelManager.updateActiveButton();
 
-            // =================================================================
-            //  NEW & IMPROVED Video.js Source Configuration
-            // =================================================================
-            let sourceType;
+            // This configuration is for videojs-contrib-eme
+            player.emeOptions = {};
             const source = {
                 src: channel.url,
+                type: channel.url.includes('.m3u8') ? 'application/x-mpegURL' : 'application/dash+xml'
             };
 
-            if (channel.url.includes('.m3u8')) {
-                source.type = 'application/x-mpegURL';
-            } else if (channel.url.includes('.mpd')) {
-                source.type = 'application/dash+xml';
+            if (channel.drm === 'clearkey' && channel.keyId && channel.key) {
+                console.log(`Configuring Clearkey for ${channel.name} via videojs-contrib-eme`);
+                const keyIdB64 = hexToBase64Url(channel.keyId);
+                const keyB64 = hexToBase64Url(channel.key);
 
-                // --- Pass DRM keys directly to the DASH plugin ---
-                if (channel.drm === 'clearkey' && channel.keyId && channel.key) {
-                    console.log(`Configuring Clearkey for ${channel.name} via videojs-dash`);
-                    source.keySystemOptions = [{
-                        name: 'org.w3.clearkey',
-                        options: {
-                            serverURL: 'https://example.com/license', // This can be a dummy URL
-                            clearkeys: {
-                                [channel.keyId]: channel.key
-                            }
-                        }
-                    }];
-                }
+                source.keySystems = {
+                    'org.w3.clearkey': {
+                        keys: [{
+                            "kty": "oct",
+                            "k": keyB64,
+                            "kid": keyIdB64
+                        }]
+                    }
+                };
             }
 
             player.src(source);
-            player.play().catch(e => console.error("Error on load:", e));
         }
     };
     
     function setupCategorySidebar(categories) {
-        // This function remains the same
         categorySidebar.innerHTML = '';
         categories.forEach(category => {
             const link = document.createElement('a');
@@ -290,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const error = player.error();
             if (error) {
                 console.error('Video.js Error:', error);
-                playerControls.showError(error.message);
+                playerControls.showError(error.message, channels[currentChannelId]?.name);
             }
         });
 
