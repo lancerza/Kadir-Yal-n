@@ -1,531 +1,288 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Online TV • Compact</title>
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Online TV • Movies</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0f13; --text:#eef2ff; --muted:#9aa4bd; --primary:#0d8eff;
+    --panel:#121620; --border:#1f2431; --chip:#1b2130;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
+  .wrap{max-width:1100px; margin:20px auto 28px; padding:0 14px}
 
-  <!-- Players -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.min.js"></script>
+  /* Header */
+  .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700}
+  .dot{width:10px; height:10px; border-radius:50%; background:var(--primary); box-shadow:0 0 10px rgba(13,142,255,.65)}
+  .subtxt{color:var(--muted); font-size:.95rem}
 
-  <style>
-    :root{
-      --primary:#0d8eff; --bg:#0e0f13; --panel:#151820; --text:#f1f5ff;
-      --muted:#8b93a7; --border:#232735; --card:#161a23;
-      --shadowA:0 10px 28px rgba(0,0,0,.4);
-      --chip:#1f2431;
-    }
-    :root[data-theme="light"]{
-      --bg:#f7f9fd; --panel:#ffffff; --card:#ffffff; --text:#0b1220; --muted:#51607a; --border:#e6e9f2;
-      --shadowA:0 10px 26px rgba(12,22,44,.08); --chip:#f0f3f9;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  /* Player */
+  .player{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden}
+  .vbox{position:relative; background:#000}
+  video{width:100%; display:block; aspect-ratio:16/9; background:#000}
 
-    /* App Bar */
-    .appbar{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--border);
-      background:linear-gradient(180deg, rgba(5,10,20,.75), rgba(5,10,20,.35));backdrop-filter:saturate(140%) blur(8px)}
-    :root[data-theme="light"] .appbar{background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.65))}
-    .appbar-inner{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
-    .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--primary);box-shadow:0 0 16px rgba(13,142,255,.7)}
-    .toolbar{display:flex;align-items:center;gap:10px}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;border:1px solid var(--border);background:var(--panel);cursor:pointer;box-shadow:var(--shadowA);transition:.18s}
-    .btn:hover{transform:translateY(-1px)}
-    .icon{width:20px;height:20px}
+  /* Controls (ultra clean) */
+  .ctrl{position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; gap:10px; padding:8px 10px;
+        background:linear-gradient(180deg, transparent, rgba(0,0,0,.55)); opacity:0; transform:translateY(8px); transition:.2s}
+  .player:hover .ctrl, .ctrl.show{opacity:1; transform:translateY(0)}
+  .cbtn{width:34px; height:34px; display:grid; place-items:center; border-radius:9px; background:rgba(255,255,255,.08);
+        border:1px solid rgba(255,255,255,.18); color:#fff; cursor:pointer}
+  .cbtn svg{width:18px; height:18px}
+  #bar{flex:1; height:6px; accent-color:var(--primary)}
+  #bar, #vol{appearance:none; -webkit-appearance:none; outline:none; background:transparent}
+  #bar::-webkit-slider-runnable-track, #vol::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
+  #bar::-webkit-slider-thumb{ -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--primary); margin-top:-3px }
+  #vol{width:100px}
+  #vol::-webkit-slider-thumb{ -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--primary); margin-top:-2px }
 
-    .container{width:95%;max-width:1200px;margin:16px auto 28px auto}
+  .live{background:#e53935; color:#fff; font-weight:800; padding:4px 10px; border-radius:8px; font-size:.85rem}
+  .t{min-width:90px; text-align:center; color:#d9e2ff; font-size:.85rem}
+  .hidden{display:none!important}
 
-    /* Player */
-    .player-card{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:
-      radial-gradient(1200px 600px at 10% -20%, rgba(13,142,255,.15), transparent 55%),var(--card);box-shadow:var(--shadowA)}
-    .player-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
-    .now{display:flex;align-items:center;gap:12px;min-width:0}
-    .now img{width:40px;height:40px;border-radius:10px;object-fit:contain;background:#00000055;padding:6px;border:1px solid rgba(255,255,255,.12)}
-    .now .title{font-weight:700;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .sub{display:flex;gap:8px;color:var(--muted);font-size:.9rem}
-    .badge{padding:3px 8px;border-radius:999px;border:1px solid var(--border);background:var(--chip);font-size:.8rem}
-    .video-wrap{position:relative;background:#000}
-    video{width:100%;display:block;aspect-ratio:16/9;background:#000}
+  /* Overlay */
+  .overlay{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+           background:rgba(5,10,20,.65); color:#fff; opacity:0; pointer-events:none; transition:.2s}
+  .overlay.show{opacity:1; pointer-events:auto}
+  .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* === Controls (refined & compact) === */
-    .controls{
-      position:absolute; left:0; right:0; bottom:0;
-      display:flex; align-items:center; gap:10px;
-      padding:8px 10px;
-      background:linear-gradient(180deg, transparent, rgba(0,0,0,.55));
-      z-index:3; opacity:0; transform:translateY(10px); transition:.2s;
-    }
-    .player-card:hover .controls, .controls.visible{ opacity:1; transform:translateY(0) }
-    .ctrl-group{ display:flex; align-items:center; gap:8px }
-    .ctrl-group.right{ margin-left:auto }
-    .cbtn{
-      height:34px; width:34px; display:grid; place-items:center;
-      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
-      color:#fff; border-radius:9px; cursor:pointer; transition:.2s;
-    }
-    .cbtn:hover{ background:rgba(255,255,255,.16) }
-    .cbtn svg{ width:18px; height:18px }
+  /* Only Movies grid */
+  .title-row{display:flex; align-items:center; justify-content:space-between; margin:14px 2px 10px}
+  .title-row h3{margin:0; font-size:1.1rem}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px}
+  .card{border:1px solid var(--border); background:#0f131d; border-radius:12px; overflow:hidden; cursor:pointer; transition:transform .15s}
+  .card:hover{transform:translateY(-2px)}
+  .thumb{height:84px; display:flex; align-items:center; justify-content:center; background:#0b0f18}
+  .thumb img{max-width:78%; max-height:68%; object-fit:contain; filter:drop-shadow(0 6px 16px rgba(0,0,0,.45))}
+  .cbody{padding:8px 10px}
+  .cname{font-weight:700; font-size:.95rem; line-height:1.25; color:#eaf0ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
-    #progress{ flex:1; height:6px; accent-color:var(--primary) }
-    #progress,#vol{ -webkit-appearance:none; appearance:none; background:transparent; outline:none }
-    #progress::-webkit-slider-runnable-track{ height:6px; background:rgba(255,255,255,.18); border-radius:999px }
-    #progress::-webkit-slider-thumb{ -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--primary); margin-top:-3px }
-    #progress::-moz-range-track{ height:6px; background:rgba(255,255,255,.18); border-radius:999px }
-    #progress::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background:var(--primary) }
-
-    #vol{ width:100px }
-    #vol::-webkit-slider-runnable-track{ height:6px; background:rgba(255,255,255,.18); border-radius:999px }
-    #vol::-webkit-slider-thumb{ -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--primary); margin-top:-2px }
-    #vol::-moz-range-track{ height:6px; background:rgba(255,255,255,.18); border-radius:999px }
-    #vol::-moz-range-thumb{ width:10px; height:10px; border-radius:50%; background:var(--primary) }
-
-    .time-label{ font-size:.85rem; color:#cfd6e6; min-width:82px; text-align:center }
-    .live-pill{
-      display:inline-flex; align-items:center; gap:6px;
-      background:#e53935; color:#fff; font-weight:800;
-      padding:4px 10px; border-radius:8px; font-size:.85rem;
-    }
-    .live-pill .dot{ width:8px; height:8px; border-radius:50%; background:#fff }
-    .pill{
-      padding:6px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.25);
-      background:rgba(255,255,255,.07); color:#fff; cursor:pointer;
-    }
-    .hidden{ display:none !important }
-
-    /* Overlay */
-    .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(4,8,16,.7);color:#fff;z-index:4;opacity:0;pointer-events:none;transition:opacity .2s}
-    .overlay.visible{opacity:1;pointer-events:auto}
-    .spin{border:4px solid rgba(255,255,255,.3);border-top:4px solid var(--primary);width:44px;height:44px;border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* Chips */
-    .chips{display:flex;gap:6px;overflow:auto;padding:10px 2px;scrollbar-width:none}
-    .chip{white-space:nowrap;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--border);cursor:pointer;user-select:none;transition:.15s;font-size:.9rem}
-    .chip:hover{transform:translateY(-1px)}
-    .chip.active{outline:2px solid var(--primary);box-shadow:0 0 0 3px rgba(13,142,255,.15)}
-
-    /* Grid (compact) */
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-    .card{border:1px solid var(--border);background:var(--card);border-radius:12px;overflow:hidden;cursor:pointer;transition:.2s;box-shadow:var(--shadowA);display:flex;flex-direction:column}
-    .card:hover{transform:translateY(-2px)}
-    .thumb{background:#0a0d14;height:86px;display:flex;align-items:center;justify-content:center;position:relative}
-    .thumb img{max-width:76%;max-height:64%;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,.45))}
-    .thumb .fav{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);width:30px;height:30px;display:grid;place-items:center;border-radius:9px}
-    .fav.active{background:rgba(13,142,255,.85)}
-    .body{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
-    .title{font-weight:700;font-size:.92rem;line-height:1.2}
-    .meta-line{display:flex;gap:6px;color:var(--muted);font-size:.8rem}
-    .playbtn{margin-top:2px;padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--panel);display:flex;gap:8px;align-items:center;justify-content:center}
-    .playbtn svg{width:16px;height:16px}
-
-    /* Snackbar & Modal (unchanged size) */
-    .snackbar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#121826;color:#fff;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);opacity:0;pointer-events:none;transition:.2s;z-index:60}
-    .snackbar.show{opacity:1;pointer-events:auto}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(6,10,18,.6);display:none;align-items:center;justify-content:center;z-index:70}
-    .modal{width:min(560px, 92vw);background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadowA)}
-    .modal-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
-    .modal-b{padding:16px;display:grid;gap:14px}
-    .switch{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);padding:10px 12px;border-radius:12px;background:var(--card)}
-    .switch label{color:var(--muted)}
-    .switch input{transform:scale(1.2)}
-
-    @media (max-width:720px){
-      .appbar-inner{padding:10px 14px}
-      .grid{ grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); gap:8px }
-      .thumb{ height:78px }
-    }
-  </style>
+  @media (max-width:680px){
+    .grid{grid-template-columns:repeat(auto-fill, minmax(128px,1fr))}
+    .thumb{height:78px}
+  }
+</style>
 </head>
 <body>
-  <!-- App Bar -->
-  <header class="appbar">
-    <div class="appbar-inner">
-      <div class="brand"><div class="dot"></div><span>Online TV</span></div>
-      <div class="toolbar">
-        <button id="themeBtn" class="btn" title="สลับธีม">
-          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 009 9 9 9 0 11-9-9zm0 16a7 7 0 100-14 7 7 0 000 14z"/></svg>
-          <span>Theme</span>
-        </button>
-        <button id="settingsBtn" class="btn" title="ตั้งค่า">
-          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94a7.997 7.997 0 000-1.88l2.03-1.58a.5.5 0 00.12-.64l-1.92-3.32a.5.5 0 00-.6-.22l-2.39.96c-.5-.41-1.04-.73-1.62-.94l-.36-2.54a.5.5 0 00-.5-.42h-3.84a.5.5 0 00-.5.42l-.36 2.54c-.58.23-1.12.53-1.62.94l-2.39-.96a.5.5 0 00-.6.22L2.71 8.84a.5.5 0 00.12.64l2.03 1.58c-.05.31-.07.63-.07.94s.02.63.07.94L2.83 14.5a.5.5 0 00-.12.64l1.92 3.32c.14.24.43.34.69.22l2.39-.96c.5.41 1.05.73 1.62.94l.36 2.54c.05.25.26.42.5.42h3.84c.24 0 .45-.17.5-.42l.36-2.54c.58-.21 1.12-.53 1.62-.94l2.39.96c.26.12.55.02.69-.22l1.92-3.32a.5.5 0 00-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1115.5 12 3.5 3.5 0 0112 15.5z"/></svg>
-          <span>Settings</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="container">
-    <!-- Player -->
-    <section class="player-card" id="playerCard">
-      <div class="player-topbar">
-        <div class="now">
-          <img id="nowLogo" alt="logo">
-          <div>
-            <div id="nowTitle" class="title">เลือกช่องเพื่อเริ่มเล่น</div>
-            <div class="sub">
-              <span id="nowEngine" class="badge">—</span>
-              <span id="nowCategory" class="badge">—</span>
-              <span id="clock" class="badge">--:--:--</span>
-            </div>
-          </div>
-        </div>
-        <div class="toolbar">
-          <button id="shareBtn" class="btn" title="คัดลอกลิงก์ช่องนี้">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.3 3.3 0 000-1.39l7.02-4.11a2.99 2.99 0 10-.97-1.68L7.94 9.64a3 3 0 100 4.72l7.03 4.12A3 3 0 1018 16.08z"/></path></svg>
-            <span>แชร์</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="video-wrap" id="video-container">
-        <video id="video" playsinline></video>
-
-        <div class="overlay" id="overlay">
-          <div class="spin"></div>
-          <div id="overlayText">กำลังโหลด…</div>
-        </div>
-
-        <!-- Controls (refined) -->
-        <div class="controls" id="controls">
-          <!-- Left -->
-          <div class="ctrl-group left">
-            <button id="playBtn" class="cbtn" title="เล่น/หยุด (Space)">
-              <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              <svg class="i-pause hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
-            </button>
-            <span id="timeLabel" class="time-label">--:-- / --:--</span>
-            <span id="live" class="live-pill hidden"><span class="dot"></span>LIVE</span>
-          </div>
-
-          <!-- Middle (seek) -->
-          <input type="range" id="progress" value="0" step="1" title="แถบเวลา">
-
-          <!-- Right -->
-          <div class="ctrl-group right">
-            <button id="goLive" class="pill hidden" title="กระโดดไปสด">Go Live</button>
-
-            <button id="muteBtn" class="cbtn" title="เปิด/ปิดเสียง (M)">
-              <svg class="i-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-              <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
-            </button>
-            <input type="range" id="vol" min="0" max="1" step="0.05" value="1" title="ปรับเสียง">
-
-            <button id="pipBtn" class="cbtn" title="Picture-in-Picture">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 7H3v10h16V7zm2-4H1C.45 3 0 3.45 0 4v14c0 .55.45 1 1 1h20c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z"/></svg>
-            </button>
-            <button id="fsBtn" class="cbtn" title="เต็มจอ (F)">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zM5 10h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Category chips -->
-    <div class="chips" id="chipBar"></div>
-
-    <!-- Grid -->
-    <section class="grid" id="grid"></section>
-  </main>
-
-  <!-- Snackbar -->
-  <div class="snackbar" id="snackbar"></div>
-
-  <!-- Settings Modal -->
-  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="setHd">
-      <div class="modal-h">
-        <strong id="setHd">การตั้งค่า</strong>
-        <button class="btn" id="closeModal" title="ปิด">ปิด</button>
-      </div>
-      <div class="modal-b">
-        <div class="switch">
-          <div><div style="font-weight:700">เล่นอัตโนมัติ</div><label>เริ่มเล่นทันทีเมื่อโหลดช่อง</label></div>
-          <input type="checkbox" id="optAutoplay">
-        </div>
-        <div class="switch">
-          <div><div style="font-weight:700">ล็อกหน้าจอแนวนอนเมื่อเต็มจอ</div><label>พยายามล็อกเป็นแนวนอน</label></div>
-          <input type="checkbox" id="optLockLandscape" checked>
-        </div>
-        <div class="switch">
-          <div><div style="font-weight:700">จำระดับเสียง</div><label>บันทึกระดับเสียง/ปิดเสียง</label></div>
-          <input type="checkbox" id="optRememberVol" checked>
-        </div>
-      </div>
-    </div>
+<div class="wrap">
+  <div class="head">
+    <div class="brand"><div class="dot"></div><div>Movies</div></div>
+    <div class="subtxt" id="nowInfo">เลือกเรื่องเพื่อเริ่มรับชม</div>
   </div>
+
+  <section class="player">
+    <div class="vbox" id="vbox">
+      <video id="video" playsinline></video>
+
+      <div class="overlay" id="overlay">
+        <div class="spin"></div>
+        <div id="ovtxt">กำลังโหลด…</div>
+      </div>
+
+      <div class="ctrl" id="ctrl">
+        <button id="play" class="cbtn" title="เล่น/หยุด (Space)">
+          <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="i-pause hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
+        </button>
+        <span id="time" class="t">--:-- / --:--</span>
+        <span id="live" class="live hidden">LIVE</span>
+        <input id="bar" type="range" value="0" step="1">
+        <button id="mute" class="cbtn" title="เปิด/ปิดเสียง (M)">
+          <svg class="i-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+          <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
+        </button>
+        <input id="vol" type="range" min="0" max="1" step="0.05" value="1" title="เสียง">
+        <button id="fs" class="cbtn" title="เต็มจอ (F)">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zM5 10h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="title-row"><h3>รายการหนัง</h3></div>
+  <section class="grid" id="grid"></section>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // --------- Channels ---------
-  const channels = {
-    "กีฬา": {
-      "aff_u23": { name:"Indo vs Thai U23", url:"https://tglmp04.akamaized.net/out/v1/400fc0702dee453bb33ebcc29466e58a/manifest.mpd", logo:"https://iili.io/FWccqEg.md.jpg", license_key:"91b9592c819246c68b3b08a1fe08ba22:fa0d80dfd865b34077bae44cd4a0c5e6" }
-    },
-    "ข่าว & ทั่วไป": {
-      "thairath_dash": { name:"Thairath TV (DASH)", url:"https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd", logo:"https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png", license_key:"d418f733ed224f9bb9c2b1589db22a20:6ed6fe26daa4b926810869ff60254ebb" },
-      "workpoint": { name:"Workpoint TV", url:"https://wp-live.cdn.3bb.co.th/wp/live/playlist.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/4/49/Workpoint_TV_Logo.png", license_key:null },
-      "thairathtv_hls": { name:"Thairath TV (HLS)", url:"https://d373k698imbfvs.cloudfront.net/out/v1/d08c879331984d948956b631988820c8/index.m3u8", logo:"https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png", license_key:null }
-    },
-    "หนัง": {
-      "hls_doomovic1": { name:"Smurfs(2025)สเมิร์ฟ", url:"https://master.streamhls.com/hlsr2/344daafccf7c29fc7134386f145c785e/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/07/Smurfs-2025.jpg", license_key:null },
-      "hls_doomovic2": { name:"AnHonestLife(2025)ชีวิตซื่อ", url:"https://master.streamhls.com/hlsr2/46cabdb7b096b7bfc651293e8a682fbd/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/08/An-Honest-Life-2025.jpg", license_key:null },
-      "hls_doomovic3": { name:" พระแท้ คนเก๊(2025)", url:"https://master.streamhls.com/hlsr2/7341740f96136f2ea13b204d01dc203d/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/08/The-Stone-2025.jpg", license_key:null }
-    },
-    "ช่อง 3BB": {
-      "3bb1": { name:"3BB 1", url:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/2/2.mpd", logo:"https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png", license_key:"ca20a93cf8e3421dafbd5bdb1990081b:86ae86a7391c481ea93eecdb740f0a14" },
-      "3bb2": { name:"3BB 2", url:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/3/3.mpd", logo:"https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png", license_key:"4d4426a505f64382a9841155d721cee6:0f4770219ccb4be5836a7517057e51c3" },
-      "3bb3": { name:"3BB 3", url:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/4/4.mpd", logo:"https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png", license_key:"1e98456bcbea44b7ad05831387e364ef:3d14fd4f9d3149a79b35a7124fccbd67" }
-    }
+  // ---------- Movies only ----------
+  const movies = {
+    "hls_doomovic1": { name:"Smurfs (2025) สเมิร์ฟ", url:"https://master.streamhls.com/hlsr2/344daafccf7c29fc7134386f145c785e/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/07/Smurfs-2025.jpg" },
+    "hls_doomovic2": { name:"An Honest Life (2025) ชีวิตซื่อ", url:"https://master.streamhls.com/hlsr2/46cabdb7b096b7bfc651293e8a682fbd/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/08/An-Honest-Life-2025.jpg" },
+    "hls_doomovic3": { name:"พระแท้ คนเก๊ (2025)", url:"https://master.streamhls.com/hlsr2/7341740f96136f2ea13b204d01dc203d/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/08/The-Stone-2025.jpg" }
   };
 
-  // --------- State ---------
-  let shakaPlayer=null, hls=null, currentId=null, currentEngine=null, loadToken=0;
-  const favorites = new Set(JSON.parse(localStorage.getItem('otv_favs')||'[]'));
-  const opts = {
-    autoplay: JSON.parse(localStorage.getItem('opt_autoplay')||'true'),
-    lockLandscape: JSON.parse(localStorage.getItem('opt_lock_land')||'true'),
-    rememberVol: JSON.parse(localStorage.getItem('opt_rem_vol')||'true'),
-  };
+  // ---------- State / DOM ----------
+  let hls = null, currentId = null, loadingToken = 0;
+  const MAX_REASONABLE_DUR = 8 * 3600; // 8 ชม. – เกินนี้ถือว่า duration เพี้ยน => แสดงแบบ LIVE/ซ่อนแถบเวลา
 
-  // --------- DOM ---------
-  const $ = s=>document.querySelector(s);
-  const grid = $('#grid'), chipBar = $('#chipBar');
-  const video = $('#video'), overlay = $('#overlay'), overlayText = $('#overlayText');
-  const playBtn = $('#playBtn'), muteBtn = $('#muteBtn');
-  const iPlay = playBtn.querySelector('.i-play'), iPause = playBtn.querySelector('.i-pause');
-  const iVol = muteBtn.querySelector('.i-vol'), iMute = muteBtn.querySelector('.i-mute');
-  const progress = $('#progress'), vol = $('#vol'), liveEl = $('#live'), goLiveEl = $('#goLive'), timeLabel = $('#timeLabel');
-  const nowTitle = $('#nowTitle'), nowLogo = $('#nowLogo'), nowEngine=$('#nowEngine'), nowCategory=$('#nowCategory');
-  const fsBtn = $('#fsBtn'), pipBtn = $('#pipBtn'), shareBtn = $('#shareBtn');
-  const snack = $('#snackbar'); const themeBtn = $('#themeBtn'); const settingsBtn=$('#settingsBtn');
-  const modalBackdrop = $('#modalBackdrop'), closeModal = $('#closeModal');
-  const optAutoplay = $('#optAutoplay'), optLockLandscape = $('#optLockLandscape'), optRememberVol = $('#optRememberVol');
+  const grid = document.getElementById('grid');
+  const video = document.getElementById('video');
+  const overlay = document.getElementById('overlay');
+  const ovtxt = document.getElementById('ovtxt');
+  const ctrl = document.getElementById('ctrl');
+  const play = document.getElementById('play');
+  const iPlay = play.querySelector('.i-play');
+  const iPause = play.querySelector('.i-pause');
+  const mute = document.getElementById('mute');
+  const iVol = mute.querySelector('.i-vol');
+  const iMute = mute.querySelector('.i-mute');
+  const bar = document.getElementById('bar');
+  const vol = document.getElementById('vol');
+  const time = document.getElementById('time');
+  const livePill = document.getElementById('live');
+  const fs = document.getElementById('fs');
+  const nowInfo = document.getElementById('nowInfo');
 
-  // Theme
-  const userTheme = localStorage.getItem('otv_theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', userTheme);
-  themeBtn.addEventListener('click', ()=>{
-    const next = document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('otv_theme', next);
-  });
+  // ---------- Helpers ----------
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const showOverlay = (t="กำลังโหลด…") => { ovtxt.textContent = t; overlay.classList.add('show'); };
+  const hideOverlay = () => overlay.classList.remove('show');
 
-  // Utils
-  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-  const isHls = (u)=>/\.m3u8(\?|$)/i.test(u);
-  const isDash = (u)=>/\.mpd(\?|$)/i.test(u);
-  const showOverlay=(t='กำลังโหลด…')=>{ overlayText.textContent=t; overlay.classList.add('visible'); }
-  const hideOverlay=()=>overlay.classList.remove('visible');
-  const toast=(m,ms=2200)=>{ snack.textContent=m; snack.classList.add('show'); setTimeout(()=>snack.classList.remove('show'), ms); };
-  setInterval(()=>{ $('#clock').textContent=new Date().toLocaleTimeString('th-TH',{hour12:false}); },1000);
-
-  function getChannel(id){
-    for(const c in channels){ if(channels[c][id]) return {cat:c,id,...channels[c][id]}; }
-    return null;
-  }
-  function rememberVol(){ if(!opts.rememberVol) return; localStorage.setItem('otv_volume', JSON.stringify({v:video.volume, m:video.muted})); }
-  function restoreVol(){ if(!opts.rememberVol) return; try{ const s=JSON.parse(localStorage.getItem('otv_volume')||'null'); if(!s) return; video.volume=s.v??1; video.muted=!!s.m; }catch{} }
-
-  // Engines
-  async function hardResetVideo(){ try{ video.pause(); }catch{} video.removeAttribute('src'); try{ video.load(); }catch{} await sleep(120); }
-  async function unloadEngines(){ if(hls){ try{ hls.destroy(); }catch{} hls=null; } if(shakaPlayer){ try{ await shakaPlayer.destroy(); }catch{} shakaPlayer=null; } await hardResetVideo(); }
-  async function withRetry(task,{retries=3,base=300}={}){ let last; for(let i=0;i<retries;i++){ try{ return await task(); }catch(e){ last=e; await sleep(base*Math.pow(2,i)); } } throw last||new Error('load failed'); }
-  async function useShaka(ch){
-    shaka.polyfill.installAll();
-    if(!shaka.Player.isBrowserSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ Shaka');
-    shakaPlayer = new shaka.Player(video);
-    shakaPlayer.configure({
-      streaming:{bufferingGoal:30,rebufferingGoal:5,retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}},
-      manifest:{retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}}, drm:{clearKeys:{}}
-    });
-    if(ch.license_key){ const [kid,key]=String(ch.license_key).split(':'); if(kid&&key) shakaPlayer.configure({drm:{clearKeys:{[kid]:key}}}); }
-    await withRetry(async()=>{ await shakaPlayer.load(ch.url); await sleep(120); });
-    currentEngine='DASH';
-  }
-  async function useHls(ch){
-    if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src = ch.url; currentEngine='HLS'; return; }
-    if(window.Hls && Hls.isSupported()){
-      hls = new Hls({lowLatencyMode:true, backBufferLength:60, maxBufferLength:30, enableWorker:true});
-      hls.attachMedia(video); hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(ch.url));
-      hls.on(Hls.Events.ERROR,(_,d)=>{ if(d.fatal){ if(d.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad(); else if(d.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError(); }});
-      currentEngine='HLS'; return;
-    }
-    throw new Error('เบราว์เซอร์ไม่รองรับ HLS');
-  }
-
-  // ===== Time formatting (show HH:MM:SS for movies) =====
-  function fmtTime(sec, forceHours=false){
-    if (!isFinite(sec)) return '--:--';
+  function formatTime(sec, forceHours=false){
+    if(!isFinite(sec)) return '--:--';
     sec = Math.max(0, Math.floor(sec));
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    if (forceHours || h > 0) {
-      return `${String(h).padStart(1,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }
-    return `${m}:${String(s).padStart(2,'0')}`;
+    const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+    return (forceHours || h>0)
+      ? `${String(h).padStart(1,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+      : `${m}:${String(s).padStart(2,'0')}`;
   }
+
+  function isLiveLike(){
+    const d = video.duration;
+    return !isFinite(d) || d <= 0 || d > MAX_REASONABLE_DUR;
+  }
+
   function refreshTimeUI(){
-    const isLive = (video.duration === Infinity || Number.isNaN(video.duration) || !isFinite(video.duration));
-    const forceHours = isFinite(video.duration) && video.duration >= 3600;
-    liveEl.classList.toggle('hidden', !isLive);
-    goLiveEl.classList.toggle('hidden', !isLive);
-    progress.classList.toggle('hidden', isLive);
+    const liveLike = isLiveLike();
+    livePill.classList.toggle('hidden', !liveLike);
+    bar.classList.toggle('hidden', liveLike);
 
-    if (isLive) {
-      timeLabel.textContent = 'ถ่ายทอดสด';
-    } else {
-      timeLabel.textContent = `${fmtTime(video.currentTime || 0, forceHours)} / ${fmtTime(video.duration || 0, forceHours)}`;
-      progress.max = isFinite(video.duration) ? video.duration : 0;
-      progress.value = video.currentTime || 0;
+    if(liveLike){
+      time.textContent = 'ถ่ายทอดสด';
+    }else{
+      const forceHours = video.duration >= 3600;
+      time.textContent = `${formatTime(video.currentTime||0, forceHours)} / ${formatTime(video.duration||0, forceHours)}`;
+      bar.max = isFinite(video.duration) ? video.duration : 0;
+      bar.value = video.currentTime || 0;
     }
   }
 
-  // Player controls
-  let ctrlsTimer;
-  const showCtrls=()=>{ clearTimeout(ctrlsTimer); $('#controls').classList.add('visible'); ctrlsTimer=setTimeout(()=>$('#controls').classList.remove('visible'),2200); };
-  $('#video-container').addEventListener('mousemove', showCtrls);
-  $('#video-container').addEventListener('touchstart', showCtrls);
-  $('#video-container').addEventListener('mouseleave', ()=>{ clearTimeout(ctrlsTimer); $('#controls').classList.remove('visible'); });
+  async function unload(){
+    if(hls){ try{ hls.destroy(); }catch{} hls=null; }
+    try{ video.pause(); }catch{}
+    video.removeAttribute('src');
+    try{ video.load(); }catch{}
+    await sleep(80);
+  }
 
-  playBtn.addEventListener('click', ()=> video.paused?video.play():video.pause());
-  muteBtn.addEventListener('click', ()=> video.muted=!video.muted);
-  vol.addEventListener('input', e=>{ video.volume=+e.target.value; if(video.volume>0 && video.muted) video.muted=false; rememberVol(); });
-  progress.addEventListener('input', e=> video.currentTime=+e.target.value);
-  goLiveEl.addEventListener('click', ()=>{ const end=video.seekable?.length?video.seekable.end(video.seekable.length-1):null; if(end) video.currentTime=end-.5; });
+  async function playHls(url){
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+    } else if (window.Hls && Hls.isSupported()){
+      hls = new Hls({lowLatencyMode:false, maxBufferLength:30, enableWorker:true});
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(url));
+      hls.on(Hls.Events.ERROR, (_, data)=>{
+        if(data.fatal){
+          if(data.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+          else if(data.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+        }
+      });
+    } else {
+      throw new Error('เบราว์เซอร์ไม่รองรับ HLS');
+    }
+  }
+
+  async function switchMovie(id){
+    if(currentId===id) return;
+    const token = ++loadingToken;
+    const mv = movies[id]; if(!mv) return;
+
+    currentId = id;
+    nowInfo.textContent = mv.name;
+    showOverlay('กำลังโหลด…');
+
+    try{
+      await unload();
+      if(token!==loadingToken) return;
+      await playHls(mv.url);
+      await sleep(120);
+      hideOverlay();
+      video.play().catch(()=>{});
+    }catch(e){
+      console.error(e);
+      showOverlay('เล่นไม่ได้ ลองใหม่อีกครั้ง');
+    }
+  }
+
+  // ---------- Build grid ----------
+  function buildGrid(){
+    grid.innerHTML='';
+    Object.entries(movies).forEach(([id, mv])=>{
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="thumb"><img loading="lazy" src="${mv.logo}" alt=""></div>
+        <div class="cbody"><div class="cname">${mv.name}</div></div>
+      `;
+      card.onclick = ()=> switchMovie(id);
+      card.onkeydown = (e)=>{ if(e.key==='Enter') switchMovie(id); };
+      card.tabIndex = 0;
+      grid.appendChild(card);
+    });
+  }
+
+  // ---------- Controls ----------
+  let ctrlTimer;
+  const showCtrl = ()=>{ clearTimeout(ctrlTimer); ctrl.classList.add('show'); ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),2000); };
+  document.getElementById('vbox').addEventListener('mousemove', showCtrl);
+  document.getElementById('vbox').addEventListener('touchstart', showCtrl);
+
+  play.addEventListener('click', ()=> video.paused?video.play():video.pause());
+  mute.addEventListener('click', ()=> video.muted=!video.muted);
+  vol.addEventListener('input', e=>{ video.volume = +e.target.value; if(video.volume>0 && video.muted) video.muted=false; });
+  bar.addEventListener('input', e=> video.currentTime = +e.target.value);
 
   video.addEventListener('play', ()=>{ iPlay.classList.add('hidden'); iPause.classList.remove('hidden'); });
   video.addEventListener('pause', ()=>{ iPlay.classList.remove('hidden'); iPause.classList.add('hidden'); });
-  video.addEventListener('volumechange', ()=>{ vol.value=video.volume; const m=video.muted||video.volume===0; iVol.classList.toggle('hidden',m); iMute.classList.toggle('hidden',!m); rememberVol(); });
+  video.addEventListener('timeupdate', refreshTimeUI);
   video.addEventListener('loadedmetadata', refreshTimeUI);
   video.addEventListener('durationchange', refreshTimeUI);
-  video.addEventListener('timeupdate', refreshTimeUI);
 
-  document.addEventListener('keydown',(e)=>{ const t=document.activeElement?.tagName; if(t==='INPUT'||t==='TEXTAREA')return;
+  fs.addEventListener('click', async ()=>{
+    try{
+      const box = document.getElementById('vbox');
+      if(!document.fullscreenElement) await box.requestFullscreen();
+      else await document.exitFullscreen();
+    }catch{}
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    const tag = document.activeElement?.tagName;
+    if(tag==='INPUT' || tag==='TEXTAREA') return;
     if(e.code==='Space'){ e.preventDefault(); video.paused?video.play():video.pause(); }
     else if(e.key.toLowerCase()==='m'){ video.muted=!video.muted; }
-    else if(e.key.toLowerCase()==='f'){ fsBtn.click(); }
+    else if(e.key.toLowerCase()==='f'){ fs.click(); }
     else if(e.key==='ArrowRight'){ video.currentTime=(video.currentTime||0)+5; }
     else if(e.key==='ArrowLeft'){ video.currentTime=Math.max(0,(video.currentTime||0)-5); }
   });
 
-  if(!('requestPictureInPicture' in video)) $('#pipBtn').disabled = true;
-  pipBtn.addEventListener('click', async ()=>{ try{ await video.requestPictureInPicture(); }catch{} });
-  fsBtn.addEventListener('click', async ()=>{ try{ if(!document.fullscreenElement){ await $('#video-container').requestFullscreen(); if(opts.lockLandscape && screen.orientation?.lock) screen.orientation.lock('landscape').catch(()=>{}); } else await document.exitFullscreen(); }catch{} });
-
-  // Settings
-  settingsBtn.addEventListener('click', ()=>{ modalBackdrop.style.display='flex'; optAutoplay.checked=opts.autoplay; optLockLandscape.checked=opts.lockLandscape; optRememberVol.checked=opts.rememberVol; });
-  closeModal.addEventListener('click', ()=> modalBackdrop.style.display='none');
-  modalBackdrop.addEventListener('click', (e)=>{ if(e.target===modalBackdrop) modalBackdrop.style.display='none'; });
-  optAutoplay.addEventListener('change', e=>{ opts.autoplay=e.target.checked; localStorage.setItem('opt_autoplay', String(opts.autoplay)); });
-  optLockLandscape.addEventListener('change', e=>{ opts.lockLandscape=e.target.checked; localStorage.setItem('opt_lock_land', String(opts.lockLandscape)); });
-  optRememberVol.addEventListener('change', e=>{ opts.rememberVol=e.target.checked; localStorage.setItem('opt_rem_vol', String(opts.rememberVol)); });
-
-  // Chips & Grid
-  function buildChips(){
-    chipBar.innerHTML='';
-    const all=document.createElement('div'); all.className='chip active'; all.textContent='ทั้งหมด'; all.dataset.cat='*'; chipBar.appendChild(all);
-    for(const cat of Object.keys(channels)){ const c=document.createElement('div'); c.className='chip'; c.textContent=cat; c.dataset.cat=cat; chipBar.appendChild(c); }
-    const fav=document.createElement('div'); fav.className='chip'; fav.textContent='รายการโปรด'; fav.dataset.cat='@fav'; chipBar.appendChild(fav);
-
-    chipBar.addEventListener('click', (e)=>{
-      const t=e.target.closest('.chip'); if(!t) return;
-      chipBar.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); t.classList.add('active');
-      renderGrid(t.dataset.cat);
-    });
-  }
-
-  function renderGrid(cat='*'){
-    grid.innerHTML='';
-    const items=[];
-    for(const catName in channels){
-      for(const id in channels[catName]){
-        const ch=channels[catName][id];
-        if(cat!=='*' && cat!=='@fav' && catName!==cat) continue;
-        if(cat==='@fav' && !favorites.has(id)) continue;
-        items.push({cat:catName,id,...ch});
-      }
-    }
-    items.sort((a,b)=>a.name.localeCompare(b.name,'th'));
-
-    for(const ch of items){
-      const card=document.createElement('div'); card.className='card'; card.tabIndex=0;
-      card.innerHTML=`
-        <div class="thumb">
-          <img src="${ch.logo}" alt="">
-          <button class="fav ${favorites.has(ch.id)?'active':''}" title="เพิ่มเป็นรายการโปรด">
-            <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-          </button>
-        </div>
-        <div class="body">
-          <div class="title">${ch.name}</div>
-          <div class="meta-line"><span class="badge">${ch.cat}</span><span class="badge">${isDash(ch.url)||ch.license_key?'DASH/DRM':'HLS'}</span></div>
-          <button class="playbtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> เล่น</button>
-        </div>
-      `;
-      card.querySelector('.playbtn').addEventListener('click', ()=> switchChannel(ch.id));
-      card.addEventListener('keydown', (e)=>{ if(e.key==='Enter') switchChannel(ch.id); });
-      const favBtn=card.querySelector('.fav');
-      favBtn.addEventListener('click',(e)=>{
-        e.stopPropagation();
-        if(favorites.has(ch.id)) favorites.delete(ch.id); else favorites.add(ch.id);
-        localStorage.setItem('otv_favs', JSON.stringify([...favorites]));
-        favBtn.classList.toggle('active');
-      });
-      grid.appendChild(card);
-    }
-  }
-
-  // Switch channel
-  function setNow(ch){ nowTitle.textContent=ch.name; nowLogo.src=ch.logo||''; nowCategory.textContent=ch.cat; nowEngine.textContent=currentEngine||'—'; }
-  async function switchChannel(id){
-    if(currentId===id) return;
-    const token=++loadToken, ch=getChannel(id); if(!ch){ toast('ไม่พบช่อง'); return; }
-    currentId=id; localStorage.setItem('lastWatchedChannel', id); showOverlay('กำลังโหลด…');
-    try{
-      await unloadEngines(); if(token!==loadToken) return;
-      if(isDash(ch.url)||ch.license_key) await useShaka(ch); else if(isHls(ch.url)) await useHls(ch); else await useShaka(ch);
-      if(token!==loadToken) return;
-      setNow(ch); hideOverlay(); if(opts.autoplay) video.play().catch(()=>{});
-    }catch(err){ console.error(err); showOverlay(err?.message||'เล่นไม่สำเร็จ'); toast('ไม่สามารถเล่นช่องได้'); }
-  }
-
-  // Share
-  shareBtn.addEventListener('click', async ()=>{
-    if(!currentId) return;
-    const u=new URL(location.href); u.searchParams.set('ch', currentId);
-    try{ await navigator.clipboard.writeText(u.href); toast('คัดลอกลิงก์แล้ว'); }catch{ toast('คัดลอกลิงก์ไม่สำเร็จ'); }
-  });
-
-  // Init
-  (function init(){
-    // chips
-    buildChips();
-    renderGrid('*');
-    // pause VOD when hidden
-    document.addEventListener('visibilitychange', ()=>{ if(document.hidden && isFinite(video.duration) && !Number.isNaN(video.duration)) video.pause(); });
-    // restore
-    restoreVol();
-    const url = new URLSearchParams(location.search);
-    const fromUrl = url.get('ch');
-    const last = localStorage.getItem('lastWatchedChannel');
-    const firstCat = Object.keys(channels)[0];
-    const firstId = Object.keys(channels[firstCat])[0];
-    const id = fromUrl || last || firstId;
-    if(id) switchChannel(id);
-  })();
+  // ---------- Init ----------
+  buildGrid();
+  // เล่นเรื่องแรกทันที
+  const firstId = Object.keys(movies)[0];
+  switchMovie(firstId);
 });
 </script>
-
-<!-- ใช้งานเฉพาะคอนเทนต์ที่คุณมีสิทธิ์รับชม -->
 </body>
 </html>
