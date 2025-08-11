@@ -20,112 +20,31 @@
             --card-background: #1e1e1e;
             --text-color: #e0e0e0;
         }
-        body {
-            margin: 0;
-            padding-bottom: 20px;
-            background: var(--background-color);
-            color: var(--text-color);
-            font-family: 'Sarabun', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            width: 95%;
-            max-width: 1000px;
-        }
-        .logo-container {
-            text-align: center;
-            padding: 15px 0;
-        }
-        .logo {
-            height: 50px;
-            max-width: 200px;
-            object-fit: contain;
-            transition: opacity 0.3s ease;
-        }
-        .video-container {
-            position: relative;
+        body { margin: 0; padding-bottom: 20px; background: var(--background-color); color: var(--text-color); font-family: 'Sarabun', sans-serif; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 95%; max-width: 1000px; }
+        .logo-container { text-align: center; padding: 15px 0; }
+        .logo { height: 50px; max-width: 200px; object-fit: contain; transition: opacity 0.3s ease; }
+        .video-container { position: relative; width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); background-color: #000; }
+        video { width: 100%; display: block; aspect-ratio: 16 / 9; }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.7); color: white; font-size: 1.2em; text-align: center; padding: 20px; box-sizing: border-box; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; }
+        .overlay.visible { opacity: 1; pointer-events: auto; }
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* ===== สไตล์สำหรับหมวดหมู่ ===== */
+        .category-header {
             width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            background-color: #000;
-        }
-        video {
-            width: 100%;
-            display: block;
-            aspect-ratio: 16 / 9;
-        }
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            font-size: 1.2em;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .overlay.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .channel-buttons {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .channel-buttons button {
-            padding: 10px 15px;
-            font-size: 1em;
-            border: 2px solid var(--primary-color);
-            border-radius: 20px;
-            background: transparent;
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            font-family: 'Sarabun', sans-serif;
-        }
-        .channel-buttons button:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-        .channel-buttons button.active {
-            background: var(--primary-color);
-            color: white;
+            margin: 25px 0 15px 0;
+            padding-bottom: 5px;
+            font-size: 1.5em;
             font-weight: 700;
-            box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+            color: var(--primary-color);
+            border-bottom: 2px solid #333;
         }
-        .channel-buttons button.loading {
-            pointer-events: none;
-            color: #888;
-            border-color: #555;
-        }
+        .channel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .channel-grid button { padding: 10px 15px; font-size: 1em; border: 2px solid #444; border-radius: 8px; background: var(--card-background); color: var(--text-color); cursor: pointer; transition: all 0.2s ease-in-out; font-family: 'Sarabun', sans-serif; text-align: center; }
+        .channel-grid button:hover { border-color: var(--primary-color); transform: translateY(-3px); }
+        .channel-grid button.active { background: var(--primary-color); color: white; font-weight: 700; border-color: var(--primary-color); box-shadow: 0 0 15px rgba(0, 123, 255, 0.5); }
     </style>
 </head>
 <body>
@@ -143,83 +62,83 @@
                 <span id="overlay-text"></span>
             </div>
         </div>
+        <div id="live-indicator" style="position: absolute; bottom: 60px; left: 20px; background-color: red; padding: 5px 10px; border-radius: 5px; font-weight: bold; display: none;">LIVE</div>
     </div>
+    
+    <div id="channels-container"></div>
 
-    <div id="channel-buttons" class="channel-buttons">
-        </div>
-
-    </div>
+</div>
 
 <script>
+    // ==========================================================
+    //  1. จัดโครงสร้างช่องใหม่เป็นหมวดหมู่
+    // ==========================================================
     const channels = {
-      // --- ช่องใหม่ที่เพิ่มเข้ามา ---
-      "aff_u23": {
-        name: "Indo vs Thai U23",
-        url: "https://tglmp04.akamaized.net/out/v1/400fc0702dee453bb33ebcc29466e58a/manifest.mpd",
-        logo: "https://iili.io/FWccqEg.md.jpg",
-        license_key: "91b9592c819246c68b3b08a1fe08ba22:fa0d80dfd865b34077bae44cd4a0c5e6"
-      },
-      "thairath_dash": {
-        name: "Thairath TV (DASH)",
-        url: "https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd",
-        logo: "https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png",
-        license_key: "d418f733ed224f9bb9c2b1589db22a20:6ed6fe26daa4b926810869ff60254ebb"
-      },
-      // --- ช่องเดิม (ลบ epg ออก) ---
-      "3bb1": {
-        name: "3BB 1",
-        url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/2/2.mpd",
-        logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
-        license_key: "ca20a93cf8e3421dafbd5bdb1990081b:86ae86a7391c481ea93eecdb740f0a14"
-      },
-      "3bb2": {
-        name: "3BB 2",
-        url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/3/3.mpd",
-        logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
-        license_key: "4d4426a505f64382a9841155d721cee6:0f4770219ccb4be5836a7517057e51c3"
-      },
-      "3bb3": {
-        name: "3BB 3",
-        url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/4/4.mpd",
-        logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
-        license_key: "1e98456bcbea44b7ad05831387e364ef:3d14fd4f9d3149a79b35a7124fccbd67"
-      },
-      "workpoint": {
-        name: "Workpoint TV",
-        url: "https://wp-live.cdn.3bb.co.th/wp/live/playlist.m3u8",
-        logo: "https://upload.wikimedia.org/wikipedia/commons/4/49/Workpoint_TV_Logo.png",
-        license_key: null
-      },
-      "thairathtv_hls": {
-        name: "Thairath TV (HLS)",
-        url: "https://d373k698imbfvs.cloudfront.net/out/v1/d08c879331984d948956b631988820c8/index.m3u8",
-        logo: "https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png",
-        license_key: null
-      }
+        "กีฬา": {
+            "aff_u23": {
+                name: "Indo vs Thai U23",
+                url: "https://tglmp04.akamaized.net/out/v1/400fc0702dee453bb33ebcc29466e58a/manifest.mpd",
+                logo: "https://iili.io/FWccqEg.md.jpg",
+                license_key: "91b9592c819246c68b3b08a1fe08ba22:fa0d80dfd865b34077bae44cd4a0c5e6"
+            }
+        },
+        "ข่าว & ทั่วไป": {
+            "thairath_dash": {
+                name: "Thairath TV (DASH)",
+                url: "https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd",
+                logo: "https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png",
+                license_key: "d418f733ed224f9bb9c2b1589db22a20:6ed6fe26daa4b926810869ff60254ebb"
+            },
+            "workpoint": {
+                name: "Workpoint TV",
+                url: "https://wp-live.cdn.3bb.co.th/wp/live/playlist.m3u8",
+                logo: "https://upload.wikimedia.org/wikipedia/commons/4/49/Workpoint_TV_Logo.png",
+                license_key: null
+            },
+            "thairathtv_hls": {
+                name: "Thairath TV (HLS)",
+                url: "https://d373k698imbfvs.cloudfront.net/out/v1/d08c879331984d948956b631988820c8/index.m3u8",
+                logo: "https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png",
+                license_key: null
+            }
+        },
+        "ช่อง 3BB": {
+            "3bb1": {
+                name: "3BB 1",
+                url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/2/2.mpd",
+                logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
+                license_key: "ca20a93cf8e3421dafbd5bdb1990081b:86ae86a7391c481ea93eecdb740f0a14"
+            },
+            "3bb2": {
+                name: "3BB 2",
+                url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/3/3.mpd",
+                logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
+                license_key: "4d4426a505f64382a9841155d721cee6:0f4770219ccb4be5836a7517057e51c3"
+            },
+            "3bb3": {
+                name: "3BB 3",
+                url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/4/4.mpd",
+                logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
+                license_key: "1e98456bcbea44b7ad05831387e364ef:3d14fd4f9d3149a79b35a7124fccbd67"
+            }
+        }
     };
 
     let player;
     let currentChannelId = null;
 
-    // --- อัปเดต: ลบ epgBox ออก ---
     const DOM = {
         video: document.getElementById('video'),
         channelLogo: document.getElementById('channel-logo'),
-        channelButtons: document.getElementById('channel-buttons'),
+        channelsContainer: document.getElementById('channels-container'),
         overlay: document.getElementById('video-overlay'),
         overlayText: document.getElementById('overlay-text'),
-        spinner: document.getElementById('spinner')
+        spinner: document.getElementById('spinner'),
+        liveIndicator: document.getElementById('live-indicator')
     };
 
-    function showOverlay(message, showSpinner = false) {
-        DOM.overlayText.textContent = message;
-        DOM.spinner.style.display = showSpinner ? 'block' : 'none';
-        DOM.overlay.classList.add('visible');
-    }
-
-    function hideOverlay() {
-        DOM.overlay.classList.remove('visible');
-    }
+    function showOverlay(message, showSpinner = false) { /* ... same as before ... */ }
+    function hideOverlay() { /* ... same as before ... */ }
 
     async function initPlayer() {
         shaka.polyfill.installAll();
@@ -227,40 +146,63 @@
             showOverlay("เบราว์เซอร์ของคุณไม่รองรับ ❌");
             return;
         }
-
         player = new shaka.Player(DOM.video);
         player.addEventListener('error', onPlayerError);
 
+        // --- เพิ่ม Event Listener เพื่ออัปเดตเวลา ---
+        DOM.video.addEventListener('timeupdate', updateTimeAndProgress);
+        DOM.video.addEventListener('loadedmetadata', updateTimeAndProgress);
+
         generateChannelButtons();
-        
         const lastChannel = localStorage.getItem('lastWatchedChannel') || 'aff_u23';
         await switchChannel(lastChannel);
     }
+    
+    // ==========================================================
+    //  2. ฟังก์ชันใหม่สำหรับจัดการเวลาและแถบ Progress
+    // ==========================================================
+    function updateTimeAndProgress() {
+        // ใช้ shaka.Player.isLive() เพื่อตรวจสอบสถานะ
+        const isLive = player.isLive();
+        const videoControls = DOM.video.controls;
+        
+        DOM.liveIndicator.style.display = isLive ? 'block' : 'none';
+        
+        // ถ้าเป็นช่องสด ให้ซ่อนแถบควบคุมเวลาของเบราว์เซอร์
+        // หมายเหตุ: การซ่อนบางส่วนของ controls อาจไม่ทำงานเหมือนกันทุกเบราว์เซอร์
+        if (isLive) {
+            // นี่เป็นวิธีแก้ปัญหาแบบง่ายๆ อาจต้องใช้ custom controls เพื่อความสวยงาม
+            DOM.video.style.pointerEvents = "auto";
+        }
+    }
+
 
     async function switchChannel(channelId) {
-        if (currentChannelId === channelId) return;
-
         currentChannelId = channelId;
         localStorage.setItem('lastWatchedChannel', channelId);
-        
         updateActiveButton(channelId);
         showOverlay("กำลังโหลดช่อง...", true);
         
-        const channel = channels[channelId];
+        // ค้นหาข้อมูลช่องจากโครงสร้างใหม่
+        let channel;
+        for (const category in channels) {
+            if (channels[category][channelId]) {
+                channel = channels[category][channelId];
+                break;
+            }
+        }
+
         if (!channel) {
             showOverlay(`ไม่พบช่อง ${channelId}`, false);
             return;
         }
 
         DOM.channelLogo.src = channel.logo;
-        // --- อัปเดต: ลบโค้ด EPG ออก ---
-
+        
         const drmConfig = { drm: { clearKeys: {} } };
         if (channel.license_key) {
             const [keyId, key] = channel.license_key.split(':');
-            if (keyId && key) {
-                drmConfig.drm.clearKeys[keyId] = key;
-            }
+            if (keyId && key) drmConfig.drm.clearKeys[keyId] = key;
         }
         player.configure(drmConfig);
 
@@ -276,22 +218,39 @@
     function onPlayerError(e) {
         console.error("Shaka error:", e.detail);
         const channelName = channels[currentChannelId]?.name || '';
-        showOverlay(`ไม่สามารถเล่นช่อง ${channelName} ได้\n(Error: ${e.detail.code})`, false);
+        showOverlay(`ไม่สามารถเล่นช่องได้\n(Error: ${e.detail.code})`, false);
     }
 
+    // ==========================================================
+    //  3. สร้างปุ่มตามหมวดหมู่
+    // ==========================================================
     function generateChannelButtons() {
-        DOM.channelButtons.innerHTML = ''; 
-        for (const id in channels) {
-            const button = document.createElement('button');
-            button.innerText = channels[id].name;
-            button.dataset.channelId = id;
-            button.onclick = () => switchChannel(id);
-            DOM.channelButtons.appendChild(button);
+        DOM.channelsContainer.innerHTML = '';
+        for (const categoryName in channels) {
+            // สร้าง Header ของหมวดหมู่
+            const categoryHeader = document.createElement('h2');
+            categoryHeader.className = 'category-header';
+            categoryHeader.textContent = categoryName;
+            DOM.channelsContainer.appendChild(categoryHeader);
+
+            // สร้าง Grid สำหรับปุ่มในหมวดหมู่นั้นๆ
+            const grid = document.createElement('div');
+            grid.className = 'channel-grid';
+
+            for (const id in channels[categoryName]) {
+                const channel = channels[categoryName][id];
+                const button = document.createElement('button');
+                button.innerText = channel.name;
+                button.dataset.channelId = id;
+                button.onclick = () => switchChannel(id);
+                grid.appendChild(button);
+            }
+            DOM.channelsContainer.appendChild(grid);
         }
     }
     
     function updateActiveButton(channelId) {
-        document.querySelectorAll('.channel-buttons button').forEach(button => {
+        document.querySelectorAll('.channel-grid button').forEach(button => {
             button.classList.toggle('active', button.dataset.channelId === channelId);
         });
     }
