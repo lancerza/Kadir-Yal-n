@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Minimal</title>
+<title>Online TV • Rails Minimal</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,14 +17,14 @@
   :root{
     --bg:#0e1116; --panel:#0f141b; --border:#1a2130;
     --text:#eaf0ff; --muted:#97a1b6; --primary:#0d8eff;
-    --card:#111722; --hover:#162033;
+    --card:#111722; --hover:#172339; --logoBox:#f7f9ff;
   }
   *{box-sizing:border-box}
   body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
-  .wrap{max-width:1100px; margin:20px auto 32px; padding:0 14px}
+  .wrap{max-width:1100px; margin:18px auto 32px; padding:0 14px}
 
   /* Header */
-  .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
+  .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
   .brand{display:flex; align-items:center; gap:10px; font-weight:700}
   .dot{width:10px; height:10px; border-radius:50%; background:var(--primary); box-shadow:0 0 10px rgba(13,142,255,.65)}
   .subtxt{color:var(--muted); font-size:.95rem}
@@ -63,24 +63,21 @@
   .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* Chips – flat, clean */
-  .chips{display:flex; gap:8px; overflow:auto; padding:12px 2px}
-  .chip{padding:7px 12px; border-radius:999px; background:#0e1420; color:#cfd7ea; cursor:pointer; user-select:none; border:1px solid var(--border)}
-  .chip.active{background:var(--primary); color:#fff; border-color:transparent}
-
-  /* Grid – clean cards */
-  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:12px}
-  .card{background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; cursor:pointer; transition:background .15s, border-color .15s}
-  .card:hover{background:var(--hover); border-color:#24314a}
-  .thumb{height:96px; display:flex; align-items:center; justify-content:center; background:#0c1320}
-  .thumb img{max-width:80%; max-height:72%; object-fit:contain}
-  .cbody{padding:10px 12px}
-  .name{font-weight:700; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .meta{margin-top:4px; color:var(--muted); font-size:.85rem}
-
+  /* Rails (horizontal lists) */
+  .rail{margin-top:16px}
+  .rail h3{margin:0 0 8px 4px; font-size:1rem; color:#dfe7ff; font-weight:700}
+  .rail-inner{display:flex; gap:12px; overflow-x:auto; padding:6px 2px 2px; scroll-snap-type:x proximity; scrollbar-width:thin}
+  .mini{scroll-snap-align:start; width:128px; min-width:128px; height:180px; background:var(--card); border:1px solid var(--border);
+        border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:10px 10px 8px;
+        cursor:pointer; transition:background .15s, border-color .15s, transform .15s}
+  .mini:hover{background:var(--hover); border-color:#22314a; transform:translateY(-1px)}
+  .logo-box{width:86px; height:62px; background:var(--logoBox); border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:10px}
+  .logo-box img{max-width:86%; max-height:80%; object-fit:contain}
+  .mini .name{font-weight:700; text-align:center; line-height:1.15; color:#eef3ff; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word}
+  .mini:focus{outline:2px solid var(--primary)}
   @media (max-width:720px){
-    .grid{grid-template-columns:repeat(auto-fill, minmax(140px,1fr))}
-    .thumb{height:88px}
+    .mini{width:118px; min-width:118px; height:170px}
+    .logo-box{width:80px; height:58px}
   }
 </style>
 </head>
@@ -131,11 +128,8 @@
     </div>
   </section>
 
-  <!-- Chips -->
-  <div class="chips" id="chips"></div>
-
-  <!-- Grid -->
-  <section class="grid" id="grid"></section>
+  <!-- Rails per category -->
+  <div id="rails"></div>
 </div>
 
 <script>
@@ -164,10 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ---------- State / DOM ----------
   let hls=null, shakaP=null, currentId=null, currentCat=null, currentEngine='—', token=0;
-  const MAX_REASONABLE_DUR = 8*3600; // >8h ถือว่าเพี้ยน/ไลฟ์ → ซ่อนแถบเวลา
+  const MAX_REASONABLE_DUR = 8*3600; // >8h => ซ่อนแถบเวลา
 
-  const chipsEl = document.getElementById('chips');
-  const grid = document.getElementById('grid');
+  const railsWrap = document.getElementById('rails');
   const video = document.getElementById('video');
   const overlay = document.getElementById('overlay');
   const ovtxt = document.getElementById('ovtxt');
@@ -261,43 +254,34 @@ document.addEventListener('DOMContentLoaded', () => {
       if(tk!==token) return;
       nowTitle.textContent=ch.name; nowLogo.src=ch.logo||'';
       nowMeta.textContent=`${cat} · ${currentEngine}${ch.license_key?' (DRM)':''}`;
-      document.getElementById('nowInfo').textContent=ch.name;
+      nowInfo.textContent=ch.name;
       hideOverlay();
       video.play().catch(()=>{});
     }catch(e){ console.error(e); showOverlay('เล่นไม่ได้ ลองใหม่'); }
   }
 
-  // ---------- Chips & Grid (clean) ----------
-  function buildChips(){
-    chipsEl.innerHTML='';
-    const all=document.createElement('div'); all.className='chip active'; all.textContent='ทั้งหมด'; all.dataset.cat='*'; chipsEl.appendChild(all);
-    Object.keys(channels).forEach(cat=>{ const c=document.createElement('div'); c.className='chip'; c.textContent=cat; c.dataset.cat=cat; chipsEl.appendChild(c); });
-    chipsEl.addEventListener('click',e=>{
-      const t=e.target.closest('.chip'); if(!t) return;
-      chipsEl.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); t.classList.add('active'); renderGrid(t.dataset.cat);
-    });
-  }
-  function renderGrid(cat='*'){
-    grid.innerHTML='';
-    const items=[];
-    for(const c in channels){
-      if(cat!=='*' && c!==cat) continue;
-      for(const id in channels[c]) items.push({cat:c,id,...channels[c][id]});
-    }
-    // ชื่อเรียง
-    items.sort((a,b)=>a.name.localeCompare(b.name,'th'));
-    for(const ch of items){
-      const card=document.createElement('div'); card.className='card'; card.tabIndex=0;
-      card.innerHTML=`
-        <div class="thumb"><img loading="lazy" src="${ch.logo}" alt=""></div>
-        <div class="cbody">
+  // ---------- Build rails ----------
+  function buildRails(){
+    railsWrap.innerHTML='';
+    Object.keys(channels).forEach(cat=>{
+      const section = document.createElement('section');
+      section.className = 'rail';
+      section.innerHTML = `<h3>${cat}</h3><div class="rail-inner" id="rail-${cat}"></div>`;
+      railsWrap.appendChild(section);
+
+      const inner = section.querySelector('.rail-inner');
+      Object.entries(channels[cat]).forEach(([id, ch])=>{
+        const card = document.createElement('button');
+        card.className = 'mini';
+        card.title = ch.name;
+        card.innerHTML = `
+          <div class="logo-box"><img loading="lazy" src="${ch.logo}" alt="" draggable="false"></div>
           <div class="name">${ch.name}</div>
-          <div class="meta">${ch.cat} · ${(isDash(ch.url)||ch.license_key)?'DASH/DRM':'HLS'}</div>
-        </div>`;
-      card.onclick=()=>switchChannel(ch.cat,ch.id);
-      card.onkeydown=(e)=>{ if(e.key==='Enter') switchChannel(ch.cat,ch.id); };
-      grid.appendChild(card);
-    }
+        `;
+        card.onclick = ()=> switchChannel(cat, id);
+        inner.appendChild(card);
+      });
+    });
   }
 
   // ---------- Controls ----------
@@ -334,8 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ---------- Init ----------
-  buildChips();
-  renderGrid('*');
+  buildRails();
   const firstCat=Object.keys(channels)[0], firstId=Object.keys(channels[firstCat])[0];
   switchChannel(firstCat, firstId);
 });
