@@ -1,21 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
     // --- Global Variables ---
-    let player, channels = {}, currentChannelId = null;
+    let activePlayer = null; // This will hold either HLS.js or DASH.js instance
+    let channels = {}, currentChannelId = null;
     let controlsTimeout;
 
     // --- DOM Elements ---
     const body = document.body;
-    const videoElement = document.getElementById('video');
+    const video = document.getElementById('video');
     const playerWrapper = document.querySelector('.player-wrapper');
+    const customControls = document.querySelector('.custom-controls');
     const channelButtonsContainer = document.getElementById('channel-buttons-container');
     const categorySidebar = document.getElementById('category-sidebar');
     const loadingIndicator = document.getElementById('loading-indicator');
     const loadingMessage = document.getElementById('loading-message');
     const errorOverlay = document.getElementById('error-overlay');
     const errorMessage = document.getElementById('error-message');
-    
-    // --- Player Control Elements ---
-    const customControls = document.querySelector('.custom-controls');
     const playPauseBtn = document.getElementById('play-pause-btn');
     const progressBar = document.getElementById('progress-bar');
     const timeDisplay = document.getElementById('time-display');
@@ -27,33 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const playOverlay = document.getElementById('play-overlay');
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const refreshChannelsBtn = document.getElementById('refresh-channels-btn');
-
-    // --- Initialize Video.js Player ---
-    player = videojs(videoElement, {
-        controls: false,
-        autoplay: true,
-        muted: true,
-        playsinline: true
-    });
-    // Initialize EME plugin for DRM
-    player.eme();
-
-    // Helper Function: Convert Hex string to Base64URL string
-    function hexToBase64Url(hexString) {
-        const bytes = [];
-        for (let i = 0; i < hexString.length; i += 2) {
-            bytes.push(parseInt(hexString.substr(i, 2), 16));
-        }
-        const base64 = btoa(String.fromCharCode.apply(null, bytes));
-        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-    }
-
+    
     function showLoadingIndicator(isLoading, message = '') {
         loadingIndicator.classList.toggle('hidden', !isLoading);
         if (isLoading) loadingMessage.textContent = message;
     }
 
-    // --- Player Logic ---
+    // --- Universal Player Controls (works with the <video> element) ---
     const playerControls = {
         showError: (message, channelName) => {
             const errorChannelName = document.getElementById('error-channel-name');
@@ -61,7 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
             
             errorChannelName.textContent = nameToShow || '';
             errorChannelName.style.display = nameToShow ? 'block' : 'none';
-            
             errorMessage.textContent = `Error: ${message}`;
             errorOverlay.classList.remove('hidden');
             
@@ -74,15 +52,15 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         hideError: () => errorOverlay.classList.add('hidden'),
         togglePlay: () => {
-            if (player.paused()) {
-                player.play().catch(e => console.error("Play error:", e));
+            if (video.paused) {
+                video.play().catch(e => console.error("Play error:", e));
             } else {
-                player.pause();
+                video.pause();
             }
         },
         updatePlayButton: () => {
-            playPauseBtn.querySelector('.icon-play').classList.toggle('hidden', !player.paused());
-            playPauseBtn.querySelector('.icon-pause').classList.toggle('hidden', player.paused());
+            playPauseBtn.querySelector('.icon-play').classList.toggle('hidden', !video.paused);
+            playPauseBtn.querySelector('.icon-pause').classList.toggle('hidden', video.paused);
         },
         formatTime: (timeInSeconds) => {
             const time = !isNaN(timeInSeconds) ? timeInSeconds : 0;
@@ -94,44 +72,39 @@ document.addEventListener("DOMContentLoaded", () => {
             return hours > 0 ? `${hours}:${formattedMinutes}:${formattedSeconds}` : `${formattedMinutes}:${formattedSeconds}`;
         },
         updateProgress: () => {
-            const currentTime = player.currentTime();
-            const duration = player.duration();
-            if (isFinite(duration)) {
-                progressBar.value = (currentTime / duration) * 100 || 0;
-                timeDisplay.textContent = `${playerControls.formatTime(currentTime)} / ${playerControls.formatTime(duration)}`;
-            }
+            progressBar.value = (video.currentTime / video.duration) * 100 || 0;
+            timeDisplay.textContent = `${playerControls.formatTime(video.currentTime)} / ${playerControls.formatTime(video.duration)}`;
         },
-        setProgress: () => {
-            const newTime = (progressBar.value / 100) * player.duration();
-            player.currentTime(newTime);
-        },
+        setProgress: () => video.currentTime = (progressBar.value / 100) * video.duration,
         toggleMute: () => {
-            player.muted(!player.muted());
-            localStorage.setItem('webtv_muted', player.muted());
+            video.muted = !video.muted;
+            localStorage.setItem('webtv_muted', video.muted);
         },
         updateMuteButton: () => {
-            const isMuted = player.muted() || player.volume() === 0;
+            const isMuted = video.muted || video.volume === 0;
             muteBtn.querySelector('.icon-volume-high').classList.toggle('hidden', isMuted);
             muteBtn.querySelector('.icon-volume-off').classList.toggle('hidden', !isMuted);
         },
         setVolume: () => {
-            player.volume(volumeSlider.value);
-            localStorage.setItem('webtv_volume', player.volume());
+            video.volume = volumeSlider.value;
+            localStorage.setItem('webtv_volume', video.volume);
         },
-        toggleFullscreen: () => player.requestFullscreen(),
-        togglePip: () => {
-            try {
-                 if (player.isInPictureInPicture()) {
-                    player.exitPictureInPicture();
-                } else {
-                    player.requestPictureInPicture();
-                }
-            } catch (e) {
-                console.error("PiP Error:", e);
+        toggleFullscreen: () => {
+            if (!document.fullscreenElement) {
+                playerWrapper.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+            } else {
+                document.exitFullscreen();
+            }
+        },
+        togglePip: async () => {
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+            } else {
+                await video.requestPictureInPicture();
             }
         },
         hideControls: () => {
-            if (player.paused()) return;
+            if (video.paused) return;
             customControls.classList.add('controls-hidden');
             playerWrapper.classList.add('hide-cursor');
         },
@@ -142,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
             controlsTimeout = setTimeout(playerControls.hideControls, 3000);
         },
         checkIfLive: () => {
-            const isLive = !isFinite(player.duration());
+            const isLive = !isFinite(video.duration);
             progressBar.style.display = isLive ? 'none' : 'flex';
             timeDisplay.style.display = isLive ? 'none' : 'block';
             liveIndicator.classList.toggle('hidden', !isLive);
@@ -210,46 +183,78 @@ document.addEventListener("DOMContentLoaded", () => {
             setupCategorySidebar(categories);
         },
         loadChannel: (channelId) => {
-            if (currentChannelId === channelId && !player.error()) return;
-
+            if (currentChannelId === channelId) return;
+            
             playerControls.hideError();
             showLoadingIndicator(true, 'กำลังโหลดช่อง...');
             currentChannelId = channelId;
             localStorage.setItem('webtv_lastChannelId', channelId);
             const channel = channels[channelId];
             if (!channel) return;
-
+            
             document.title = `▶️ ${channel.name} - Flow TV`;
             channelManager.updateActiveButton();
 
-            // This configuration is for videojs-contrib-eme
-            player.emeOptions = {};
-            const source = {
-                src: channel.url,
-                type: channel.url.includes('.m3u8') ? 'application/x-mpegURL' : 'application/dash+xml'
-            };
-
-            if (channel.drm === 'clearkey' && channel.keyId && channel.key) {
-                console.log(`Configuring Clearkey for ${channel.name} via videojs-contrib-eme`);
-                const keyIdB64 = hexToBase64Url(channel.keyId);
-                const keyB64 = hexToBase64Url(channel.key);
-
-                source.keySystems = {
-                    'org.w3.clearkey': {
-                        keys: [{
-                            "kty": "oct",
-                            "k": keyB64,
-                            "kid": keyIdB64
-                        }]
-                    }
-                };
+            // --- Destroy previous player instance ---
+            if (activePlayer) {
+                if (typeof activePlayer.destroy === 'function') {
+                    activePlayer.destroy();
+                } else if (typeof activePlayer.reset === 'function') {
+                    activePlayer.reset();
+                }
+                activePlayer = null;
             }
 
-            player.src(source);
+            // --- Select player based on URL ---
+            if (channel.url.includes('.m3u8')) {
+                // Use HLS.js for HLS streams
+                console.log("Using HLS.js player");
+                if (Hls.isSupported()) {
+                    const hls = new Hls();
+                    hls.loadSource(channel.url);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.ERROR, (event, data) => {
+                        if (data.fatal) {
+                            console.error('HLS.js Fatal Error:', data);
+                            playerControls.showError(`HLS Error: ${data.details}`, channel.name);
+                        }
+                    });
+                    activePlayer = hls;
+                } else {
+                    playerControls.showError("HLS is not supported on this browser.", channel.name);
+                }
+            } else if (channel.url.includes('.mpd')) {
+                // Use DASH.js for DASH streams
+                console.log("Using DASH.js player");
+                const dashPlayer = dashjs.MediaPlayer().create();
+                dashPlayer.initialize(video, channel.url, true); // true for autoplay
+                
+                if (channel.drm === 'clearkey' && channel.keyId && channel.key) {
+                    console.log(`Configuring Clearkey for ${channel.name} via dash.js`);
+                    const protectionData = {
+                        "org.w3.clearkey": {
+                            "clearkeys": {
+                                [channel.keyId]: channel.key
+                            }
+                        }
+                    };
+                    dashPlayer.setProtectionData(protectionData);
+                }
+                dashPlayer.on(dashjs.MediaPlayer.events.ERROR, (e) => {
+                    console.error("DASH.js Error:", e);
+                    playerControls.showError(`DASH Error: ${e.error.message}`, channel.name);
+                });
+                activePlayer = dashPlayer;
+            } else {
+                // Fallback for direct MP4 or other formats
+                console.log("Using native HTML5 player");
+                video.src = channel.url;
+            }
         }
     };
     
     function setupCategorySidebar(categories) {
+        // This function remains the same
         categorySidebar.innerHTML = '';
         categories.forEach(category => {
             const link = document.createElement('a');
@@ -280,31 +285,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Main Initialization ---
     async function init() {
-        player.on('play', playerControls.updatePlayButton);
-        player.on('pause', playerControls.updatePlayButton);
-        player.on('volumechange', playerControls.updateMuteButton);
-        player.on('playing', () => {
+        // --- Universal video element event listeners ---
+        video.addEventListener('play', playerControls.updatePlayButton);
+        video.addEventListener('pause', playerControls.updatePlayButton);
+        video.addEventListener('volumechange', playerControls.updateMuteButton);
+        video.addEventListener('playing', () => {
             showLoadingIndicator(false);
             playOverlay.classList.add('hidden');
             document.querySelectorAll('.channel-tile.loading').forEach(t => t.classList.remove('loading'));
             playerControls.checkIfLive();
         });
-        player.on('timeupdate', playerControls.updateProgress);
-        player.on('error', () => {
-            const error = player.error();
-            if (error) {
-                console.error('Video.js Error:', error);
-                playerControls.showError(error.message, channels[currentChannelId]?.name);
-            }
-        });
+        video.addEventListener('timeupdate', playerControls.updateProgress);
 
+        // --- Custom control listeners ---
         playPauseBtn.addEventListener('click', playerControls.togglePlay);
         progressBar.addEventListener('input', playerControls.setProgress);
         muteBtn.addEventListener('click', playerControls.toggleMute);
         volumeSlider.addEventListener('input', playerControls.setVolume);
         fullscreenBtn.addEventListener('click', playerControls.toggleFullscreen);
         pipBtn.addEventListener('click', playerControls.togglePip);
-        playOverlay.addEventListener('click', () => player.play());
+        playOverlay.addEventListener('click', () => video.play());
         playerWrapper.addEventListener('mousemove', playerControls.showControls);
         playerWrapper.addEventListener('mouseleave', playerControls.hideControls);
         
@@ -320,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => refreshChannelsBtn.classList.remove('refresh-active'), 1000);
         });
         
+        // Load initial state
         const savedTheme = localStorage.getItem('webtv_theme');
         if (savedTheme === 'light') {
             body.classList.add('light-theme');
@@ -327,11 +328,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         await fetchAndRenderChannels();
-
-        const savedVolume = localStorage.getItem('webtv_volume');
-        if (savedVolume !== null) player.volume(savedVolume);
         
-        playerControls.updatePlayButton();
+        video.volume = localStorage.getItem('webtv_volume') || 0.5;
+        volumeSlider.value = video.volume;
         playerControls.updateMuteButton();
 
         const lastChannelId = localStorage.getItem('webtv_lastChannelId');
