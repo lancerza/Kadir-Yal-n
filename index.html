@@ -154,7 +154,6 @@
             overlayText: document.getElementById('overlay-text'),
             spinner: document.getElementById('spinner'),
             datetimeDisplay: document.getElementById('datetime-display'),
-            // Custom Controls
             customControls: document.getElementById('custom-controls'),
             playPauseBtn: document.getElementById('play-pause-btn'),
             progressBar: document.getElementById('progress-bar'),
@@ -271,7 +270,6 @@
             setInterval(updateTime, 1000);
         }
 
-        // --- Setup for Custom Controls ---
         function setupEventListeners() {
             DOM.playPauseBtn.addEventListener('click', () => player.getMediaElement().paused ? player.getMediaElement().play() : player.getMediaElement().pause());
             DOM.muteBtn.addEventListener('click', () => player.getMediaElement().muted = !player.getMediaElement().muted);
