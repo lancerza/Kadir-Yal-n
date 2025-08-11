@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Clean</title>
+<title>Online TV • Minimal</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,13 +15,13 @@
 
 <style>
   :root{
-    --bg:#0e0f13; --panel:#121620; --border:#1f2431;
-    --text:#eef2ff; --muted:#9aa4bd; --primary:#0d8eff;
-    --chip:#1b2130;
+    --bg:#0e1116; --panel:#0f141b; --border:#1a2130;
+    --text:#eaf0ff; --muted:#97a1b6; --primary:#0d8eff;
+    --card:#111722; --hover:#162033;
   }
   *{box-sizing:border-box}
   body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
-  .wrap{max-width:1100px; margin:20px auto 28px; padding:0 14px}
+  .wrap{max-width:1100px; margin:20px auto 32px; padding:0 14px}
 
   /* Header */
   .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
@@ -31,22 +31,20 @@
 
   /* Player */
   .player{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden}
-  .topbar{display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-bottom:1px solid var(--border)}
+  .topbar{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--border)}
   .now{display:flex; align-items:center; gap:10px; min-width:0}
-  .now img{width:36px; height:36px; border-radius:8px; object-fit:contain; background:#00000055; padding:6px; border:1px solid rgba(255,255,255,.12)}
+  .now img{width:34px; height:34px; border-radius:6px; object-fit:contain; background:#00000050; padding:6px}
   .now .title{font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .now .meta{display:flex; gap:8px; color:var(--muted); font-size:.85rem}
-  .badge{padding:3px 8px; border-radius:999px; background:var(--chip); border:1px solid var(--border)}
-
+  .now .meta{color:var(--muted); font-size:.85rem}
   .vbox{position:relative; background:#000}
   video{width:100%; display:block; aspect-ratio:16/9; background:#000}
 
-  /* Controls */
+  /* Controls – minimal */
   .ctrl{position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; gap:10px; padding:8px 10px;
         background:linear-gradient(180deg, transparent, rgba(0,0,0,.55)); opacity:0; transform:translateY(8px); transition:.2s}
   .player:hover .ctrl, .ctrl.show{opacity:1; transform:translateY(0)}
-  .cbtn{width:34px; height:34px; display:grid; place-items:center; border-radius:9px; background:rgba(255,255,255,.08);
-        border:1px solid rgba(255,255,255,.18); color:#fff; cursor:pointer}
+  .cbtn{width:34px; height:34px; display:grid; place-items:center; border-radius:8px; background:rgba(255,255,255,.08);
+        border:1px solid rgba(255,255,255,.14); color:#fff; cursor:pointer}
   .cbtn svg{width:18px; height:18px}
   #bar{flex:1; height:6px; accent-color:var(--primary)}
   #bar,#vol{appearance:none; -webkit-appearance:none; outline:none; background:transparent}
@@ -60,29 +58,29 @@
 
   /* Overlay */
   .overlay{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
-           background:rgba(5,10,20,.65); color:#fff; opacity:0; pointer-events:none; transition:.2s}
+           background:rgba(6,10,18,.6); color:#fff; opacity:0; pointer-events:none; transition:.2s}
   .overlay.show{opacity:1; pointer-events:auto}
   .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* Chips */
-  .chips{display:flex; gap:8px; overflow:auto; padding:10px 2px}
-  .chip{padding:7px 12px; border-radius:999px; background:var(--chip); border:1px solid var(--border); cursor:pointer; user-select:none}
-  .chip.active{outline:2px solid var(--primary); box-shadow:0 0 0 3px rgba(13,142,255,.15)}
+  /* Chips – flat, clean */
+  .chips{display:flex; gap:8px; overflow:auto; padding:12px 2px}
+  .chip{padding:7px 12px; border-radius:999px; background:#0e1420; color:#cfd7ea; cursor:pointer; user-select:none; border:1px solid var(--border)}
+  .chip.active{background:var(--primary); color:#fff; border-color:transparent}
 
-  /* Grid */
-  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:10px}
-  .card{border:1px solid var(--border); background:#0f131d; border-radius:12px; overflow:hidden; cursor:pointer; transition:transform .15s}
-  .card:hover{transform:translateY(-2px)}
-  .thumb{height:86px; display:flex; align-items:center; justify-content:center; background:#0b0f18}
-  .thumb img{max-width:76%; max-height:64%; object-fit:contain; filter:drop-shadow(0 6px 16px rgba(0,0,0,.45))}
-  .cbody{padding:8px 10px}
-  .cname{font-weight:700; font-size:.92rem; line-height:1.25; color:#eaf0ff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .cmeta{display:flex; gap:6px; color:var(--muted); font-size:.78rem; margin-top:4px}
+  /* Grid – clean cards */
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:12px}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; cursor:pointer; transition:background .15s, border-color .15s}
+  .card:hover{background:var(--hover); border-color:#24314a}
+  .thumb{height:96px; display:flex; align-items:center; justify-content:center; background:#0c1320}
+  .thumb img{max-width:80%; max-height:72%; object-fit:contain}
+  .cbody{padding:10px 12px}
+  .name{font-weight:700; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .meta{margin-top:4px; color:var(--muted); font-size:.85rem}
 
-  @media (max-width:680px){
-    .grid{grid-template-columns:repeat(auto-fill, minmax(130px,1fr))}
-    .thumb{height:78px}
+  @media (max-width:720px){
+    .grid{grid-template-columns:repeat(auto-fill, minmax(140px,1fr))}
+    .thumb{height:88px}
   }
 </style>
 </head>
@@ -98,9 +96,9 @@
     <div class="topbar">
       <div class="now">
         <img id="nowLogo" alt="">
-        <div>
+        <div style="min-width:0">
           <div class="title" id="nowTitle">—</div>
-          <div class="meta"><span class="badge" id="nowCat">—</span><span class="badge" id="nowEngine">—</span></div>
+          <div class="meta" id="nowMeta">—</div>
         </div>
       </div>
     </div>
@@ -120,7 +118,7 @@
         </button>
         <span id="time" class="t">--:-- / --:--</span>
         <span id="live" class="live hidden">LIVE</span>
-        <input id="bar" type="range" value="0" step="1">
+        <input id="bar" type="range" value="0" step="1" title="แถบเวลา">
         <button id="mute" class="cbtn" title="เปิด/ปิดเสียง (M)">
           <svg class="i-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
           <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
@@ -142,7 +140,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // -------- Channels (ครบทุกหมวดตามที่เคยให้) --------
+  // ---------- Channels ----------
   const channels = {
     "กีฬา": {
       "aff_u23": { name:"Indo vs Thai U23", url:"https://tglmp04.akamaized.net/out/v1/400fc0702dee453bb33ebcc29466e58a/manifest.mpd", logo:"https://iili.io/FWccqEg.md.jpg", license_key:"91b9592c819246c68b3b08a1fe08ba22:fa0d80dfd865b34077bae44cd4a0c5e6" }
@@ -164,9 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // ------------- State / DOM -------------
-  let hls=null, shakaP=null, currentId=null, currentEngine='—', token=0;
-  const MAX_REASONABLE_DUR = 8*3600; // >8 ชม. ถือว่า live/เพี้ยน → ซ่อนแถบเวลา
+  // ---------- State / DOM ----------
+  let hls=null, shakaP=null, currentId=null, currentCat=null, currentEngine='—', token=0;
+  const MAX_REASONABLE_DUR = 8*3600; // >8h ถือว่าเพี้ยน/ไลฟ์ → ซ่อนแถบเวลา
 
   const chipsEl = document.getElementById('chips');
   const grid = document.getElementById('grid');
@@ -182,9 +180,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const time = document.getElementById('time'), livePill = document.getElementById('live');
   const fs = document.getElementById('fs');
   const nowInfo = document.getElementById('nowInfo'), nowTitle = document.getElementById('nowTitle');
-  const nowLogo = document.getElementById('nowLogo'), nowCat = document.getElementById('nowCat'), nowEngine = document.getElementById('nowEngine');
+  const nowMeta = document.getElementById('nowMeta'), nowLogo = document.getElementById('nowLogo');
 
-  // ------------- Utils -------------
+  // ---------- Utils ----------
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
   const isHls = (u)=>/\.m3u8(\?|$)/i.test(u);
   const isDash = (u)=>/\.mpd(\?|$)/i.test(u);
@@ -193,22 +191,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function fmt(sec, forceH=false){
     if(!isFinite(sec)) return '--:--';
-    sec = Math.max(0, Math.floor(sec));
-    const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
-    return (forceH || h>0) ? `${String(h).padStart(1,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+    sec=Math.max(0,Math.floor(sec));
+    const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+    return (forceH||h>0) ? `${String(h).padStart(1,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
   }
   function isLiveLike(){
-    const d = video.duration;
+    const d=video.duration;
     return !isFinite(d) || d<=0 || d>MAX_REASONABLE_DUR;
   }
   function refreshTimeUI(){
     const liveLike = isLiveLike();
     livePill.classList.toggle('hidden', !liveLike);
     bar.classList.toggle('hidden', liveLike);
-    if(liveLike){ time.textContent = 'ถ่ายทอดสด'; }
+    if(liveLike){ time.textContent='ถ่ายทอดสด'; }
     else{
       const forceH = video.duration>=3600;
-      time.textContent = `${fmt(video.currentTime||0, forceH)} / ${fmt(video.duration||0, forceH)}`;
+      time.textContent = `${fmt(video.currentTime||0,forceH)} / ${fmt(video.duration||0,forceH)}`;
       bar.max = isFinite(video.duration)?video.duration:0;
       bar.value = video.currentTime||0;
     }
@@ -223,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function useHls(url){
-    if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src = url; currentEngine='HLS'; return; }
+    if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=url; currentEngine='HLS'; return; }
     if(window.Hls && Hls.isSupported()){
       hls = new Hls({
         enableWorker:true, lowLatencyMode:false,
@@ -235,8 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       hls.attachMedia(video); hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(url));
       hls.on(Hls.Events.ERROR,(_,d)=>{ if(d.fatal){ if(d.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad(); else if(d.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError(); }});
-      currentEngine='HLS';
-      return;
+      currentEngine='HLS'; return;
     }
     throw new Error('เบราว์เซอร์ไม่รองรับ HLS');
   }
@@ -245,85 +242,67 @@ document.addEventListener('DOMContentLoaded', () => {
     shaka.polyfill.installAll();
     if(!shaka.Player.isBrowserSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ DASH');
     shakaP = new shaka.Player(video);
-    const cfg = {
-      streaming:{bufferingGoal:30,rebufferingGoal:5,retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}},
-      manifest:{retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}},
-      drm:{clearKeys:{}}
-    };
-    if(ch.license_key){
-      const [kid,key] = String(ch.license_key).split(':'); if(kid&&key) cfg.drm.clearKeys[kid]=key;
-    }
-    shakaP.configure(cfg);
-    await shakaP.load(ch.url);
-    currentEngine='DASH';
+    const cfg={streaming:{bufferingGoal:30,rebufferingGoal:5,retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}},
+               manifest:{retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}},
+               drm:{clearKeys:{}}};
+    if(ch.license_key){ const [kid,key]=String(ch.license_key).split(':'); if(kid&&key) cfg.drm.clearKeys[kid]=key; }
+    shakaP.configure(cfg); await shakaP.load(ch.url); currentEngine='DASH';
   }
 
   async function switchChannel(cat,id){
-    if(currentId===id) return;
-    const tk = ++token;
-    const ch = channels[cat]?.[id]; if(!ch) return;
-
-    currentId=id;
-    showOverlay('กำลังโหลด…');
-
+    if(currentId===id && currentCat===cat) return;
+    const tk=++token; const ch=channels[cat]?.[id]; if(!ch) return;
+    currentId=id; currentCat=cat; showOverlay('กำลังโหลด…');
     try{
       await unload(); if(tk!==token) return;
       if(isDash(ch.url) || ch.license_key) await useShaka(ch);
       else if(isHls(ch.url)) await useHls(ch.url);
       else await useShaka(ch);
-
       if(tk!==token) return;
-      nowTitle.textContent = ch.name; nowLogo.src = ch.logo||''; nowCat.textContent = cat; nowEngine.textContent = currentEngine;
-      nowInfo.textContent = ch.name;
+      nowTitle.textContent=ch.name; nowLogo.src=ch.logo||'';
+      nowMeta.textContent=`${cat} · ${currentEngine}${ch.license_key?' (DRM)':''}`;
+      document.getElementById('nowInfo').textContent=ch.name;
       hideOverlay();
       video.play().catch(()=>{});
-    }catch(e){
-      console.error(e);
-      showOverlay('เล่นไม่ได้ ลองใหม่');
-    }
+    }catch(e){ console.error(e); showOverlay('เล่นไม่ได้ ลองใหม่'); }
   }
 
-  // -------- Build chips & grid --------
+  // ---------- Chips & Grid (clean) ----------
   function buildChips(){
     chipsEl.innerHTML='';
-    const all = document.createElement('div'); all.className='chip active'; all.textContent='ทั้งหมด'; all.dataset.cat='*'; chipsEl.appendChild(all);
-    Object.keys(channels).forEach(cat=>{
-      const c = document.createElement('div'); c.className='chip'; c.textContent=cat; c.dataset.cat=cat; chipsEl.appendChild(c);
-    });
-    chipsEl.addEventListener('click', (e)=>{
+    const all=document.createElement('div'); all.className='chip active'; all.textContent='ทั้งหมด'; all.dataset.cat='*'; chipsEl.appendChild(all);
+    Object.keys(channels).forEach(cat=>{ const c=document.createElement('div'); c.className='chip'; c.textContent=cat; c.dataset.cat=cat; chipsEl.appendChild(c); });
+    chipsEl.addEventListener('click',e=>{
       const t=e.target.closest('.chip'); if(!t) return;
-      chipsEl.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-      t.classList.add('active');
-      renderGrid(t.dataset.cat);
+      chipsEl.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); t.classList.add('active'); renderGrid(t.dataset.cat);
     });
   }
   function renderGrid(cat='*'){
     grid.innerHTML='';
-    const list=[];
+    const items=[];
     for(const c in channels){
       if(cat!=='*' && c!==cat) continue;
-      for(const id in channels[c]){
-        const ch=channels[c][id];
-        list.push({cat:c,id,...ch});
-      }
+      for(const id in channels[c]) items.push({cat:c,id,...channels[c][id]});
     }
-    list.forEach(ch=>{
+    // ชื่อเรียง
+    items.sort((a,b)=>a.name.localeCompare(b.name,'th'));
+    for(const ch of items){
       const card=document.createElement('div'); card.className='card'; card.tabIndex=0;
       card.innerHTML=`
         <div class="thumb"><img loading="lazy" src="${ch.logo}" alt=""></div>
         <div class="cbody">
-          <div class="cname">${ch.name}</div>
-          <div class="cmeta"><span class="badge">${ch.cat}</span><span class="badge">${isDash(ch.url)||ch.license_key?'DASH/DRM':'HLS'}</span></div>
+          <div class="name">${ch.name}</div>
+          <div class="meta">${ch.cat} · ${(isDash(ch.url)||ch.license_key)?'DASH/DRM':'HLS'}</div>
         </div>`;
       card.onclick=()=>switchChannel(ch.cat,ch.id);
       card.onkeydown=(e)=>{ if(e.key==='Enter') switchChannel(ch.cat,ch.id); };
       grid.appendChild(card);
-    });
+    }
   }
 
-  // -------- Controls --------
+  // ---------- Controls ----------
   let ctrlTimer;
-  const showCtrl=()=>{ clearTimeout(ctrlTimer); ctrl.classList.add('show'); ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),2000); };
+  const showCtrl=()=>{ clearTimeout(ctrlTimer); ctrl.classList.add('show'); ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),1800); };
   document.getElementById('vbox').addEventListener('mousemove', showCtrl);
   document.getElementById('vbox').addEventListener('touchstart', showCtrl);
 
@@ -340,9 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fs.addEventListener('click', async ()=>{
     try{
-      const b=document.getElementById('vbox');
-      if(!document.fullscreenElement) await b.requestFullscreen();
-      else await document.exitFullscreen();
+      const box=document.getElementById('vbox');
+      if(!document.fullscreenElement) await box.requestFullscreen(); else await document.exitFullscreen();
     }catch{}
   });
 
@@ -355,12 +333,10 @@ document.addEventListener('DOMContentLoaded', () => {
     else if(e.key==='ArrowLeft'){ video.currentTime=Math.max(0,(video.currentTime||0)-5); }
   });
 
-  // -------- Init --------
+  // ---------- Init ----------
   buildChips();
   renderGrid('*');
-  // เริ่มด้วยช่องแรกสุด
-  const firstCat = Object.keys(channels)[0];
-  const firstId = Object.keys(channels[firstCat])[0];
+  const firstCat=Object.keys(channels)[0], firstId=Object.keys(channels[firstCat])[0];
   switchChannel(firstCat, firstId);
 });
 </script>
