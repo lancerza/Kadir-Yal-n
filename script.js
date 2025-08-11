@@ -2,20 +2,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Global Variables ---
     let player, channels = {}, currentChannelId = null;
     let controlsTimeout;
+    let isAudioUnlocked = false;
 
     // --- DOM Elements ---
     const body = document.body;
-    const videoElement = document.getElementById('video');
-    const playerWrapper = document.querySelector('.player-wrapper');
-    const channelButtonsContainer = document.getElementById('channel-buttons-container');
     const categorySidebar = document.getElementById('category-sidebar');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const refreshChannelsBtn = document.getElementById('refresh-channels-btn');
+    const video = document.getElementById('video');
+    const playerWrapper = document.querySelector('.player-wrapper');
+    const customControls = document.querySelector('.custom-controls');
+    const channelButtonsContainer = document.getElementById('channel-buttons-container');
     const loadingIndicator = document.getElementById('loading-indicator');
     const loadingMessage = document.getElementById('loading-message');
     const errorOverlay = document.getElementById('error-overlay');
     const errorMessage = document.getElementById('error-message');
-    
-    // --- Player Control Elements ---
-    const customControls = document.querySelector('.custom-controls');
     const playPauseBtn = document.getElementById('play-pause-btn');
     const progressBar = document.getElementById('progress-bar');
     const timeDisplay = document.getElementById('time-display');
@@ -25,47 +26,43 @@ document.addEventListener("DOMContentLoaded", () => {
     const pipBtn = document.getElementById('pip-btn');
     const liveIndicator = document.getElementById('live-indicator');
     const playOverlay = document.getElementById('play-overlay');
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    const refreshChannelsBtn = document.getElementById('refresh-channels-btn');
 
-    // --- Initialize Video.js Player ---
-    player = videojs(videoElement, {
-        controls: false,
-        autoplay: true,
-        muted: true,
-        playsinline: true
-    });
-    player.eme();
+    // --- Audio Unlock Function ---
+    function unlockAudio() {
+        if (isAudioUnlocked) return;
+        
+        console.log("Audio unlocked by user interaction.");
+        isAudioUnlocked = true;
+        
+        const savedMuted = localStorage.getItem('webtv_muted') === 'true';
+        video.muted = savedMuted;
+        playerControls.updateMuteButton();
 
-    // =================================================================
-    //  NEW HELPER FUNCTION: Convert Hex string to Base64URL string
-    // =================================================================
-    function hexToBase64Url(hexString) {
-        const bytes = [];
-        for (let i = 0; i < hexString.length; i += 2) {
-            bytes.push(parseInt(hexString.substr(i, 2), 16));
-        }
-        const base64 = btoa(String.fromCharCode.apply(null, bytes));
-        return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-    }
-
-    function showLoadingIndicator(isLoading, message = '') {
-        loadingIndicator.classList.toggle('hidden', !isLoading);
-        if (isLoading) loadingMessage.textContent = message;
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('keydown', unlockAudio);
     }
 
     // --- Player Logic ---
+    function showLoadingIndicator(isLoading, message = '') {
+        loadingIndicator.classList.toggle('hidden', !isLoading);
+        if (isLoading) {
+            loadingMessage.textContent = message;
+        }
+    }
+
     const playerControls = {
         showError: (message, channelName) => {
             const errorChannelName = document.getElementById('error-channel-name');
-            const nameToShow = channelName || (currentChannelId && channels[currentChannelId] ? channels[currentChannelId].name : '');
+            const nameToShow = channelName || (currentChannelId && channels[currentChannelId] ? channels[currentChannelId].name : null);
             
-            errorChannelName.textContent = nameToShow || '';
-            errorChannelName.style.display = nameToShow ? 'block' : 'none';
-            
-            errorMessage.textContent = `Error: ${message}`;
-            errorOverlay.classList.remove('hidden');
-            
+            if (nameToShow) {
+                errorChannelName.textContent = nameToShow;
+                errorChannelName.style.display = 'block';
+            } else {
+                errorChannelName.style.display = 'none';
+            }
+            if (errorMessage) errorMessage.textContent = message;
+            if (errorOverlay) errorOverlay.classList.remove('hidden');
             const retryBtn = document.getElementById('retry-btn');
             const newBtn = retryBtn.cloneNode(true);
             newBtn.addEventListener('click', () => {
@@ -73,66 +70,72 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             retryBtn.parentNode.replaceChild(newBtn, retryBtn);
         },
-        hideError: () => errorOverlay.classList.add('hidden'),
+        hideError: () => {
+            if (errorOverlay) errorOverlay.classList.add('hidden');
+        },
         togglePlay: () => {
-            if (player.paused()) {
-                player.play().catch(e => console.error("Play error:", e));
+            if (video.paused) {
+                video.play().catch(e => { if (e.name !== 'AbortError') console.error("Error playing video:", e); });
             } else {
-                player.pause();
+                video.pause();
             }
         },
         updatePlayButton: () => {
-            playPauseBtn.querySelector('.icon-play').classList.toggle('hidden', !player.paused());
-            playPauseBtn.querySelector('.icon-pause').classList.toggle('hidden', player.paused());
+            playPauseBtn.querySelector('.icon-play').classList.toggle('hidden', !video.paused);
+            playPauseBtn.querySelector('.icon-pause').classList.toggle('hidden', video.paused);
         },
         formatTime: (timeInSeconds) => {
             const time = !isNaN(timeInSeconds) ? timeInSeconds : 0;
             const hours = Math.floor(time / 3600);
             const minutes = Math.floor((time % 3600) / 60);
             const seconds = Math.floor(time % 60);
+
             const formattedMinutes = minutes.toString().padStart(2, '0');
             const formattedSeconds = seconds.toString().padStart(2, '0');
-            return hours > 0 ? `${hours}:${formattedMinutes}:${formattedSeconds}` : `${formattedMinutes}:${formattedSeconds}`;
-        },
-        updateProgress: () => {
-            const currentTime = player.currentTime();
-            const duration = player.duration();
-            if (isFinite(duration)) {
-                progressBar.value = (currentTime / duration) * 100 || 0;
-                timeDisplay.textContent = `${playerControls.formatTime(currentTime)} / ${playerControls.formatTime(duration)}`;
+
+            if (hours > 0) {
+                return `${hours}:${formattedMinutes}:${formattedSeconds}`;
+            } else {
+                return `${formattedMinutes}:${formattedSeconds}`;
             }
         },
-        setProgress: () => {
-            const newTime = (progressBar.value / 100) * player.duration();
-            player.currentTime(newTime);
+        updateProgress: () => {
+            progressBar.value = (video.currentTime / video.duration) * 100 || 0;
+            timeDisplay.textContent = `${playerControls.formatTime(video.currentTime)} / ${playerControls.formatTime(video.duration)}`;
         },
+        setProgress: () => video.currentTime = (progressBar.value / 100) * video.duration,
         toggleMute: () => {
-            player.muted(!player.muted());
-            localStorage.setItem('webtv_muted', player.muted());
+            unlockAudio();
+            video.muted = !video.muted;
+            localStorage.setItem('webtv_muted', video.muted);
+            playerControls.updateMuteButton();
         },
         updateMuteButton: () => {
-            const isMuted = player.muted() || player.volume() === 0;
+            const isMuted = video.muted || video.volume === 0;
             muteBtn.querySelector('.icon-volume-high').classList.toggle('hidden', isMuted);
             muteBtn.querySelector('.icon-volume-off').classList.toggle('hidden', !isMuted);
         },
         setVolume: () => {
-            player.volume(volumeSlider.value);
-            localStorage.setItem('webtv_volume', player.volume());
+            unlockAudio();
+            video.volume = volumeSlider.value;
+            video.muted = Number(volumeSlider.value) === 0;
+            playerControls.updateMuteButton();
+            localStorage.setItem('webtv_volume', video.volume);
+            localStorage.setItem('webtv_muted', video.muted);
         },
-        toggleFullscreen: () => player.requestFullscreen(),
-        togglePip: () => {
+        toggleFullscreen: () => {
+            if (!document.fullscreenElement) playerWrapper.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+            else document.exitFullscreen();
+        },
+        togglePip: async () => {
+            if (!document.pictureInPictureEnabled) return alert('เบราว์เซอร์ของคุณไม่รองรับ Picture-in-Picture');
             try {
-                 if (player.isInPictureInPicture()) {
-                    player.exitPictureInPicture();
-                } else {
-                    player.requestPictureInPicture();
-                }
-            } catch (e) {
-                console.error("PiP Error:", e);
-            }
+                if (document.pictureInPictureElement) await document.exitPictureInPicture();
+                else await video.requestPictureInPicture();
+            } catch (error) { console.error("เกิดข้อผิดพลาดในการเปิดโหมด PiP:", error); }
         },
         hideControls: () => {
-            if (player.paused()) return;
+            if (video.paused) return;
             customControls.classList.add('controls-hidden');
             playerWrapper.classList.add('hide-cursor');
         },
@@ -143,10 +146,10 @@ document.addEventListener("DOMContentLoaded", () => {
             controlsTimeout = setTimeout(playerControls.hideControls, 3000);
         },
         checkIfLive: () => {
-            const isLive = !isFinite(player.duration());
+            const isLive = player.isLive();
             progressBar.style.display = isLive ? 'none' : 'flex';
             timeDisplay.style.display = isLive ? 'none' : 'block';
-            liveIndicator.classList.toggle('hidden', !isLive);
+            if (liveIndicator) liveIndicator.classList.toggle('hidden', !isLive);
         }
     };
 
@@ -158,6 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
         createChannelButtons: () => {
             channelButtonsContainer.innerHTML = '';
             categorySidebar.innerHTML = '';
+            
             const groupedChannels = {};
             for (const channelId in channels) {
                 const channel = channels[channelId];
@@ -165,19 +169,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!groupedChannels[category]) groupedChannels[category] = [];
                 groupedChannels[category].push({ id: channelId, ...channel });
             }
+
             const categories = Object.keys(groupedChannels);
+
             for (const category of categories) {
                 const header = document.createElement('h2');
                 header.className = 'channel-category-header';
                 header.textContent = category;
                 header.id = `category-${category.replace(/\s+/g, '-')}`;
                 channelButtonsContainer.appendChild(header);
+                
                 const grid = document.createElement('div');
                 grid.className = 'channel-buttons';
-                if (category === 'หนัง') grid.classList.add('movie-grid');
+                
+                if (category === 'หนัง') {
+                    grid.classList.add('movie-grid');
+                }
+
                 groupedChannels[category].forEach((channel, index) => {
                     const tile = document.createElement('a');
-                    tile.className = `channel-tile ${category === 'หนัง' ? 'movie-tile' : ''}`;
+                    tile.className = 'channel-tile';
+
+                    if (category === 'หนัง') {
+                        tile.classList.add('movie-tile');
+                    }
+
                     tile.dataset.channelId = channel.id;
                     tile.addEventListener('click', () => {
                         document.querySelectorAll('.channel-tile.loading').forEach(t => t.classList.remove('loading'));
@@ -185,24 +201,30 @@ document.addEventListener("DOMContentLoaded", () => {
                         channelManager.loadChannel(channel.id);
                         playerWrapper.scrollIntoView({ behavior: 'smooth' });
                     });
+                    
                     const logoWrapper = document.createElement('div');
                     logoWrapper.className = 'channel-logo-wrapper';
+                    
                     const logoImg = document.createElement('img');
                     logoImg.src = channel.logo;
                     logoImg.alt = channel.name;
                     logoImg.loading = 'lazy';
+                    
                     logoWrapper.appendChild(logoImg);
                     tile.appendChild(logoWrapper);
+
                     const nameSpan = document.createElement('span');
                     nameSpan.className = 'channel-tile-name';
                     nameSpan.innerText = channel.name;
                     tile.appendChild(nameSpan);
+
                     if (channel.badge) {
                         const badge = document.createElement('div');
                         badge.className = 'channel-badge';
                         badge.textContent = channel.badge;
                         tile.appendChild(badge);
                     }
+                    
                     tile.style.animationDelay = `${index * 0.05}s`;
                     grid.appendChild(tile);
                 });
@@ -210,73 +232,151 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             setupCategorySidebar(categories);
         },
-        loadChannel: (channelId) => {
+        loadChannel: async (channelId) => {
             if (currentChannelId === channelId) return;
 
+            video.classList.remove('visible');
             playerControls.hideError();
             showLoadingIndicator(true, 'กำลังโหลดช่อง...');
+            await new Promise(resolve => setTimeout(resolve, 300));
             currentChannelId = channelId;
             localStorage.setItem('webtv_lastChannelId', channelId);
+            
             const channel = channels[channelId];
-            if (!channel) return;
-
+            if (!channel) {
+                playerControls.showError("ไม่พบข้อมูลช่อง", `ID: ${channelId}`);
+                return;
+            }
+            
             document.title = `▶️ ${channel.name} - Flow TV`;
             channelManager.updateActiveButton();
 
-            let sourceType;
-            if (channel.url.includes('.m3u8')) {
-                sourceType = 'application/x-mpegURL';
-            } else if (channel.url.includes('.mpd')) {
-                sourceType = 'application/dash+xml';
-            }
+            // --- Shaka Player Configuration ---
+            const config = { drm: { clearKeys: {} } };
 
-            const source = {
-                src: channel.url,
-                type: sourceType,
-            };
-
-            // =================================================================
-            //  UPDATED DRM CONFIGURATION
-            // =================================================================
-            if (channel.drm === 'clearkey' && channel.keyId && channel.key) {
+            // Check if channel is DRM protected
+            if (channel.type === 'dash' && channel.drm === 'clearkey' && channel.keyId && channel.key) {
                 console.log(`Configuring Clearkey for ${channel.name}`);
-                
-                // Convert hex keys to Base64URL before passing to the player
-                const keyIdB64 = hexToBase64Url(channel.keyId);
-                const keyB64 = hexToBase64Url(channel.key);
-
-                source.keySystems = {
-                    'org.w3.clearkey': {
-                        keys: [{
-                            "kty": "oct",
-                            "k": keyB64,
-                            "kid": keyIdB64
-                        }]
-                    }
-                };
+                config.drm.clearKeys[channel.keyId] = channel.key;
             }
-
-            player.src(source);
-            player.play().catch(e => console.error("Error on load:", e));
+            
+            player.configure(config);
+            
+            try {
+                await player.load(channel.url);
+                console.log(`Channel "${channel.name}" loaded successfully.`);
+                playOverlay.classList.add('hidden');
+            } catch (error) {
+                console.error(`Error loading channel: ${channel.name}`, error);
+                playerControls.showError(`เกิดข้อผิดพลาดในการโหลดช่อง (code: ${error.code})`, channel.name);
+            }
         }
     };
     
+    // --- Datetime Logic ---
+    const timeManager = {
+        update: () => {
+            const now = new Date();
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            const thaiDate = now.toLocaleDateString('th-TH', dateOptions);
+            const thaiTime = now.toLocaleTimeString('th-TH', timeOptions);
+            document.getElementById('datetime-display').innerHTML = `🕒 ${thaiDate} ${thaiTime}`;
+        },
+        start: () => {
+            timeManager.update();
+            setInterval(timeManager.update, 1000);
+        }
+    };
+
+    // --- Sidebar Logic ---
     function setupCategorySidebar(categories) {
-        categorySidebar.innerHTML = '';
         categories.forEach(category => {
             const link = document.createElement('a');
             link.className = 'category-link';
             link.textContent = category;
             const categoryId = `category-${category.replace(/\s+/g, '-')}`;
             link.href = `#${categoryId}`;
+
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 document.getElementById(categoryId)?.scrollIntoView({ behavior: 'smooth' });
             });
+
             categorySidebar.appendChild(link);
         });
+        // Intersection observer logic can be added here as before
+    }
+
+    // --- Shaka Player Error Handler ---
+    function onPlayerErrorEvent(event) {
+        onPlayerError(event.detail);
+    }
+
+    function onPlayerError(error) {
+        console.error('Shaka Player Error:', error);
+        playerControls.showError(`Error: ${error.message} (code: ${error.code})`, channels[currentChannelId]?.name);
     }
     
+    // --- Event Listener Setup ---
+    function setupEventListeners() {
+        playPauseBtn.addEventListener('click', playerControls.togglePlay);
+        
+        video.addEventListener('playing', () => {
+            document.querySelectorAll('.channel-tile.loading').forEach(t => t.classList.remove('loading'));
+            showLoadingIndicator(false);
+            video.classList.add('visible'); 
+            playerControls.checkIfLive();
+        });
+        video.addEventListener('play', () => {
+            playOverlay.classList.add('hidden');
+            playerControls.updatePlayButton();
+            playerControls.showControls();
+        });
+        video.addEventListener('pause', () => { playerControls.updatePlayButton(); playerControls.showControls(); });
+        progressBar.addEventListener('input', playerControls.setProgress);
+        video.addEventListener('timeupdate', playerControls.updateProgress);
+        muteBtn.addEventListener('click', playerControls.toggleMute);
+        volumeSlider.addEventListener('input', playerControls.setVolume);
+        
+        fullscreenBtn.addEventListener('click', playerControls.toggleFullscreen);
+        pipBtn.addEventListener('click', playerControls.togglePip);
+        
+        themeToggleBtn.addEventListener('click', () => {
+            body.classList.toggle('light-theme');
+            const isLight = body.classList.contains('light-theme');
+            themeToggleBtn.textContent = isLight ? '🌙' : '☀️';
+            localStorage.setItem('webtv_theme', isLight ? 'light' : 'dark');
+        });
+
+        refreshChannelsBtn.addEventListener('click', () => {
+            refreshChannelsBtn.classList.add('refresh-active');
+            fetchAndRenderChannels();
+            setTimeout(() => {
+                refreshChannelsBtn.classList.remove('refresh-active');
+            }, 1000);
+        });
+
+        playOverlay.addEventListener('click', () => {
+            playOverlay.classList.add('hidden');
+            showLoadingIndicator(true, 'กำลังเชื่อมต่อ...');
+            playerControls.togglePlay();
+        });
+
+        playerWrapper.addEventListener('mousemove', playerControls.showControls);
+        playerWrapper.addEventListener('mouseleave', playerControls.hideControls);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            switch(e.key.toLowerCase()) {
+                case ' ': e.preventDefault(); playerControls.togglePlay(); break;
+                case 'm': playerControls.toggleMute(); break;
+                case 'f': playerControls.toggleFullscreen(); break;
+            }
+        });
+    }
+
+    // --- Data Fetching ---
     async function fetchAndRenderChannels() {
         console.log("Fetching channel list...");
         try {
@@ -290,69 +390,58 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Main Initialization ---
-    async function init() {
-        player.on('play', playerControls.updatePlayButton);
-        player.on('pause', playerControls.updatePlayButton);
-        player.on('volumechange', playerControls.updateMuteButton);
-        player.on('playing', () => {
-            showLoadingIndicator(false);
-            playOverlay.classList.add('hidden');
-            document.querySelectorAll('.channel-tile.loading').forEach(t => t.classList.remove('loading'));
-            playerControls.checkIfLive();
-        });
-        player.on('timeupdate', playerControls.updateProgress);
-        player.on('error', () => {
-            const error = player.error();
-            if (error) {
-                console.error('Video.js Error:', error);
-                playerControls.showError(error.message);
-            }
-        });
 
-        playPauseBtn.addEventListener('click', playerControls.togglePlay);
-        progressBar.addEventListener('input', playerControls.setProgress);
-        muteBtn.addEventListener('click', playerControls.toggleMute);
-        volumeSlider.addEventListener('input', playerControls.setVolume);
-        fullscreenBtn.addEventListener('click', playerControls.toggleFullscreen);
-        pipBtn.addEventListener('click', playerControls.togglePip);
-        playOverlay.addEventListener('click', () => player.play());
-        playerWrapper.addEventListener('mousemove', playerControls.showControls);
-        playerWrapper.addEventListener('mouseleave', playerControls.hideControls);
-        
-        themeToggleBtn.addEventListener('click', () => {
-            body.classList.toggle('light-theme');
-            const isLight = body.classList.contains('light-theme');
-            themeToggleBtn.textContent = isLight ? '🌙' : '☀️';
-            localStorage.setItem('webtv_theme', isLight ? 'light' : 'dark');
-        });
-        refreshChannelsBtn.addEventListener('click', () => {
-            refreshChannelsBtn.classList.add('refresh-active');
-            fetchAndRenderChannels();
-            setTimeout(() => refreshChannelsBtn.classList.remove('refresh-active'), 1000);
-        });
-        
+    // --- Initialization ---
+    async function init() {
         const savedTheme = localStorage.getItem('webtv_theme');
         if (savedTheme === 'light') {
             body.classList.add('light-theme');
             themeToggleBtn.textContent = '🌙';
         }
 
-        await fetchAndRenderChannels();
+        await fetchAndRenderChannels().catch(e => {
+            console.error("Fatal Error: Could not load initial channel data.", e);
+            playerControls.showError("เกิดข้อผิดพลาด: ไม่สามารถโหลดข้อมูลช่องได้");
+            return;
+        });
 
-        const savedVolume = localStorage.getItem('webtv_volume');
-        if (savedVolume !== null) player.volume(savedVolume);
+        // --- Initialize Shaka Player ---
+        shaka.polyfill.installAll();
+        if (shaka.Player.isBrowserSupported()) {
+            player = new shaka.Player(video);
+            player.addEventListener('error', onPlayerErrorEvent);
+        } else {
+            console.error('Browser not supported by Shaka Player!');
+            playerControls.showError('เบราว์เซอร์นี้ไม่รองรับการเล่นวิดีโอ');
+        }
         
-        playerControls.updatePlayButton();
+        setupEventListeners();
+        timeManager.start();
+        
+        const savedVolume = localStorage.getItem('webtv_volume');
+        const savedMuted = localStorage.getItem('webtv_muted') === 'true' || localStorage.getItem('webtv_muted') === null;
+
+        if (savedVolume !== null) {
+            video.volume = savedVolume;
+            volumeSlider.value = savedVolume;
+        } else {
+            video.volume = 0.5;
+            volumeSlider.value = 0.5;
+        }
+        
+        video.muted = savedMuted;
         playerControls.updateMuteButton();
+
+        document.addEventListener('click', unlockAudio, { once: true });
+        document.addEventListener('keydown', unlockAudio, { once: true });
 
         const lastChannelId = localStorage.getItem('webtv_lastChannelId');
         const firstChannelId = Object.keys(channels)[0];
         
         if (lastChannelId && channels[lastChannelId]) {
-            channelManager.loadChannel(lastChannelId);
+            await channelManager.loadChannel(lastChannelId);
         } else if (firstChannelId) {
-            channelManager.loadChannel(firstChannelId);
+            await channelManager.loadChannel(firstChannelId);
         }
     }
     
