@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flow TV</title>
     <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,7 +28,7 @@
         
         <div class="main-layout">
             <div class="player-wrapper">
-                <video id="video" autoplay muted playsinline></video>
+                <video id="video" class="video-js" autoplay muted playsinline></video>
                 
                 <div id="play-overlay" class="play-overlay hidden">
                     <button id="big-play-btn" class="big-play-btn" aria-label="เล่นวิดีโอ">
@@ -70,8 +76,13 @@
         </div>
     </div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/shaka-player/4.3.4/shaka-player.compiled.js"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.js"></script>
+
+    <script src="https://unpkg.com/videojs-contrib-eme/dist/videojs-contrib-eme.js"></script>
+    
+    <script src="https://unpkg.com/dashjs/dist/dash.all.min.js"></script>
+    <script src="https://unpkg.com/videojs-dash/dist/videojs-dash.js"></script>
+
     <script src="script.js" defer></script>
 </body>
 </html>
-
