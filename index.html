@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Online TV • Clean</title>
+  <title>Online TV • Compact</title>
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
   <!-- Fonts -->
@@ -28,7 +28,8 @@
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-    /* App Bar (no search) */
+
+    /* App Bar */
     .appbar{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--border);
       background:linear-gradient(180deg, rgba(5,10,20,.75), rgba(5,10,20,.35));backdrop-filter:saturate(140%) blur(8px)}
     :root[data-theme="light"] .appbar{background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.65))}
@@ -43,8 +44,9 @@
     .container{width:95%;max-width:1200px;margin:16px auto 28px auto}
 
     /* Player */
-    .player-card{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:radial-gradient(1200px 600px at 10% -20%, rgba(13,142,255,.15), transparent 55%),var(--card);box-shadow:var(--shadowA)}
-    .player-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+    .player-card{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:
+      radial-gradient(1200px 600px at 10% -20%, rgba(13,142,255,.15), transparent 55%),var(--card);box-shadow:var(--shadowA)}
+    .player-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
     .now{display:flex;align-items:center;gap:12px;min-width:0}
     .now img{width:40px;height:40px;border-radius:10px;object-fit:contain;background:#00000055;padding:6px;border:1px solid rgba(255,255,255,.12)}
     .now .title{font-weight:700;font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -52,46 +54,81 @@
     .badge{padding:3px 8px;border-radius:999px;border:1px solid var(--border);background:var(--chip);font-size:.8rem}
     .video-wrap{position:relative;background:#000}
     video{width:100%;display:block;aspect-ratio:16/9;background:#000}
-    .controls{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:14px;padding:12px;background:linear-gradient(180deg, transparent, rgba(0,0,0,.55));opacity:0;transform:translateY(10px);transition:.2s;z-index:3}
-    .player-card:hover .controls,.controls.visible{opacity:1;transform:translateY(0)}
-    .cbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:7px;border-radius:10px;cursor:pointer;display:flex;align-items:center}
-    .cbtn:hover{background:rgba(255,255,255,.16)}
-    .cbtn svg{width:22px;height:22px}
-    #progress{flex:1;accent-color:var(--primary)}
-    #vol{width:120px;accent-color:var(--primary)}
-    .live{background:#e53935;color:#fff;font-weight:800;padding:4px 10px;border-radius:8px;font-size:.85rem}
-    .golive{padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.07);color:#fff;cursor:pointer}
 
+    /* === Controls (refined & compact) === */
+    .controls{
+      position:absolute; left:0; right:0; bottom:0;
+      display:flex; align-items:center; gap:10px;
+      padding:8px 10px;
+      background:linear-gradient(180deg, transparent, rgba(0,0,0,.55));
+      z-index:3; opacity:0; transform:translateY(10px); transition:.2s;
+    }
+    .player-card:hover .controls, .controls.visible{ opacity:1; transform:translateY(0) }
+    .ctrl-group{ display:flex; align-items:center; gap:8px }
+    .ctrl-group.right{ margin-left:auto }
+    .cbtn{
+      height:34px; width:34px; display:grid; place-items:center;
+      background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18);
+      color:#fff; border-radius:9px; cursor:pointer; transition:.2s;
+    }
+    .cbtn:hover{ background:rgba(255,255,255,.16) }
+    .cbtn svg{ width:18px; height:18px }
+
+    #progress{ flex:1; height:6px; accent-color:var(--primary) }
+    #progress,#vol{ -webkit-appearance:none; appearance:none; background:transparent; outline:none }
+    #progress::-webkit-slider-runnable-track{ height:6px; background:rgba(255,255,255,.18); border-radius:999px }
+    #progress::-webkit-slider-thumb{ -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--primary); margin-top:-3px }
+    #progress::-moz-range-track{ height:6px; background:rgba(255,255,255,.18); border-radius:999px }
+    #progress::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background:var(--primary) }
+
+    #vol{ width:100px }
+    #vol::-webkit-slider-runnable-track{ height:6px; background:rgba(255,255,255,.18); border-radius:999px }
+    #vol::-webkit-slider-thumb{ -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--primary); margin-top:-2px }
+    #vol::-moz-range-track{ height:6px; background:rgba(255,255,255,.18); border-radius:999px }
+    #vol::-moz-range-thumb{ width:10px; height:10px; border-radius:50%; background:var(--primary) }
+
+    .time-label{ font-size:.85rem; color:#cfd6e6; min-width:82px; text-align:center }
+    .live-pill{
+      display:inline-flex; align-items:center; gap:6px;
+      background:#e53935; color:#fff; font-weight:800;
+      padding:4px 10px; border-radius:8px; font-size:.85rem;
+    }
+    .live-pill .dot{ width:8px; height:8px; border-radius:50%; background:#fff }
+    .pill{
+      padding:6px 10px; border-radius:10px; border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.07); color:#fff; cursor:pointer;
+    }
+    .hidden{ display:none !important }
+
+    /* Overlay */
     .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(4,8,16,.7);color:#fff;z-index:4;opacity:0;pointer-events:none;transition:opacity .2s}
     .overlay.visible{opacity:1;pointer-events:auto}
     .spin{border:4px solid rgba(255,255,255,.3);border-top:4px solid var(--primary);width:44px;height:44px;border-radius:50%;animation:spin 1s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* Chips */
-    .chips{display:flex;gap:8px;overflow:auto;padding:14px 2px;scrollbar-width:none}
-    .chip{white-space:nowrap;padding:8px 12px;border-radius:999px;background:var(--chip);border:1px solid var(--border);cursor:pointer;user-select:none;transition:.15s}
+    .chips{display:flex;gap:6px;overflow:auto;padding:10px 2px;scrollbar-width:none}
+    .chip{white-space:nowrap;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--border);cursor:pointer;user-select:none;transition:.15s;font-size:.9rem}
     .chip:hover{transform:translateY(-1px)}
     .chip.active{outline:2px solid var(--primary);box-shadow:0 0 0 3px rgba(13,142,255,.15)}
 
-    /* Grid */
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
-    .card{border:1px solid var(--border);background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;transition:.2s;box-shadow:var(--shadowA);display:flex;flex-direction:column}
+    /* Grid (compact) */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .card{border:1px solid var(--border);background:var(--card);border-radius:12px;overflow:hidden;cursor:pointer;transition:.2s;box-shadow:var(--shadowA);display:flex;flex-direction:column}
     .card:hover{transform:translateY(-2px)}
-    .thumb{background:#0a0d14;height:110px;display:flex;align-items:center;justify-content:center;position:relative}
-    .thumb img{max-width:80%;max-height:70%;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,.45))}
-    .thumb .fav{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);width:34px;height:34px;display:grid;place-items:center;border-radius:10px}
+    .thumb{background:#0a0d14;height:86px;display:flex;align-items:center;justify-content:center;position:relative}
+    .thumb img{max-width:76%;max-height:64%;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,.45))}
+    .thumb .fav{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);width:30px;height:30px;display:grid;place-items:center;border-radius:9px}
     .fav.active{background:rgba(13,142,255,.85)}
-    .body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-    .title{font-weight:700;font-size:1rem;line-height:1.2}
-    .meta-line{display:flex;gap:8px;color:var(--muted);font-size:.9rem}
-    .playbtn{margin-top:2px;padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--panel);display:flex;gap:8px;align-items:center;justify-content:center}
-    .playbtn svg{width:18px;height:18px}
+    .body{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+    .title{font-weight:700;font-size:.92rem;line-height:1.2}
+    .meta-line{display:flex;gap:6px;color:var(--muted);font-size:.8rem}
+    .playbtn{margin-top:2px;padding:7px 8px;border-radius:8px;border:1px solid var(--border);background:var(--panel);display:flex;gap:8px;align-items:center;justify-content:center}
+    .playbtn svg{width:16px;height:16px}
 
-    /* Snackbar */
+    /* Snackbar & Modal (unchanged size) */
     .snackbar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#121826;color:#fff;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);opacity:0;pointer-events:none;transition:.2s;z-index:60}
     .snackbar.show{opacity:1;pointer-events:auto}
-
-    /* Modal */
     .modal-backdrop{position:fixed;inset:0;background:rgba(6,10,18,.6);display:none;align-items:center;justify-content:center;z-index:70}
     .modal{width:min(560px, 92vw);background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadowA)}
     .modal-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
@@ -102,11 +139,13 @@
 
     @media (max-width:720px){
       .appbar-inner{padding:10px 14px}
+      .grid{ grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); gap:8px }
+      .thumb{ height:78px }
     }
   </style>
 </head>
 <body>
-  <!-- App Bar (no search) -->
+  <!-- App Bar -->
   <header class="appbar">
     <div class="appbar-inner">
       <div class="brand"><div class="dot"></div><span>Online TV</span></div>
@@ -154,25 +193,38 @@
           <div id="overlayText">กำลังโหลด…</div>
         </div>
 
+        <!-- Controls (refined) -->
         <div class="controls" id="controls">
-          <button id="playBtn" class="cbtn" title="เล่น/หยุด (Space)">
-            <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            <svg class="i-pause hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
-          </button>
+          <!-- Left -->
+          <div class="ctrl-group left">
+            <button id="playBtn" class="cbtn" title="เล่น/หยุด (Space)">
+              <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="i-pause hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
+            </button>
+            <span id="timeLabel" class="time-label">--:-- / --:--</span>
+            <span id="live" class="live-pill hidden"><span class="dot"></span>LIVE</span>
+          </div>
+
+          <!-- Middle (seek) -->
           <input type="range" id="progress" value="0" step="1" title="แถบเวลา">
-          <span id="live" class="live hidden">LIVE</span>
-          <button id="goLive" class="golive hidden">Go Live</button>
-          <button id="muteBtn" class="cbtn" title="เปิด/ปิดเสียง (M)">
-            <svg class="i-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-            <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
-          </button>
-          <input type="range" id="vol" min="0" max="1" step="0.05" value="1" title="ปรับเสียง">
-          <button id="pipBtn" class="cbtn" title="Picture-in-Picture">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 7H3v10h16V7zm2-4H1C.45 3 0 3.45 0 4v14c0 .55.45 1 1 1h20c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z"/></svg>
-          </button>
-          <button id="fsBtn" class="cbtn" title="เต็มจอ (F)">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zM5 10h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-          </button>
+
+          <!-- Right -->
+          <div class="ctrl-group right">
+            <button id="goLive" class="pill hidden" title="กระโดดไปสด">Go Live</button>
+
+            <button id="muteBtn" class="cbtn" title="เปิด/ปิดเสียง (M)">
+              <svg class="i-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+              <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
+            </button>
+            <input type="range" id="vol" min="0" max="1" step="0.05" value="1" title="ปรับเสียง">
+
+            <button id="pipBtn" class="cbtn" title="Picture-in-Picture">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 7H3v10h16V7zm2-4H1C.45 3 0 3.45 0 4v14c0 .55.45 1 1 1h20c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1z"/></svg>
+            </button>
+            <button id="fsBtn" class="cbtn" title="เต็มจอ (F)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zM5 10h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -248,10 +300,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const $ = s=>document.querySelector(s);
   const grid = $('#grid'), chipBar = $('#chipBar');
   const video = $('#video'), overlay = $('#overlay'), overlayText = $('#overlayText');
-  const controls = $('#controls'), playBtn = $('#playBtn'), muteBtn = $('#muteBtn');
+  const playBtn = $('#playBtn'), muteBtn = $('#muteBtn');
   const iPlay = playBtn.querySelector('.i-play'), iPause = playBtn.querySelector('.i-pause');
   const iVol = muteBtn.querySelector('.i-vol'), iMute = muteBtn.querySelector('.i-mute');
-  const progress = $('#progress'), vol = $('#vol'), live = $('#live'), goLive = $('#goLive');
+  const progress = $('#progress'), vol = $('#vol'), liveEl = $('#live'), goLiveEl = $('#goLive'), timeLabel = $('#timeLabel');
   const nowTitle = $('#nowTitle'), nowLogo = $('#nowLogo'), nowEngine=$('#nowEngine'), nowCategory=$('#nowCategory');
   const fsBtn = $('#fsBtn'), pipBtn = $('#pipBtn'), shareBtn = $('#shareBtn');
   const snack = $('#snackbar'); const themeBtn = $('#themeBtn'); const settingsBtn=$('#settingsBtn');
@@ -310,15 +362,37 @@ document.addEventListener('DOMContentLoaded', () => {
     throw new Error('เบราว์เซอร์ไม่รองรับ HLS');
   }
 
-  // Player events / controls
-  function liveMode(){
-    const isLive = (video.duration===Infinity || Number.isNaN(video.duration) || !isFinite(video.duration));
-    live.classList.toggle('hidden', !isLive); goLive.classList.toggle('hidden', !isLive);
-    progress.classList.toggle('hidden', isLive);
-    if(!isLive){ progress.max = isFinite(video.duration)?video.duration:0; progress.value = video.currentTime||0; }
+  // ===== Time formatting (show HH:MM:SS for movies) =====
+  function fmtTime(sec, forceHours=false){
+    if (!isFinite(sec)) return '--:--';
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    if (forceHours || h > 0) {
+      return `${String(h).padStart(1,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    return `${m}:${String(s).padStart(2,'0')}`;
   }
+  function refreshTimeUI(){
+    const isLive = (video.duration === Infinity || Number.isNaN(video.duration) || !isFinite(video.duration));
+    const forceHours = isFinite(video.duration) && video.duration >= 3600;
+    liveEl.classList.toggle('hidden', !isLive);
+    goLiveEl.classList.toggle('hidden', !isLive);
+    progress.classList.toggle('hidden', isLive);
+
+    if (isLive) {
+      timeLabel.textContent = 'ถ่ายทอดสด';
+    } else {
+      timeLabel.textContent = `${fmtTime(video.currentTime || 0, forceHours)} / ${fmtTime(video.duration || 0, forceHours)}`;
+      progress.max = isFinite(video.duration) ? video.duration : 0;
+      progress.value = video.currentTime || 0;
+    }
+  }
+
+  // Player controls
   let ctrlsTimer;
-  const showCtrls=()=>{ clearTimeout(ctrlsTimer); $('#controls').classList.add('visible'); ctrlsTimer=setTimeout(()=>$('#controls').classList.remove('visible'),2500); };
+  const showCtrls=()=>{ clearTimeout(ctrlsTimer); $('#controls').classList.add('visible'); ctrlsTimer=setTimeout(()=>$('#controls').classList.remove('visible'),2200); };
   $('#video-container').addEventListener('mousemove', showCtrls);
   $('#video-container').addEventListener('touchstart', showCtrls);
   $('#video-container').addEventListener('mouseleave', ()=>{ clearTimeout(ctrlsTimer); $('#controls').classList.remove('visible'); });
@@ -327,12 +401,14 @@ document.addEventListener('DOMContentLoaded', () => {
   muteBtn.addEventListener('click', ()=> video.muted=!video.muted);
   vol.addEventListener('input', e=>{ video.volume=+e.target.value; if(video.volume>0 && video.muted) video.muted=false; rememberVol(); });
   progress.addEventListener('input', e=> video.currentTime=+e.target.value);
-  goLive.addEventListener('click', ()=>{ const end=video.seekable?.length?video.seekable.end(video.seekable.length-1):null; if(end) video.currentTime=end-.5; });
+  goLiveEl.addEventListener('click', ()=>{ const end=video.seekable?.length?video.seekable.end(video.seekable.length-1):null; if(end) video.currentTime=end-.5; });
 
   video.addEventListener('play', ()=>{ iPlay.classList.add('hidden'); iPause.classList.remove('hidden'); });
   video.addEventListener('pause', ()=>{ iPlay.classList.remove('hidden'); iPause.classList.add('hidden'); });
   video.addEventListener('volumechange', ()=>{ vol.value=video.volume; const m=video.muted||video.volume===0; iVol.classList.toggle('hidden',m); iMute.classList.toggle('hidden',!m); rememberVol(); });
-  video.addEventListener('timeupdate', liveMode);
+  video.addEventListener('loadedmetadata', refreshTimeUI);
+  video.addEventListener('durationchange', refreshTimeUI);
+  video.addEventListener('timeupdate', refreshTimeUI);
 
   document.addEventListener('keydown',(e)=>{ const t=document.activeElement?.tagName; if(t==='INPUT'||t==='TEXTAREA')return;
     if(e.code==='Space'){ e.preventDefault(); video.paused?video.play():video.pause(); }
@@ -354,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
   optLockLandscape.addEventListener('change', e=>{ opts.lockLandscape=e.target.checked; localStorage.setItem('opt_lock_land', String(opts.lockLandscape)); });
   optRememberVol.addEventListener('change', e=>{ opts.rememberVol=e.target.checked; localStorage.setItem('opt_rem_vol', String(opts.rememberVol)); });
 
-  // Chips & Grid (no search)
+  // Chips & Grid
   function buildChips(){
     chipBar.innerHTML='';
     const all=document.createElement('div'); all.className='chip active'; all.textContent='ทั้งหมด'; all.dataset.cat='*'; chipBar.appendChild(all);
@@ -379,7 +455,6 @@ document.addEventListener('DOMContentLoaded', () => {
         items.push({cat:catName,id,...ch});
       }
     }
-    // sort by name
     items.sort((a,b)=>a.name.localeCompare(b.name,'th'));
 
     for(const ch of items){
@@ -431,23 +506,13 @@ document.addEventListener('DOMContentLoaded', () => {
     try{ await navigator.clipboard.writeText(u.href); toast('คัดลอกลิงก์แล้ว'); }catch{ toast('คัดลอกลิงก์ไม่สำเร็จ'); }
   });
 
-  // Settings
-  settingsBtn.addEventListener('click', ()=>{ modalBackdrop.style.display='flex'; optAutoplay.checked=opts.autoplay; optLockLandscape.checked=opts.lockLandscape; optRememberVol.checked=opts.rememberVol; });
-  closeModal.addEventListener('click', ()=> modalBackdrop.style.display='none');
-  modalBackdrop.addEventListener('click', (e)=>{ if(e.target===modalBackdrop) modalBackdrop.style.display='none'; });
-  optAutoplay.addEventListener('change', e=>{ opts.autoplay=e.target.checked; localStorage.setItem('opt_autoplay', String(opts.autoplay)); });
-  optLockLandscape.addEventListener('change', e=>{ opts.lockLandscape=e.target.checked; localStorage.setItem('opt_lock_land', String(opts.lockLandscape)); });
-  optRememberVol.addEventListener('change', e=>{ opts.rememberVol=e.target.checked; localStorage.setItem('opt_rem_vol', String(opts.rememberVol)); });
-
   // Init
   (function init(){
     // chips
     buildChips();
     renderGrid('*');
-    // player small bindings
-    document.addEventListener('visibilitychange', ()=>{ if(document.hidden && video && isFinite(video.duration) && !Number.isNaN(video.duration)) video.pause(); });
-    // theme clock
-    setInterval(()=>{ const el=document.getElementById('clock'); if(el) el.textContent=new Date().toLocaleTimeString('th-TH',{hour12:false}); },1000);
+    // pause VOD when hidden
+    document.addEventListener('visibilitychange', ()=>{ if(document.hidden && isFinite(video.duration) && !Number.isNaN(video.duration)) video.pause(); });
     // restore
     restoreVol();
     const url = new URLSearchParams(location.search);
@@ -461,6 +526,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- ใช้งานเฉพาะคอนเทนต์ที่มีสิทธิ์รับชม -->
+<!-- ใช้งานเฉพาะคอนเทนต์ที่คุณมีสิทธิ์รับชม -->
 </body>
 </html>
