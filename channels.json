@@ -1,4 +1,24 @@
 {
+  "dash_aff_u23": {
+    "name": "AFF U23",
+    "category": "กีฬา",
+    "url": "https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd",
+    "logo": "https://iili.io/FWccqEg.md.jpg",
+    "type": "dash",
+    "drm": "clearkey",
+    "keyId": "d418f733ed224f9bb9c2b1589db22a20",
+    "key": "6ed6fe26daa4b926810869ff60254ebb"
+  },
+  "dash_aff_u23v2": {
+    "name": "AFF U23",
+    "category": "กีฬา",
+    "url": "https://tglmp04.akamaized.net/out/v1/400fc0702dee453bb33ebcc29466e58a/manifest.mpd",
+    "logo": "https://iili.io/FWccqEg.md.jpg",
+    "type": "dash",
+    "drm": "clearkey",
+    "keyId": "91b9592c819246c68b3b08a1fe08ba22",
+    "key": "fa0d80dfd865b34077bae44cd4a0c5e6"
+  },
   "hls_truehd1": {
     "name": "ทรูสปอร์ตHD1",
     "category": "กีฬา",
