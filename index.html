@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Rails Minimal</title>
+<title>Online TV • Rails Minimal (Hairline)</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
-  .wrap{max-width:1100px; margin:18px auto 32px; padding:0 14px}
+  .wrap{max-width:1100px; margin:18px auto 28px; padding:0 14px}
 
   /* Header */
   .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
@@ -31,11 +31,11 @@
 
   /* Player */
   .player{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden}
-  .topbar{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid var(--border)}
+  .topbar{display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--border)}
   .now{display:flex; align-items:center; gap:10px; min-width:0}
-  .now img{width:34px; height:34px; border-radius:6px; object-fit:contain; background:#00000050; padding:6px}
+  .now img{width:30px; height:30px; border-radius:6px; object-fit:contain; background:#00000040; padding:5px}
   .now .title{font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .now .meta{color:var(--muted); font-size:.85rem}
+  .now .meta{color:var(--muted); font-size:.84rem}
   .vbox{position:relative; background:#000}
   video{width:100%; display:block; aspect-ratio:16/9; background:#000}
 
@@ -63,21 +63,51 @@
   .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* Rails (horizontal lists) */
-  .rail{margin-top:16px}
-  .rail h3{margin:0 0 8px 4px; font-size:1rem; color:#dfe7ff; font-weight:700}
-  .rail-inner{display:flex; gap:12px; overflow-x:auto; padding:6px 2px 2px; scroll-snap-type:x proximity; scrollbar-width:thin}
-  .mini{scroll-snap-align:start; width:128px; min-width:128px; height:180px; background:var(--card); border:1px solid var(--border);
-        border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:10px 10px 8px;
-        cursor:pointer; transition:background .15s, border-color .15s, transform .15s}
-  .mini:hover{background:var(--hover); border-color:#22314a; transform:translateY(-1px)}
-  .logo-box{width:86px; height:62px; background:var(--logoBox); border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:10px}
-  .logo-box img{max-width:86%; max-height:80%; object-fit:contain}
-  .mini .name{font-weight:700; text-align:center; line-height:1.15; color:#eef3ff; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word}
-  .mini:focus{outline:2px solid var(--primary)}
+  /* ---- Rails (compact & hairline) ---- */
+  .rail{ margin-top:12px }
+  .rail h3{ margin:0 0 6px 4px; font-size:.95rem; letter-spacing:.1px; color:#dfe7ff }
+
+  .rail-inner{
+    display:flex; gap:8px; overflow-x:auto;
+    padding:4px 2px 0; scroll-snap-type:x proximity; scrollbar-width:thin;
+  }
+
+  .mini{
+    scroll-snap-align:start;
+    width:112px; min-width:112px; height:156px;
+    padding:8px 8px 6px;
+    border-radius:10px;
+
+    background:var(--card);
+    border:1px solid transparent;
+    box-shadow:0 0 0 1px rgba(255,255,255,.06) inset;
+
+    display:flex; flex-direction:column; align-items:center; cursor:pointer;
+    transition:background .15s, box-shadow .15s, transform .15s;
+  }
+  .mini:hover{
+    background:var(--hover);
+    box-shadow:0 0 0 1px rgba(13,142,255,.45) inset;
+    transform:translateY(-1px);
+  }
+
+  .logo-box{
+    width:72px; height:54px; margin-bottom:8px;
+    border-radius:10px;
+    background:linear-gradient(180deg,#f7f9ff,#eef3ff);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logo-box img{ max-width:86%; max-height:80%; object-fit:contain }
+
+  .mini .name{
+    font-weight:600; font-size:.9rem; text-align:center; line-height:1.2; color:#eef3ff;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    word-break:break-word;
+  }
+
   @media (max-width:720px){
-    .mini{width:118px; min-width:118px; height:170px}
-    .logo-box{width:80px; height:58px}
+    .mini{ width:108px; min-width:108px; height:150px }
+    .logo-box{ width:68px; height:50px }
   }
 </style>
 </head>
