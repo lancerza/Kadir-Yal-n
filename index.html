@@ -1,91 +1,185 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Online TV</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Online TV</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --background-color: #121212;
+            --card-background: #1e1e1e;
+            --text-color: #e0e0e0;
+        }
 
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.min.js"></script>
-  
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+        body {
+            margin: 0;
+            padding-bottom: 20px;
+            background: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Sarabun', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    video {
-      width: 90%;
-      max-width: 1000px;
-      margin-top: 10px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255,255,255,0.1);
-    }
+        .container {
+            width: 95%;
+            max-width: 1000px;
+        }
 
-    .channel-buttons {
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+        .logo-container {
+            text-align: center;
+            padding: 15px 0;
+        }
 
-    .channel-buttons button {
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background: #1e90ff;
-      color: white;
-      cursor: pointer;
-    }
+        .logo {
+            height: 50px;
+            max-width: 200px;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
 
-    .logo {
-      height: 60px;
-      margin-top: 10px;
-    }
+        .video-container {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background-color: #000;
+        }
 
-    .epg-box {
-      margin-top: 20px;
-      background: #111;
-      padding: 15px;
-      width: 90%;
-      max-width: 1000px;
-      border-radius: 10px;
-      font-size: 16px;
-      line-height: 1.5;
-      white-space: pre-wrap; /* เพื่อให้ \n ทำงาน */
-    }
-  </style>
+        video {
+            width: 100%;
+            display: block;
+            aspect-ratio: 16 / 9;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 1.2em;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            pointer-events: none; /* Hide by default */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .channel-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .channel-buttons button {
+            padding: 10px 15px;
+            font-size: 1em;
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .channel-buttons button:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .channel-buttons button.active {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+        }
+        
+        .channel-buttons button.loading {
+            pointer-events: none;
+            color: #888;
+            border-color: #555;
+        }
+
+        .epg-box {
+            margin-top: 20px;
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            border: 1px solid #333;
+        }
+    </style>
 </head>
 <body>
 
-  <img id="channel-logo" class="logo" src="" alt="โลโก้ช่อง"/>
+<div class="container">
+    <div class="logo-container">
+        <img id="channel-logo" class="logo" src="" alt="โลโก้ช่อง"/>
+    </div>
 
-  <div class="channel-buttons">
-    <button onclick="switchChannel('3bb1')">3BB 1 (DASH)</button>
-    <button onclick="switchChannel('3bb2')">3BB 2 (DASH)</button>
-    <button onclick="switchChannel('3bb3')">3BB 3 (DASH)</button>
-    
-    <button onclick="switchChannel('workpoint')">Workpoint (HLS)</button>
-    <button onclick="switchChannel('thairathtv')">ThairathTV (HLS)</button>
-  </div>
+    <div class="video-container">
+        <video id="video" autoplay controls></video>
+        <div id="video-overlay" class="overlay">
+            <div id="overlay-content">
+                <div id="spinner" class="spinner" style="display: none;"></div>
+                <span id="overlay-text"></span>
+            </div>
+        </div>
+    </div>
 
-  <video id="video" autoplay controls></video>
+    <div id="channel-buttons" class="channel-buttons">
+        </div>
 
-  <div class="epg-box" id="epg-box">
-    <strong>EPG:</strong> รอโหลดข้อมูล...
-  </div>
+    <div class="epg-box" id="epg-box">
+        <strong>EPG:</strong> รอโหลดข้อมูล...
+    </div>
+</div>
 
-  <script>
+<script>
     const channels = {
       "3bb1": {
         name: "3BB 1",
@@ -108,89 +202,122 @@
         epg: "การ์ตูน - 15:00 | กีฬา - 17:00 | ข่าวดึก - 21:00",
         license_key: "1e98456bcbea44b7ad05831387e364ef:3d14fd4f9d3149a79b35a7124fccbd67"
       },
-      // --- เพิ่มช่อง HLS ใหม่ตรงนี้ ---
       "workpoint": {
         name: "Workpoint TV",
         url: "https://wp-live.cdn.3bb.co.th/wp/live/playlist.m3u8",
         logo: "https://upload.wikimedia.org/wikipedia/commons/4/49/Workpoint_TV_Logo.png",
         epg: "รายการวาไรตี้สด",
-        license_key: null // ไม่มี DRM
+        license_key: null
       },
       "thairathtv": {
         name: "Thairath TV",
         url: "https://d373k698imbfvs.cloudfront.net/out/v1/d08c879331984d948956b631988820c8/index.m3u8",
         logo: "https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png",
         epg: "ข่าวสด รายงานสถานการณ์ปัจจุบัน",
-        license_key: null // ไม่มี DRM
+        license_key: null
       }
     };
 
     let player;
+    let currentChannelId = null;
+
+    const DOM = {
+        video: document.getElementById('video'),
+        channelLogo: document.getElementById('channel-logo'),
+        epgBox: document.getElementById('epg-box'),
+        channelButtons: document.getElementById('channel-buttons'),
+        overlay: document.getElementById('video-overlay'),
+        overlayText: document.getElementById('overlay-text'),
+        spinner: document.getElementById('spinner')
+    };
+
+    function showOverlay(message, showSpinner = false) {
+        DOM.overlayText.textContent = message;
+        DOM.spinner.style.display = showSpinner ? 'block' : 'none';
+        DOM.overlay.classList.add('visible');
+    }
+
+    function hideOverlay() {
+        DOM.overlay.classList.remove('visible');
+    }
 
     async function initPlayer() {
-      const video = document.getElementById('video');
-      // ติดตั้ง Polyfill ของ Shaka Player
-      shaka.polyfill.installAll();
-
-      if (!shaka.Player.isBrowserSupported()) {
-        alert("บราวเซอร์ของคุณไม่รองรับ");
-        return;
-      }
-
-      player = new shaka.Player(video);
-
-      player.addEventListener('error', (e) => {
-        console.error("Shaka error:", e.detail);
-      });
-
-      // โหลดช่องแรกเมื่อเปิดหน้า
-      await loadChannel('3bb1');
-    }
-
-    async function loadChannel(channelId) {
-      const channel = channels[channelId];
-      if (!channel) return;
-      
-      console.log(`กำลังสลับไปที่ช่อง: ${channel.name}`);
-
-      // โหลดโลโก้ (เพิ่ม timestamp เพื่อป้องกัน cache)
-      document.getElementById('channel-logo').src = channel.logo + '?t=' + new Date().getTime();
-
-      // โหลด EPG
-      document.getElementById('epg-box').innerText = `📺 ${channel.name}\nEPG: ${channel.epg || 'ไม่มีข้อมูล'}`;
-
-      // --- อัปเดตส่วนการตั้งค่า DRM ---
-      const drmConfig = { drm: { clearKeys: {} } };
-
-      // ตรวจสอบว่าช่องมี license_key หรือไม่
-      if (channel.license_key) {
-        // แยก keyId และ key ออกจากกัน
-        const [keyId, key] = channel.license_key.split(':');
-        
-        if (keyId && key) {
-           console.log(`ตั้งค่า Clearkey สำหรับช่อง ${channel.name}`);
-           drmConfig.drm.clearKeys[keyId] = key;
+        shaka.polyfill.installAll();
+        if (!shaka.Player.isBrowserSupported()) {
+            showOverlay("เบราว์เซอร์ของคุณไม่รองรับ ❌");
+            return;
         }
-      }
-      
-      // ส่งค่าตั้งค่า DRM ให้กับ Player
-      player.configure(drmConfig);
 
-      // โหลด URL ของช่อง (Shaka จะจัดการเองว่าเป็น DASH หรือ HLS)
-      try {
-        await player.load(channel.url);
-        console.log("เล่นช่องสำเร็จ:", channel.name);
-      } catch (err) {
-        console.error("โหลดช่องล้มเหลว:", err);
-      }
+        player = new shaka.Player(DOM.video);
+        player.addEventListener('error', onPlayerError);
+
+        generateChannelButtons();
+        
+        const lastChannel = localStorage.getItem('lastWatchedChannel') || '3bb1';
+        await switchChannel(lastChannel);
     }
 
-    function switchChannel(channelId) {
-      loadChannel(channelId);
+    async function switchChannel(channelId) {
+        if (currentChannelId === channelId) return;
+
+        currentChannelId = channelId;
+        localStorage.setItem('lastWatchedChannel', channelId);
+        
+        updateActiveButton(channelId);
+        showOverlay("กำลังโหลดช่อง...", true);
+        
+        const channel = channels[channelId];
+        if (!channel) {
+            showOverlay(`ไม่พบช่อง ${channelId}`, false);
+            return;
+        }
+
+        DOM.channelLogo.src = channel.logo;
+        DOM.epgBox.innerText = `📺 ${channel.name}\nEPG: ${channel.epg || 'ไม่มีข้อมูล'}`;
+
+        const drmConfig = { drm: { clearKeys: {} } };
+        if (channel.license_key) {
+            const [keyId, key] = channel.license_key.split(':');
+            if (keyId && key) {
+                drmConfig.drm.clearKeys[keyId] = key;
+            }
+        }
+        player.configure(drmConfig);
+
+        try {
+            // Unload previous source before loading a new one
+            await player.unload();
+            await player.load(channel.url);
+            hideOverlay();
+        } catch (err) {
+            // Error is handled by the event listener
+        }
+    }
+
+    function onPlayerError(e) {
+        console.error("Shaka error:", e.detail);
+        const channelName = channels[currentChannelId]?.name || '';
+        showOverlay(`ไม่สามารถเล่นช่อง ${channelName} ได้\n(Error: ${e.detail.code})`, false);
+    }
+
+    function generateChannelButtons() {
+        DOM.channelButtons.innerHTML = ''; // Clear old buttons
+        for (const id in channels) {
+            const button = document.createElement('button');
+            button.innerText = channels[id].name;
+            button.dataset.channelId = id;
+            button.onclick = () => switchChannel(id);
+            DOM.channelButtons.appendChild(button);
+        }
+    }
+    
+    function updateActiveButton(channelId) {
+        document.querySelectorAll('.channel-buttons button').forEach(button => {
+            button.classList.toggle('active', button.dataset.channelId === channelId);
+        });
     }
 
     document.addEventListener("DOMContentLoaded", initPlayer);
-  </script>
+</script>
 </body>
 </html>
-
