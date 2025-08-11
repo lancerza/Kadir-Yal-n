@@ -1,87 +1,193 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flow TV</title>
-    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-    
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3BB Online TV</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.min.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    video {
+      width: 90%;
+      max-width: 1000px;
+      margin-top: 10px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    }
+
+    .channel-buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .channel-buttons button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #1e90ff;
+      color: white;
+      cursor: pointer;
+    }
+
+    .logo {
+      height: 60px;
+      margin-top: 10px;
+    }
+
+    .epg-box {
+      margin-top: 20px;
+      background: #111;
+      padding: 15px;
+      width: 90%;
+      max-width: 1000px;
+      border-radius: 10px;
+      font-size: 16px;
+      line-height: 1.5;
+      white-space: pre-wrap; /* เพื่อให้ \n ทำงาน */
+    }
+  </style>
 </head>
 <body>
-    <nav id="category-sidebar" class="category-sidebar"></nav>
 
-    <div class="container">
-        <div class="header-container">
-            <div id="datetime-display"></div>
-            <div class="header-buttons">
-                <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="สลับธีม">☀️</button>
-                <button id="refresh-channels-btn" class="theme-toggle-btn" aria-label="รีเฟรชรายการช่อง">🔄</button>
-            </div>
-        </div>
+  <img id="channel-logo" class="logo" src="" alt="โลโก้ช่อง"/>
+
+  <div class="channel-buttons">
+    <button onclick="switchChannel('3bb1')">3BB 1 (DASH)</button>
+    <button onclick="switchChannel('3bb2')">3BB 2 (DASH)</button>
+    <button onclick="switchChannel('3bb3')">3BB 3 (DASH)</button>
+    
+    <button onclick="switchChannel('workpoint')">Workpoint (HLS)</button>
+    <button onclick="switchChannel('thairathtv')">ThairathTV (HLS)</button>
+  </div>
+
+  <video id="video" autoplay controls></video>
+
+  <div class="epg-box" id="epg-box">
+    <strong>EPG:</strong> รอโหลดข้อมูล...
+  </div>
+
+  <script>
+    const channels = {
+      "3bb1": {
+        name: "3BB 1",
+        url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/2/2.mpd",
+        logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
+        epg: "ละครเย็น - 17:00 | ข่าวค่ำ - 18:30 | รายการพิเศษ - 20:00",
+        license_key: "ca20a93cf8e3421dafbd5bdb1990081b:86ae86a7391c481ea93eecdb740f0a14"
+      },
+      "3bb2": {
+        name: "3BB 2",
+        url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/3/3.mpd",
+        logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
+        epg: "ซีรีส์ญี่ปุ่น - 16:00 | เกมโชว์ - 18:00 | หนังไทย - 20:00",
+        license_key: "4d4426a505f64382a9841155d721cee6:0f4770219ccb4be5836a7517057e51c3"
+      },
+      "3bb3": {
+        name: "3BB 3",
+        url: "https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/4/4.mpd",
+        logo: "https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png",
+        epg: "การ์ตูน - 15:00 | กีฬา - 17:00 | ข่าวดึก - 21:00",
+        license_key: "1e98456bcbea44b7ad05831387e364ef:3d14fd4f9d3149a79b35a7124fccbd67"
+      },
+      // --- เพิ่มช่อง HLS ใหม่ตรงนี้ ---
+      "workpoint": {
+        name: "Workpoint TV",
+        url: "https://wp-live.cdn.3bb.co.th/wp/live/playlist.m3u8",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/4/49/Workpoint_TV_Logo.png",
+        epg: "รายการวาไรตี้สด",
+        license_key: null // ไม่มี DRM
+      },
+      "thairathtv": {
+        name: "Thairath TV",
+        url: "https://d373k698imbfvs.cloudfront.net/out/v1/d08c879331984d948956b631988820c8/index.m3u8",
+        logo: "https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png",
+        epg: "ข่าวสด รายงานสถานการณ์ปัจจุบัน",
+        license_key: null // ไม่มี DRM
+      }
+    };
+
+    let player;
+
+    async function initPlayer() {
+      const video = document.getElementById('video');
+      // ติดตั้ง Polyfill ของ Shaka Player
+      shaka.polyfill.installAll();
+
+      if (!shaka.Player.isBrowserSupported()) {
+        alert("บราวเซอร์ของคุณไม่รองรับ");
+        return;
+      }
+
+      player = new shaka.Player(video);
+
+      player.addEventListener('error', (e) => {
+        console.error("Shaka error:", e.detail);
+      });
+
+      // โหลดช่องแรกเมื่อเปิดหน้า
+      await loadChannel('3bb1');
+    }
+
+    async function loadChannel(channelId) {
+      const channel = channels[channelId];
+      if (!channel) return;
+      
+      console.log(`กำลังสลับไปที่ช่อง: ${channel.name}`);
+
+      // โหลดโลโก้ (เพิ่ม timestamp เพื่อป้องกัน cache)
+      document.getElementById('channel-logo').src = channel.logo + '?t=' + new Date().getTime();
+
+      // โหลด EPG
+      document.getElementById('epg-box').innerText = `📺 ${channel.name}\nEPG: ${channel.epg || 'ไม่มีข้อมูล'}`;
+
+      // --- อัปเดตส่วนการตั้งค่า DRM ---
+      const drmConfig = { drm: { clearKeys: {} } };
+
+      // ตรวจสอบว่าช่องมี license_key หรือไม่
+      if (channel.license_key) {
+        // แยก keyId และ key ออกจากกัน
+        const [keyId, key] = channel.license_key.split(':');
         
-        <div class="main-layout">
-            <div class="player-wrapper">
-                <video id="video" class="video-js" autoplay muted playsinline></video>
-                
-                <div id="play-overlay" class="play-overlay hidden">
-                    <button id="big-play-btn" class="big-play-btn" aria-label="เล่นวิดีโอ">
-                        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path></svg>
-                    </button>
-                </div>
-                
-                <div id="loading-indicator" class="loading-indicator hidden">
-                    <div class="spinner"></div>
-                    <p id="loading-message" class="loading-message"></p>
-                </div>
+        if (keyId && key) {
+           console.log(`ตั้งค่า Clearkey สำหรับช่อง ${channel.name}`);
+           drmConfig.drm.clearKeys[keyId] = key;
+        }
+      }
+      
+      // ส่งค่าตั้งค่า DRM ให้กับ Player
+      player.configure(drmConfig);
 
-                <div id="error-overlay" class="error-overlay hidden">
-                    <div class="error-content">
-                        <div class="error-icon">⚠️</div>
-                        <h4 id="error-channel-name" class="error-channel-name"></h4>
-                        <p id="error-message"></p>
-                        <button id="retry-btn" class="retry-button">ลองอีกครั้ง</button>
-                    </div>
-                </div>
+      // โหลด URL ของช่อง (Shaka จะจัดการเองว่าเป็น DASH หรือ HLS)
+      try {
+        await player.load(channel.url);
+        console.log("เล่นช่องสำเร็จ:", channel.name);
+      } catch (err) {
+        console.error("โหลดช่องล้มเหลว:", err);
+      }
+    }
 
-                <div class="custom-controls">
-                    <button id="play-pause-btn" class="control-btn" aria-label="เล่น/หยุดชั่วคราว">
-                        <svg class="icon-play" fill="currentColor" viewBox="0 0 16 16"><path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"></path></svg>
-                        <svg class="icon-pause hidden" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"></path></svg>
-                    </button>
-                    <input type="range" id="progress-bar" value="0" step="1" aria-label="แถบความคืบหน้าวิดีโอ">
-                    <div id="live-indicator" class="live-indicator hidden">LIVE</div>
-                    <div id="time-display" class="time-display">00:00 / 00:00</div>
-                    <button id="mute-btn" class="control-btn" aria-label="เปิด/ปิดเสียง">
-                        <svg class="icon-volume-high" fill="currentColor" viewBox="0 0 16 16"><path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"></path><path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.482 5.482 0 0 1 11.025 8a5.482 5.482 0 0 1-1.61 3.89l.706.706z"></path><path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"></path></svg>
-                        <svg class="icon-volume-off hidden" fill="currentColor" viewBox="0 0 16 16"><path d="M10.717 3.55A.5.5 0 0 1 11 4v8a.5.5 0 0 1-.812.39L7.825 10.5H5.5A.5.5 0 0 1 5 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06zM10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707A4.486 4.486 0 0 0 10.025 8zM13.969 1.531a.75.75 0 0 1 .063 1.06L12.56 4.125a6.48 6.48 0 0 1-1.44 8.458l-.707-.707a5.482 5.482 0 0 0 1.22-7.144L8.4 6.667l-.72-.72-3.8-3.8a.75.75 0 0 1 1.06-1.061l11.06 11.06a.75.75 0 0 1-1.06 1.06l-1.6-1.6A8.473 8.473 0 0 1 1.5 8a.75.75 0 0 1 0-1.5 6.979 6.979 0 0 0 1.83-.31L1.2 4.125a.75.75 0 0 1 1.06-1.062l2.362 2.362a8.47 8.47 0 0 1 8.284-3.894Z"></path></svg>
-                    </button>
-                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" aria-label="แถบปรับระดับเสียง">
-                    <button id="fullscreen-btn" class="control-btn" aria-label="สลับโหมดเต็มจอ">
-                        <svg class="icon-fullscreen" fill="currentColor" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"></path></svg>
-                    </button>
-                    <button id="pip-btn" class="control-btn" aria-label="Picture-in-Picture">
-                        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5v-9zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"></path><path d="M8 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5-.5h-5a.5.5 0 0 1-.5-.5v-3z"></path></svg>
-                    </button>
-                </div>
-            </div>
+    function switchChannel(channelId) {
+      loadChannel(channelId);
+    }
 
-            <div id="channel-buttons-container"></div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-
-    <script src="script.js" defer></script>
+    document.addEventListener("DOMContentLoaded", initPlayer);
+  </script>
 </body>
 </html>
-
-
