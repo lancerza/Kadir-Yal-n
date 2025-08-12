@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Clean Cards (Logo + Name)</title>
+<title>Online TV • Clean Cards</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +17,7 @@
   :root{
     --bg:#0e1116; --panel:#0f141b; --border:#1a2130;
     --text:#eaf0ff; --muted:#97a1b6; --primary:#0d8eff;
-    --card:#101622; --hover:#172339; --logoBox:#f7f9ff;
-    --hairline: rgba(255,255,255,.06);
+    --card:#0f1623; --hover:#172339; --hairline:rgba(255,255,255,.06);
   }
   *{box-sizing:border-box}
   body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
@@ -31,7 +30,7 @@
   .subtxt{color:var(--muted); font-size:.95rem}
 
   /* Player */
-  .player{background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden}
+  .player{background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden}
   .topbar{display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--border)}
   .now{display:flex; align-items:center; gap:10px; min-width:0}
   .now img{width:30px; height:30px; border-radius:6px; object-fit:contain; background:#00000040; padding:5px}
@@ -64,37 +63,40 @@
   .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ===== Category sections with responsive grid ===== */
+  /* Sections (auto-fit grid) */
   .section{margin-top:16px}
   .section h3{margin:0 0 10px 2px; font-size:1rem; color:#dfe7ff; font-weight:700}
-
-  /* Auto-fit grid: การ์ดจะกว้างระหว่าง 130–180px แล้วแต่หน้าจอ */
   .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(clamp(130px, 17vw, 180px), 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(clamp(120px, 16vw, 170px), 1fr));
     gap:12px;
   }
 
-  /* ===== Card (logo + name only) ===== */
+  /* Card = สี่เหลี่ยมเรียบ โลโก้โปร่งใส + ชื่อเท่านั้น */
   .card{
     background:var(--card);
-    border-radius:14px;
-    /* hairline border แทนกรอบหนา */
+    border-radius:8px;              /* มุมเล็ก -> ดูเป็นสี่เหลี่ยมสมดุล */
     border:1px solid transparent;
     box-shadow:0 0 0 1px var(--hairline) inset;
-
-    display:flex; flex-direction:column; align-items:center;
-    padding:10px; cursor:pointer; transition:background .15s, box-shadow .15s, transform .15s;
+    display:flex; flex-direction:column; align-items:center; padding:10px;
+    cursor:pointer; transition:background .15s, box-shadow .15s, transform .15s;
   }
   .card:hover{ background:var(--hover); box-shadow:0 0 0 1px rgba(13,142,255,.45) inset; transform:translateY(-1px) }
+
   .logo-box{
-    width:100%; aspect-ratio:4/3; border-radius:12px; margin-bottom:10px;
+    width:100%;
+    aspect-ratio: 1 / 1;            /* สี่เหลี่ยมจัตุรัส */
+    border-radius:6px;
+    margin-bottom:10px;
     display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(180deg,#f7f9ff,#eef3ff);
+    background: transparent;        /* << ไม่มีพื้นหลังขาวแล้ว */
   }
-  .logo-box img{ max-width:86%; max-height:80%; object-fit:contain }
-  .name{ font-weight:700; text-align:center; color:#eef3ff; line-height:1.2;
-         display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word }
+  .logo-box img{ max-width:90%; max-height:90%; object-fit:contain }
+
+  .name{
+    font-weight:700; text-align:center; color:#eef3ff; line-height:1.2;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word;
+  }
 
   @media (max-width:560px){
     .grid{ gap:10px }
@@ -110,7 +112,7 @@
   </div>
 
   <!-- Player -->
-  <section class="player">
+  <section class="player" id="playerSection">
     <div class="topbar">
       <div class="now">
         <img id="nowLogo" alt="">
@@ -157,9 +159,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   // ---------- Channels ----------
   const channels = {
-    "กีฬา": {
-      "aff_u23": { name:"Indo vs Thai U23", url:"https://tglmp04.akamaized.net/out/v1/400fc0702dee453bb33ebcc29466e58a/manifest.mpd", logo:"https://iili.io/FWccqEg.md.jpg", license_key:"91b9592c819246c68b3b08a1fe08ba22:fa0d80dfd865b34077bae44cd4a0c5e6" }
-    },
     "ข่าว & ทั่วไป": {
       "thairath_dash": { name:"Thairath TV (DASH)", url:"https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd", logo:"https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png", license_key:"d418f733ed224f9bb9c2b1589db22a20:6ed6fe26daa4b926810869ff60254ebb" },
       "workpoint": { name:"Workpoint TV", url:"https://wp-live.cdn.3bb.co.th/wp/live/playlist.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/4/49/Workpoint_TV_Logo.png", license_key:null },
@@ -182,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const MAX_REASONABLE_DUR = 8*3600; // >8h => ซ่อนแถบเวลา
 
   const sections = document.getElementById('sections');
+  const playerSection = document.getElementById('playerSection');
   const video = document.getElementById('video');
   const overlay = document.getElementById('overlay');
   const ovtxt = document.getElementById('ovtxt');
@@ -202,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const isDash = (u)=>/\.mpd(\?|$)/i.test(u);
   const showOverlay=(t='กำลังโหลด…')=>{ ovtxt.textContent=t; overlay.classList.add('show'); };
   const hideOverlay=()=>overlay.classList.remove('show');
+  const scrollToPlayer=()=> playerSection.scrollIntoView({behavior:'smooth', block:'start'});
 
   function fmt(sec, forceH=false){
     if(!isFinite(sec)) return '--:--';
@@ -264,9 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function switchChannel(cat,id){
-    if(currentId===id && currentCat===cat) return;
+    if(currentId===id && currentCat===cat) { scrollToPlayer(); return; }
     const tk=++token; const ch=channels[cat]?.[id]; if(!ch) return;
-    currentId=id; currentCat=cat; showOverlay('กำลังโหลด…');
+    currentId=id; currentCat=cat; showOverlay('กำลังโหลด…'); scrollToPlayer();
     try{
       await unload(); if(tk!==token) return;
       if(isDash(ch.url) || ch.license_key) await useShaka(ch);
@@ -278,10 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
       nowInfo.textContent=ch.name;
       hideOverlay();
       video.play().catch(()=>{});
+      // เลื่อนไป Player อีกครั้งหลังโหลด (กันกรณีอยู่ล่าง ๆ)
+      setTimeout(scrollToPlayer, 50);
     }catch(e){ console.error(e); showOverlay('เล่นไม่ได้ ลองใหม่'); }
   }
 
-  // ---------- Build sections (responsive grid) ----------
+  // ---------- Build sections ----------
   function buildSections(){
     sections.innerHTML='';
     Object.keys(channels).forEach(cat=>{
