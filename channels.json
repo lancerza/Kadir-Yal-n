@@ -108,5 +108,17 @@
       "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTofn2UUMuUcyBD_-7a82prieNzxCG3XnUzSQ&s",
       "license_key": "d9e3024854648dd01714f781c1492c4c:9404541975d298f6787c591d2cc871b1"
     }
+  },
+  "🔴ARENA SPORT": {
+    "arena_1": {
+      "name": "Arena Sport 1",
+      "url": "https://arenasport.don147ok.workers.dev/ts/arena1",
+      "logo": "https://tvprofil.com/img/kanali-logo/Arena_Sport_1_HR_logo.png"
+    },
+    "arena_2": {
+      "name": "Arena Sport 2",
+      "url": "https://arenasport.don147ok.workers.dev/ts/arena2",
+      "logo": "https://tvprofil.com/img/kanali-logo/Arena_Sport_2_HR_logo.png"
+    }
   }
 }
