@@ -213,6 +213,221 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   /* ======= ใส่ URL RAW ของ channels.json บน GitHub ของคุณ ======= */
+  const CHANNELS_URL = '<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Online TV • Channels from GitHub (no fallback)</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.min.js"></script>
+
+<style>
+  :root{
+    --bg:#0e1116; --panel:#0f141b; --border:#1a2130;
+    --text:#eaf0ff; --muted:#97a1b6; --primary:#0d8eff;
+    --card:#0f1623; --hover:#172339; --hairline:rgba(255,255,255,.06);
+    --card-min:96px; --card-ideal:13vw; --card-max:132px;
+    --card-br:6px; --logo-br:6px; --card-pad:8px; --gap:8px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
+  .wrap{max-width:1100px; margin:14px auto 30px; padding:0 14px}
+
+  /* Top center: Date + Time (time below date) */
+  .datetime{ width:100%; text-align:center; margin:10px 0 6px; color:#eaf0ff }
+  .datetime .chip{
+    display:inline-block; padding:8px 14px; border-radius:12px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 4px 18px rgba(0,0,0,.25);
+  }
+  .dt-date{ font-weight:700; line-height:1.2 }
+  .dt-time{ font-weight:600; opacity:.95; line-height:1.2; margin-top:2px; font-size:.95rem }
+
+  /* Header */
+  .head{display:flex; align-items:center; justify-content:space-between; margin:10px 0}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700}
+  .dot{width:10px; height:10px; border-radius:50%; background:var(--primary); box-shadow:0 0 10px rgba(13,142,255,.65)}
+  .subtxt{color:#b9c3d8; font-size:.95rem}
+
+  /* Player */
+  .player{background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden}
+  .topbar{display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--border)}
+  .now{display:flex; align-items:center; gap:10px; min-width:0}
+  .now img{width:30px; height:30px; border-radius:6px; object-fit:contain; background:#0003; padding:5px}
+  .now .title{font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .now .meta{color:var(--muted); font-size:.84rem}
+  .vbox{position:relative; background:#000}
+  video{width:100%; display:block; aspect-ratio:16/9; background:#000}
+
+  /* Controls — L/C/R */
+  .ctrl{
+    position:absolute; left:0; right:0; bottom:0;
+    display:flex; align-items:center; padding:8px 10px;
+    background:linear-gradient(180deg, transparent, rgba(0,0,0,.55));
+    transform:translateY(8px); opacity:0; transition:.2s; z-index:2;
+  }
+  .player:hover .ctrl, .ctrl.show{opacity:1; transform:translateY(0)}
+  .ctrl-inner{display:flex; align-items:center; width:100%; gap:12px}
+  .ctrl-left{display:flex; align-items:center; gap:8px}
+  .ctrl-center{display:flex; align-items:center; gap:10px; flex:1}
+  .ctrl-right{display:flex; align-items:center; gap:10px}
+
+  .cbtn{width:34px; height:34px; display:grid; place-items:center; border-radius:8px;
+        background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); color:#fff; cursor:pointer}
+  .cbtn svg{width:18px; height:18px; pointer-events:none}
+
+  /* progress */
+  #bar{flex:1; height:6px; accent-color:var(--primary); appearance:none; -webkit-appearance:none; outline:none; background:transparent}
+  #bar::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
+  #bar::-webkit-slider-thumb{-webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--primary); margin-top:-3px}
+
+  /* movie time text (H:M:S only in "หนัง") */
+  .t{min-width:140px; text-align:center; color:#d9e2ff; font-size:.85rem; opacity:.95}
+  .hidden{display:none!important}
+  .live{background:#e53935; color:#fff; font-weight:800; padding:4px 10px; border-radius:8px; font-size:.85rem}
+
+  /* volume slider — short */
+  #vol{
+    width:clamp(60px, 12vw, 100px);
+    height:6px;
+    appearance:none; -webkit-appearance:none; outline:none; background:transparent; accent-color:var(--primary)
+  }
+  #vol::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
+  #vol::-webkit-slider-thumb{-webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--primary); margin-top:-2px}
+
+  /* Overlay */
+  .overlay{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    background:rgba(6,10,18,.6); color:#fff; z-index:3;
+    opacity:0; visibility:hidden; pointer-events:none; transition:.18s;
+  }
+  .overlay.show{ opacity:1; visibility:visible; pointer-events:auto }
+  .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Unmute hint */
+  .unmute{
+    position:absolute; left:50%; bottom:52px; transform:translateX(-50%);
+    background:rgba(12,16,24,.8); border:1px solid rgba(255,255,255,.14);
+    color:#fff; padding:6px 10px; border-radius:10px; font-size:.88rem;
+    box-shadow:0 6px 22px rgba(0,0,0,.35); z-index:2; backdrop-filter:blur(4px)
+  }
+  .unmute.hidden{display:none}
+
+  /* Sections (cards) */
+  .section{margin-top:16px}
+  .section h3{margin:0 0 10px 2px; font-size:1rem; color:#dfe7ff; font-weight:700}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(clamp(var(--card-min), var(--card-ideal), var(--card-max)), 1fr)); gap:var(--gap)}
+  .card{
+    background:var(--card); border-radius:var(--card-br);
+    box-shadow:0 0 0 1px var(--hairline) inset; padding:var(--card-pad);
+    display:flex; flex-direction:column; align-items:center; cursor:pointer;
+    transition:background .15s, box-shadow .15s, transform .15s;
+  }
+  .card:hover{ background:var(--hover); box-shadow:0 0 0 1px rgba(13,142,255,.45) inset; transform:translateY(-1px) }
+  .logo-box{width:100%; aspect-ratio:1/1; border-radius:var(--logo-br); margin-bottom:8px; display:flex; align-items:center; justify-content:center}
+  .logo-box img{max-width:88%; max-height:88%; object-fit:contain}
+  .name{font-weight:700; font-size:.82rem; line-height:1.15; text-align:center; color:#eef3ff; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+
+  /* Active card highlight */
+  .card.active{
+    background:var(--hover);
+    box-shadow:0 0 0 2px var(--primary) inset, 0 6px 20px rgba(13,142,255,.15);
+    transform:none;
+  }
+  .card:focus-visible{ outline:2px solid var(--primary); outline-offset:2px }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*:before,*:after{ animation:none!important; transition:none!important; scroll-behavior:auto!important }
+  }
+  @media (max-width:560px){
+    .grid{ gap:6px } .section{ margin-top:14px }
+    .cbtn{ width:32px; height:32px }
+    .t{ min-width:110px; font-size:.8rem }
+  }
+</style>
+</head>
+<body>
+<!-- Top center: Date + Time -->
+<div class="datetime">
+  <div class="chip">
+    <div id="dateTop" class="dt-date">—</div>
+    <div id="timeTop" class="dt-time">—</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="head">
+    <div class="brand"><div class="dot"></div><div>Online TV</div></div>
+    <div class="subtxt" id="nowInfo" aria-live="polite">กำลังโหลดรายการช่องจาก GitHub…</div>
+  </div>
+
+  <!-- Player -->
+  <section class="player" id="playerSection" aria-busy="true">
+    <div class="topbar">
+      <div class="now">
+        <img id="nowLogo" alt="">
+        <div style="min-width:0">
+          <div class="title" id="nowTitle">—</div>
+          <div class="meta" id="nowMeta">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="vbox" id="vbox">
+      <video id="video" playsinline autoplay muted></video>
+
+      <div class="overlay" id="overlay">
+        <div class="spin"></div>
+        <div id="ovtxt">กำลังโหลด…</div>
+      </div>
+
+      <div id="unmute-hint" class="unmute hidden">แตะเพื่อเปิดเสียง</div>
+
+      <!-- Controls -->
+      <div class="ctrl" id="ctrl">
+        <div class="ctrl-inner">
+          <div class="ctrl-left">
+            <button id="play" class="cbtn" title="เล่น/หยุด (Space)">
+              <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="i-pause hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
+            </button>
+            <span id="live" class="live hidden">LIVE</span>
+          </div>
+
+          <div class="ctrl-center">
+            <span id="time" class="t hidden">--:--:-- / --:--:--</span>
+            <input id="bar" type="range" value="0" step="1" title="แถบเวลา">
+          </div>
+
+          <div class="ctrl-right">
+            <button id="mute" class="cbtn" title="เปิด/ปิดเสียง (M)">
+              <svg class="i-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+              <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
+            </button>
+            <input id="vol" type="range" min="0" max="1" step="0.05" title="เสียง">
+            <button id="fs" class="cbtn" title="เต็มจอ (F)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zM5 10h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sections -->
+  <div id="sections"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  /* ======= ใส่ URL RAW ของ channels.json บน GitHub ของคุณ ======= */
   const CHANNELS_URL = 'https://raw.githubusercontent.com/lancerza/tv-online/refs/heads/main/channels.json'; // <-- แก้เป็นของคุณ
 
   /* ---------- Top Date & Time (time under date, no seconds) ---------- */
@@ -500,4 +715,292 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 </body>
+</html>'https://raw.githubusercontent.com/lancerza/tv-online/main/channels.json'; // <-- แก้เป็นของคุณ
+
+  /* ---------- Top Date & Time (time under date, no seconds) ---------- */
+  const dateEl = document.getElementById('dateTop');
+  const timeEl = document.getElementById('timeTop');
+  function updateDateTimeTop(){
+    const now = new Date();
+    dateEl.textContent = now.toLocaleDateString('th-TH', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    timeEl.textContent = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', hour12:false });
+  }
+  updateDateTimeTop();
+  setInterval(updateDateTimeTop, 1000);
+
+  /* ---------- State & DOM ---------- */
+  let channels = null; // โหลดจาก GitHub เท่านั้น (ไม่มี fallback)
+  let hls=null, shakaP=null, currentId=null, currentCat=null, currentEngine='—', token=0;
+  const MAX_REASONABLE_DUR = 8*3600;
+  const LAST_CH_KEY='tv_last_channel';
+
+  const sections = document.getElementById('sections');
+  const playerSection = document.getElementById('playerSection');
+  const video = document.getElementById('video');
+  const overlay = document.getElementById('overlay');
+  const ovtxt = document.getElementById('ovtxt');
+  const ctrl = document.getElementById('ctrl');
+  const play = document.getElementById('play');
+  const iPlay = play.querySelector('.i-play'), iPause = play.querySelector('.i-pause');
+  const mute = document.getElementById('mute');
+  const iVol = mute.querySelector('.i-vol'), iMute = mute.querySelector('.i-mute');
+  const bar = document.getElementById('bar');
+  const timeTxt = document.getElementById('time');
+  const livePill = document.getElementById('live');
+  const fs = document.getElementById('fs');
+  const vol = document.getElementById('vol');
+  const nowInfo = document.getElementById('nowInfo'), nowTitle = document.getElementById('nowTitle');
+  const nowMeta = document.getElementById('nowMeta'), nowLogo = document.getElementById('nowLogo');
+
+  const FIRST_KEY='tv_first_visit_done';
+  const VOL_KEY='tv_volume';
+  const LAST_VOL_KEY='tv_last_vol';
+
+  /* ---------- Helpers ---------- */
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+  const isHls = (u)=>/\.m3u8(\?|$)/i.test(u);
+  const isDash = (u)=>/\.mpd(\?|$)/i.test(u);
+  const showOverlay=(t='กำลังโหลด…')=>{ ovtxt.textContent=t; overlay.classList.add('show'); };
+  const hideOverlay=()=>overlay.classList.remove('show');
+  const hideOverlaySafe=()=>hideOverlay();
+  const scrollToPlayer=()=> playerSection.scrollIntoView({behavior:'smooth', block:'start'});
+  const cssEscape=(s)=> (window.CSS&&CSS.escape)?CSS.escape(s):String(s).replace(/([\\[\\].#:$'"`])/g,'\\$1');
+
+  function fmtHMS(sec){
+    if(!isFinite(sec)) return '--:--:--';
+    sec=Math.max(0,Math.floor(sec));
+    const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  const isLiveLike=()=>{ const d=video.duration; return !isFinite(d)||d<=0||d>MAX_REASONABLE_DUR; };
+
+  function refreshTimeUI(){
+    const liveLike=isLiveLike();
+    livePill.classList.toggle('hidden', !liveLike);
+    bar.classList.toggle('hidden', liveLike);
+    if(!liveLike){ bar.max=isFinite(video.duration)?video.duration:0; bar.value=video.currentTime||0; }
+    const showTime=(currentCat==='หนัง') && !liveLike;
+    timeTxt.classList.toggle('hidden', !showTime);
+    if(showTime){ timeTxt.textContent=`${fmtHMS(video.currentTime||0)} / ${fmtHMS(video.duration||0)}`; }
+  }
+
+  function syncVolUI(){
+    vol.value = video.volume;
+    const muted = video.muted || video.volume===0;
+    iVol.classList.toggle('hidden', muted);
+    iMute.classList.toggle('hidden', !muted);
+  }
+
+  function setActiveCard(cat,id){
+    document.querySelectorAll('.card.active').forEach(el=>{
+      el.classList.remove('active'); el.setAttribute('aria-pressed','false');
+    });
+    const el=document.querySelector(`.card[data-cat="${cssEscape(cat)}"][data-id="${cssEscape(id)}"]`);
+    if(el){ el.classList.add('active'); el.setAttribute('aria-pressed','true'); el.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'}); }
+    localStorage.setItem(LAST_CH_KEY, JSON.stringify({cat,id}));
+  }
+
+  async function unload(){
+    if(hls){ try{ hls.destroy(); }catch{} hls=null; }
+    if(shakaP){ try{ await shakaP.destroy(); }catch{} shakaP=null; }
+    try{ video.pause(); }catch{} video.removeAttribute('src'); try{ video.load(); }catch{};
+    await sleep(80);
+  }
+
+  async function useHls(url){
+    if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=url; currentEngine='HLS'; return; }
+    if(window.Hls && Hls.isSupported()){
+      hls=new Hls({
+        enableWorker:true, lowLatencyMode:false, capLevelToPlayerSize:true, startLevel:-1, startPosition:-1,
+        maxBufferLength:20, backBufferLength:30, maxBufferHole:.5, maxLoadingDelay:8, maxStarvationDelay:4,
+        manifestLoadingTimeOut:10000, fragLoadingTimeOut:15000, levelLoadingTimeOut:10000,
+        manifestLoadingMaxRetry:1, fragLoadingMaxRetry:1, levelLoadingMaxRetry:1
+      });
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(url));
+      hls.on(Hls.Events.MANIFEST_PARSED, hideOverlaySafe);
+      hls.on(Hls.Events.LEVEL_LOADED, hideOverlaySafe);
+      hls.on(Hls.Events.ERROR,(_,d)=>{ if(d.fatal){ if(d.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad(); else if(d.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError(); }});
+      currentEngine='HLS'; return;
+    }
+    throw new Error('เบราว์เซอร์ไม่รองรับ HLS');
+  }
+
+  async function useShaka(ch){
+    shaka.polyfill.installAll();
+    if(!shaka.Player.isBrowserSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ DASH');
+    shakaP=new shaka.Player(video);
+    const cfg={streaming:{bufferingGoal:30,rebufferingGoal:5,retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}},
+               manifest:{retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}},
+               drm:{clearKeys:{}}};
+    if(ch.license_key){ const [kid,key]=String(ch.license_key).split(':'); if(kid&&key) cfg.drm.clearKeys[kid]=key; }
+    shakaP.configure(cfg);
+    shakaP.addEventListener('loaded', hideOverlaySafe);
+    shakaP.addEventListener('trackschanged', hideOverlaySafe);
+    await shakaP.load(ch.url);
+    currentEngine='DASH';
+  }
+
+  /* ---------- Autoplay + unmute hint ---------- */
+  const unmuteHint = document.getElementById('unmute-hint');
+  function showUnmute(){ unmuteHint.classList.remove('hidden'); }
+  function hideUnmute(){ unmuteHint.classList.add('hidden'); }
+  function restoreSavedVolume(){
+    const saved=parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5');
+    video.volume = isFinite(saved) ? saved : 0.5;
+  }
+  async function tryAutoplay(){
+    try{ video.muted = true; await video.play(); showUnmute(); }
+    catch{ setTimeout(async()=>{ try{ video.muted=true; await video.play(); showUnmute(); }catch{} }, 400); }
+  }
+  function enableSoundOnce(){ restoreSavedVolume(); video.muted=false; hideUnmute(); }
+  ['click','touchstart','keydown'].forEach(evt=>{
+    document.addEventListener(evt, ()=>{ if(!unmuteHint.classList.contains('hidden')) enableSoundOnce(); }, { once:true, capture:true });
+  });
+
+  async function switchChannel(cat,id){
+    if(currentId===id && currentCat===cat){ scrollToPlayer(); return; }
+    const tk=++token; const ch=channels[cat]?.[id]; if(!ch) return;
+    currentId=id; currentCat=cat; showOverlay('กำลังโหลด…'); scrollToPlayer();
+    try{
+      await unload(); if(tk!==token) return;
+      if(isDash(ch.url) || ch.license_key) await useShaka(ch);
+      else if(isHls(ch.url)) await useHls(ch.url);
+      else await useShaka(ch);
+      if(tk!==token) return;
+
+      nowTitle.textContent=ch.name;
+      nowLogo.src=ch.logo||'';
+      nowMeta.textContent=`${cat} · ${currentEngine}${ch.license_key?' (DRM)':''}`;
+      nowInfo.textContent=ch.name;
+
+      setActiveCard(cat,id);
+
+      await tryAutoplay();
+      setTimeout(hideOverlaySafe, 1500);
+      setTimeout(scrollToPlayer, 60);
+    }catch(e){ console.error(e); showOverlay('เล่นไม่ได้ ลองใหม่'); }
+  }
+
+  function buildSections(){
+    sections.innerHTML='';
+    Object.keys(channels).forEach(cat=>{
+      const sec=document.createElement('section'); sec.className='section';
+      sec.innerHTML=`<h3>${cat}</h3><div class="grid" id="grid-${cat}"></div>`;
+      sections.appendChild(sec);
+      const grid=sec.querySelector('.grid');
+      Object.entries(channels[cat]).forEach(([id,ch])=>{
+        const card=document.createElement('button');
+        card.className='card'; card.title=ch.name;
+        card.dataset.cat=cat; card.dataset.id=id;
+        card.setAttribute('role','button'); card.setAttribute('aria-pressed','false');
+        card.innerHTML=`<div class="logo-box"><img loading="lazy" src="${ch.logo}" alt="" draggable="false"></div><div class="name">${ch.name}</div>`;
+        card.onclick=()=>switchChannel(cat,id);
+        grid.appendChild(card);
+      });
+    });
+  }
+
+  /* ---------- Controls ---------- */
+  let ctrlTimer;
+  const showCtrl=()=>{ clearTimeout(ctrlTimer); ctrl.classList.add('show'); ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),1800); };
+  document.getElementById('vbox').addEventListener('mousemove', showCtrl);
+  document.getElementById('vbox').addEventListener('touchstart', showCtrl);
+
+  play.addEventListener('click', ()=> video.paused?video.play():video.pause());
+  video.addEventListener('play', ()=>{ iPlay.classList.add('hidden'); iPause.classList.remove('hidden'); hideOverlaySafe(); });
+  video.addEventListener('pause', ()=>{ iPlay.classList.remove('hidden'); iPause.classList.add('hidden'); });
+
+  // ซ่อน overlay เมื่อพร้อมเล่น
+  video.addEventListener('loadeddata', hideOverlaySafe);
+  video.addEventListener('canplay', hideOverlaySafe);
+  video.addEventListener('playing', hideOverlaySafe);
+  setInterval(()=>{ if(overlay.classList.contains('show') && video.readyState>=2) hideOverlaySafe(); }, 1000);
+
+  // Volume init (จำครั้งก่อน) — เริ่ม muted เพื่อ autoplay
+  (function initVolume(){
+    if(!localStorage.getItem(FIRST_KEY)){
+      localStorage.setItem(FIRST_KEY,'1');
+      localStorage.setItem(VOL_KEY,'0.5');
+      localStorage.setItem(LAST_VOL_KEY,'0.5');
+    }
+    vol.value = parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5');
+    syncVolUI();
+  })();
+
+  mute.addEventListener('click', ()=>{
+    if(video.muted || video.volume===0){ enableSoundOnce(); }
+    else{
+      localStorage.setItem(LAST_VOL_KEY, String(video.volume||.5));
+      video.muted=true; syncVolUI(); showUnmute();
+    }
+    localStorage.setItem(VOL_KEY, String(video.volume));
+  });
+  vol.addEventListener('input', e=>{
+    const v=+e.target.value; video.volume=v;
+    if(v>0 && video.muted){ video.muted=false; hideUnmute(); }
+    localStorage.setItem(VOL_KEY, String(v)); localStorage.setItem(LAST_VOL_KEY, String(v));
+    syncVolUI();
+  });
+  video.addEventListener('volumechange', syncVolUI);
+
+  bar.addEventListener('input', e=> video.currentTime=+e.target.value);
+  video.addEventListener('timeupdate', refreshTimeUI);
+  video.addEventListener('loadedmetadata', refreshTimeUI);
+  video.addEventListener('durationchange', refreshTimeUI);
+
+  fs.addEventListener('click', async ()=>{
+    try{
+      const box=document.getElementById('vbox');
+      if(!document.fullscreenElement) await box.requestFullscreen(); else await document.exitFullscreen();
+    }catch{}
+  });
+  document.addEventListener('keydown',(e)=>{
+    const t=document.activeElement?.tagName; if(t==='INPUT'||t==='TEXTAREA') return;
+    if(e.code==='Space'){ e.preventDefault(); video.paused?video.play():video.pause(); }
+    else if(e.key.toLowerCase()==='m'){ mute.click(); }
+    else if(e.key.toLowerCase()==='f'){ fs.click(); }
+    else if(e.key==='ArrowRight'){ video.currentTime=(video.currentTime||0)+5; }
+    else if(e.key==='ArrowLeft'){ video.currentTime=Math.max(0,(video.currentTime||0)-5); }
+  });
+
+  /* ---------- โหลด channels จาก GitHub (ไม่มี fallback) ---------- */
+  async function loadChannelsFromGitHub(){
+    const res = await fetch(CHANNELS_URL, { cache: 'no-cache' });
+    if(!res.ok) throw new Error('โหลด channels.json ไม่สำเร็จ (HTTP ' + res.status + ')');
+    const data = await res.json();
+    if(!data || typeof data!=='object') throw new Error('รูปแบบ channels.json ไม่ถูกต้อง');
+    return data;
+  }
+
+  async function init(){
+    try{
+      const data = await loadChannelsFromGitHub();
+      channels = data;
+
+      buildSections();
+
+      // เลือกช่องแรก หรือช่องล่าสุดที่เคยดู (ถ้ามีอยู่ในรายการนี้)
+      let firstCat=Object.keys(channels)[0];
+      let firstId =Object.keys(channels[firstCat])[0];
+      try{
+        const saved = JSON.parse(localStorage.getItem(LAST_CH_KEY) || 'null');
+        if(saved && channels[saved.cat]?.[saved.id]){ firstCat=saved.cat; firstId=saved.id; }
+      }catch{}
+      document.getElementById('nowInfo').textContent='เลือกช่องเพื่อเริ่มรับชม';
+      playerSection.removeAttribute('aria-busy');
+      switchChannel(firstCat, firstId);
+    }catch(err){
+      console.error(err);
+      document.getElementById('nowInfo').textContent='โหลดรายการช่องจาก GitHub ไม่สำเร็จ';
+      showOverlay('ไม่สามารถโหลด "channels.json" จาก GitHub ได้\nกรุณาตรวจสอบ URL หรือสิทธิ์การเข้าถึง');
+      // หยุดทำงานต่อ เพราะไม่มีข้อมูลช่อง
+    }
+  }
+
+  init();
+});
+</script>
+</body>
 </html>
+
