@@ -12,7 +12,7 @@
 <!-- Players -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.min.js"></script>
-<!-- NEW: TS player -->
+<!-- MPEG-TS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mpegts.js/1.7.3/mpegts.min.js"></script>
 
 <style>
@@ -20,17 +20,14 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
   .wrap{max-width:1100px;margin:14px auto 30px;padding:0 14px}
-  /* top date/time */
   .datetime{width:100%;text-align:center;margin:10px 0 6px}
   .chip{display:inline-block;padding:8px 14px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
   .dt-date{font-weight:700}
   .dt-time{font-weight:600;opacity:.95}
-  /* head */
   .head{display:flex;align-items:center;justify-content:space-between;margin:10px 0}
   .brand{display:flex;align-items:center;gap:10px;font-weight:700}
   .dot{width:10px;height:10px;border-radius:50%;background:var(--primary);box-shadow:0 0 10px rgba(13,142,255,.6)}
   .subtxt{color:#b9c3d8;font-size:.95rem}
-  /* player */
   .player{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
   .topbar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border)}
   .now{display:flex;align-items:center;gap:10px;min-width:0}
@@ -39,14 +36,11 @@
   .now .meta{color:var(--muted);font-size:.84rem}
   .vbox{position:relative;background:#000}
   video{width:100%;display:block;aspect-ratio:16/9;background:#000}
-  /* controls */
-  .ctrl{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;padding:8px 10px;
-        background:linear-gradient(180deg,transparent,rgba(0,0,0,.55));transform:translateY(8px);opacity:0;transition:.2s;z-index:2}
+  .ctrl{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;padding:8px 10px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.55));transform:translateY(8px);opacity:0;transition:.2s;z-index:2}
   .player:hover .ctrl,.ctrl.show{opacity:1;transform:translateY(0)}
   .ctrl-inner{display:flex;align-items:center;width:100%;gap:12px;justify-content:space-between}
   .side-left,.side-right{display:flex;align-items:center;gap:8px}
-  .cbtn{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.08);
-        border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer}
+  .cbtn{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer}
   .cbtn svg{width:18px;height:18px;pointer-events:none}
   #bar{flex:1;height:6px;accent-color:var(--primary);appearance:none;background:transparent}
   #bar::-webkit-slider-runnable-track{height:6px;background:rgba(255,255,255,.18);border-radius:999px}
@@ -61,10 +55,8 @@
   .overlay.show{opacity:1;visibility:visible;pointer-events:auto}
   .spin{border:4px solid rgba(255,255,255,.35);border-top:4px solid var(--primary);width:42px;height:42px;border-radius:50%;animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .unmute{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);background:rgba(12,16,24,.8);border:1px solid rgba(255,255,255,.14);
-          color:#fff;padding:6px 10px;border-radius:10px;font-size:.88rem;box-shadow:0 6px 22px rgba(0,0,0,.35);z-index:2}
+  .unmute{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);background:rgba(12,16,24,.8);border:1px solid rgba(255,255,255,.14);color:#fff;padding:6px 10px;border-radius:10px;font-size:.88rem;box-shadow:0 6px 22px rgba(0,0,0,.35);z-index:2}
   .unmute.hidden{display:none}
-  /* sections */
   .section{margin-top:16px}
   .section h3{margin:0 0 10px 2px;font-size:1rem;color:#dfe7ff;font-weight:700}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
@@ -74,6 +66,12 @@
   .logo-box img{max-width:88%;max-height:88%;object-fit:contain}
   .name{font-weight:700;font-size:.82rem;line-height:1.15;text-align:center;color:#eef3ff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .card.active{box-shadow:0 0 0 2px var(--primary) inset,0 6px 20px rgba(13,142,255,.15)}
+  .inline-form{display:grid;grid-template-columns:1.4fr .7fr 1fr 1fr 1.2fr 1.2fr auto;gap:8px}
+  .inline-form input,.inline-form select{background:#101827;border:1px solid var(--border);color:#eaf0ff;border-radius:10px;padding:10px}
+  .btn{background:#0d8eff;border:0;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:700}
+  .btn.alt{background:#1f2a3a}
+  .note{color:#9fb0c9;font-size:.85rem}
+  @media(max-width:980px){.inline-form{grid-template-columns:1fr 1fr 1fr;}.hide-sm{display:none}}
   @media(max-width:560px){.grid{gap:6px}.cbtn{width:32px;height:32px}.t{min-width:110px;font-size:.8rem}}
 </style>
 </head>
@@ -103,6 +101,7 @@
           <div class="meta" id="nowMeta">—</div>
         </div>
       </div>
+      <div class="t" id="stat">—</div>
     </div>
 
     <div class="vbox" id="vbox">
@@ -111,6 +110,7 @@
       <div class="overlay" id="overlay">
         <div class="spin"></div>
         <div id="ovtxt">กำลังโหลด…</div>
+        <div><button class="btn alt" id="retryBtn">ลองอีกครั้ง</button></div>
       </div>
 
       <div id="unmute-hint" class="unmute hidden">แตะเพื่อเปิดเสียง</div>
@@ -134,8 +134,14 @@
               <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
             </button>
             <input id="vol" type="range" min="0" max="1" step="0.05" title="เสียง">
+            <button id="pip" class="cbtn" title="Picture in Picture">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 7H5a2 2 0 00-2 2v6a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2zm-6 6h6v4h-6v-4z"/></svg>
+            </button>
             <button id="fs" class="cbtn" title="เต็มจอ (F)">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zM5 10h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            </button>
+            <button id="share" class="cbtn" title="คัดลอกลิงก์ช่อง">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.27 3.27 0 000-1.39l7-4.11A2.99 2.99 0 0018 6a3 3 0 10-2.83-4H15a3 3 0 100 6c.76 0 1.44-.3 1.96-.77l7 4.11c-.05.23-.08.47-.08.72 0 .25.03.49.08.72l-7 4.11c-.52-.47-1.2-.77-1.96-.77a3 3 0 100 6 3 3 0 002.83-4h.17A3 3 0 1018 16.08z"/></svg>
             </button>
           </div>
         </div>
@@ -144,14 +150,40 @@
   </section>
 
   <div id="sections"></div>
+
+  <!-- เล่นจากลิงก์แบบด่วน -->
+  <section class="section" id="quick">
+    <h3>เล่นจากลิงก์ (ทดสอบเอ็นด์พอยท์ พร้อม Referrer & User-Agent)</h3>
+    <div class="inline-form" role="group" aria-label="Play from URL">
+      <input id="qSrc" type="url" placeholder="ลิงก์สตรีม เช่น https://...m3u8 หรือ .mpd หรือ .ts"/>
+      <select id="qType" title="ชนิดสตรีม">
+        <option value="auto" selected>ตรวจอัตโนมัติ</option>
+        <option value="hls">HLS (.m3u8)</option>
+        <option value="dash">DASH (.mpd)</option>
+        <option value="ts">MPEG-TS (.ts)</option>
+      </select>
+      <input id="qName" placeholder="ชื่อช่อง (ตัวเลือก)"/>
+      <input id="qLogo" class="hide-sm" placeholder="โลโก้ URL (ตัวเลือก)"/>
+      <input id="qRef" placeholder="Referrer เช่น https://99dooball.com/"/>
+      <input id="qUA" placeholder="User-Agent (ถ้าต้องใช้)"/>
+      <button class="btn" id="qPlay">เล่น</button>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+      <input id="qKey" placeholder="ClearKey (kid:key) สำหรับ Widevine ClearKey - ถ้ามี" style="flex:1;background:#101827;border:1px solid var(--border);color:#eaf0ff;border-radius:10px;padding:10px"/>
+      <button class="btn alt" id="qShare">สร้างลิงก์แชร์</button>
+    </div>
+    <div class="note" style="margin-top:6px">* เบราว์เซอร์ <b>ห้าม</b> ตั้งค่า Referer/User-Agent ตรง ๆ ได้ เราใช้พร็อกซีฝั่งเซิร์ฟเวอร์แทน (ตั้งค่า <code>PROXY_URL</code> ในสคริปต์ด้านล่าง)</div>
+  </section>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  /* ===== URL channels.json ของคุณ ===== */
-  const CHANNELS_URL = 'https://raw.githubusercontent.com/lancerza/tv-online/refs/heads/main/channels.json'; // แก้ให้ตรงของคุณ
+(function(){
+  /* ===================== CONFIG (แก้ให้ตรงเว็บคุณ) ===================== */
+  const CHANNELS_URL = 'https://raw.githubusercontent.com/lancerza/tv-online/refs/heads/main/channels.json';
+  // ชี้ไปที่พร็อกซีของคุณ (เช่น Cloudflare Workers/Node):
+  const PROXY_URL = 'https://your-worker.example/proxy';
 
-  /* top time (ไม่โชว์วินาที) */
+  /* ===================== เวลา (ไม่โชว์วินาที) ===================== */
   const dateEl = document.getElementById('dateTop');
   const timeEl = document.getElementById('timeTop');
   function updateTop(){
@@ -161,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   updateTop(); setInterval(updateTop,1000);
 
-  /* state */
+  /* ===================== State ===================== */
   let channels=null,hls=null,shakaP=null,tsPlayer=null,currentEngine='—',currentId=null,currentCat=null,token=0;
   const MAX_DUR=8*3600, LAST='tv_last_channel', VOL='tv_volume', FIRST='tv_first_visit_done';
   const sections=document.getElementById('sections');
@@ -173,11 +205,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const mute=document.getElementById('mute'), iVol=mute.querySelector('.i-vol'), iMute=mute.querySelector('.i-mute');
   const bar=document.getElementById('bar'); const livePill=document.getElementById('live');
   const fs=document.getElementById('fs'); const vol=document.getElementById('vol');
+  const pipBtn=document.getElementById('pip');
+  const shareBtn=document.getElementById('share');
   const nowInfo=document.getElementById('nowInfo'), nowTitle=document.getElementById('nowTitle');
   const nowMeta=document.getElementById('nowMeta'), nowLogo=document.getElementById('nowLogo');
+  const stat=document.getElementById('stat');
   const unmuteHint=document.getElementById('unmute-hint');
+  const retryBtn=document.getElementById('retryBtn');
 
-  /* helpers */
+  // Quick form
+  const qSrc=document.getElementById('qSrc');
+  const qType=document.getElementById('qType');
+  const qName=document.getElementById('qName');
+  const qLogo=document.getElementById('qLogo');
+  const qRef=document.getElementById('qRef');
+  const qUA=document.getElementById('qUA');
+  const qKey=document.getElementById('qKey');
+  const qPlay=document.getElementById('qPlay');
+  const qShare=document.getElementById('qShare');
+
+  const qs=new URLSearchParams(location.search);
+
+  /* ===================== Helpers ===================== */
   const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
   const isHls=(u)=>/\.m3u8(\?|$)/i.test(u);
   const isDash=(u)=>/\.mpd(\?|$)/i.test(u);
@@ -185,7 +234,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const showOverlay=(t='กำลังโหลด…')=>{ovtxt.textContent=t;overlay.classList.add('show');};
   const hideOverlay=()=>overlay.classList.remove('show');
   const scrollToPlayer=()=>playerSection.scrollIntoView({behavior:'smooth',block:'start'});
-  const cssEscape=(s)=>window.CSS&&CSS.escape?CSS.escape(s):String(s).replace(/([\\[\\].#:$'"`])/g,'\\$1');
+  const cssEscape=(s)=>window.CSS&&CSS.escape?CSS.escape(s):String(s).replace(/([\[\].#:$'"`])/g,'\$1');
+
+  // ห่อ URL ให้ผ่านพร็อกซี พร้อม referrer/UA
+  function wrap(u, headers){
+    try{ new URL(u); }catch{ return u; }
+    const p=new URLSearchParams({u});
+    if(headers?.ref) p.set('ref', headers.ref);
+    if(headers?.ua) p.set('ua', headers.ua);
+    return `${PROXY_URL}?${p.toString()}`;
+  }
 
   function isLiveLike(){const d=video.duration;return !isFinite(d)||d<=0||d>MAX_DUR}
 
@@ -194,8 +252,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const m=video.muted||video.volume===0;
     iVol.classList.toggle('hidden',m); iMute.classList.toggle('hidden',!m);
   }
+  function updateStat(){
+    const w=video.videoWidth||0,h=video.videoHeight||0;
+    stat.textContent = (w&&h?`${w}×${h}`:'—') + (currentEngine!=='—'?` · ${currentEngine}`:'');
+  }
 
-  /* unload ครอบคลุมทุก engine */
+  /* ===================== Unload ทุก engine ===================== */
   async function unload(){
     if(hls){try{hls.destroy();}catch{} hls=null;}
     if(shakaP){try{await shakaP.destroy();}catch{} shakaP=null;}
@@ -203,12 +265,23 @@ document.addEventListener('DOMContentLoaded', () => {
     try{video.pause();}catch{} video.removeAttribute('src'); try{video.load();}catch{}; await sleep(60);
   }
 
-  /* Players */
+  /* ===================== Engines (ผ่านพร็อกซี) ===================== */
+  let currentHeaders={ref:'',ua:''};
+
   async function useHls(url){
-    if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=url; currentEngine='HLS'; return; }
+    const loaderClass = class extends Hls.DefaultConfig.loader{
+      load(context, cfg, cbs){ context.url = wrap(context.url, currentHeaders); super.load(context, cfg, cbs); }
+    };
+
+    if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=wrap(url,currentHeaders); currentEngine='HLS'; return; }
     if(window.Hls&&Hls.isSupported()){
-      hls=new Hls({enableWorker:true,capLevelToPlayerSize:true,startLevel:-1,lowLatencyMode:false});
-      hls.attachMedia(video); hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));
+      hls=new Hls({
+        enableWorker:true,capLevelToPlayerSize:true,startLevel:-1,lowLatencyMode:false,backBufferLength:30,
+        loader: loaderClass,
+        recoverMediaError:true
+      });
+      hls.on(Hls.Events.ERROR,(e,data)=>{ if(data.fatal){ if(data.type===Hls.ErrorTypes.NETWORK_ERROR){ hls.startLoad(); } else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){ hls.recoverMediaError(); } } });
+      hls.attachMedia(video); hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(wrap(url,currentHeaders)));
       currentEngine='HLS'; return;
     }
     throw new Error('เบราว์เซอร์ไม่รองรับ HLS');
@@ -218,15 +291,19 @@ document.addEventListener('DOMContentLoaded', () => {
     shakaP=new shaka.Player(video);
     const cfg={streaming:{bufferingGoal:25,rebufferingGoal:4},drm:{clearKeys:{}}};
     if(ch.license_key){const [kid,key]=String(ch.license_key).split(':'); if(kid&&key) cfg.drm.clearKeys[kid]=key;}
-    shakaP.configure(cfg); await shakaP.load(ch.url); currentEngine='DASH';
+    shakaP.configure(cfg);
+    const net=shakaP.getNetworkingEngine();
+    net.registerRequestFilter((type, request)=>{ request.uris = request.uris.map(u=>wrap(u,currentHeaders)); });
+    shakaP.addEventListener('error',ev=>{console.warn('Shaka error',ev?.detail)});
+    await shakaP.load(ch.url); currentEngine='DASH';
   }
   async function useTs(url){
     if(!window.mpegts||!mpegts.isSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ MPEG-TS');
-    tsPlayer=mpegts.createPlayer({type:'mpegts',url,isLive:true},{enableWorker:true,liveBufferLatencyChasing:true});
+    const wrapped = wrap(url,currentHeaders);
+    tsPlayer=mpegts.createPlayer({type:'mpegts',url:wrapped,isLive:true},{enableWorker:true,liveBufferLatencyChasing:true});
     tsPlayer.attachMediaElement(video); await tsPlayer.load(); await video.play(); currentEngine='MPEG-TS';
   }
 
-  /* time & progress */
   function refreshTimeUI(){
     const live=isLiveLike();
     livePill.classList.toggle('hidden',!live);
@@ -234,7 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!live){ bar.max=isFinite(video.duration)?video.duration:0; bar.value=video.currentTime||0; }
   }
 
-  /* active card */
   function setActiveCard(cat,id){
     document.querySelectorAll('.card.active').forEach(el=>{el.classList.remove('active');el.setAttribute('aria-pressed','false');});
     const el=document.querySelector(`.card[data-cat="${cssEscape(cat)}"][data-id="${cssEscape(id)}"]`);
@@ -242,35 +318,46 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem(LAST,JSON.stringify({cat,id}));
   }
 
-  /* autoplay hint */
   function showUnmute(){unmuteHint.classList.remove('hidden')}
   function hideUnmute(){unmuteHint.classList.add('hidden')}
   function restoreSavedVolume(){const v=parseFloat(localStorage.getItem(VOL)??'0.5'); video.volume=isFinite(v)?v:.5;}
   async function tryAutoplay(){try{video.muted=true;await video.play();showUnmute();}catch{}}
-  ['click','touchstart','keydown'].forEach(e=>document.addEventListener(e,()=>{if(!unmuteHint.classList.contains('hidden')){restoreSavedVolume();video.muted=false;hideUnmute();}}, {once:true,capture:true}));
+  ;['click','touchstart','keydown'].forEach(e=>document.addEventListener(e,()=>{if(!unmuteHint.classList.contains('hidden')){restoreSavedVolume();video.muted=false;hideUnmute();}}, {once:true,capture:true}));
 
-  /* switch channel */
-  async function switchChannel(cat,id){
-    if(currentId===id && currentCat===cat){scrollToPlayer();return;}
-    const tk=++token; const ch=channels[cat]?.[id]; if(!ch) return;
-    currentId=id; currentCat=cat; showOverlay('กำลังโหลด…'); scrollToPlayer();
+  /* ===================== Core play (fallback + headers ต่อช่อง) ===================== */
+  async function playWithFallback(ch){
+    const tk=++token; showOverlay('กำลังโหลด…');
+    const urls = [ch.url, ...(Array.isArray(ch.alt)?ch.alt:[])].filter(Boolean);
+    let lastErr=null;
+    currentHeaders={ref: ch.referrer||ch.ref||'', ua: ch.user_agent||ch.ua||''};
 
-    try{
-      await unload(); if(tk!==token) return;
-
-      if(isTs(ch.url))       await useTs(ch.url);         /* NEW: TS */
-      else if(isDash(ch.url) || ch.license_key) await useShaka(ch);
-      else if(isHls(ch.url)) await useHls(ch.url);
-      else throw new Error('ไม่รู้จักชนิดสตรีม');
-
-      if(tk!==token) return;
-      nowTitle.textContent=ch.name; nowLogo.src=ch.logo||''; nowMeta.textContent=`${cat} · ${currentEngine}`;
-      nowInfo.textContent=ch.name; setActiveCard(cat,id);
-      await tryAutoplay(); setTimeout(()=>overlay.classList.remove('show'),500);
-    }catch(e){console.error(e); ovtxt.textContent='เล่นไม่ได้ ลองใหม่';}
+    for(let i=0;i<urls.length;i++){
+      if(tk!==token) return; // switched while trying
+      try{
+        await unload(); if(tk!==token) return;
+        const u=urls[i];
+        if(ch.forceType==='ts' || isTs(u))            await useTs(u);
+        else if(ch.forceType==='dash' || isDash(u) || ch.license_key) await useShaka({...ch,url:u});
+        else if(ch.forceType==='hls' || isHls(u))     await useHls(u);
+        else throw new Error('ไม่รู้จักชนิดสตรีม');
+        hideOverlay();
+        return true;
+      }catch(e){ lastErr=e; console.warn('แหล่งที่',i+1,'ล้มเหลว:',e?.message||e); ovtxt.textContent='พยายามสำรอง… ('+(i+1)+'/'+urls.length+')'; await sleep(300); }
+    }
+    ovtxt.textContent='เล่นไม่ได้ ลองใหม่';
+    console.error(lastErr); return false;
   }
 
-  /* build UI */
+  async function switchChannel(cat,id){
+    if(currentId===id && currentCat===cat){scrollToPlayer();return;}
+    const ch=channels?.[cat]?.[id]; if(!ch) return;
+    currentId=id; currentCat=cat; scrollToPlayer();
+    nowTitle.textContent=ch.name; nowLogo.src=ch.logo||''; nowInfo.textContent=ch.name; nowMeta.textContent=`${cat} · กำลังโหลด…`;
+    const ok = await playWithFallback(ch);
+    if(ok){ nowMeta.textContent=`${cat} · ${currentEngine}`; setActiveCard(cat,id); await tryAutoplay(); } else { nowMeta.textContent=`${cat} · ผิดพลาด`; }
+  }
+
+  /* ===================== Build sections ===================== */
   function buildSections(){
     sections.innerHTML='';
     Object.keys(channels).forEach(cat=>{
@@ -279,8 +366,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const grid=sec.querySelector('.grid');
       Object.entries(channels[cat]).forEach(([id,ch])=>{
         const card=document.createElement('button');
-        card.className='card'; card.dataset.cat=cat; card.dataset.id=id; card.title=ch.name;
-        card.innerHTML=`<div class="logo-box"><img loading="lazy" src="${ch.logo}" alt=""></div><div class="name">${ch.name}</div>`;
+        card.className='card'; card.dataset.cat=cat; card.dataset.id=id; card.title=ch.name; card.setAttribute('aria-pressed','false');
+        card.innerHTML=`<div class="logo-box"><img loading="lazy" src="${ch.logo||''}" alt=""></div><div class="name">${ch.name}</div>`;
         card.onclick=()=>switchChannel(cat,id);
         grid.appendChild(card);
       });
@@ -288,22 +375,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* controls */
+  /* ===================== Controls ===================== */
   document.getElementById('vbox').addEventListener('mousemove',()=>{clearTimeout(ctrlTimer);ctrl.classList.add('show');ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),1800);});
   document.getElementById('vbox').addEventListener('touchstart',()=>{clearTimeout(ctrlTimer);ctrl.classList.add('show');ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),1800);});
 
   play.addEventListener('click',()=>video.paused?video.play():video.pause());
   video.addEventListener('play',()=>{iPlay.classList.add('hidden');iPause.classList.remove('hidden');hideOverlay();});
   video.addEventListener('pause',()=>{iPlay.classList.remove('hidden');iPause.classList.add('hidden');});
-  video.addEventListener('loadeddata',hideOverlay);
+  video.addEventListener('loadeddata',()=>{hideOverlay();updateStat();});
   video.addEventListener('canplay',hideOverlay);
   video.addEventListener('playing',hideOverlay);
+  video.addEventListener('resize',updateStat);
+  video.addEventListener('error',()=>{showOverlay('เกิดข้อผิดพลาดกับตัวเล่น');});
   bar.addEventListener('input',e=>video.currentTime=+e.target.value);
   video.addEventListener('timeupdate',refreshTimeUI);
-  video.addEventListener('loadedmetadata',refreshTimeUI);
+  video.addEventListener('loadedmetadata',()=>{refreshTimeUI();updateStat();});
   video.addEventListener('durationchange',refreshTimeUI);
 
-  /* volume init */
+  pipBtn.addEventListener('click',async()=>{try{ if(document.pictureInPictureElement){await document.exitPictureInPicture();} else {await video.requestPictureInPicture();} }catch(e){console.warn(e)}});
+
+  function buildShareLink(){
+    const url=new URL(location.href); const p=url.searchParams; p.delete('src');p.delete('name');p.delete('logo');p.delete('type');p.delete('key');p.delete('cat');p.delete('id');p.delete('ref');p.delete('ua');
+    if(currentCat&&currentId){ p.set('cat',currentCat); p.set('id',currentId); }
+    else if(lastCustom?.url){ p.set('src',encodeURIComponent(lastCustom.url)); if(lastCustom.forceType) p.set('type',lastCustom.forceType); if(lastCustom.name) p.set('name',lastCustom.name); if(lastCustom.logo) p.set('logo',lastCustom.logo); if(lastCustom.license_key) p.set('key',lastCustom.license_key); if(lastCustom.referrer) p.set('ref',lastCustom.referrer); if(lastCustom.user_agent) p.set('ua',lastCustom.user_agent); }
+    url.search=p.toString(); return url.toString();
+  }
+  shareBtn.addEventListener('click',async()=>{
+    const link=buildShareLink();
+    try{await navigator.clipboard.writeText(link); ovtxt.textContent='คัดลอกลิงก์แล้ว'; showOverlay('คัดลอกลิงก์แล้ว'); setTimeout(hideOverlay,800);}catch{ prompt('คัดลอกลิงก์:',link); }
+  });
+
+  retryBtn.addEventListener('click',()=>{ if(currentCat&&currentId) switchChannel(currentCat,currentId); else if(lastCustom) playCustom(lastCustom); });
+
+  // Volume
   if(!localStorage.getItem(FIRST)){localStorage.setItem(FIRST,'1');localStorage.setItem(VOL,'0.5');}
   video.volume=parseFloat(localStorage.getItem(VOL)??'0.5'); syncVolUI();
   mute.addEventListener('click',()=>{ if(video.muted||video.volume===0){restoreSavedVolume();video.muted=false;hideUnmute();} else {video.muted=true;showUnmute();} syncVolUI(); localStorage.setItem(VOL,String(video.volume)); });
@@ -317,22 +421,73 @@ document.addEventListener('DOMContentLoaded', () => {
     else if(e.key.toLowerCase()==='m'){mute.click();}
     else if(e.key.toLowerCase()==='f'){fs.click();}
     else if(e.key==='ArrowRight'){video.currentTime=(video.currentTime||0)+5;}
-    else if(e.key==='ArrowLeft'){video.currentTime=Math.max(0,(video.currentTime||0)-5);}
+    else if(e.key==='ArrowLeft'){video.currentTime=Math.max(0,(video.currentTime||0)-5);} 
   });
 
-  /* load channels from GitHub */
-  async function loadChannels(){const r=await fetch(CHANNELS_URL,{cache:'no-cache'}); if(!r.ok) throw new Error('โหลด channels.json ไม่สำเร็จ'); return r.json();}
+  /* ===================== Load channels ===================== */
+  async function loadChannels(){ const r=await fetch(CHANNELS_URL,{cache:'no-cache'}); if(!r.ok) throw new Error('โหลด channels.json ไม่สำเร็จ'); return r.json(); }
+
+  /* ===================== Custom source (form & query) ===================== */
+  let lastCustom=null;
+  function shapeCustomFromForm(){
+    const src=qSrc.value.trim(); if(!src) return null;
+    const ft=(qType.value||'auto');
+    const obj={name:qName.value.trim()||'Custom',logo:qLogo.value.trim()||'',url:src,license_key:(qKey.value.trim()||null),referrer:qRef.value.trim()||'',user_agent:qUA.value.trim()||''};
+    if(ft!=='auto') obj.forceType=ft; return obj;
+  }
+  async function playCustom(obj){
+    lastCustom=obj; currentCat=null; currentId=null;
+    nowTitle.textContent=obj.name||'Custom'; nowLogo.src=obj.logo||''; nowInfo.textContent=obj.name||'Custom'; nowMeta.textContent=`กำลังโหลด…`;
+    const ok=await playWithFallback(obj);
+    nowMeta.textContent = ok? `${obj.forceType?obj.forceType.toUpperCase():currentEngine}` : 'ผิดพลาด';
+    await tryAutoplay();
+  }
+  qPlay.addEventListener('click',()=>{const obj=shapeCustomFromForm(); if(obj) playCustom(obj); else {showOverlay('กรอกลิงก์ก่อน'); setTimeout(hideOverlay,900);}});
+  qShare.addEventListener('click',()=>{
+    const obj=shapeCustomFromForm(); if(!obj){showOverlay('กรอกลิงก์ก่อน'); setTimeout(hideOverlay,900); return;}
+    const url=new URL(location.href); const p=url.searchParams; p.set('src',encodeURIComponent(obj.url)); if(obj.forceType) p.set('type',obj.forceType); if(obj.name) p.set('name',obj.name); if(obj.logo) p.set('logo',obj.logo); if(obj.license_key) p.set('key',obj.license_key); if(obj.referrer) p.set('ref',obj.referrer); if(obj.user_agent) p.set('ua',obj.user_agent);
+    url.search=p.toString(); const link=url.toString();
+    navigator.clipboard?.writeText(link).then(()=>{showOverlay('คัดลอกลิงก์แชร์แล้ว'); setTimeout(hideOverlay,900);}).catch(()=>{prompt('คัดลอกลิงก์:',link);});
+  });
+
+  async function maybePlayFromQuery(){
+    const qCat=qs.get('cat'); const qId=qs.get('id');
+    const qSrcParam=qs.get('src');
+    if(qCat&&qId&&channels?.[qCat]?.[qId]){ switchChannel(qCat,qId); return true; }
+    if(qSrcParam){
+      const raw=decodeURIComponent(qSrcParam);
+      const obj={ url:raw, name:qs.get('name')||'Custom', logo:qs.get('logo')||'', license_key:qs.get('key')||null, referrer:qs.get('ref')||'', user_agent:qs.get('ua')||'' };
+      const t=(qs.get('type')||'auto').toLowerCase(); if(['hls','dash','ts'].includes(t)) obj.forceType=t;
+      await playCustom(obj); return true;
+    }
+    return false;
+  }
+
+  /* ===================== Init ===================== */
   async function init(){
     try{
       channels=await loadChannels(); buildSections();
-      let cat=Object.keys(channels)[0], id=Object.keys(channels[cat])[0];
-      try{const saved=JSON.parse(localStorage.getItem(LAST)||'null'); if(saved&&channels[saved.cat]?.[saved.id]){cat=saved.cat;id=saved.id;}}catch{}
-      nowInfo.textContent='เลือกช่องเพื่อเริ่มรับชม'; playerSection.removeAttribute('aria-busy');
-      switchChannel(cat,id);
+      if(qs.get('name')) qName.value=qs.get('name');
+      if(qs.get('logo')) qLogo.value=qs.get('logo');
+      if(qs.get('key')) qKey.value=qs.get('key');
+      if(qs.get('ref')) qRef.value=qs.get('ref');
+      if(qs.get('ua')) qUA.value=qs.get('ua');
+      if(qs.get('type')) qType.value=(qs.get('type').toLowerCase());
+      if(qs.get('src')) qSrc.value=decodeURIComponent(qs.get('src'));
+
+      let played=await maybePlayFromQuery();
+      if(!played){
+        let cat=Object.keys(channels)[0], id=Object.keys(channels[cat])[0];
+        try{const saved=JSON.parse(localStorage.getItem(LAST)||'null'); if(saved&&channels[saved.cat]?.[saved.id]){cat=saved.cat;id=saved.id;}}catch{}
+        nowInfo.textContent='เลือกช่องเพื่อเริ่มรับชม'; playerSection.removeAttribute('aria-busy');
+        switchChannel(cat,id);
+      } else {
+        playerSection.removeAttribute('aria-busy');
+      }
     }catch(err){console.error(err); nowInfo.textContent='โหลดรายการช่องไม่สำเร็จ'; showOverlay('โหลด "channels.json" ไม่ได้');}
   }
   init();
-});
+})();
 </script>
 </body>
 </html>
