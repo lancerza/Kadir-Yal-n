@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Clean Player</title>
+<title>Online TV</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,97 +12,74 @@
 <!-- Players -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.min.js"></script>
+<!-- NEW: TS player -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mpegts.js/1.7.3/mpegts.min.js"></script>
 
 <style>
-:root{
-  --bg:#0e1116; --panel:#0f141b; --border:#1a2130;
-  --text:#eaf0ff; --muted:#9fb0c8; --primary:#0d8eff;
-  --card:#0f1623; --hover:#172339; --hair:rgba(255,255,255,.07);
-  --gap:10px; --br:12px;
-  --card-min:96px; --card-ideal:12.5vw; --card-max:128px;
-}
-*{box-sizing:border-box}
-body{margin:0; background:var(--bg); color:var(--text); font-family:'Sarabun',system-ui,Segoe UI,Roboto,sans-serif}
-.wrap{max-width:1100px; margin:14px auto 28px; padding:0 14px}
-
-/* Top Date+Time (ตรงกลาง) */
-.datetime{display:grid; place-items:center; margin:10px 0 6px}
-.chip{display:inline-block; padding:10px 16px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); box-shadow:0 4px 18px rgba(0,0,0,.25)}
-.dt-date{font-weight:700}
-.dt-time{font-weight:600; opacity:.95; margin-top:2px}
-
-/* Head */
-.head{display:flex; justify-content:space-between; align-items:center; margin:8px 0 12px}
-.brand{display:flex; align-items:center; gap:10px; font-weight:700}
-.dot{width:10px; height:10px; border-radius:50%; background:var(--primary); box-shadow:0 0 10px rgba(13,142,255,.65)}
-.sub{color:var(--muted); font-size:.95rem}
-
-/* Player */
-.player{background:var(--panel); border:1px solid var(--border); border-radius:var(--br); overflow:hidden}
-.topbar{display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--border)}
-.now{display:flex; align-items:center; gap:10px; min-width:0}
-.now img{width:30px; height:30px; border-radius:6px; object-fit:contain; background:#0003; padding:5px}
-.now .title{font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.now .meta{color:var(--muted); font-size:.85rem}
-.vbox{position:relative; background:#000}
-video{width:100%; display:block; aspect-ratio:16/9; background:#000}
-
-/* Controls */
-.ctrl{position:absolute; left:0; right:0; bottom:0; padding:10px; background:linear-gradient(180deg,transparent,rgba(0,0,0,.6)); opacity:0; transform:translateY(8px); transition:.2s; z-index:2}
-.player:hover .ctrl,.ctrl.show{opacity:1; transform:translateY(0)}
-.ctrl-inner{display:flex; align-items:center; gap:12px}
-.ctrl-left{display:flex; align-items:center; gap:8px}
-.ctrl-center{display:flex; align-items:center; gap:10px; flex:1}
-.ctrl-right{display:flex; align-items:center; gap:10px; margin-left:auto}
-
-.cbtn{width:34px; height:34px; display:grid; place-items:center; border-radius:9px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); color:#fff; cursor:pointer}
-.cbtn svg{width:18px; height:18px; pointer-events:none}
-.live{background:#e53935; color:#fff; font-weight:800; padding:4px 10px; border-radius:8px; font-size:.85rem}
-
-#bar{flex:1; height:6px; accent-color:var(--primary); appearance:none; outline:none; background:transparent}
-#bar::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
-#bar::-webkit-slider-thumb{-webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--primary); margin-top:-3px}
-.t{min-width:140px; text-align:center; color:#d9e2ff; font-size:.85rem; opacity:.95}
-.hidden{display:none!important}
-
-/* Volume slider (สั้น) */
-#vol{width:clamp(60px,14vw,110px); height:6px; appearance:none; outline:none; background:transparent; accent-color:var(--primary)}
-#vol::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
-#vol::-webkit-slider-thumb{-webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--primary); margin-top:-2px}
-
-/* Unmute hint */
-.unmute{position:absolute; left:50%; bottom:54px; transform:translateX(-50%); background:rgba(12,16,24,.82); border:1px solid rgba(255,255,255,.14); color:#fff; padding:6px 10px; border-radius:10px; font-size:.9rem; box-shadow:0 6px 22px rgba(0,0,0,.35); z-index:2}
-.unmute.hidden{display:none}
-
-/* Overlay */
-.overlay{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:rgba(6,10,18,.55); color:#fff; z-index:3; opacity:0; visibility:hidden; pointer-events:none; transition:.18s}
-.overlay.show{opacity:1; visibility:visible; pointer-events:auto}
-.spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Sections (clean cards) */
-.section{margin-top:18px}
-.section h3{margin:0 0 10px 2px; font-size:1rem; color:#dfe7ff; font-weight:700}
-.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(clamp(var(--card-min),var(--card-ideal),var(--card-max)),1fr)); gap:var(--gap)}
-.card{background:var(--card); border-radius:10px; box-shadow:0 0 0 1px var(--hair) inset; padding:10px; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; transition:background .15s, box-shadow .15s, transform .15s}
-.card:hover{background:var(--hover); box-shadow:0 0 0 1px rgba(13,142,255,.45) inset; transform:translateY(-1px)}
-.logo-box{width:100%; aspect-ratio:1/1; border-radius:8px; display:flex; align-items:center; justify-content:center; background:#0c1220; overflow:hidden}
-.logo-box img{max-width:88%; max-height:88%; object-fit:contain}
-.name{font-weight:700; font-size:.86rem; line-height:1.15; text-align:center; color:#eef3ff; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
-
-/* Active card */
-.card.active{background:var(--hover); box-shadow:0 0 0 2px var(--primary) inset,0 6px 20px rgba(13,142,255,.15)}
-.card:focus-visible{outline:2px solid var(--primary); outline-offset:2px}
-
-@media (max-width:560px){
-  .grid{gap:8px}
-  .cbtn{width:32px;height:32px}
-  .t{min-width:110px;font-size:.8rem}
-}
+  :root{--bg:#0e1116;--panel:#0f141b;--border:#1a2130;--text:#eaf0ff;--muted:#97a1b6;--primary:#0d8eff;--hair:rgba(255,255,255,.06)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  .wrap{max-width:1100px;margin:14px auto 30px;padding:0 14px}
+  /* top date/time */
+  .datetime{width:100%;text-align:center;margin:10px 0 6px}
+  .chip{display:inline-block;padding:8px 14px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+  .dt-date{font-weight:700}
+  .dt-time{font-weight:600;opacity:.95}
+  /* head */
+  .head{display:flex;align-items:center;justify-content:space-between;margin:10px 0}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--primary);box-shadow:0 0 10px rgba(13,142,255,.6)}
+  .subtxt{color:#b9c3d8;font-size:.95rem}
+  /* player */
+  .player{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .topbar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border)}
+  .now{display:flex;align-items:center;gap:10px;min-width:0}
+  .now img{width:30px;height:30px;border-radius:6px;object-fit:contain;background:#0003;padding:5px}
+  .now .title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .now .meta{color:var(--muted);font-size:.84rem}
+  .vbox{position:relative;background:#000}
+  video{width:100%;display:block;aspect-ratio:16/9;background:#000}
+  /* controls */
+  .ctrl{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;padding:8px 10px;
+        background:linear-gradient(180deg,transparent,rgba(0,0,0,.55));transform:translateY(8px);opacity:0;transition:.2s;z-index:2}
+  .player:hover .ctrl,.ctrl.show{opacity:1;transform:translateY(0)}
+  .ctrl-inner{display:flex;align-items:center;width:100%;gap:12px;justify-content:space-between}
+  .side-left,.side-right{display:flex;align-items:center;gap:8px}
+  .cbtn{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.08);
+        border:1px solid rgba(255,255,255,.14);color:#fff;cursor:pointer}
+  .cbtn svg{width:18px;height:18px;pointer-events:none}
+  #bar{flex:1;height:6px;accent-color:var(--primary);appearance:none;background:transparent}
+  #bar::-webkit-slider-runnable-track{height:6px;background:rgba(255,255,255,.18);border-radius:999px}
+  #bar::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--primary);margin-top:-3px}
+  .live{background:#e53935;color:#fff;font-weight:800;padding:4px 10px;border-radius:8px;font-size:.85rem}
+  #vol{width:clamp(60px,12vw,100px);height:6px;appearance:none;background:transparent;accent-color:var(--primary)}
+  #vol::-webkit-slider-runnable-track{height:6px;background:rgba(255,255,255,.18);border-radius:999px}
+  #vol::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:var(--primary);margin-top:-2px}
+  .t{min-width:140px;text-align:center;color:#d9e2ff;font-size:.85rem;opacity:.95}
+  .hidden{display:none!important}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(6,10,18,.6);color:#fff;z-index:3;opacity:0;visibility:hidden;pointer-events:none;transition:.18s}
+  .overlay.show{opacity:1;visibility:visible;pointer-events:auto}
+  .spin{border:4px solid rgba(255,255,255,.35);border-top:4px solid var(--primary);width:42px;height:42px;border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .unmute{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);background:rgba(12,16,24,.8);border:1px solid rgba(255,255,255,.14);
+          color:#fff;padding:6px 10px;border-radius:10px;font-size:.88rem;box-shadow:0 6px 22px rgba(0,0,0,.35);z-index:2}
+  .unmute.hidden{display:none}
+  /* sections */
+  .section{margin-top:16px}
+  .section h3{margin:0 0 10px 2px;font-size:1rem;color:#dfe7ff;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+  .card{background:#101827;border-radius:10px;box-shadow:0 0 0 1px var(--hair) inset;padding:8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:transform .15s,box-shadow .15s}
+  .card:hover{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(13,142,255,.45) inset}
+  .logo-box{width:100%;aspect-ratio:1/1;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#0b1220}
+  .logo-box img{max-width:88%;max-height:88%;object-fit:contain}
+  .name{font-weight:700;font-size:.82rem;line-height:1.15;text-align:center;color:#eef3ff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card.active{box-shadow:0 0 0 2px var(--primary) inset,0 6px 20px rgba(13,142,255,.15)}
+  @media(max-width:560px){.grid{gap:6px}.cbtn{width:32px;height:32px}.t{min-width:110px;font-size:.8rem}}
 </style>
 </head>
 <body>
-<!-- Top Date + Time -->
+
+<!-- top date/time -->
 <div class="datetime">
   <div class="chip">
     <div id="dateTop" class="dt-date">—</div>
@@ -113,17 +90,17 @@ video{width:100%; display:block; aspect-ratio:16/9; background:#000}
 <div class="wrap">
   <div class="head">
     <div class="brand"><div class="dot"></div><div>Online TV</div></div>
-    <div id="nowInfo" class="sub" aria-live="polite">กำลังโหลดรายการช่อง…</div>
+    <div class="subtxt" id="nowInfo" aria-live="polite">กำลังโหลดรายการช่อง…</div>
   </div>
 
-  <!-- Player -->
+  <!-- player -->
   <section class="player" id="playerSection" aria-busy="true">
     <div class="topbar">
       <div class="now">
         <img id="nowLogo" alt="">
         <div style="min-width:0">
-          <div id="nowTitle" class="title">—</div>
-          <div id="nowMeta" class="meta">—</div>
+          <div class="title" id="nowTitle">—</div>
+          <div class="meta" id="nowMeta">—</div>
         </div>
       </div>
     </div>
@@ -131,17 +108,17 @@ video{width:100%; display:block; aspect-ratio:16/9; background:#000}
     <div class="vbox" id="vbox">
       <video id="video" playsinline autoplay muted></video>
 
-      <div id="overlay" class="overlay">
+      <div class="overlay" id="overlay">
         <div class="spin"></div>
         <div id="ovtxt">กำลังโหลด…</div>
       </div>
 
-      <div id="unmute" class="unmute hidden">แตะเพื่อเปิดเสียง</div>
+      <div id="unmute-hint" class="unmute hidden">แตะเพื่อเปิดเสียง</div>
 
-      <div id="ctrl" class="ctrl">
+      <!-- controls -->
+      <div class="ctrl" id="ctrl">
         <div class="ctrl-inner">
-          <!-- Left: play + LIVE -->
-          <div class="ctrl-left">
+          <div class="side-left">
             <button id="play" class="cbtn" title="เล่น/หยุด (Space)">
               <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               <svg class="i-pause hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
@@ -149,14 +126,9 @@ video{width:100%; display:block; aspect-ratio:16/9; background:#000}
             <span id="live" class="live hidden">LIVE</span>
           </div>
 
-          <!-- Center: time (เฉพาะหมวดหนัง) + progress -->
-          <div class="ctrl-center">
-            <span id="time" class="t hidden">--:--:-- / --:--:--</span>
-            <input id="bar" type="range" value="0" step="1" title="แถบเวลา">
-          </div>
+          <input id="bar" type="range" value="0" step="1" title="แถบเวลา">
 
-          <!-- Right: volume + fullscreen -->
-          <div class="ctrl-right">
+          <div class="side-right">
             <button id="mute" class="cbtn" title="เปิด/ปิดเสียง (M)">
               <svg class="i-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
               <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
@@ -171,194 +143,134 @@ video{width:100%; display:block; aspect-ratio:16/9; background:#000}
     </div>
   </section>
 
-  <!-- Sections -->
   <div id="sections"></div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  /* === โหลด JSON ช่องจากโฟลเดอร์เดียวกัน (หลีกเลี่ยง 404) === */
-  const CHANNELS_URL = './channels.json?v=1';
+  /* ===== URL channels.json ของคุณ ===== */
+  const CHANNELS_URL = 'https://raw.githubusercontent.com/lancerza/tv-online/refs/heads/main/channels.json'; // แก้ให้ตรงของคุณ
 
-  /* Top Date & Time (ไม่มีวินาที) */
+  /* top time (ไม่โชว์วินาที) */
   const dateEl = document.getElementById('dateTop');
   const timeEl = document.getElementById('timeTop');
-  function updateDT(){
+  function updateTop(){
     const now=new Date();
     dateEl.textContent = now.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     timeEl.textContent = now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',hour12:false});
   }
-  updateDT(); setInterval(updateDT,1000);
+  updateTop(); setInterval(updateTop,1000);
 
-  /* State */
-  let channels=null, hls=null, shakaP=null, currentId=null, currentCat=null, currentEngine='—', token=0;
-  const MAX_REASONABLE_DUR=8*3600;
-  const LAST_CH_KEY='tv_last_ch';
-  const VOL_KEY='tv_volume';
-  const FIRST_KEY='tv_first';
-
-  /* DOM */
+  /* state */
+  let channels=null,hls=null,shakaP=null,tsPlayer=null,currentEngine='—',currentId=null,currentCat=null,token=0;
+  const MAX_DUR=8*3600, LAST='tv_last_channel', VOL='tv_volume', FIRST='tv_first_visit_done';
   const sections=document.getElementById('sections');
   const playerSection=document.getElementById('playerSection');
   const video=document.getElementById('video');
-  const overlay=document.getElementById('overlay'); const ovtxt=document.getElementById('ovtxt');
-  const ctrl=document.getElementById('ctrl'); const play=document.getElementById('play');
-  const iPlay=play.querySelector('.i-play'); const iPause=play.querySelector('.i-pause');
-  const mute=document.getElementById('mute'); const iVol=mute.querySelector('.i-vol'); const iMute=mute.querySelector('.i-mute');
-  const bar=document.getElementById('bar'); const timeTxt=document.getElementById('time'); const livePill=document.getElementById('live');
+  const overlay=document.getElementById('overlay'), ovtxt=document.getElementById('ovtxt');
+  const ctrl=document.getElementById('ctrl'); let ctrlTimer;
+  const play=document.getElementById('play'), iPlay=play.querySelector('.i-play'), iPause=play.querySelector('.i-pause');
+  const mute=document.getElementById('mute'), iVol=mute.querySelector('.i-vol'), iMute=mute.querySelector('.i-mute');
+  const bar=document.getElementById('bar'); const livePill=document.getElementById('live');
   const fs=document.getElementById('fs'); const vol=document.getElementById('vol');
-  const nowTitle=document.getElementById('nowTitle'); const nowMeta=document.getElementById('nowMeta'); const nowLogo=document.getElementById('nowLogo');
-  const nowInfo=document.getElementById('nowInfo'); const unmute=document.getElementById('unmute');
+  const nowInfo=document.getElementById('nowInfo'), nowTitle=document.getElementById('nowTitle');
+  const nowMeta=document.getElementById('nowMeta'), nowLogo=document.getElementById('nowLogo');
+  const unmuteHint=document.getElementById('unmute-hint');
 
-  /* Helpers */
-  const cssEscape = s => (window.CSS&&CSS.escape)?CSS.escape(s):String(s).replace(/([\\[\\].#:$'"`])/g,'\\$1');
-  const sleep = ms => new Promise(r=>setTimeout(r,ms));
-  const isHls = u => /\.m3u8(\?|$)/i.test(u);
-  const isDash = u => /\.mpd(\?|$)/i.test(u);
-  const showOverlay = (t='กำลังโหลด…')=>{ovtxt.textContent=t; overlay.classList.add('show');};
-  const hideOverlay = ()=>overlay.classList.remove('show');
-  const scrollToPlayer = ()=>playerSection.scrollIntoView({behavior:'smooth', block:'start'});
+  /* helpers */
+  const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+  const isHls=(u)=>/\.m3u8(\?|$)/i.test(u);
+  const isDash=(u)=>/\.mpd(\?|$)/i.test(u);
+  const isTs=(u)=>/\.ts(\?|$)/i.test(u) || /\/ts\//i.test(u);
+  const showOverlay=(t='กำลังโหลด…')=>{ovtxt.textContent=t;overlay.classList.add('show');};
+  const hideOverlay=()=>overlay.classList.remove('show');
+  const scrollToPlayer=()=>playerSection.scrollIntoView({behavior:'smooth',block:'start'});
+  const cssEscape=(s)=>window.CSS&&CSS.escape?CSS.escape(s):String(s).replace(/([\\[\\].#:$'"`])/g,'\\$1');
 
-  const fmtHMS = s => {
-    if(!isFinite(s)) return '--:--:--';
-    s = Math.max(0, Math.floor(s));
-    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
-    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-  };
-  const isLiveLike=()=>{const d=video.duration; return !isFinite(d)||d<=0||d>MAX_REASONABLE_DUR;};
-
-  function refreshTimeUI(){
-    const live=isLiveLike();
-    livePill.classList.toggle('hidden', !live);
-    bar.classList.toggle('hidden', live);
-    if(!live){ bar.max=isFinite(video.duration)?video.duration:0; bar.value=video.currentTime||0; }
-    const showTime=(currentCat==='หนัง') && !live;
-    timeTxt.classList.toggle('hidden', !showTime);
-    if(showTime){ timeTxt.textContent = `${fmtHMS(video.currentTime||0)} / ${fmtHMS(video.duration||0)}`; }
-  }
+  function isLiveLike(){const d=video.duration;return !isFinite(d)||d<=0||d>MAX_DUR}
 
   function syncVolUI(){
-    vol.value = video.volume;
-    const muted = video.muted || video.volume===0;
-    iVol.classList.toggle('hidden', muted);
-    iMute.classList.toggle('hidden', !muted);
+    vol.value=video.volume;
+    const m=video.muted||video.volume===0;
+    iVol.classList.toggle('hidden',m); iMute.classList.toggle('hidden',!m);
   }
 
-function setActiveCard(cat,id){
-  // ล้าง active เดิม
-  document.querySelectorAll('.card.active').forEach(el=>{
-    el.classList.remove('active');
-    el.setAttribute('aria-pressed','false');
-  });
-  // ติด active การ์ดที่เลือก (ไม่ scroll การ์ด)
-  const el=document.querySelector(`.card[data-cat="${cssEscape(cat)}"][data-id="${cssEscape(id)}"]`);
-  if(el){
-    el.classList.add('active');
-    el.setAttribute('aria-pressed','true');
-  }
-  // จำช่องล่าสุด
-  localStorage.setItem(LAST_CH_KEY, JSON.stringify({cat,id}));
-  }
-
-  /* Unload & engines */
+  /* unload ครอบคลุมทุก engine */
   async function unload(){
-    if(hls){ try{ hls.destroy(); }catch{} hls=null; }
-    if(shakaP){ try{ await shakaP.destroy(); }catch{} shakaP=null; }
-    try{ video.pause(); }catch{} video.removeAttribute('src'); try{ video.load(); }catch{};
-    await sleep(60);
+    if(hls){try{hls.destroy();}catch{} hls=null;}
+    if(shakaP){try{await shakaP.destroy();}catch{} shakaP=null;}
+    if(tsPlayer){try{tsPlayer.unload();tsPlayer.detachMediaElement();tsPlayer.destroy();}catch{} tsPlayer=null;}
+    try{video.pause();}catch{} video.removeAttribute('src'); try{video.load();}catch{}; await sleep(60);
   }
 
+  /* Players */
   async function useHls(url){
     if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=url; currentEngine='HLS'; return; }
-    if(window.Hls && Hls.isSupported()){
-      hls=new Hls({ enableWorker:true, capLevelToPlayerSize:true, startLevel:-1, lowLatencyMode:false, maxBufferLength:20 });
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MEDIA_ATTACHED, ()=>hls.loadSource(url));
-      hls.on(Hls.Events.MANIFEST_PARSED, hideOverlay);
-      hls.on(Hls.Events.ERROR,(_,d)=>{ if(d.fatal){ if(d.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad(); else if(d.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError(); }});
+    if(window.Hls&&Hls.isSupported()){
+      hls=new Hls({enableWorker:true,capLevelToPlayerSize:true,startLevel:-1,lowLatencyMode:false});
+      hls.attachMedia(video); hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));
       currentEngine='HLS'; return;
     }
     throw new Error('เบราว์เซอร์ไม่รองรับ HLS');
   }
-
   async function useShaka(ch){
-    shaka.polyfill.installAll();
-    if(!shaka.Player.isBrowserSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ DASH');
+    shaka.polyfill.installAll(); if(!shaka.Player.isBrowserSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ DASH');
     shakaP=new shaka.Player(video);
-
-    // คอนฟิกพื้นฐาน
-    const baseCfg = {
-      abr:{ enabled:true, switchInterval:2, defaultBandwidthEstimate:1_500_000 },
-      restrictions:{ maxHeight:720 },
-      streaming:{
-        bufferingGoal:12, rebufferingGoal:2, lowLatencyMode:false,
-        stallEnabled:true, stallThreshold:0.5, gapDetectionThreshold:0.5, jumpLargeGaps:true,
-        retryParameters:{ timeout:0, maxAttempts:6, baseDelay:400, backoffFactor:2, fuzzFactor:0.5 }
-      },
-      manifest:{ retryParameters:{ timeout:0, maxAttempts:6, baseDelay:400, backoffFactor:2, fuzzFactor:0.5 } },
-      drm:{ clearKeys:{} }
-    };
-
-    // ถ้าเป็น SKY LIVE → จำกัดลงเพื่อลดค้าง
-    if (currentCat === '🔴SKY LIVE') {
-      baseCfg.restrictions.maxHeight = 540;
-      baseCfg.abr.defaultBandwidthEstimate = 1_000_000;
-      baseCfg.streaming.bufferingGoal = 16;
-      baseCfg.streaming.rebufferingGoal = 3;
-    }
-
-    shakaP.configure(baseCfg);
-
-    if(ch.license_key){
-      const [kid,key]=String(ch.license_key).split(':');
-      if(kid&&key) shakaP.configure({ drm:{ clearKeys:{[kid]:key} } });
-    }
-
-    shakaP.addEventListener('loaded', hideOverlay);
-    shakaP.addEventListener('trackschanged', hideOverlay);
-    await shakaP.load(ch.url);
-    currentEngine='DASH';
+    const cfg={streaming:{bufferingGoal:25,rebufferingGoal:4},drm:{clearKeys:{}}};
+    if(ch.license_key){const [kid,key]=String(ch.license_key).split(':'); if(kid&&key) cfg.drm.clearKeys[kid]=key;}
+    shakaP.configure(cfg); await shakaP.load(ch.url); currentEngine='DASH';
+  }
+  async function useTs(url){
+    if(!window.mpegts||!mpegts.isSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ MPEG-TS');
+    tsPlayer=mpegts.createPlayer({type:'mpegts',url,isLive:true},{enableWorker:true,liveBufferLatencyChasing:true});
+    tsPlayer.attachMediaElement(video); await tsPlayer.load(); await video.play(); currentEngine='MPEG-TS';
   }
 
-  /* Autoplay + unmute hint */
-  function showUnmute(){ unmute.classList.remove('hidden'); }
-  function hideUnmute(){ unmute.classList.add('hidden'); }
-  function restoreSavedVolume(){
-    const saved=parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5');
-    video.volume = isFinite(saved) ? saved : 0.5;
+  /* time & progress */
+  function refreshTimeUI(){
+    const live=isLiveLike();
+    livePill.classList.toggle('hidden',!live);
+    bar.classList.toggle('hidden',live);
+    if(!live){ bar.max=isFinite(video.duration)?video.duration:0; bar.value=video.currentTime||0; }
   }
-  async function tryAutoplay(){
-    try{ video.muted=true; await video.play(); showUnmute(); }
-    catch{ setTimeout(async()=>{ try{ video.muted=true; await video.play(); showUnmute(); }catch{} }, 400); }
-  }
-  function enableSoundOnce(){ restoreSavedVolume(); video.muted=false; hideUnmute(); }
-  ['click','touchstart','keydown'].forEach(evt=>{
-    document.addEventListener(evt, ()=>{ if(!unmute.classList.contains('hidden')) enableSoundOnce(); }, { once:true, capture:true });
-  });
 
+  /* active card */
+  function setActiveCard(cat,id){
+    document.querySelectorAll('.card.active').forEach(el=>{el.classList.remove('active');el.setAttribute('aria-pressed','false');});
+    const el=document.querySelector(`.card[data-cat="${cssEscape(cat)}"][data-id="${cssEscape(id)}"]`);
+    if(el){el.classList.add('active');el.setAttribute('aria-pressed','true');}
+    localStorage.setItem(LAST,JSON.stringify({cat,id}));
+  }
+
+  /* autoplay hint */
+  function showUnmute(){unmuteHint.classList.remove('hidden')}
+  function hideUnmute(){unmuteHint.classList.add('hidden')}
+  function restoreSavedVolume(){const v=parseFloat(localStorage.getItem(VOL)??'0.5'); video.volume=isFinite(v)?v:.5;}
+  async function tryAutoplay(){try{video.muted=true;await video.play();showUnmute();}catch{}}
+  ['click','touchstart','keydown'].forEach(e=>document.addEventListener(e,()=>{if(!unmuteHint.classList.contains('hidden')){restoreSavedVolume();video.muted=false;hideUnmute();}}, {once:true,capture:true}));
+
+  /* switch channel */
   async function switchChannel(cat,id){
-    if(currentId===id && currentCat===cat){ scrollToPlayer(); return; }
+    if(currentId===id && currentCat===cat){scrollToPlayer();return;}
     const tk=++token; const ch=channels[cat]?.[id]; if(!ch) return;
     currentId=id; currentCat=cat; showOverlay('กำลังโหลด…'); scrollToPlayer();
+
     try{
       await unload(); if(tk!==token) return;
-      if(isDash(ch.url) || ch.license_key) await useShaka(ch);
+
+      if(isTs(ch.url))       await useTs(ch.url);         /* NEW: TS */
+      else if(isDash(ch.url) || ch.license_key) await useShaka(ch);
       else if(isHls(ch.url)) await useHls(ch.url);
-      else await useShaka(ch);
+      else throw new Error('ไม่รู้จักชนิดสตรีม');
+
       if(tk!==token) return;
-
-      nowTitle.textContent=ch.name;
-      nowLogo.src=ch.logo||'';
-      nowMeta.textContent=`${cat} · ${currentEngine}${ch.license_key?' (DRM)':''}`;
-      nowInfo.textContent=ch.name;
-      setActiveCard(cat,id);
-
-      await tryAutoplay();
-      setTimeout(hideOverlay, 1200);
-      setTimeout(scrollToPlayer, 60);
-    }catch(e){ console.error(e); showOverlay('เล่นไม่ได้ ลองใหม่'); }
+      nowTitle.textContent=ch.name; nowLogo.src=ch.logo||''; nowMeta.textContent=`${cat} · ${currentEngine}`;
+      nowInfo.textContent=ch.name; setActiveCard(cat,id);
+      await tryAutoplay(); setTimeout(()=>overlay.classList.remove('show'),500);
+    }catch(e){console.error(e); ovtxt.textContent='เล่นไม่ได้ ลองใหม่';}
   }
 
+  /* build UI */
   function buildSections(){
     sections.innerHTML='';
     Object.keys(channels).forEach(cat=>{
@@ -367,8 +279,7 @@ function setActiveCard(cat,id){
       const grid=sec.querySelector('.grid');
       Object.entries(channels[cat]).forEach(([id,ch])=>{
         const card=document.createElement('button');
-        card.className='card'; card.title=ch.name; card.dataset.cat=cat; card.dataset.id=id;
-        card.setAttribute('role','button'); card.setAttribute('aria-pressed','false');
+        card.className='card'; card.dataset.cat=cat; card.dataset.id=id; card.title=ch.name;
         card.innerHTML=`<div class="logo-box"><img loading="lazy" src="${ch.logo}" alt=""></div><div class="name">${ch.name}</div>`;
         card.onclick=()=>switchChannel(cat,id);
         grid.appendChild(card);
@@ -377,91 +288,51 @@ function setActiveCard(cat,id){
     });
   }
 
-  /* Controls */
-  let timer; const showCtrl=()=>{ clearTimeout(timer); ctrl.classList.add('show'); timer=setTimeout(()=>ctrl.classList.remove('show'), 1700); };
-  document.getElementById('vbox').addEventListener('mousemove', showCtrl);
-  document.getElementById('vbox').addEventListener('touchstart', showCtrl);
+  /* controls */
+  document.getElementById('vbox').addEventListener('mousemove',()=>{clearTimeout(ctrlTimer);ctrl.classList.add('show');ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),1800);});
+  document.getElementById('vbox').addEventListener('touchstart',()=>{clearTimeout(ctrlTimer);ctrl.classList.add('show');ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),1800);});
 
-  play.addEventListener('click', ()=> video.paused?video.play():video.pause());
-  video.addEventListener('play', ()=>{ iPlay.classList.add('hidden'); iPause.classList.remove('hidden'); hideOverlay(); });
-  video.addEventListener('pause', ()=>{ iPlay.classList.remove('hidden'); iPause.classList.add('hidden'); });
+  play.addEventListener('click',()=>video.paused?video.play():video.pause());
+  video.addEventListener('play',()=>{iPlay.classList.add('hidden');iPause.classList.remove('hidden');hideOverlay();});
+  video.addEventListener('pause',()=>{iPlay.classList.remove('hidden');iPause.classList.add('hidden');});
+  video.addEventListener('loadeddata',hideOverlay);
+  video.addEventListener('canplay',hideOverlay);
+  video.addEventListener('playing',hideOverlay);
+  bar.addEventListener('input',e=>video.currentTime=+e.target.value);
+  video.addEventListener('timeupdate',refreshTimeUI);
+  video.addEventListener('loadedmetadata',refreshTimeUI);
+  video.addEventListener('durationchange',refreshTimeUI);
 
-  video.addEventListener('loadeddata', hideOverlay);
-  video.addEventListener('canplay', hideOverlay);
-  video.addEventListener('playing', hideOverlay);
-  setInterval(()=>{ if(overlay.classList.contains('show') && video.readyState>=2) hideOverlay(); }, 1000);
+  /* volume init */
+  if(!localStorage.getItem(FIRST)){localStorage.setItem(FIRST,'1');localStorage.setItem(VOL,'0.5');}
+  video.volume=parseFloat(localStorage.getItem(VOL)??'0.5'); syncVolUI();
+  mute.addEventListener('click',()=>{ if(video.muted||video.volume===0){restoreSavedVolume();video.muted=false;hideUnmute();} else {video.muted=true;showUnmute();} syncVolUI(); localStorage.setItem(VOL,String(video.volume)); });
+  vol.addEventListener('input',e=>{video.volume=+e.target.value;if(video.volume>0) video.muted=false; syncVolUI(); localStorage.setItem(VOL,String(video.volume));});
+  video.addEventListener('volumechange',syncVolUI);
 
-  // Volume init (จำ 50% ครั้งแรก)
-  (function initVol(){
-    if(!localStorage.getItem(FIRST_KEY)){ localStorage.setItem(FIRST_KEY,'1'); localStorage.setItem(VOL_KEY,'0.5'); }
-    vol.value = parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5'); syncVolUI();
-  })();
+  fs.addEventListener('click',async()=>{try{const box=document.getElementById('vbox'); if(!document.fullscreenElement) await box.requestFullscreen(); else await document.exitFullscreen();}catch{}});
 
-  mute.addEventListener('click', ()=>{
-    if(video.muted || video.volume===0){ enableSoundOnce(); }
-    else{ video.muted=true; showUnmute(); }
-    localStorage.setItem(VOL_KEY, String(video.volume));
-    syncVolUI();
-  });
-  vol.addEventListener('input', e=>{
-    const v=+e.target.value; video.volume=v;
-    if(v>0 && video.muted){ video.muted=false; hideUnmute(); }
-    localStorage.setItem(VOL_KEY, String(v));
-    syncVolUI();
-  });
-  video.addEventListener('volumechange', syncVolUI);
-
-  bar.addEventListener('input', e=> video.currentTime=+e.target.value);
-  video.addEventListener('timeupdate', refreshTimeUI);
-  video.addEventListener('loadedmetadata', refreshTimeUI);
-  video.addEventListener('durationchange', refreshTimeUI);
-
-  fs.addEventListener('click', async ()=>{
-    const box=document.getElementById('vbox');
-    try{ !document.fullscreenElement ? await box.requestFullscreen() : await document.exitFullscreen(); }catch{}
-  });
-  document.addEventListener('keydown',(e)=>{
-    const t=document.activeElement?.tagName; if(t==='INPUT'||t==='TEXTAREA') return;
-    if(e.code==='Space'){ e.preventDefault(); video.paused?video.play():video.pause(); }
-    else if(e.key.toLowerCase()==='m'){ mute.click(); }
-    else if(e.key.toLowerCase()==='f'){ fs.click(); }
-    else if(e.key==='ArrowRight'){ video.currentTime=(video.currentTime||0)+5; }
-    else if(e.key==='ArrowLeft'){ video.currentTime=Math.max(0,(video.currentTime||0)-5); }
+  document.addEventListener('keydown',(e)=>{const t=e.target.tagName; if(t==='INPUT'||t==='TEXTAREA') return;
+    if(e.code==='Space'){e.preventDefault(); video.paused?video.play():video.pause();}
+    else if(e.key.toLowerCase()==='m'){mute.click();}
+    else if(e.key.toLowerCase()==='f'){fs.click();}
+    else if(e.key==='ArrowRight'){video.currentTime=(video.currentTime||0)+5;}
+    else if(e.key==='ArrowLeft'){video.currentTime=Math.max(0,(video.currentTime||0)-5);}
   });
 
-  /* โหลด channels */
-  async function loadChannels(){
-    const res = await fetch(CHANNELS_URL,{cache:'no-cache'});
-    if(!res.ok) throw new Error('โหลด channels.json ไม่สำเร็จ ('+res.status+')');
-    const data = await res.json();
-    if(!data || typeof data!=='object') throw new Error('รูปแบบ channels.json ไม่ถูกต้อง');
-    return data;
-  }
-
+  /* load channels from GitHub */
+  async function loadChannels(){const r=await fetch(CHANNELS_URL,{cache:'no-cache'}); if(!r.ok) throw new Error('โหลด channels.json ไม่สำเร็จ'); return r.json();}
   async function init(){
     try{
-      channels = await loadChannels();
-      buildSections();
-
-      // เลือกช่องล่าสุดหรือช่องแรก
-      let firstCat=Object.keys(channels)[0];
-      let firstId =Object.keys(channels[firstCat])[0];
-      try{
-        const saved=JSON.parse(localStorage.getItem(LAST_CH_KEY)||'null');
-        if(saved && channels[saved.cat]?.[saved.id]){ firstCat=saved.cat; firstId=saved.id; }
-      }catch{}
-      nowInfo.textContent='เลือกช่องเพื่อเริ่มรับชม';
-      playerSection.removeAttribute('aria-busy');
-      switchChannel(firstCat, firstId);
-    }catch(err){
-      console.error(err);
-      nowInfo.textContent='โหลดรายการช่องไม่สำเร็จ';
-      showOverlay('โหลด "channels.json" ไม่ได้ กรุณาตรวจสอบไฟล์/พาธ');
-    }
+      channels=await loadChannels(); buildSections();
+      let cat=Object.keys(channels)[0], id=Object.keys(channels[cat])[0];
+      try{const saved=JSON.parse(localStorage.getItem(LAST)||'null'); if(saved&&channels[saved.cat]?.[saved.id]){cat=saved.cat;id=saved.id;}}catch{}
+      nowInfo.textContent='เลือกช่องเพื่อเริ่มรับชม'; playerSection.removeAttribute('aria-busy');
+      switchChannel(cat,id);
+    }catch(err){console.error(err); nowInfo.textContent='โหลดรายการช่องไม่สำเร็จ'; showOverlay('โหลด "channels.json" ไม่ได้');}
   }
   init();
 });
 </script>
 </body>
 </html>
-
