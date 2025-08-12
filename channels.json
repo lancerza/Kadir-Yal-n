@@ -11,6 +11,12 @@
       "url": "https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd",
       "logo": "https://iili.io/FWccqEg.md.jpg",
       "license_key": "d418f733ed224f9bb9c2b1589db22a20:6ed6fe26daa4b926810869ff60254ebb"
-   }
+       },
+    "arena2": {
+      "name": "Arena Sport 2",
+      "url": "http://innovationtv.eu:80/play/live.php?mac=A0:BB:3E:43:94:7E&amp;stream=1862037&amp;extension=ts&amp;play_token=PRjHP4UkHy",
+      "logo": "https://tvprofil.com/img/kanali-logo/Arena_Sport_2_HR_logo.png",
+      "license_key": null
+    }
   }
 }
