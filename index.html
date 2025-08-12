@@ -143,7 +143,9 @@
     // 2) Proxy สำหรับส่ง Referer/User-Agent จากฝั่งเซิร์ฟเวอร์ (ใส่ของคุณ)
     // ตัวอย่าง: 'https://your-domain.com/hls' หรือ 'https://your-worker.your-subdomain.workers.dev/hls'
     const PROXY_BASE = 'https://follow.don147ok.workers.dev';
-
+    
+    const FORCE_PROXY_HOSTS = ['cdn2.aws-live-streaming.com']; // โดเมนที่ต้อง proxy เสมอ
+    const ALWAYS_PROXY = true;  // <<<<< ตรงนี้ให้ตั้งเป็น true
     // 3) ค่าเริ่มต้น ถ้าช่องไม่ได้ใส่ referer/userAgent มากับ channels.json
     const DEFAULT_REF = 'https://99dooball.com/';
     const DEFAULT_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1';
@@ -251,14 +253,16 @@
     ['click','touchstart','keydown'].forEach(e=>document.addEventListener(e,()=>{if(!unmuteHint.classList.contains('hidden')){restoreSavedVolume();video.muted=false;hideUnmute();}},{once:true,capture:true}));
 
     /* ===== NEW: proxy wrapper ===== */
-    function proxify(url, ch){
-      const needProxy = !!(ch.referer || ch.userAgent);
-      if(!needProxy){ return url; }
-      if(!PROXY_BASE){ return url; }
-      const ref = encodeURIComponent(ch.referer || DEFAULT_REF);
-      const ua  = encodeURIComponent(ch.userAgent || DEFAULT_UA);
-      return `${PROXY_BASE}?url=${encodeURIComponent(url)}&ref=${ref}&ua=${ua}`;
-    }
+  function proxify(url, ch){
+  const host = (()=>{ try { return new URL(url).hostname; } catch { return ''; } })();
+  const needProxy = ALWAYS_PROXY || !!(ch.referer || ch.userAgent) || FORCE_PROXY_HOSTS.some(h=>host.endsWith(h));
+  if (!needProxy || !PROXY_BASE) return url;
+
+  const ref = encodeURIComponent(ch.referer || DEFAULT_REF);
+  const ua  = encodeURIComponent(ch.userAgent || DEFAULT_UA);
+  return `${PROXY_BASE}?url=${encodeURIComponent(url)}&ref=${ref}&ua=${ua}`;
+}
+
 
     function kindOf(src){
       if(isDash(src)) return 'dash';
@@ -362,3 +366,4 @@
   </script>
 </body>
 </html>
+
