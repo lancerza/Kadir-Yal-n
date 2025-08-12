@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Minimal Controls (Left/Right)</title>
+<title>Online TV • Movie Hours + Volume Slider</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,8 +19,8 @@
     --card:#0f1623; --hover:#172339; --hairline:rgba(255,255,255,.06);
 
     /* XS cards */
-    --card-min: 96px; --card-ideal: 13vw; --card-max: 132px;
-    --card-br: 6px; --logo-br: 6px; --card-pad: 8px; --gap: 8px;
+    --card-min:96px; --card-ideal:13vw; --card-max:132px;
+    --card-br:6px; --logo-br:6px; --card-pad:8px; --gap:8px;
   }
   *{box-sizing:border-box}
   body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
@@ -45,16 +45,15 @@
   /* Controls — full-width bottom bar */
   .ctrl{
     position:absolute; left:0; right:0; bottom:0;
-    display:flex; align-items:center; gap:10px; padding:8px 10px;
+    display:flex; align-items:center; padding:8px 10px;
     background:linear-gradient(180deg, transparent, rgba(0,0,0,.55));
     transform:translateY(8px); opacity:0; transition:.2s; z-index:2;
   }
   .player:hover .ctrl, .ctrl.show{opacity:1; transform:translateY(0)}
-
   .ctrl-inner{display:flex; align-items:center; width:100%; gap:12px}
   .ctrl-left{display:flex; align-items:center; gap:8px}
-  .ctrl-center{display:flex; align-items:center; gap:8px; flex:1}
-  .ctrl-right{display:flex; align-items:center; gap:8px}
+  .ctrl-center{display:flex; align-items:center; gap:10px; flex:1}
+  .ctrl-right{display:flex; align-items:center; gap:10px}
 
   .cbtn{width:34px; height:34px; display:grid; place-items:center; border-radius:8px;
         background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); color:#fff; cursor:pointer}
@@ -66,15 +65,16 @@
   #bar::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
   #bar::-webkit-slider-thumb{-webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--primary); margin-top:-3px}
 
-  .live{background:#e53935; color:#fff; font-weight:800; padding:4px 10px; border-radius:8px; font-size:.85rem}
+  /* time text */
+  .t{min-width:140px; text-align:center; color:#d9e2ff; font-size:.85rem; opacity:.95}
   .hidden{display:none!important}
+  .live{background:#e53935; color:#fff; font-weight:800; padding:4px 10px; border-radius:8px; font-size:.85rem}
 
-  /* Overlay */
-  .overlay{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
-           background:rgba(6,10,18,.6); color:#fff; opacity:0; pointer-events:none; transition:.2s}
-  .overlay.show{opacity:1; pointer-events:auto}
-  .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+  /* volume slider (ด้านขวาถัดจากลำโพง) */
+  #vol{width:clamp(90px, 18vw, 150px); height:6px}
+  #vol{appearance:none; -webkit-appearance:none; outline:none; background:transparent; accent-color:var(--primary)}
+  #vol::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
+  #vol::-webkit-slider-thumb{-webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--primary); margin-top:-2px}
 
   /* Sections (auto-fit grid) */
   .section{margin-top:16px}
@@ -93,7 +93,6 @@
     transition:background .15s, box-shadow .15s, transform .15s;
   }
   .card:hover{ background:var(--hover); box-shadow:0 0 0 1px rgba(13,142,255,.45) inset; transform:translateY(-1px) }
-
   .logo-box{ width:100%; aspect-ratio:1/1; border-radius:var(--logo-br); margin-bottom:8px; background:transparent;
              display:flex; align-items:center; justify-content:center }
   .logo-box img{ max-width:88%; max-height:88%; object-fit:contain }
@@ -103,6 +102,7 @@
   @media (max-width:560px){
     .grid{ gap:6px } .section{ margin-top:14px }
     .cbtn{ width:32px; height:32px }
+    .t{ min-width:110px; font-size:.8rem }
   }
 </style>
 </head>
@@ -133,7 +133,7 @@
         <div id="ovtxt">กำลังโหลด…</div>
       </div>
 
-      <!-- Controls: left (play + LIVE) | center (progress) | right (volume + fullscreen) -->
+      <!-- Controls -->
       <div class="ctrl" id="ctrl">
         <div class="ctrl-inner">
           <div class="ctrl-left">
@@ -145,6 +145,7 @@
           </div>
 
           <div class="ctrl-center">
+            <span id="time" class="t hidden">--:--:-- / --:--:--</span>
             <input id="bar" type="range" value="0" step="1" title="แถบเวลา">
           </div>
 
@@ -153,6 +154,7 @@
               <svg class="i-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
               <svg class="i-mute hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-.22-.02-.43-.05-.63l-2.45-2.45V7.97A5.004 5.004 0 0121 12a7.9 7.9 0 01-.54 2.64l-1.51-1.51c.34-.82.54-1.7.54-2.64zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25 1.27-1.27L4.27 3z"/></svg>
             </button>
+            <input id="vol" type="range" min="0" max="1" step="0.05" title="เสียง">
             <button id="fs" class="cbtn" title="เต็มจอ (F)">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zM5 10h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
             </button>
@@ -202,8 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const mute = document.getElementById('mute');
   const iVol = mute.querySelector('.i-vol'), iMute = mute.querySelector('.i-mute');
   const bar = document.getElementById('bar');
+  const timeTxt = document.getElementById('time');
   const livePill = document.getElementById('live');
   const fs = document.getElementById('fs');
+  const vol = document.getElementById('vol');
   const nowInfo = document.getElementById('nowInfo'), nowTitle = document.getElementById('nowTitle');
   const nowMeta = document.getElementById('nowMeta'), nowLogo = document.getElementById('nowLogo');
 
@@ -219,29 +223,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const hideOverlay=()=>overlay.classList.remove('show');
   const scrollToPlayer=()=> playerSection.scrollIntoView({behavior:'smooth', block:'start'});
 
-  const fmt=(sec,forceH=false)=>{
-    if(!isFinite(sec)) return '--:--';
-    sec=Math.max(0,Math.floor(sec)); const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
-    return (forceH||h>0)?`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${m}:${String(s).padStart(2,'0')}`;
-  };
+  function fmtHMS(sec){
+    if(!isFinite(sec)) return '--:--:--';
+    sec=Math.max(0,Math.floor(sec));
+    const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
   const isLiveLike=()=>{ const d=video.duration; return !isFinite(d)||d<=0||d>MAX_REASONABLE_DUR; };
+
   function refreshTimeUI(){
     const liveLike=isLiveLike();
-    livePill.classList.toggle('hidden',!liveLike);
-    // แถบเวลาซ่อนเมื่อ Live
-    bar.classList.toggle('hidden',liveLike);
+    livePill.classList.toggle('hidden', !liveLike);
+
+    // bar: ซ่อนเฉพาะไลฟ์
+    bar.classList.toggle('hidden', liveLike);
     if(!liveLike){ bar.max=isFinite(video.duration)?video.duration:0; bar.value=video.currentTime||0; }
+
+    // time text: โชว์เฉพาะหมวด "หนัง" และไม่ใช่ไลฟ์
+    const showTime = (currentCat === 'หนัง') && !liveLike;
+    timeTxt.classList.toggle('hidden', !showTime);
+    if(showTime){
+      timeTxt.textContent = `${fmtHMS(video.currentTime||0)} / ${fmtHMS(video.duration||0)}`;
+    }
   }
-  function syncVolIcon(){
-    const muted = video.muted || video.volume===0;
-    iVol.classList.toggle('hidden', muted);
-    iMute.classList.toggle('hidden', !muted);
+
+  function syncVolUI(){
+    vol.value = video.volume;
+    const muted=video.muted || video.volume===0;
+    iVol.classList.toggle('hidden',muted);
+    iMute.classList.toggle('hidden',!muted);
   }
 
   async function unload(){
     if(hls){ try{ hls.destroy(); }catch{} hls=null; }
     if(shakaP){ try{ await shakaP.destroy(); }catch{} shakaP=null; }
-    try{ video.pause(); }catch{} video.removeAttribute('src'); try{ video.load(); }catch{}; await sleep(80);
+    try{ video.pause(); }catch{}
+    video.removeAttribute('src'); try{ video.load(); }catch{}
+    await sleep(80);
   }
   async function useHls(url){
     if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=url; currentEngine='HLS'; return; }
@@ -305,31 +323,41 @@ document.addEventListener('DOMContentLoaded', () => {
   video.addEventListener('play', ()=>{ iPlay.classList.add('hidden'); iPause.classList.remove('hidden'); });
   video.addEventListener('pause', ()=>{ iPlay.classList.remove('hidden'); iPause.classList.add('hidden'); });
 
-  // Volume: first 50%, save last volume; no sliderแล้ว
+  // Volume (first visit 50%, remember last)
   (function initVolume(){
-    if(!localStorage.getItem(FIRST_KEY)){
-      video.volume=.5; localStorage.setItem(FIRST_KEY,'1'); localStorage.setItem(VOL_KEY,'0.5'); localStorage.setItem(LAST_VOL_KEY,'0.5');
+    if(!localStorage.getItem('tv_first_visit_done')){
+      video.volume=.5; vol.value=.5;
+      localStorage.setItem('tv_first_visit_done','1');
+      localStorage.setItem('tv_volume','0.5');
+      localStorage.setItem('tv_last_vol','0.5');
     }else{
-      const saved=parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5');
+      const saved=parseFloat(localStorage.getItem('tv_volume') ?? '0.5');
       video.volume=isFinite(saved)?saved:.5;
+      vol.value=video.volume;
     }
-    syncVolIcon();
+    syncVolUI();
   })();
 
   mute.addEventListener('click', ()=>{
     if(video.muted || video.volume===0){
       video.muted=false;
-      let last=parseFloat(localStorage.getItem(LAST_VOL_KEY) ?? '0.5');
+      let last=parseFloat(localStorage.getItem('tv_last_vol') ?? '0.5');
       if(!isFinite(last) || last<=0) last=.5;
       if(video.volume===0) video.volume=last;
     }else{
-      localStorage.setItem(LAST_VOL_KEY, String(video.volume||.5));
+      localStorage.setItem('tv_last_vol', String(video.volume||.5));
       video.muted=true;
     }
-    localStorage.setItem(VOL_KEY, String(video.volume));
-    syncVolIcon();
+    localStorage.setItem('tv_volume', String(video.volume));
+    syncVolUI();
   });
-  video.addEventListener('volumechange', syncVolIcon);
+  vol.addEventListener('input', e=>{
+    const v=+e.target.value; video.volume=v; if(v>0) video.muted=false;
+    localStorage.setItem('tv_volume', String(v));
+    localStorage.setItem('tv_last_vol', String(v));
+    syncVolUI();
+  });
+  video.addEventListener('volumechange', syncVolUI);
 
   // progress
   bar.addEventListener('input', e=> video.currentTime=+e.target.value);
@@ -339,8 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // fullscreen
   fs.addEventListener('click', async ()=>{
+    const box=document.getElementById('vbox');
     try{
-      const box=document.getElementById('vbox');
       if(!document.fullscreenElement) await box.requestFullscreen(); else await document.exitFullscreen();
     }catch{}
   });
