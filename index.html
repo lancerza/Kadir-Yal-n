@@ -142,7 +142,7 @@
 
     // 2) Proxy สำหรับส่ง Referer/User-Agent จากฝั่งเซิร์ฟเวอร์ (ใส่ของคุณ)
     // ตัวอย่าง: 'https://your-domain.com/hls' หรือ 'https://your-worker.your-subdomain.workers.dev/hls'
-    const PROXY_BASE = 'https://follow.don147ok.workers.dev';
+    const PROXY_BASE = 'https://follow.don147ok.workers.dev/hls';
     
     const FORCE_PROXY_HOSTS = ['cdn2.aws-live-streaming.com']; // โดเมนที่ต้อง proxy เสมอ
     const ALWAYS_PROXY = true;  // <<<<< ตรงนี้ให้ตั้งเป็น true
@@ -366,4 +366,5 @@
   </script>
 </body>
 </html>
+
 
