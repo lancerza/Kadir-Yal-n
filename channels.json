@@ -109,16 +109,30 @@
       "license_key": "d9e3024854648dd01714f781c1492c4c:9404541975d298f6787c591d2cc871b1"
     }
   },
-  "🔴ARENA SPORT": {
-    "arena_1": {
-      "name": "Arena Sport 1",
-      "url": "https://arenasport.don147ok.workers.dev/ts/arena1",
-      "logo": "https://tvprofil.com/img/kanali-logo/Arena_Sport_1_HR_logo.png"
+"🔴MONOMAX": {
+    "mono-max-1": {
+      "name": "MONO MAX - 1",
+      "logo": "https://img.monomax.me/9ahQXPNNQxosilSBzpPyZRzSQ6M=/www.monomax.me/assets/monomax/images/logo2025/monomax-logo-white-h-sd.png",
+      "url": "https://cdn2.aws-live-streaming.com/lsmscore/monomax1/chunks.m3u8",
+      "referrer": "https://99dooball.com/",
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.140",
+      "forceType": "hls"
     },
-    "arena_2": {
-      "name": "Arena Sport 2",
-      "url": "https://arenasport.don147ok.workers.dev/ts/arena2",
-      "logo": "https://tvprofil.com/img/kanali-logo/Arena_Sport_2_HR_logo.png"
+    "mono-max-2": {
+      "name": "MONO MAX - 2",
+      "logo": "https://img.monomax.me/9ahQXPNNQxosilSBzpPyZRzSQ6M=/www.monomax.me/assets/monomax/images/logo2025/monomax-logo-white-h-sd.png",
+      "url": "https://cdn2.aws-live-streaming.com/lsmscore/ais-monomax-3/chunks.m3u8",
+      "referrer": "https://99dooball.com/",
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.140",
+      "forceType": "hls"
+    },
+    "mono-max-3": {
+      "name": "MONO MAX - 3",
+      "logo": "https://img.monomax.me/9ahQXPNNQxosilSBzpPyZRzSQ6M=/www.monomax.me/assets/monomax/images/logo2025/monomax-logo-white-h-sd.png",
+      "url": "https://cdn2.aws-live-streaming.com/lsmscore/ais-monomax-4/chunks.m3u8",
+      "referrer": "https://99dooball.com/",
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.140",
+      "forceType": "hls"
     }
   }
 }
