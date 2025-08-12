@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Movie Hours + Volume Slider</title>
+<title>Online TV • Fixed Overlay + Shorter Volume</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,6 @@
     --text:#eaf0ff; --muted:#97a1b6; --primary:#0d8eff;
     --card:#0f1623; --hover:#172339; --hairline:rgba(255,255,255,.06);
 
-    /* XS cards */
     --card-min:96px; --card-ideal:13vw; --card-max:132px;
     --card-br:6px; --logo-br:6px; --card-pad:8px; --gap:8px;
   }
@@ -26,13 +25,11 @@
   body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
   .wrap{max-width:1100px; margin:18px auto 30px; padding:0 14px}
 
-  /* Header */
   .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
   .brand{display:flex; align-items:center; gap:10px; font-weight:700}
   .dot{width:10px; height:10px; border-radius:50%; background:var(--primary); box-shadow:0 0 10px rgba(13,142,255,.65)}
   .subtxt{color:var(--muted); font-size:.95rem}
 
-  /* Player */
   .player{background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden}
   .topbar{display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--border)}
   .now{display:flex; align-items:center; gap:10px; min-width:0}
@@ -42,7 +39,7 @@
   .vbox{position:relative; background:#000}
   video{width:100%; display:block; aspect-ratio:16/9; background:#000}
 
-  /* Controls — full-width bottom bar */
+  /* Controls — full width bottom bar (L/C/R) */
   .ctrl{
     position:absolute; left:0; right:0; bottom:0;
     display:flex; align-items:center; padding:8px 10px;
@@ -60,32 +57,39 @@
   .cbtn svg{width:18px; height:18px; pointer-events:none}
 
   /* progress */
-  #bar{flex:1; height:6px; accent-color:var(--primary)}
-  #bar{appearance:none; -webkit-appearance:none; outline:none; background:transparent}
+  #bar{flex:1; height:6px; accent-color:var(--primary); appearance:none; -webkit-appearance:none; outline:none; background:transparent}
   #bar::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
   #bar::-webkit-slider-thumb{-webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--primary); margin-top:-3px}
 
-  /* time text */
+  /* time text (แสดงเฉพาะหมวดหนัง) */
   .t{min-width:140px; text-align:center; color:#d9e2ff; font-size:.85rem; opacity:.95}
   .hidden{display:none!important}
   .live{background:#e53935; color:#fff; font-weight:800; padding:4px 10px; border-radius:8px; font-size:.85rem}
 
-  /* volume slider (ด้านขวาถัดจากลำโพง) */
-  #vol{width:clamp(90px, 18vw, 150px); height:6px}
-  #vol{appearance:none; -webkit-appearance:none; outline:none; background:transparent; accent-color:var(--primary)}
+  /* volume slider — shorter */
+  #vol{
+    width:clamp(60px, 12vw, 100px);
+    height:6px;
+    appearance:none; -webkit-appearance:none; outline:none; background:transparent; accent-color:var(--primary)
+  }
   #vol::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
   #vol::-webkit-slider-thumb{-webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--primary); margin-top:-2px}
 
-  /* Sections (auto-fit grid) */
+  /* Overlay: ไม่ให้เล็ดลอด */
+  .overlay{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    background:rgba(6,10,18,.6); color:#fff; z-index:3;
+    opacity:0; visibility:hidden; pointer-events:none; transition:.18s;
+  }
+  .overlay.show{ opacity:1; visibility:visible; pointer-events:auto }
+  .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Sections (cards) */
   .section{margin-top:16px}
   .section h3{margin:0 0 10px 2px; font-size:1rem; color:#dfe7ff; font-weight:700}
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(clamp(var(--card-min), var(--card-ideal), var(--card-max)), 1fr));
-    gap:var(--gap);
-  }
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(clamp(var(--card-min), var(--card-ideal), var(--card-max)), 1fr)); gap:var(--gap)}
 
-  /* Cards */
   .card{
     background:var(--card); border-radius:var(--card-br); border:1px solid transparent;
     box-shadow:0 0 0 1px var(--hairline) inset; padding:var(--card-pad);
@@ -93,11 +97,9 @@
     transition:background .15s, box-shadow .15s, transform .15s;
   }
   .card:hover{ background:var(--hover); box-shadow:0 0 0 1px rgba(13,142,255,.45) inset; transform:translateY(-1px) }
-  .logo-box{ width:100%; aspect-ratio:1/1; border-radius:var(--logo-br); margin-bottom:8px; background:transparent;
-             display:flex; align-items:center; justify-content:center }
+  .logo-box{ width:100%; aspect-ratio:1/1; border-radius:var(--logo-br); margin-bottom:8px; background:transparent; display:flex; align-items:center; justify-content:center }
   .logo-box img{ max-width:88%; max-height:88%; object-fit:contain }
-  .name{ font-weight:700; font-size:.82rem; line-height:1.15; text-align:center; color:#eef3ff;
-         display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word }
+  .name{ font-weight:700; font-size:.82rem; line-height:1.15; text-align:center; color:#eef3ff; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word }
 
   @media (max-width:560px){
     .grid{ gap:6px } .section{ margin-top:14px }
@@ -221,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const isDash = (u)=>/\.mpd(\?|$)/i.test(u);
   const showOverlay=(t='กำลังโหลด…')=>{ ovtxt.textContent=t; overlay.classList.add('show'); };
   const hideOverlay=()=>overlay.classList.remove('show');
+  const hideOverlaySafe=()=>hideOverlay();
   const scrollToPlayer=()=> playerSection.scrollIntoView({behavior:'smooth', block:'start'});
 
   function fmtHMS(sec){
@@ -234,46 +237,47 @@ document.addEventListener('DOMContentLoaded', () => {
   function refreshTimeUI(){
     const liveLike=isLiveLike();
     livePill.classList.toggle('hidden', !liveLike);
-
-    // bar: ซ่อนเฉพาะไลฟ์
     bar.classList.toggle('hidden', liveLike);
     if(!liveLike){ bar.max=isFinite(video.duration)?video.duration:0; bar.value=video.currentTime||0; }
-
-    // time text: โชว์เฉพาะหมวด "หนัง" และไม่ใช่ไลฟ์
-    const showTime = (currentCat === 'หนัง') && !liveLike;
+    const showTime=(currentCat==='หนัง') && !liveLike;
     timeTxt.classList.toggle('hidden', !showTime);
-    if(showTime){
-      timeTxt.textContent = `${fmtHMS(video.currentTime||0)} / ${fmtHMS(video.duration||0)}`;
-    }
+    if(showTime){ timeTxt.textContent=`${fmtHMS(video.currentTime||0)} / ${fmtHMS(video.duration||0)}`; }
   }
 
   function syncVolUI(){
     vol.value = video.volume;
-    const muted=video.muted || video.volume===0;
-    iVol.classList.toggle('hidden',muted);
-    iMute.classList.toggle('hidden',!muted);
+    const muted = video.muted || video.volume===0;
+    iVol.classList.toggle('hidden', muted);
+    iMute.classList.toggle('hidden', !muted);
   }
 
   async function unload(){
     if(hls){ try{ hls.destroy(); }catch{} hls=null; }
     if(shakaP){ try{ await shakaP.destroy(); }catch{} shakaP=null; }
-    try{ video.pause(); }catch{}
-    video.removeAttribute('src'); try{ video.load(); }catch{}
+    try{ video.pause(); }catch{} video.removeAttribute('src'); try{ video.load(); }catch{};
     await sleep(80);
   }
+
   async function useHls(url){
     if(video.canPlayType('application/vnd.apple.mpegurl')){ video.src=url; currentEngine='HLS'; return; }
     if(window.Hls && Hls.isSupported()){
-      hls=new Hls({enableWorker:true,lowLatencyMode:false,capLevelToPlayerSize:true,startLevel:-1,startPosition:-1,
-        maxBufferLength:20,backBufferLength:30,maxBufferHole:.5,maxLoadingDelay:8,maxStarvationDelay:4,
-        manifestLoadingTimeOut:10000,fragLoadingTimeOut:15000,levelLoadingTimeOut:10000,
-        manifestLoadingMaxRetry:1,fragLoadingMaxRetry:1,levelLoadingMaxRetry:1});
-      hls.attachMedia(video); hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));
+      hls=new Hls({
+        enableWorker:true, lowLatencyMode:false, capLevelToPlayerSize:true, startLevel:-1, startPosition:-1,
+        maxBufferLength:20, backBufferLength:30, maxBufferHole:.5, maxLoadingDelay:8, maxStarvationDelay:4,
+        manifestLoadingTimeOut:10000, fragLoadingTimeOut:15000, levelLoadingTimeOut:10000,
+        manifestLoadingMaxRetry:1, fragLoadingMaxRetry:1, levelLoadingMaxRetry:1
+      });
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(url));
+      // ซ่อน overlay ทันทีที่พร้อม
+      hls.on(Hls.Events.MANIFEST_PARSED, hideOverlaySafe);
+      hls.on(Hls.Events.LEVEL_LOADED, hideOverlaySafe);
       hls.on(Hls.Events.ERROR,(_,d)=>{ if(d.fatal){ if(d.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad(); else if(d.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError(); }});
       currentEngine='HLS'; return;
     }
     throw new Error('เบราว์เซอร์ไม่รองรับ HLS');
   }
+
   async function useShaka(ch){
     shaka.polyfill.installAll();
     if(!shaka.Player.isBrowserSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ DASH');
@@ -282,7 +286,12 @@ document.addEventListener('DOMContentLoaded', () => {
                manifest:{retryParameters:{timeout:0,maxAttempts:5,baseDelay:500,backoffFactor:2,fuzzFactor:.5}},
                drm:{clearKeys:{}}};
     if(ch.license_key){ const [kid,key]=String(ch.license_key).split(':'); if(kid&&key) cfg.drm.clearKeys[kid]=key; }
-    shakaP.configure(cfg); await shakaP.load(ch.url); currentEngine='DASH';
+    shakaP.configure(cfg);
+    // บางเบราว์เซอร์จะยิงอีเวนต์เหล่านี้
+    shakaP.addEventListener('loaded', hideOverlaySafe);
+    shakaP.addEventListener('trackschanged', hideOverlaySafe);
+    await shakaP.load(ch.url);
+    currentEngine='DASH';
   }
 
   async function switchChannel(cat,id){
@@ -291,11 +300,16 @@ document.addEventListener('DOMContentLoaded', () => {
     currentId=id; currentCat=cat; showOverlay('กำลังโหลด…'); scrollToPlayer();
     try{
       await unload(); if(tk!==token) return;
-      if(isDash(ch.url) || ch.license_key) await useShaka(ch); else if(isHls(ch.url)) await useHls(ch.url); else await useShaka(ch);
+      if(isDash(ch.url) || ch.license_key) await useShaka(ch);
+      else if(isHls(ch.url)) await useHls(ch.url);
+      else await useShaka(ch);
       if(tk!==token) return;
       nowTitle.textContent=ch.name; nowLogo.src=ch.logo||''; nowMeta.textContent=`${cat} · ${currentEngine}${ch.license_key?' (DRM)':''}`;
-      nowInfo.textContent=ch.name; hideOverlay(); video.play().catch(()=>{});
-      setTimeout(scrollToPlayer,60);
+      nowInfo.textContent=ch.name;
+      // พยายามเล่น และซ่อน overlay แบบกันพลาด
+      video.play().catch(()=>{});
+      setTimeout(hideOverlaySafe, 1500);
+      setTimeout(scrollToPlayer, 60);
     }catch(e){ console.error(e); showOverlay('เล่นไม่ได้ ลองใหม่'); }
   }
 
@@ -314,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---------- Controls ---------- */
-  let ctrlTimer;
+  let ctrlTimer, overlayWatch=null;
   const showCtrl=()=>{ clearTimeout(ctrlTimer); ctrl.classList.add('show'); ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),1800); };
   document.getElementById('vbox').addEventListener('mousemove', showCtrl);
   document.getElementById('vbox').addEventListener('touchstart', showCtrl);
@@ -323,61 +337,63 @@ document.addEventListener('DOMContentLoaded', () => {
   video.addEventListener('play', ()=>{ iPlay.classList.add('hidden'); iPause.classList.remove('hidden'); });
   video.addEventListener('pause', ()=>{ iPlay.classList.remove('hidden'); iPause.classList.add('hidden'); });
 
+  // ซ่อน overlay เมื่อวิดีโอพร้อม/กำลังเล่น
+  video.addEventListener('loadeddata', hideOverlaySafe);
+  video.addEventListener('canplay', hideOverlaySafe);
+  video.addEventListener('playing', hideOverlaySafe);
+  // watchdog: ทุก 1s ถ้า readyState >= 2 ให้ซ่อน overlay
+  overlayWatch = setInterval(()=>{ if(overlay.classList.contains('show') && video.readyState>=2) hideOverlaySafe(); }, 1000);
+
   // Volume (first visit 50%, remember last)
   (function initVolume(){
-    if(!localStorage.getItem('tv_first_visit_done')){
+    if(!localStorage.getItem(FIRST_KEY)){
       video.volume=.5; vol.value=.5;
-      localStorage.setItem('tv_first_visit_done','1');
-      localStorage.setItem('tv_volume','0.5');
-      localStorage.setItem('tv_last_vol','0.5');
+      localStorage.setItem(FIRST_KEY,'1');
+      localStorage.setItem(VOL_KEY,'0.5');
+      localStorage.setItem(LAST_VOL_KEY,'0.5');
     }else{
-      const saved=parseFloat(localStorage.getItem('tv_volume') ?? '0.5');
-      video.volume=isFinite(saved)?saved:.5;
-      vol.value=video.volume;
+      const saved=parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5');
+      video.volume=isFinite(saved)?saved:.5; vol.value=video.volume;
     }
     syncVolUI();
   })();
 
-  mute.addEventListener('click', ()=>{
+  document.getElementById('mute').addEventListener('click', ()=>{
     if(video.muted || video.volume===0){
       video.muted=false;
-      let last=parseFloat(localStorage.getItem('tv_last_vol') ?? '0.5');
+      let last=parseFloat(localStorage.getItem(LAST_VOL_KEY) ?? '0.5');
       if(!isFinite(last) || last<=0) last=.5;
       if(video.volume===0) video.volume=last;
     }else{
-      localStorage.setItem('tv_last_vol', String(video.volume||.5));
+      localStorage.setItem(LAST_VOL_KEY, String(video.volume||.5));
       video.muted=true;
     }
-    localStorage.setItem('tv_volume', String(video.volume));
+    localStorage.setItem(VOL_KEY, String(video.volume));
     syncVolUI();
   });
   vol.addEventListener('input', e=>{
     const v=+e.target.value; video.volume=v; if(v>0) video.muted=false;
-    localStorage.setItem('tv_volume', String(v));
-    localStorage.setItem('tv_last_vol', String(v));
+    localStorage.setItem(VOL_KEY, String(v)); localStorage.setItem(LAST_VOL_KEY, String(v));
     syncVolUI();
   });
   video.addEventListener('volumechange', syncVolUI);
 
-  // progress
+  // progress & hotkeys
   bar.addEventListener('input', e=> video.currentTime=+e.target.value);
   video.addEventListener('timeupdate', refreshTimeUI);
   video.addEventListener('loadedmetadata', refreshTimeUI);
   video.addEventListener('durationchange', refreshTimeUI);
 
-  // fullscreen
   fs.addEventListener('click', async ()=>{
     const box=document.getElementById('vbox');
     try{
       if(!document.fullscreenElement) await box.requestFullscreen(); else await document.exitFullscreen();
     }catch{}
   });
-
-  // hotkeys
   document.addEventListener('keydown',(e)=>{
     const t=document.activeElement?.tagName; if(t==='INPUT'||t==='TEXTAREA') return;
     if(e.code==='Space'){ e.preventDefault(); video.paused?video.play():video.pause(); }
-    else if(e.key.toLowerCase()==='m'){ mute.click(); }
+    else if(e.key.toLowerCase()==='m'){ document.getElementById('mute').click(); }
     else if(e.key.toLowerCase()==='f'){ fs.click(); }
     else if(e.key==='ArrowRight'){ video.currentTime=(video.currentTime||0)+5; }
     else if(e.key==='ArrowLeft'){ video.currentTime=Math.max(0,(video.currentTime||0)-5); }
