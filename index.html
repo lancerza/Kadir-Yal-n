@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Fixed Overlay + Shorter Volume</title>
+<title>Online TV • Clean + Active Card + Autoplay</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,19 +17,31 @@
     --bg:#0e1116; --panel:#0f141b; --border:#1a2130;
     --text:#eaf0ff; --muted:#97a1b6; --primary:#0d8eff;
     --card:#0f1623; --hover:#172339; --hairline:rgba(255,255,255,.06);
-
     --card-min:96px; --card-ideal:13vw; --card-max:132px;
     --card-br:6px; --logo-br:6px; --card-pad:8px; --gap:8px;
   }
   *{box-sizing:border-box}
   body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
-  .wrap{max-width:1100px; margin:18px auto 30px; padding:0 14px}
+  .wrap{max-width:1100px; margin:14px auto 30px; padding:0 14px}
 
-  .head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+  /* Datetime top center */
+  .datetime{
+    width:100%; text-align:center; margin:10px 0 6px;
+    color:#eaf0ff; font-weight:700;
+  }
+  .datetime .chip{
+    display:inline-block; padding:6px 12px; border-radius:999px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 4px 18px rgba(0,0,0,.25);
+  }
+
+  /* Header (info live) */
+  .head{display:flex; align-items:center; justify-content:space-between; margin:10px 0}
   .brand{display:flex; align-items:center; gap:10px; font-weight:700}
   .dot{width:10px; height:10px; border-radius:50%; background:var(--primary); box-shadow:0 0 10px rgba(13,142,255,.65)}
   .subtxt{color:var(--muted); font-size:.95rem}
 
+  /* Player */
   .player{background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden}
   .topbar{display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--border)}
   .now{display:flex; align-items:center; gap:10px; min-width:0}
@@ -66,7 +78,7 @@
   .hidden{display:none!important}
   .live{background:#e53935; color:#fff; font-weight:800; padding:4px 10px; border-radius:8px; font-size:.85rem}
 
-  /* volume slider — shorter */
+  /* volume slider — สั้น */
   #vol{
     width:clamp(60px, 12vw, 100px);
     height:6px;
@@ -75,7 +87,7 @@
   #vol::-webkit-slider-runnable-track{height:6px; background:rgba(255,255,255,.18); border-radius:999px}
   #vol::-webkit-slider-thumb{-webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:var(--primary); margin-top:-2px}
 
-  /* Overlay: ไม่ให้เล็ดลอด */
+  /* Overlay ป้องกันค้าง */
   .overlay{
     position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
     background:rgba(6,10,18,.6); color:#fff; z-index:3;
@@ -85,21 +97,43 @@
   .spin{border:4px solid rgba(255,255,255,.35); border-top:4px solid var(--primary); width:42px; height:42px; border-radius:50%; animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
+  /* ป้ายแตะเพื่อเปิดเสียง */
+  .unmute{
+    position:absolute; left:50%; bottom:52px; transform:translateX(-50%);
+    background:rgba(12,16,24,.8); border:1px solid rgba(255,255,255,.14);
+    color:#fff; padding:6px 10px; border-radius:10px; font-size:.88rem;
+    box-shadow:0 6px 22px rgba(0,0,0,.35); z-index:2; backdrop-filter:blur(4px)
+  }
+  .unmute.hidden{display:none}
+
   /* Sections (cards) */
   .section{margin-top:16px}
   .section h3{margin:0 0 10px 2px; font-size:1rem; color:#dfe7ff; font-weight:700}
   .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(clamp(var(--card-min), var(--card-ideal), var(--card-max)), 1fr)); gap:var(--gap)}
 
   .card{
-    background:var(--card); border-radius:var(--card-br); border:1px solid transparent;
+    background:var(--card); border-radius:var(--card-br);
     box-shadow:0 0 0 1px var(--hairline) inset; padding:var(--card-pad);
     display:flex; flex-direction:column; align-items:center; cursor:pointer;
     transition:background .15s, box-shadow .15s, transform .15s;
   }
   .card:hover{ background:var(--hover); box-shadow:0 0 0 1px rgba(13,142,255,.45) inset; transform:translateY(-1px) }
-  .logo-box{ width:100%; aspect-ratio:1/1; border-radius:var(--logo-br); margin-bottom:8px; background:transparent; display:flex; align-items:center; justify-content:center }
-  .logo-box img{ max-width:88%; max-height:88%; object-fit:contain }
-  .name{ font-weight:700; font-size:.82rem; line-height:1.15; text-align:center; color:#eef3ff; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word }
+  .logo-box{width:100%; aspect-ratio:1/1; border-radius:var(--logo-br); margin-bottom:8px; display:flex; align-items:center; justify-content:center}
+  .logo-box img{max-width:88%; max-height:88%; object-fit:contain; width:88; height:88}
+  .name{font-weight:700; font-size:.82rem; line-height:1.15; text-align:center; color:#eef3ff; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+
+  /* ไฮไลท์การ์ดที่กำลังเล่น */
+  .card.active{
+    background:var(--hover);
+    box-shadow:0 0 0 2px var(--primary) inset, 0 6px 20px rgba(13,142,255,.15);
+    transform:none;
+  }
+  .card:focus-visible{ outline:2px solid var(--primary); outline-offset:2px }
+
+  /* ลดแอนิเมชันถ้าผู้ใช้ตั้งค่าลดการเคลื่อนไหว */
+  @media (prefers-reduced-motion: reduce){
+    *,*:before,*:after{ animation:none!important; transition:none!important; scroll-behavior:auto!important }
+  }
 
   @media (max-width:560px){
     .grid{ gap:6px } .section{ margin-top:14px }
@@ -109,10 +143,12 @@
 </style>
 </head>
 <body>
+<div class="datetime"><span id="datetime" class="chip">—</span></div>
+
 <div class="wrap">
   <div class="head">
     <div class="brand"><div class="dot"></div><div>Online TV</div></div>
-    <div class="subtxt" id="nowInfo">เลือกช่องเพื่อเริ่มรับชม</div>
+    <div class="subtxt" id="nowInfo" aria-live="polite">เลือกช่องเพื่อเริ่มรับชม</div>
   </div>
 
   <!-- Player -->
@@ -128,12 +164,15 @@
     </div>
 
     <div class="vbox" id="vbox">
-      <video id="video" playsinline></video>
+      <!-- autoplay + muted -->
+      <video id="video" playsinline autoplay muted></video>
 
       <div class="overlay" id="overlay">
         <div class="spin"></div>
         <div id="ovtxt">กำลังโหลด…</div>
       </div>
+
+      <div id="unmute-hint" class="unmute hidden">แตะเพื่อเปิดเสียง</div>
 
       <!-- Controls -->
       <div class="ctrl" id="ctrl">
@@ -191,9 +230,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  /* ---------- Datetime top center ---------- */
+  const dtEl = document.getElementById('datetime');
+  function updateDateTime(){
+    try{
+      dtEl.textContent = new Date().toLocaleString('th-TH', { dateStyle:'full', timeStyle:'medium' });
+    }catch{
+      const d=new Date();
+      dtEl.textContent = d.toLocaleDateString('th-TH', { weekday:'long', year:'numeric', month:'long', day:'numeric' })+
+                         ' ' + d.toLocaleTimeString('th-TH');
+    }
+  }
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
+
   /* ---------- State & DOM ---------- */
   let hls=null, shakaP=null, currentId=null, currentCat=null, currentEngine='—', token=0;
   const MAX_REASONABLE_DUR = 8*3600;
+  const LAST_CH_KEY='tv_last_channel';
 
   const sections = document.getElementById('sections');
   const playerSection = document.getElementById('playerSection');
@@ -225,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const hideOverlay=()=>overlay.classList.remove('show');
   const hideOverlaySafe=()=>hideOverlay();
   const scrollToPlayer=()=> playerSection.scrollIntoView({behavior:'smooth', block:'start'});
+  const cssEscape=(s)=> (window.CSS&&CSS.escape)?CSS.escape(s):String(s).replace(/([\\[\\].#:$'"`])/g,'\\$1');
 
   function fmtHMS(sec){
     if(!isFinite(sec)) return '--:--:--';
@@ -251,6 +306,15 @@ document.addEventListener('DOMContentLoaded', () => {
     iMute.classList.toggle('hidden', !muted);
   }
 
+  function setActiveCard(cat,id){
+    document.querySelectorAll('.card.active').forEach(el=>{
+      el.classList.remove('active'); el.setAttribute('aria-pressed','false');
+    });
+    const el=document.querySelector(`.card[data-cat="${cssEscape(cat)}"][data-id="${cssEscape(id)}"]`);
+    if(el){ el.classList.add('active'); el.setAttribute('aria-pressed','true'); el.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'}); }
+    localStorage.setItem(LAST_CH_KEY, JSON.stringify({cat,id}));
+  }
+
   async function unload(){
     if(hls){ try{ hls.destroy(); }catch{} hls=null; }
     if(shakaP){ try{ await shakaP.destroy(); }catch{} shakaP=null; }
@@ -269,7 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       hls.attachMedia(video);
       hls.on(Hls.Events.MEDIA_ATTACHED, ()=> hls.loadSource(url));
-      // ซ่อน overlay ทันทีที่พร้อม
       hls.on(Hls.Events.MANIFEST_PARSED, hideOverlaySafe);
       hls.on(Hls.Events.LEVEL_LOADED, hideOverlaySafe);
       hls.on(Hls.Events.ERROR,(_,d)=>{ if(d.fatal){ if(d.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad(); else if(d.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError(); }});
@@ -287,12 +350,28 @@ document.addEventListener('DOMContentLoaded', () => {
                drm:{clearKeys:{}}};
     if(ch.license_key){ const [kid,key]=String(ch.license_key).split(':'); if(kid&&key) cfg.drm.clearKeys[kid]=key; }
     shakaP.configure(cfg);
-    // บางเบราว์เซอร์จะยิงอีเวนต์เหล่านี้
     shakaP.addEventListener('loaded', hideOverlaySafe);
     shakaP.addEventListener('trackschanged', hideOverlaySafe);
     await shakaP.load(ch.url);
     currentEngine='DASH';
   }
+
+  /* ---------- Autoplay helpers ---------- */
+  const unmuteHint = document.getElementById('unmute-hint');
+  function showUnmute(){ unmuteHint.classList.remove('hidden'); }
+  function hideUnmute(){ unmuteHint.classList.add('hidden'); }
+  function restoreSavedVolume(){
+    const saved=parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5');
+    video.volume = isFinite(saved) ? saved : 0.5;
+  }
+  async function tryAutoplay(){
+    try{ video.muted = true; await video.play(); showUnmute(); }
+    catch{ setTimeout(async()=>{ try{ video.muted=true; await video.play(); showUnmute(); }catch{} }, 400); }
+  }
+  function enableSoundOnce(){ restoreSavedVolume(); video.muted=false; hideUnmute(); }
+  ['click','touchstart','keydown'].forEach(evt=>{
+    document.addEventListener(evt, ()=>{ if(!unmuteHint.classList.contains('hidden')) enableSoundOnce(); }, { once:true, capture:true });
+  });
 
   async function switchChannel(cat,id){
     if(currentId===id && currentCat===cat){ scrollToPlayer(); return; }
@@ -304,10 +383,15 @@ document.addEventListener('DOMContentLoaded', () => {
       else if(isHls(ch.url)) await useHls(ch.url);
       else await useShaka(ch);
       if(tk!==token) return;
-      nowTitle.textContent=ch.name; nowLogo.src=ch.logo||''; nowMeta.textContent=`${cat} · ${currentEngine}${ch.license_key?' (DRM)':''}`;
+
+      nowTitle.textContent=ch.name;
+      nowLogo.src=ch.logo||'';
+      nowMeta.textContent=`${cat} · ${currentEngine}${ch.license_key?' (DRM)':''}`;
       nowInfo.textContent=ch.name;
-      // พยายามเล่น และซ่อน overlay แบบกันพลาด
-      video.play().catch(()=>{});
+
+      setActiveCard(cat,id);
+
+      await tryAutoplay();
       setTimeout(hideOverlaySafe, 1500);
       setTimeout(scrollToPlayer, 60);
     }catch(e){ console.error(e); showOverlay('เล่นไม่ได้ ลองใหม่'); }
@@ -317,83 +401,82 @@ document.addEventListener('DOMContentLoaded', () => {
     sections.innerHTML='';
     Object.keys(channels).forEach(cat=>{
       const sec=document.createElement('section'); sec.className='section';
-      sec.innerHTML=`<h3>${cat}</h3><div class="grid" id="grid-${cat}"></div>`; sections.appendChild(sec);
+      sec.innerHTML=`<h3>${cat}</h3><div class="grid" id="grid-${cat}"></div>`;
+      sections.appendChild(sec);
       const grid=sec.querySelector('.grid');
       Object.entries(channels[cat]).forEach(([id,ch])=>{
-        const card=document.createElement('button'); card.className='card'; card.title=ch.name;
-        card.innerHTML=`<div class="logo-box"><img loading="lazy" src="${ch.logo}" alt="" draggable="false"></div><div class="name">${ch.name}</div>`;
-        card.onclick=()=>switchChannel(cat,id); grid.appendChild(card);
+        const card=document.createElement('button');
+        card.className='card';
+        card.title=ch.name;
+        card.dataset.cat=cat;
+        card.dataset.id=id;
+        card.setAttribute('role','button');
+        card.setAttribute('aria-pressed','false');
+        card.innerHTML=`<div class="logo-box"><img loading="lazy" src="${ch.logo}" alt="" width="88" height="88" draggable="false"></div><div class="name">${ch.name}</div>`;
+        card.onclick=()=>switchChannel(cat,id);
+        grid.appendChild(card);
       });
     });
   }
 
   /* ---------- Controls ---------- */
-  let ctrlTimer, overlayWatch=null;
+  let ctrlTimer;
   const showCtrl=()=>{ clearTimeout(ctrlTimer); ctrl.classList.add('show'); ctrlTimer=setTimeout(()=>ctrl.classList.remove('show'),1800); };
   document.getElementById('vbox').addEventListener('mousemove', showCtrl);
   document.getElementById('vbox').addEventListener('touchstart', showCtrl);
 
   play.addEventListener('click', ()=> video.paused?video.play():video.pause());
-  video.addEventListener('play', ()=>{ iPlay.classList.add('hidden'); iPause.classList.remove('hidden'); });
+  video.addEventListener('play', ()=>{ iPlay.classList.add('hidden'); iPause.classList.remove('hidden'); hideOverlaySafe(); });
   video.addEventListener('pause', ()=>{ iPlay.classList.remove('hidden'); iPause.classList.add('hidden'); });
 
-  // ซ่อน overlay เมื่อวิดีโอพร้อม/กำลังเล่น
+  // ซ่อน overlay เมื่อพร้อมเล่น
   video.addEventListener('loadeddata', hideOverlaySafe);
   video.addEventListener('canplay', hideOverlaySafe);
   video.addEventListener('playing', hideOverlaySafe);
-  // watchdog: ทุก 1s ถ้า readyState >= 2 ให้ซ่อน overlay
-  overlayWatch = setInterval(()=>{ if(overlay.classList.contains('show') && video.readyState>=2) hideOverlaySafe(); }, 1000);
+  setInterval(()=>{ if(overlay.classList.contains('show') && video.readyState>=2) hideOverlaySafe(); }, 1000);
 
-  // Volume (first visit 50%, remember last)
+  // Volume init (จำครั้งก่อน) — เริ่ม muted เพื่อ autoplay
   (function initVolume(){
     if(!localStorage.getItem(FIRST_KEY)){
-      video.volume=.5; vol.value=.5;
       localStorage.setItem(FIRST_KEY,'1');
       localStorage.setItem(VOL_KEY,'0.5');
       localStorage.setItem(LAST_VOL_KEY,'0.5');
-    }else{
-      const saved=parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5');
-      video.volume=isFinite(saved)?saved:.5; vol.value=video.volume;
     }
+    vol.value = parseFloat(localStorage.getItem(VOL_KEY) ?? '0.5');
     syncVolUI();
   })();
 
-  document.getElementById('mute').addEventListener('click', ()=>{
-    if(video.muted || video.volume===0){
-      video.muted=false;
-      let last=parseFloat(localStorage.getItem(LAST_VOL_KEY) ?? '0.5');
-      if(!isFinite(last) || last<=0) last=.5;
-      if(video.volume===0) video.volume=last;
-    }else{
+  mute.addEventListener('click', ()=>{
+    if(video.muted || video.volume===0){ enableSoundOnce(); }
+    else{
       localStorage.setItem(LAST_VOL_KEY, String(video.volume||.5));
-      video.muted=true;
+      video.muted=true; syncVolUI(); showUnmute();
     }
     localStorage.setItem(VOL_KEY, String(video.volume));
-    syncVolUI();
   });
   vol.addEventListener('input', e=>{
-    const v=+e.target.value; video.volume=v; if(v>0) video.muted=false;
+    const v=+e.target.value; video.volume=v;
+    if(v>0 && video.muted){ video.muted=false; hideUnmute(); }
     localStorage.setItem(VOL_KEY, String(v)); localStorage.setItem(LAST_VOL_KEY, String(v));
     syncVolUI();
   });
   video.addEventListener('volumechange', syncVolUI);
 
-  // progress & hotkeys
   bar.addEventListener('input', e=> video.currentTime=+e.target.value);
   video.addEventListener('timeupdate', refreshTimeUI);
   video.addEventListener('loadedmetadata', refreshTimeUI);
   video.addEventListener('durationchange', refreshTimeUI);
 
   fs.addEventListener('click', async ()=>{
-    const box=document.getElementById('vbox');
     try{
+      const box=document.getElementById('vbox');
       if(!document.fullscreenElement) await box.requestFullscreen(); else await document.exitFullscreen();
     }catch{}
   });
   document.addEventListener('keydown',(e)=>{
     const t=document.activeElement?.tagName; if(t==='INPUT'||t==='TEXTAREA') return;
     if(e.code==='Space'){ e.preventDefault(); video.paused?video.play():video.pause(); }
-    else if(e.key.toLowerCase()==='m'){ document.getElementById('mute').click(); }
+    else if(e.key.toLowerCase()==='m'){ mute.click(); }
     else if(e.key.toLowerCase()==='f'){ fs.click(); }
     else if(e.key==='ArrowRight'){ video.currentTime=(video.currentTime||0)+5; }
     else if(e.key==='ArrowLeft'){ video.currentTime=Math.max(0,(video.currentTime||0)-5); }
@@ -401,8 +484,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- Init ---------- */
   buildSections();
-  const firstCat=Object.keys(channels)[0], firstId=Object.keys(channels[firstCat])[0];
-  switchChannel(firstCat, firstId);
+  let firstCat=Object.keys(channels)[0];
+  let firstId =Object.keys(channels[firstCat])[0];
+  try{
+    const saved = JSON.parse(localStorage.getItem(LAST_CH_KEY) || 'null');
+    if(saved && channels[saved.cat]?.[saved.id]){ firstCat=saved.cat; firstId=saved.id; }
+  }catch{}
+  switchChannel(firstCat, firstId); // autoplay ให้เอง
 });
 </script>
 </body>
