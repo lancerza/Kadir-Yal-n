@@ -47,7 +47,7 @@ body{margin:0; background:var(--bg); color:var(--text); font-family:'Sarabun',sy
 .vbox{position:relative; background:#000}
 video{width:100%; display:block; aspect-ratio:16/9; background:#000}
 
-/* Controls — Left / Center / Right */
+/* Controls */
 .ctrl{position:absolute; left:0; right:0; bottom:0; padding:10px; background:linear-gradient(180deg,transparent,rgba(0,0,0,.6)); opacity:0; transform:translateY(8px); transition:.2s; z-index:2}
 .player:hover .ctrl,.ctrl.show{opacity:1; transform:translateY(0)}
 .ctrl-inner{display:flex; align-items:center; gap:12px}
@@ -177,8 +177,8 @@ video{width:100%; display:block; aspect-ratio:16/9; background:#000}
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  /* === ชี้ JSON ช่องของคุณ (บน GitHub/โฮสต์ใด ๆ) === */
-  const CHANNELS_URL = 'https://raw.githubusercontent.com/lancerza/tv-online/refs/heads/main/channels.json';
+  /* === โหลด JSON ช่องจากโฟลเดอร์เดียวกัน (หลีกเลี่ยง 404) === */
+  const CHANNELS_URL = './channels.json?v=1';
 
   /* Top Date & Time (ไม่มีวินาที) */
   const dateEl = document.getElementById('dateTop');
@@ -277,21 +277,33 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!shaka.Player.isBrowserSupported()) throw new Error('เบราว์เซอร์ไม่รองรับ DASH');
     shakaP=new shaka.Player(video);
 
-    // ปรับให้เริ่มไว/ลดค้าง + จำกัด 720p (เปลี่ยนเป็น 540/480 ได้)
-    shakaP.configure({
-      abr:{enabled:true, switchInterval:2},
-      restrictions:{maxHeight:720},
+    // คอนฟิกพื้นฐาน
+    const baseCfg = {
+      abr:{ enabled:true, switchInterval:2, defaultBandwidthEstimate:1_500_000 },
+      restrictions:{ maxHeight:720 },
       streaming:{
-        bufferingGoal:12,
-        rebufferingGoal:2,
-        lowLatencyMode:false,
+        bufferingGoal:12, rebufferingGoal:2, lowLatencyMode:false,
         stallEnabled:true, stallThreshold:0.5, gapDetectionThreshold:0.5, jumpLargeGaps:true,
-        retryParameters:{timeout:0,maxAttempts:6,baseDelay:400,backoffFactor:2,fuzzFactor:.5}
+        retryParameters:{ timeout:0, maxAttempts:6, baseDelay:400, backoffFactor:2, fuzzFactor:0.5 }
       },
-      manifest:{retryParameters:{timeout:0,maxAttempts:6,baseDelay:400,backoffFactor:2,fuzzFactor:.5}},
-      drm:{clearKeys:{}}
-    });
-    if(ch.license_key){ const [kid,key]=String(ch.license_key).split(':'); if(kid&&key) shakaP.configure({drm:{clearKeys:{[kid]:key}}}); }
+      manifest:{ retryParameters:{ timeout:0, maxAttempts:6, baseDelay:400, backoffFactor:2, fuzzFactor:0.5 } },
+      drm:{ clearKeys:{} }
+    };
+
+    // ถ้าเป็น SKY LIVE → จำกัดลงเพื่อลดค้าง
+    if (currentCat === '🔴SKY LIVE') {
+      baseCfg.restrictions.maxHeight = 540;
+      baseCfg.abr.defaultBandwidthEstimate = 1_000_000;
+      baseCfg.streaming.bufferingGoal = 16;
+      baseCfg.streaming.rebufferingGoal = 3;
+    }
+
+    shakaP.configure(baseCfg);
+
+    if(ch.license_key){
+      const [kid,key]=String(ch.license_key).split(':');
+      if(kid&&key) shakaP.configure({ drm:{ clearKeys:{[kid]:key} } });
+    }
 
     shakaP.addEventListener('loaded', hideOverlay);
     shakaP.addEventListener('trackschanged', hideOverlay);
@@ -435,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }catch(err){
       console.error(err);
       nowInfo.textContent='โหลดรายการช่องไม่สำเร็จ';
-      showOverlay('โหลด "channels.json" ไม่ได้ กรุณาตรวจสอบ URL');
+      showOverlay('โหลด "channels.json" ไม่ได้ กรุณาตรวจสอบไฟล์/พาธ');
     }
   }
   init();
@@ -443,5 +455,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
