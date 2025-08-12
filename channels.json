@@ -11,7 +11,8 @@
       "url": "https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd",
       "logo": "https://iili.io/FWccqEg.md.jpg",
       "license_key": "d418f733ed224f9bb9c2b1589db22a20:6ed6fe26daa4b926810869ff60254ebb"
-    },
+    }
+  },
   "🔴SSC SPORT": {
     "ssc1": {
       "name": "SSC 1",
@@ -62,4 +63,4 @@
       "license_key": "98cfd6fd4812497fb24dc75f7545f2ee:d3006ee69e77b25939728ebf30d3180a"
     }
   }
-}}
+}
