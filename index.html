@@ -244,11 +244,20 @@ document.addEventListener('DOMContentLoaded', () => {
     iMute.classList.toggle('hidden', !muted);
   }
 
-  function setActiveCard(cat,id){
-    document.querySelectorAll('.card.active').forEach(el=>{ el.classList.remove('active'); el.setAttribute('aria-pressed','false'); });
-    const el=document.querySelector(`.card[data-cat="${cssEscape(cat)}"][data-id="${cssEscape(id)}"]`);
-    if(el){ el.classList.add('active'); el.setAttribute('aria-pressed','true'); el.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'}); }
-    localStorage.setItem(LAST_CH_KEY, JSON.stringify({cat,id}));
+function setActiveCard(cat,id){
+  // ล้าง active เดิม
+  document.querySelectorAll('.card.active').forEach(el=>{
+    el.classList.remove('active');
+    el.setAttribute('aria-pressed','false');
+  });
+  // ติด active การ์ดที่เลือก (ไม่ scroll การ์ด)
+  const el=document.querySelector(`.card[data-cat="${cssEscape(cat)}"][data-id="${cssEscape(id)}"]`);
+  if(el){
+    el.classList.add('active');
+    el.setAttribute('aria-pressed','true');
+  }
+  // จำช่องล่าสุด
+  localStorage.setItem(LAST_CH_KEY, JSON.stringify({cat,id}));
   }
 
   /* Unload & engines */
@@ -455,3 +464,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
