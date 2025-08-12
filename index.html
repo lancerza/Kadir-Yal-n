@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Online TV • Date & Time on Top + Clean UI</title>
+<title>Online TV • Channels from GitHub (no fallback)</title>
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
   body{margin:0; font-family:'Sarabun',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text)}
   .wrap{max-width:1100px; margin:14px auto 30px; padding:0 14px}
 
-  /* Top center: Date + Time (time on new line) */
+  /* Top center: Date + Time (time below date) */
   .datetime{ width:100%; text-align:center; margin:10px 0 6px; color:#eaf0ff }
   .datetime .chip{
     display:inline-block; padding:8px 14px; border-radius:12px;
@@ -38,7 +38,7 @@
   .head{display:flex; align-items:center; justify-content:space-between; margin:10px 0}
   .brand{display:flex; align-items:center; gap:10px; font-weight:700}
   .dot{width:10px; height:10px; border-radius:50%; background:var(--primary); box-shadow:0 0 10px rgba(13,142,255,.65)}
-  .subtxt{color:var(--muted); font-size:.95rem}
+  .subtxt{color:#b9c3d8; font-size:.95rem}
 
   /* Player */
   .player{background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden}
@@ -139,7 +139,7 @@
 </style>
 </head>
 <body>
-<!-- Top center: Date + Time (time below date) -->
+<!-- Top center: Date + Time -->
 <div class="datetime">
   <div class="chip">
     <div id="dateTop" class="dt-date">—</div>
@@ -150,11 +150,11 @@
 <div class="wrap">
   <div class="head">
     <div class="brand"><div class="dot"></div><div>Online TV</div></div>
-    <div class="subtxt" id="nowInfo" aria-live="polite">เลือกช่องเพื่อเริ่มรับชม</div>
+    <div class="subtxt" id="nowInfo" aria-live="polite">กำลังโหลดรายการช่องจาก GitHub…</div>
   </div>
 
   <!-- Player -->
-  <section class="player" id="playerSection">
+  <section class="player" id="playerSection" aria-busy="true">
     <div class="topbar">
       <div class="now">
         <img id="nowLogo" alt="">
@@ -187,7 +187,6 @@
           </div>
 
           <div class="ctrl-center">
-            <!-- Movie HMS text (keeps seconds) -->
             <span id="time" class="t hidden">--:--:-- / --:--:--</span>
             <input id="bar" type="range" value="0" step="1" title="แถบเวลา">
           </div>
@@ -213,39 +212,22 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  /* ---------- Channels ---------- */
-  const channels = {
-    "ข่าว & ทั่วไป": {
-      "thairath_dash": { name:"Thairath TV (DASH)", url:"https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd", logo:"https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png", license_key:"d418f733ed224f9bb9c2b1589db22a20:6ed6fe26daa4b926810869ff60254ebb" },
-      "workpoint": { name:"Workpoint TV", url:"https://wp-live.cdn.3bb.co.th/wp/live/playlist.m3u8", logo:"https://upload.wikimedia.org/wikipedia/commons/4/49/Workpoint_TV_Logo.png", license_key:null },
-      "thairathtv_hls": { name:"Thairath TV (HLS)", url:"https://d373k698imbfvs.cloudfront.net/out/v1/d08c879331984d948956b631988820c8/index.m3u8", logo:"https://upload.wikimedia.org/wikipedia/th/b/b7/Thairath_TV_logo.png", license_key:null }
-    },
-    "หนัง": {
-      "hls_doomovic1": { name:"Smurfs (2025) สเมิร์ฟ", url:"https://master.streamhls.com/hlsr2/344daafccf7c29fc7134386f145c785e/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/07/Smurfs-2025.jpg", license_key:null },
-      "hls_doomovic2": { name:"An Honest Life (2025) ชีวิตซื่อ", url:"https://master.streamhls.com/hlsr2/46cabdb7b096b7bfc651293e8a682fbd/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/08/An-Honest-Life-2025.jpg", license_key:null },
-      "hls_doomovic3": { name:"พระแท้ คนเก๊ (2025)", url:"https://master.streamhls.com/hlsr2/7341740f96136f2ea13b204d01dc203d/master.m3u8", logo:"https://www.037hdd-movie.com/wp-content/uploads/2025/08/The-Stone-2025.jpg", license_key:null }
-    },
-    "ช่อง 3BB": {
-      "3bb1": { name:"3BB 1", url:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/2/2.mpd", logo:"https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png", license_key:"ca20a93cf8e3421dafbd5bdb1990081b:86ae86a7391c481ea93eecdb740f0a14" },
-      "3bb2": { name:"3BB 2", url:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/3/3.mpd", logo:"https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png", license_key:"4d4426a505f64382a9841155d721cee6:0f4770219ccb4be5836a7517057e51c3" },
-      "3bb3": { name:"3BB 3", url:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/4/4.mpd", logo:"https://seeklogo.com/images/3/3bb-internet-logo-373928F5D7-seeklogo.com.png", license_key:"1e98456bcbea44b7ad05831387e364ef:3d14fd4f9d3149a79b35a7124fccbd67" }
-    }
-  };
+  /* ======= ใส่ URL RAW ของ channels.json บน GitHub ของคุณ ======= */
+  const CHANNELS_URL = 'https://raw.githubusercontent.com/lancerza/tv-online/refs/heads/main/channels.json'; // <-- แก้เป็นของคุณ
 
   /* ---------- Top Date & Time (time under date, no seconds) ---------- */
   const dateEl = document.getElementById('dateTop');
   const timeEl = document.getElementById('timeTop');
   function updateDateTimeTop(){
     const now = new Date();
-    const dateStr = now.toLocaleDateString('th-TH', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-    const timeStr = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
-    dateEl.textContent = dateStr;
-    timeEl.textContent = timeStr;
+    dateEl.textContent = now.toLocaleDateString('th-TH', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    timeEl.textContent = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', hour12:false });
   }
   updateDateTimeTop();
   setInterval(updateDateTimeTop, 1000);
 
   /* ---------- State & DOM ---------- */
+  let channels = null; // โหลดจาก GitHub เท่านั้น (ไม่มี fallback)
   let hls=null, shakaP=null, currentId=null, currentCat=null, currentEngine='—', token=0;
   const MAX_REASONABLE_DUR = 8*3600;
   const LAST_CH_KEY='tv_last_channel';
@@ -407,13 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const grid=sec.querySelector('.grid');
       Object.entries(channels[cat]).forEach(([id,ch])=>{
         const card=document.createElement('button');
-        card.className='card';
-        card.title=ch.name;
-        card.dataset.cat=cat;
-        card.dataset.id=id;
-        card.setAttribute('role','button');
-        card.setAttribute('aria-pressed','false');
-        card.innerHTML=`<div class="logo-box"><img loading="lazy" src="${ch.logo}" width="88" height="88" alt="" draggable="false"></div><div class="name">${ch.name}</div>`;
+        card.className='card'; card.title=ch.name;
+        card.dataset.cat=cat; card.dataset.id=id;
+        card.setAttribute('role','button'); card.setAttribute('aria-pressed','false');
+        card.innerHTML=`<div class="logo-box"><img loading="lazy" src="${ch.logo}" alt="" draggable="false"></div><div class="name">${ch.name}</div>`;
         card.onclick=()=>switchChannel(cat,id);
         grid.appendChild(card);
       });
@@ -483,15 +462,41 @@ document.addEventListener('DOMContentLoaded', () => {
     else if(e.key==='ArrowLeft'){ video.currentTime=Math.max(0,(video.currentTime||0)-5); }
   });
 
-  /* ---------- Init ---------- */
-  buildSections();
-  let firstCat=Object.keys(channels)[0];
-  let firstId =Object.keys(channels[firstCat])[0];
-  try{
-    const saved = JSON.parse(localStorage.getItem(LAST_CH_KEY) || 'null');
-    if(saved && channels[saved.cat]?.[saved.id]){ firstCat=saved.cat; firstId=saved.id; }
-  }catch{}
-  switchChannel(firstCat, firstId); // autoplay ให้เอง
+  /* ---------- โหลด channels จาก GitHub (ไม่มี fallback) ---------- */
+  async function loadChannelsFromGitHub(){
+    const res = await fetch(CHANNELS_URL, { cache: 'no-cache' });
+    if(!res.ok) throw new Error('โหลด channels.json ไม่สำเร็จ (HTTP ' + res.status + ')');
+    const data = await res.json();
+    if(!data || typeof data!=='object') throw new Error('รูปแบบ channels.json ไม่ถูกต้อง');
+    return data;
+  }
+
+  async function init(){
+    try{
+      const data = await loadChannelsFromGitHub();
+      channels = data;
+
+      buildSections();
+
+      // เลือกช่องแรก หรือช่องล่าสุดที่เคยดู (ถ้ามีอยู่ในรายการนี้)
+      let firstCat=Object.keys(channels)[0];
+      let firstId =Object.keys(channels[firstCat])[0];
+      try{
+        const saved = JSON.parse(localStorage.getItem(LAST_CH_KEY) || 'null');
+        if(saved && channels[saved.cat]?.[saved.id]){ firstCat=saved.cat; firstId=saved.id; }
+      }catch{}
+      document.getElementById('nowInfo').textContent='เลือกช่องเพื่อเริ่มรับชม';
+      playerSection.removeAttribute('aria-busy');
+      switchChannel(firstCat, firstId);
+    }catch(err){
+      console.error(err);
+      document.getElementById('nowInfo').textContent='โหลดรายการช่องจาก GitHub ไม่สำเร็จ';
+      showOverlay('ไม่สามารถโหลด "channels.json" จาก GitHub ได้\nกรุณาตรวจสอบ URL หรือสิทธิ์การเข้าถึง');
+      // หยุดทำงานต่อ เพราะไม่มีข้อมูลช่อง
+    }
+  }
+
+  init();
 });
 </script>
 </body>
