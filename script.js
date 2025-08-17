@@ -1,13 +1,17 @@
 
-// script.js — GitHub Pages build (with Deep Refresh / Clear Cache)
+// script.js — GitHub Pages build
+// - ปุ่มรีเฟรช = ล้างแคช + รีเฟรช (ค่าเริ่มต้น)
+// - ตัดระบบ "นับคนดู" ออกทั้งหมด
+// - ใช้ channels.json โดยตรง (ไม่มี PHP)
+// - รองรับ Proxy Worker ผ่าน window.PROXY_BASE (ป้องกัน CORS / UA / Referer)
+// - กันแคชให้ทั้ง channels.json และลิงก์สตรีมเมื่อรีเฟรช
+
 document.addEventListener("DOMContentLoaded", () => {
   // --- Global ---
   let hls, channels = {}, currentChannelId = null;
   let controlsTimeout;
   let isAudioUnlocked = false;
-
-  // A global cache-buster stamp (set during deep refresh)
-  window.__cacheBuster = null;
+  window.__cacheBuster = null; // set เมื่อรีเฟรช เพื่อกันแคช
 
   // --- DOM ---
   const body = document.body;
@@ -32,14 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const liveIndicator = document.getElementById('live-indicator');
   const playOverlay = document.getElementById('play-overlay');
 
-  // GitHub Pages = ไม่มี backend: ซ่อนตัวนับผู้ชม
-  const totalViewerWrap = document.getElementById('viewer-count-display');
-  if (totalViewerWrap) totalViewerWrap.style.display = 'none';
-
   // --- Helpers ---
   function showLoadingIndicator(isLoading, message = '') {
+    if (!loadingIndicator) return;
     loadingIndicator.classList.toggle('hidden', !isLoading);
-    if (isLoading) loadingMessage.textContent = message;
+    if (isLoading && loadingMessage) loadingMessage.textContent = message;
   }
   function unlockAudio() {
     if (isAudioUnlocked) return;
@@ -50,27 +51,21 @@ document.addEventListener("DOMContentLoaded", () => {
     document.removeEventListener('click', unlockAudio);
     document.removeEventListener('keydown', unlockAudio);
   }
-
-  function currentStamp() {
-    return window.__cacheBuster || Date.now();
-  }
+  function stamp() { return window.__cacheBuster || Date.now(); }
 
   function buildPlayableUrl(url) {
-    // ถ้ามีโหมด cache-bust (deep refresh) ให้เติม param ป้องกัน CDN cache
-    const bust = (url.includes('?') ? '&' : '?') + `_=${currentStamp()}`;
-
+    // กันแคชปลายทางด้วย query ทุกครั้งที่ deep refresh
+    const extra = (url.includes('?') ? '&' : '?') + `_=${stamp()}`;
     if (window.PROXY_BASE) {
-      // ส่งผ่าน Proxy โดยไม่เปลี่ยน base64 เป้าหมาย
       const enc = btoa(url);
       const ua = encodeURIComponent(navigator.userAgent || '');
       const ref = encodeURIComponent(location.href);
-      // เพิ่ม ts ที่ฝั่ง proxy เพื่อกัน cache ที่ proxy/cdn
-      return `${window.PROXY_BASE}/p/${enc}?ua=${ua}&ref=${ref}&ts=${currentStamp()}`;
+      return `${window.PROXY_BASE}/p/${enc}?ua=${ua}&ref=${ref}&ts=${stamp()}`;
     }
-    // สำหรับ non-proxy ก็เติม query buster ไปที่ปลายทาง
-    return url + bust;
+    return url + extra;
   }
 
+  // --- Player controls ---
   const playerControls = {
     showError: (message) => {
       const el = document.getElementById('error-channel-name');
@@ -83,9 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
       errorMessage.textContent = message;
       errorOverlay.classList.remove('hidden');
       const retryBtn = document.getElementById('retry-btn');
-      const newBtn = retryBtn.cloneNode(true);
-      newBtn.addEventListener('click', () => { if (currentChannelId) channelManager.loadChannel(currentChannelId); });
-      retryBtn.parentNode.replaceChild(newBtn, retryBtn);
+      if (retryBtn) {
+        const newBtn = retryBtn.cloneNode(true);
+        newBtn.addEventListener('click', () => { if (currentChannelId) channelManager.loadChannel(currentChannelId); });
+        retryBtn.parentNode.replaceChild(newBtn, retryBtn);
+      }
     },
     hideError: () => errorOverlay.classList.add('hidden'),
     togglePlay: () => {
@@ -157,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // --- Channel manager ---
   const channelManager = {
     updateActiveButton: () => {
       document.querySelectorAll('.channel-tile').forEach(t => t.classList.toggle('active', t.dataset.channelId === currentChannelId));
@@ -218,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
             tile.appendChild(badge);
           }
 
-          tile.style.animationDelay = `${index * 0.05}s";
+          tile.style.animationDelay = `${index * 0.05}s`;
           grid.appendChild(tile);
         });
 
@@ -289,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Hls init / error handling split so we can re-init after deep refresh ---
+  // --- Hls helpers ---
   function bindHlsHandlers() {
     hls.on(Hls.Events.MANIFEST_PARSED, function() {
       const p = video.play();
@@ -304,7 +302,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.fatal) {
         const failedChannelId = currentChannelId;
         const failedChannel = channels[failedChannelId];
-        // auto-switch ไป "สำรอง" ถ้ามี
         if (failedChannel && failedChannel.badge !== 'สำรอง' && (data.type === Hls.ErrorTypes.NETWORK_ERROR || data.type === Hls.ErrorTypes.MEDIA_ERROR)) {
           const backupId = Object.keys(channels).find(key =>
             channels[key].name === failedChannel.name &&
@@ -332,14 +329,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
   function initHls() {
     if (!Hls.isSupported()) return;
     hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 600 });
     hls.attachMedia(video);
     bindHlsHandlers();
   }
-
   function hardResetPlayer() {
     try {
       if (hls) {
@@ -356,7 +351,6 @@ document.addEventListener("DOMContentLoaded", () => {
       initHls();
     }
   }
-
   async function clearCacheStorage() {
     if (!('caches' in window)) return;
     try {
@@ -366,30 +360,18 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn('CacheStorage clear failed:', e);
     }
   }
-
-  async function deepRefresh(opts = {}) {
-    const { wipeLocal = false } = opts;
-    window.__cacheBuster = Date.now(); // activate cache-busting
-    showLoadingIndicator(true, wipeLocal ? 'ล้างแคช + รีเฟรช...' : 'รีเฟรชรายการช่อง...');
-
-    // 1) Clear Cache Storage (works even without SW)
+  async function deepRefresh({ wipeLocal = false } = {}) {
+    window.__cacheBuster = Date.now();
+    showLoadingIndicator(true, 'ล้างแคช + รีเฟรช...');
     await clearCacheStorage();
-
-    // 2) Reset player buffers and re-init Hls
     hardResetPlayer();
-
-    // 3) Optionally wipe local remembered channel
     if (wipeLocal) {
       try { localStorage.removeItem('webtv_lastChannelId'); } catch {}
     }
-
-    // 4) Fetch fresh channel list with query bust and reload current channel if possible
     await fetchAndRenderChannels(true);
     if (currentChannelId && channels[currentChannelId]) {
       await channelManager.loadChannel(currentChannelId);
     }
-
-    // 5) small UI polish
     setTimeout(() => showLoadingIndicator(false), 200);
   }
 
@@ -417,14 +399,11 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem('webtv_theme', isLight ? 'light' : 'dark');
     });
 
-    // New: Refresh button now supports deep refresh on modifier-click
-    // - Click = refresh channel list + soft cache-bust
-    // - Shift/Ctrl/Meta-click = clear CacheStorage + re-init player + cache-bust + (keep last channel)
-    refreshChannelsBtn.title = 'คลิก = รีเฟรชรายการช่อง • Shift/Ctrl/⌘+คลิก = ล้างแคช + รีเฟรช';
+    // ปุ่มรีเฟรช = ล้างแคช + รีเฟรช
+    refreshChannelsBtn.title = 'รีเฟรช (ล้างแคช) • กด Alt เพื่อล้างช่องล่าสุดด้วย';
     refreshChannelsBtn.addEventListener('click', async (e) => {
       refreshChannelsBtn.classList.add('refresh-active');
-      const deep = e.shiftKey || e.ctrlKey || e.metaKey;
-      await deepRefresh({ wipeLocal: e.altKey }); // Alt+คลิก = ล้าง localStorage ช่องล่าสุดด้วย
+      await deepRefresh({ wipeLocal: e.altKey });
       setTimeout(() => refreshChannelsBtn.classList.remove('refresh-active'), 800);
     });
 
@@ -466,8 +445,8 @@ document.addEventListener("DOMContentLoaded", () => {
     channelButtonsContainer.appendChild(tempGrid);
 
     try {
-      const bust = (forceBust || !!window.__cacheBuster) ? `?v=${currentStamp()}` : `?u=${Math.random().toString(36).slice(2)}`;
-      const response = await fetch('channels.json' + bust, { cache: 'reload' });
+      const qb = `?v=${stamp()}`; // กันแคช GitHub/CDN
+      const response = await fetch('channels.json' + qb, { cache: 'reload' });
       if (!response.ok) throw new Error('โหลด channels.json ไม่สำเร็จ');
       channels = await response.json();
       channelManager.createChannelButtons();
@@ -488,7 +467,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const timeOptions = { hour: '2-digit', minute: '2-digit' };
       const thaiDate = now.toLocaleDateString('th-TH', dateOptions);
       const thaiTime = now.toLocaleTimeString('th-TH', timeOptions);
-      document.getElementById('datetime-display').innerHTML = `🕒 ${thaiDate} ${thaiTime}`;
+      const el = document.getElementById('datetime-display');
+      if (el) el.innerHTML = `🕒 ${thaiDate} ${thaiTime}`;
     },
     start: () => { timeManager.update(); setInterval(timeManager.update, 1000); }
   };
@@ -503,10 +483,7 @@ document.addEventListener("DOMContentLoaded", () => {
       themeToggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
     }
 
-    if (Hls.isSupported()) {
-      initHls();
-    }
-
+    initHls();
     setupEventListeners();
     timeManager.start();
 
@@ -519,6 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener('click', unlockAudio, { once: true });
     document.addEventListener('keydown', unlockAudio, { once: true });
 
+    // เริ่มด้วยการรีเฟรช (กันแคช) รอบแรก
     await fetchAndRenderChannels(true);
 
     const last = localStorage.getItem('webtv_lastChannelId');
