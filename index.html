@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8" />
@@ -7,7 +7,8 @@
     <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "206a014d89b54fd19f11141768eb52bd"}'></script></head>
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "206a014d89b54fd19f11141768eb52bd"}'></script>
+</head>
 <body>
     <nav id="category-sidebar" class="category-sidebar"></nav>
 
@@ -18,13 +19,11 @@
                 <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="สลับธีม">
                     <i class="bi bi-sun-fill"></i>
                 </button>
-                <button id="refresh-channels-btn" class="theme-toggle-btn" aria-label="รีเฟรชรายการช่อง">
+                <button id="refresh-channels-btn" class="theme-toggle-btn" aria-label="รีเฟรช (ล้างแคช)" title="รีเฟรช (ล้างแคช) • กด Alt เพื่อล้างช่องล่าสุดด้วย">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
             </div>
-            <div id="viewer-count-display" style="color: var(--text-color); margin-top: 10px;">
-                👤 กำลังออนไลน์: <span id="viewer-count">0</span>
-            </div>
+            <!-- ลบตัวนับคนดูออกตามคำขอ -->
         </div>
         
         <div class="main-layout">
@@ -77,12 +76,18 @@
         </div>
     </div>
 
+    <!-- Hls.js -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    
+
+    <!-- ตั้งค่า Proxy ได้ตามต้องการ (ปล่อยว่างถ้าไม่ใช้) -->
+    <script>
+      window.PROXY_BASE = ''; // เช่น 'https://your-worker.workers.dev'
+    </script>
+
+    <!-- โค้ดหลัก -->
     <script src="script.js" defer></script>
 
+    <!-- (คงระบบป้องกัน DevTools/คลิกขวาตามเดิม) -->
     <script>
         const f12Password = "pkclear"; 
         let isBlocking = false;
@@ -128,4 +133,4 @@
         setInterval(checkDevTools, 1000);
     </script>
 </body>
-</html
+</html>
