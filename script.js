@@ -1,9 +1,13 @@
-// script.js — GitHub Pages build (no PHP)
+
+// script.js — GitHub Pages build (with Deep Refresh / Clear Cache)
 document.addEventListener("DOMContentLoaded", () => {
   // --- Global ---
   let hls, channels = {}, currentChannelId = null;
   let controlsTimeout;
   let isAudioUnlocked = false;
+
+  // A global cache-buster stamp (set during deep refresh)
+  window.__cacheBuster = null;
 
   // --- DOM ---
   const body = document.body;
@@ -46,15 +50,25 @@ document.addEventListener("DOMContentLoaded", () => {
     document.removeEventListener('click', unlockAudio);
     document.removeEventListener('keydown', unlockAudio);
   }
+
+  function currentStamp() {
+    return window.__cacheBuster || Date.now();
+  }
+
   function buildPlayableUrl(url) {
-    // ถ้าตั้ง PROXY_BASE จะเข้า proxy เพื่อผ่าน CORS/เงื่อนไข UA/Referrer
+    // ถ้ามีโหมด cache-bust (deep refresh) ให้เติม param ป้องกัน CDN cache
+    const bust = (url.includes('?') ? '&' : '?') + `_=${currentStamp()}`;
+
     if (window.PROXY_BASE) {
+      // ส่งผ่าน Proxy โดยไม่เปลี่ยน base64 เป้าหมาย
       const enc = btoa(url);
       const ua = encodeURIComponent(navigator.userAgent || '');
       const ref = encodeURIComponent(location.href);
-      return `${window.PROXY_BASE}/p/${enc}?ua=${ua}&ref=${ref}`;
+      // เพิ่ม ts ที่ฝั่ง proxy เพื่อกัน cache ที่ proxy/cdn
+      return `${window.PROXY_BASE}/p/${enc}?ua=${ua}&ref=${ref}&ts=${currentStamp()}`;
     }
-    return url;
+    // สำหรับ non-proxy ก็เติม query buster ไปที่ปลายทาง
+    return url + bust;
   }
 
   const playerControls = {
@@ -204,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
             tile.appendChild(badge);
           }
 
-          tile.style.animationDelay = `${index * 0.05}s`;
+          tile.style.animationDelay = `${index * 0.05}s";
           grid.appendChild(tile);
         });
 
@@ -275,6 +289,110 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- Hls init / error handling split so we can re-init after deep refresh ---
+  function bindHlsHandlers() {
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      const p = video.play();
+      if (p) p.catch(err => {
+        if (err.name !== 'AbortError') {
+          playOverlay.classList.remove('hidden');
+          playerControls.updatePlayButton();
+        }
+      });
+    });
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      if (data.fatal) {
+        const failedChannelId = currentChannelId;
+        const failedChannel = channels[failedChannelId];
+        // auto-switch ไป "สำรอง" ถ้ามี
+        if (failedChannel && failedChannel.badge !== 'สำรอง' && (data.type === Hls.ErrorTypes.NETWORK_ERROR || data.type === Hls.ErrorTypes.MEDIA_ERROR)) {
+          const backupId = Object.keys(channels).find(key =>
+            channels[key].name === failedChannel.name &&
+            channels[key].badge === 'สำรอง' &&
+            key !== failedChannelId
+          );
+          if (backupId) {
+            showLoadingIndicator(true, `ช่องหลักขัดข้อง กำลังลองช่องสำรอง...`);
+            setTimeout(() => {
+              const oldId = currentChannelId;
+              currentChannelId = null;
+              channelManager.loadChannel(backupId).catch(() => {
+                currentChannelId = oldId;
+                playerControls.showError('ช่องสำรองล้มเหลว ไม่สามารถเล่นได้');
+              });
+            }, 500);
+            return;
+          }
+        }
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+          case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+          default: playerControls.showError('เกิดข้อผิดพลาดร้ายแรง ไม่สามารถเล่นได้'); hls.destroy(); break;
+        }
+      }
+    });
+  }
+
+  function initHls() {
+    if (!Hls.isSupported()) return;
+    hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 600 });
+    hls.attachMedia(video);
+    bindHlsHandlers();
+  }
+
+  function hardResetPlayer() {
+    try {
+      if (hls) {
+        try { hls.detachMedia(); } catch {}
+        try { hls.destroy(); } catch {}
+      }
+      hls = null;
+      video.pause();
+      video.removeAttribute('src');
+      try { video.load(); } catch {}
+    } catch (e) {
+      console.warn('hardResetPlayer:', e);
+    } finally {
+      initHls();
+    }
+  }
+
+  async function clearCacheStorage() {
+    if (!('caches' in window)) return;
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    } catch (e) {
+      console.warn('CacheStorage clear failed:', e);
+    }
+  }
+
+  async function deepRefresh(opts = {}) {
+    const { wipeLocal = false } = opts;
+    window.__cacheBuster = Date.now(); // activate cache-busting
+    showLoadingIndicator(true, wipeLocal ? 'ล้างแคช + รีเฟรช...' : 'รีเฟรชรายการช่อง...');
+
+    // 1) Clear Cache Storage (works even without SW)
+    await clearCacheStorage();
+
+    // 2) Reset player buffers and re-init Hls
+    hardResetPlayer();
+
+    // 3) Optionally wipe local remembered channel
+    if (wipeLocal) {
+      try { localStorage.removeItem('webtv_lastChannelId'); } catch {}
+    }
+
+    // 4) Fetch fresh channel list with query bust and reload current channel if possible
+    await fetchAndRenderChannels(true);
+    if (currentChannelId && channels[currentChannelId]) {
+      await channelManager.loadChannel(currentChannelId);
+    }
+
+    // 5) small UI polish
+    setTimeout(() => showLoadingIndicator(false), 200);
+  }
+
   // --- Events ---
   function setupEventListeners() {
     playPauseBtn.addEventListener('click', playerControls.togglePlay);
@@ -298,11 +416,18 @@ document.addEventListener("DOMContentLoaded", () => {
       themeToggleBtn.innerHTML = isLight ? '<i class="bi bi-moon-fill"></i>' : '<i class="bi bi-sun-fill"></i>';
       localStorage.setItem('webtv_theme', isLight ? 'light' : 'dark');
     });
-    refreshChannelsBtn.addEventListener('click', () => {
+
+    // New: Refresh button now supports deep refresh on modifier-click
+    // - Click = refresh channel list + soft cache-bust
+    // - Shift/Ctrl/Meta-click = clear CacheStorage + re-init player + cache-bust + (keep last channel)
+    refreshChannelsBtn.title = 'คลิก = รีเฟรชรายการช่อง • Shift/Ctrl/⌘+คลิก = ล้างแคช + รีเฟรช';
+    refreshChannelsBtn.addEventListener('click', async (e) => {
       refreshChannelsBtn.classList.add('refresh-active');
-      fetchAndRenderChannels();
-      setTimeout(() => refreshChannelsBtn.classList.remove('refresh-active'), 1000);
+      const deep = e.shiftKey || e.ctrlKey || e.metaKey;
+      await deepRefresh({ wipeLocal: e.altKey }); // Alt+คลิก = ล้าง localStorage ช่องล่าสุดด้วย
+      setTimeout(() => refreshChannelsBtn.classList.remove('refresh-active'), 800);
     });
+
     playOverlay.addEventListener('click', () => {
       playOverlay.classList.add('hidden');
       showLoadingIndicator(true, 'กำลังเชื่อมต่อ...');
@@ -326,7 +451,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Channels loader (GitHub: ใช้ channels.json) ---
-  async function fetchAndRenderChannels() {
+  async function fetchAndRenderChannels(forceBust = false) {
     showLoadingIndicator(true, 'กำลังโหลดรายการช่อง...');
 
     channelButtonsContainer.innerHTML = '';
@@ -341,8 +466,8 @@ document.addEventListener("DOMContentLoaded", () => {
     channelButtonsContainer.appendChild(tempGrid);
 
     try {
-      // เดิมใช้ PHP (get_channel_list.php) ตอนนี้ใช้ไฟล์ตรง
-      const response = await fetch('channels.json', { cache: 'no-store' });
+      const bust = (forceBust || !!window.__cacheBuster) ? `?v=${currentStamp()}` : `?u=${Math.random().toString(36).slice(2)}`;
+      const response = await fetch('channels.json' + bust, { cache: 'reload' });
       if (!response.ok) throw new Error('โหลด channels.json ไม่สำเร็จ');
       channels = await response.json();
       channelManager.createChannelButtons();
@@ -379,48 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (Hls.isSupported()) {
-      hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 600 });
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, function() {
-        const p = video.play();
-        if (p) p.catch(err => {
-          if (err.name !== 'AbortError') {
-            playOverlay.classList.remove('hidden');
-            playerControls.updatePlayButton();
-          }
-        });
-      });
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        if (data.fatal) {
-          const failedChannelId = currentChannelId;
-          const failedChannel = channels[failedChannelId];
-          // auto-switch ไป "สำรอง" ถ้ามี (ตรรกะมาจากสคริปต์เดิมของคุณ)
-          if (failedChannel && failedChannel.badge !== 'สำรอง' && (data.type === Hls.ErrorTypes.NETWORK_ERROR || data.type === Hls.ErrorTypes.MEDIA_ERROR)) {
-            const backupId = Object.keys(channels).find(key =>
-              channels[key].name === failedChannel.name &&
-              channels[key].badge === 'สำรอง' &&
-              key !== failedChannelId
-            );
-            if (backupId) {
-              showLoadingIndicator(true, `ช่องหลักขัดข้อง กำลังลองช่องสำรอง...`);
-              setTimeout(() => {
-                const oldId = currentChannelId;
-                currentChannelId = null;
-                channelManager.loadChannel(backupId).catch(() => {
-                  currentChannelId = oldId;
-                  playerControls.showError('ช่องสำรองล้มเหลว ไม่สามารถเล่นได้');
-                });
-              }, 500);
-              return;
-            }
-          }
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
-            case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
-            default: playerControls.showError('เกิดข้อผิดพลาดร้ายแรง ไม่สามารถเล่นได้'); hls.destroy(); break;
-          }
-        }
-      });
+      initHls();
     }
 
     setupEventListeners();
@@ -435,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener('click', unlockAudio, { once: true });
     document.addEventListener('keydown', unlockAudio, { once: true });
 
-    await fetchAndRenderChannels();
+    await fetchAndRenderChannels(true);
 
     const last = localStorage.getItem('webtv_lastChannelId');
     if (last && channels[last]) {
