@@ -2,8 +2,7 @@
    - ไม่มีโค้ดแคช TV_DATA_CACHE_V1 / ไม่มีบล็อกซ้ำ
    - ปุ่มรีเฟรช + ล้างแคช + เคลียร์อัตโนมัติทุก 6 ชม. (ไม่พึ่งเซิร์ฟเวอร์)
    - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง (ไม่มีข่าว/เพลง)
-   - Now Playing ถูกย้ายไปอยู่ "กลางบนสุดของ <main class='app'>"
-   - ปรับ Histats + Refresh ให้อยู่ซ้าย/ขวาสมดุลกับ .h-wrap
+   - ไม่มี now-playing / now-playing--main / swap
 ============================================================================== */
 
 const CH_URL  = 'channels.json';
@@ -26,14 +25,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowPlayingContainer();     // <-- ย้าย/สร้าง now-playing บนสุดของ main
   mountHistatsTopRight();
 
   try {
     await loadData();
   } catch (e) {
     console.error('โหลดข้อมูลไม่สำเร็จ:', e);
-    window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
   }
 
   buildTabs();
@@ -73,7 +70,7 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Header: Clock & Now Playing ------------------------ */
+/* ------------------------ Header: Clock ------------------------ */
 function mountClock(){
   const el = document.getElementById('clock');
   if (!el) return;
@@ -87,27 +84,6 @@ function mountClock(){
   };
   tick();
   setInterval(tick, 1000);
-}
-
-// ===== Now Playing: move to top of <main class="app"> =====
-function mountNowPlayingContainer(){
-  const main = document.querySelector('main.app') || document.querySelector('.app') || document.body;
-
-  // ถ้ามี now-playing เดิมอยู่ที่ header ให้ย้ายมาไว้บนสุดของ main
-  let now = document.getElementById('now-playing');
-  if (!now) {
-    now = document.createElement('div');
-    now.id = 'now-playing';
-  }
-  now.className = 'now-playing now-playing--main';
-  now.setAttribute('aria-live','polite');
-  main.prepend(now); // ทำให้เป็น element แรกของ main เสมอ
-
-  window.__setNowPlaying = (name='')=>{
-    now.textContent = name || '';
-    now.title = name || '';
-    now.classList.remove('swap'); void now.offsetWidth; now.classList.add('swap');
-  };
 }
 
 /* ------------------------ Tabs ------------------------ */
@@ -167,18 +143,16 @@ function centerTabsIfPossible(){
 function getCategory(ch){
   if (ch.category) return ch.category;
 
-  // tags → category map (ไม่มีข่าว/เพลงแล้ว)
   if (Array.isArray(ch.tags)) {
     const t = ch.tags.map(x=>String(x).toLowerCase());
     if (t.includes('sports')) return 'กีฬา';
     if (t.includes('documentary')) return 'สารคดี';
     if (t.includes('movie') || t.includes('film')) return 'หนัง';
-    if (t.includes('music')) return 'บันเทิง'; // จัดไปที่บันเทิง
-    if (t.includes('news'))  return 'IPTV';   // ข่าวโยนรวมที่ IPTV
+    if (t.includes('music')) return 'บันเทิง';
+    if (t.includes('news'))  return 'IPTV';
     if (t.includes('kids') || t.includes('cartoon') || t.includes('anime')) return 'เด็ก';
   }
 
-  // rules
   const hay = `${ch.name||''} ${ch.logo||''} ${JSON.stringify(ch.tags||[])}`.toLowerCase();
   const src0 = String((ch.sources?.[0]?.src) || ch.src || ch.file || '').toLowerCase();
   for (const r of (categories?.rules || [])) {
@@ -278,9 +252,7 @@ function playByIndex(i, opt={scroll:true}){
   const srcList = buildSources(ch);
   tryPlayJW(ch, srcList, 0);
 
-  window.__setNowPlaying?.(ch.name || '');
   highlight(i);
-
   if (opt.scroll ?? true) scrollToPlayer();
   showMobileToast(ch.name || '');
 }
@@ -425,7 +397,6 @@ function mountHistatsTopRight(){
   const hs = document.createElement('script'); hs.type='text/javascript'; hs.async=true; hs.src='//s10.histats.com/js15_giftop_as.js';
   (document.head || document.body).appendChild(hs);
 
-  // ย้ายกล่องจริง (#histatsC) เข้า holder เสมอ เพื่อให้ CSS คุมตำแหน่งได้
   const move = ()=>{ const c=document.getElementById('histatsC'); if(c && !holder.contains(c)){ holder.appendChild(c); } requestAnimationFrame(move); };
   move();
 }
@@ -457,7 +428,7 @@ function mountRefreshButton(){
   wrap.appendChild(btn);
 }
 
-async function clearAppCache(opt={}){
+async function clearAppCache(){
   try {
     localStorage.removeItem('lastId');
     const keys = Object.keys(localStorage);
@@ -465,10 +436,6 @@ async function clearAppCache(opt={}){
   } catch {}
   if (window.caches) {
     try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
-  }
-  if (!opt.silent) {
-    window.__setNowPlaying?.('ล้างแคชเรียบร้อย');
-    setTimeout(()=>window.__setNowPlaying?.(''), 1200);
   }
 }
 
@@ -478,12 +445,12 @@ function scheduleAutoClear(){
   const now = Date.now();
   const last = Number(localStorage.getItem(AUTO_CLEAR_KEY) || 0);
   if (!last || (now - last) >= SIX_HR_MS) {
-    clearAppCache({ silent:true });
+    clearAppCache();
     localStorage.setItem(AUTO_CLEAR_KEY, String(now));
   }
   const delay = Math.max(1000, SIX_HR_MS - ((now - last) % SIX_HR_MS || 0));
   setTimeout(function tick(){
-    clearAppCache({ silent:true });
+    clearAppCache();
     localStorage.setItem(AUTO_CLEAR_KEY, String(Date.now()));
     setTimeout(tick, SIX_HR_MS);
   }, delay);
