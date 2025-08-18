@@ -1,212 +1,71 @@
-/* ===================== styles.css (TAB LABEL HIGHER + BIGGER) =====================
-   - ขยับ tab-label สูงขึ้นเล็กน้อย + ขยายใหญ่ขึ้น (responsive)
-   - ส่วนอื่นคงเดิม (header/now-playing/tabs/grid/refresh/histats)
-=================================================================================== */
-
-/* ---------- Root tokens ---------- */
 :root{
-  --bg:#0b0c0e;
-  --panel:#141516;
-  --panel-2:#101112;
-  --text:#f2f2f2;
-  --muted:#a0a7b0;
-  --border:#242628;
-  --maxw:1200px;
-
-  /* Channel card sizing */
-  --tile-w:110px;
-  --tile-h:96px;
-  --tile-g:10px;
-
-  /* Tabs */
-  --tabW: 66px;
-  --tabH: 54px;
-  --tabBadge: 26px;
-  --tab-font: 11.6px;
-
-  /* Header HUD */
-  --hud-size: 34px;
-  --hud-radius: 999px;
-
-  /* Histats badge */
-  --hs-size: 36px;
-  --hs-scale: .98;
+  --bg:#0b0c0e; --panel:#141516; --text:#f2f2f2; --maxw:1200px;
+  --tile-w:110px; --tile-h:96px; --tile-g:10px;
+  --tabW: 66px; --tabH:54px; --tab-font:11.6px;
+  --hud-size:34px; --hud-radius:999px;
+  --hs-size:36px; --hs-scale:.98;
 }
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans Thai',sans-serif}
+*{box-sizing:border-box}
 
-/* ---------- Page ---------- */
-html,body{ height:100%; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans Thai', sans-serif }
-*{ box-sizing: border-box }
+header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,rgba(12,13,15,.86),rgba(12,13,15,.74));backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08)}
+.h-wrap{width:min(100%,var(--maxw));margin:0 auto;height:56px;position:relative;display:flex;align-items:center;justify-content:center}
+.clock{position:absolute;right:50%;transform:translateX(50%);font-weight:700;letter-spacing:.3px;opacity:.88}
 
-/* ---------- Header ---------- */
-header{
-  position:sticky; top:0; z-index:5;
-  background:linear-gradient(180deg, rgba(12,13,15,.86), rgba(12,13,15,.74));
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-.h-wrap{
-  width:min(100%, var(--maxw));
-  margin:0 auto; height:56px; position:relative;
-  display:flex; align-items:center; justify-content:center;
-}
-.clock{ position:absolute; right:50%; transform:translateX(50%); font-weight:700; letter-spacing: .3px; opacity:.88 }
+/* Player */
+#player{width:min(100%,var(--maxw));margin:8px auto 0;background:#000;position:relative}
+#player video.player-video{width:100%;height:auto;aspect-ratio:16/9;background:#000;display:block}
 
-/* Histats holder (ติดมุมขวาใน header) */
-#histats_counter{
-  position:absolute; right:8px; top:50%;
-  height: var(--hs-size);
-  transform: translateY(-50%) scale(var(--hs-scale));
-  transform-origin:100% 50%;
-  display:grid; place-items:center; z-index:2;
-}
-#histats_counter #histatsC{ position:static !important }
-#histats_counter img{
-  max-height:var(--hs-size) !important;
-  height:auto !important; width:auto !important;
-  opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))
-}
+/* Histats holder */
+#histats_counter{position:absolute;right:8px;top:50%;height:var(--hs-size);transform:translateY(-50%) scale(var(--hs-scale));transform-origin:100% 50%;display:grid;place-items:center;z-index:2}
+#histats_counter #histatsC{position:static !important}
+#histats_counter img{max-height:var(--hs-size) !important;height:auto !important;width:auto !important;opacity:.92;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
 
 /* Refresh button */
-.refresh-btn{
-  position:absolute; left:8px; top:50%; transform:translateY(-50%);
-  height: var(--hud-size); line-height: var(--hud-size);
-  display:inline-flex; align-items:center; gap:8px; padding:0 12px;
-  border-radius: var(--hud-radius); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border:1px solid rgba(255,255,255,.18); color:var(--text); font-weight:700; font-size:12px;
-  box-shadow:0 6px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35); backdrop-filter: blur(6px);
-  cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; z-index:3;
-}
-.refresh-btn .i{ font-size:14px; line-height:1 }
-.refresh-btn:hover{ transform:translateY(-50%) scale(1.03); box-shadow:0 8px 20px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.45) }
-.refresh-btn:active{ transform:translateY(-50%) scale(.98) }
-.refresh-btn[disabled]{ opacity:.55; cursor:not-allowed }
+.refresh-btn{position:absolute;left:8px;top:50%;transform:translateY(-50%);height:var(--hud-size);line-height:var(--hud-size);display:inline-flex;align-items:center;gap:8px;padding:0 12px;border-radius:var(--hud-radius);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.18);color:var(--text);font-weight:700;font-size:12px;box-shadow:0 6px 14px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.35);backdrop-filter:blur(6px);cursor:pointer;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;z-index:3}
+.refresh-btn .i{font-size:14px;line-height:1}
+.refresh-btn:hover{transform:translateY(-50%) scale(1.03);box-shadow:0 8px 20px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.45)}
+.refresh-btn:active{transform:translateY(-50%) scale(.98)}
+.refresh-btn[disabled]{opacity:.55;cursor:not-allowed}
+.refresh-btn:focus-visible{outline:2px solid #8ab4ff;outline-offset:2px}
 
 /* Now playing */
-.now-playing{
-  font-weight:800; letter-spacing:.2px; text-align:center; opacity:.9;
-  max-width:min(80vw, 720px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  will-change: opacity;
-}
-.now-playing.swap{ animation: npSwap .32s ease }
-@keyframes npSwap{ from{opacity:.2} to{opacity:1} }
+.now-playing{font-weight:800;letter-spacing:.2px;text-align:center;opacity:.9;max-width:min(80vw,720px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now-playing.swap{animation:npSwap .32s ease}
+@keyframes npSwap{from{opacity:.2}to{opacity:1}}
 
-/* ---------- Tabs ---------- */
-.tabs{
-  width:min(100%,var(--maxw)); margin:4px auto 0; padding:6px 8px 0;
-  display:flex; gap:8px; overflow:auto; scrollbar-width:none;
-}
-.tabs::-webkit-scrollbar{ display:none }
-.tabs--center{ justify-content:center }
-.tabs .tab{
-  appearance:none; -webkit-appearance:none; border:0; background:transparent; color:inherit; cursor:pointer; padding:0;
-}
-.tabs .tab .tab-card{
-  width:var(--tabW); height:var(--tabH);
-  display:grid; place-items:center; gap:6px;
-  border-radius:14px; border:1px solid rgba(255,255,255,.28);
-  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
-  box-shadow:0 10px 18px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.28);
-  transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
-}
-.tabs .tab .tab-icon{ width:22px; height:22px; display:grid; place-items:center; opacity:.92 }
-.tabs .tab .tab-label{
-  display:block; font-size:var(--tab-font); font-weight:800; line-height:1; opacity:.92; transform:translateY(-1px)
-}
-.tabs .tab:hover .tab-card{ transform:translateZ(0) scale(1.03) }
-.tabs .tab:focus-visible .tab-card{ outline:2px solid #8ab4ff; outline-offset:3px }
+/* Tabs */
+.tabs{width:min(100%,var(--maxw));margin:4px auto 0;padding:6px 8px 0;display:flex;gap:8px;overflow:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs--center{justify-content:center}
+.tabs .tab{appearance:none;border:0;background:transparent;color:inherit;cursor:pointer;padding:0}
+.tabs .tab .tab-card{width:var(--tabW);height:var(--tabH);display:grid;place-items:center;gap:6px;border-radius:14px;border:1px solid rgba(255,255,255,.28);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));box-shadow:0 10px 18px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.28);transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease}
+.tabs .tab .tab-icon{width:22px;height:22px;display:grid;place-items:center;opacity:.92}
+.tabs .tab .tab-label{display:block;font-size:var(--tab-font);font-weight:800;line-height:1;opacity:.92;transform:translateY(-1px)}
+.tabs .tab:hover .tab-card{transform:translateZ(0) scale(1.03)}
+.tabs .tab:focus-visible .tab-card{outline:2px solid #8ab4ff;outline-offset:3px}
+.tabs .tab[aria-selected="true"] .tab-card{transform:translateZ(0) scale(1.06);border-color:#86efac;box-shadow:0 0 0 2px rgba(255,255,255,.22) inset,0 12px 22px rgba(0,0,0,.32),0 0 14px rgba(255,255,255,.18)}
 
-/* สีแอคทีฟรายหมวด */
-.tabs .tab[data-filter="IPTV"]   { --accent:#86efac }
-.tabs .tab[data-filter="บันเทิง"]{ --accent:#a78bfa }
-.tabs .tab[data-filter="กีฬา"]   { --accent:#60a5fa }
-.tabs .tab[data-filter="สารคดี"] { --accent:#f59e0b }
-.tabs .tab[data-filter="เด็ก"]   { --accent:#34d399 }
-.tabs .tab[data-filter="หนัง"]    { --accent:#fb7185 }
-.tabs .tab[aria-selected="true"] .tab-card{
-  transform: translateZ(0) scale(1.06);
-  border-color: var(--accent, rgba(255,255,255,.34));
-  box-shadow: 0 0 0 2px rgba(255,255,255,.22) inset, 0 12px 22px rgba(0,0,0,.32), 0 0 14px rgba(255,255,255,.18);
-  z-index: 2; position: relative;
-}
-.tabs .tab[aria-selected="true"] .tab-card::after{
-  content:""; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
-  width:40%; height:3px; border-radius:3px; background: var(--accent, #86efac);
-  filter: drop-shadow(0 0 6px rgba(255,255,255,.25)); pointer-events:none;
-}
+/* Grid */
+.grid{width:min(100%,var(--maxw));margin:12px auto 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tile-w),1fr));gap:var(--tile-g)}
+.grid.switch-in .channel{animation:chIn .42s ease both;animation-delay:calc(var(--i) * var(--stagger,22ms))}
+@keyframes chIn{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
 
-/* ---------- Grid ---------- */
-.grid{
-  width:min(100%,var(--maxw)); margin:12px auto 0; display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--tile-w),1fr));
-  gap: var(--tile-g);
-}
-.grid.switch-in .channel{
-  animation: chIn .42s ease both;
-  animation-delay: calc(var(--i) * var(--stagger, 22ms));
-}
-@keyframes chIn{
-  from{ transform:translateY(6px); opacity:.0 }
-  to{ transform:none; opacity:1 }
-}
+.channel{appearance:none;border:0;background:transparent;padding:0;cursor:pointer;text-align:left}
+.channel .ch-card{border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 18px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.28);overflow:hidden;transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
+.channel:hover .ch-card{transform:translateZ(0) scale(1.035)}
+.channel:active .ch-card{transform:translateZ(0) scale(.985)}
+.channel[aria-pressed="true"] .ch-card{border-color:rgba(255,255,255,.32);box-shadow:0 0 0 2px rgba(255,255,255,.22) inset,0 12px 22px rgba(0,0,0,.32),0 0 14px rgba(255,255,255,.18)}
+.channel:focus-visible .ch-card{outline:2px solid #8ab4ff;outline-offset:2px}
 
-.channel{
-  appearance:none; -webkit-appearance:none; border:0; background:transparent; padding:0; cursor:pointer; text-align:left;
-}
-.channel .ch-card{
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border:1px solid rgba(255,255,255,.16);
-  box-shadow: 0 10px 18px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.28);
-  overflow:hidden; transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
-}
-.channel:hover .ch-card{ transform: translateZ(0) scale(1.035) }
-.channel:active .ch-card{ transform: translateZ(0) scale(.985) }
-.channel[aria-pressed="true"] .ch-card{
-  border-color: rgba(255,255,255,.32);
-  box-shadow: 0 0 0 2px rgba(255,255,255,.22) inset, 0 12px 22px rgba(0,0,0,.32), 0 0 14px rgba(255,255,255,.18);
-}
+.logo-wrap{display:grid;place-items:center;height:var(--tile-h);padding:10px}
+.logo{max-width:82%;max-height:70%;height:auto;width:auto}
+.name{display:block;font-weight:800;font-size:12.4px;padding:8px 10px 10px;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.channel[data-wide="true"] .logo{max-width:94%;max-height:50%}
 
-/* โลโก้ */
-.logo-wrap{ display:grid; place-items:center; height: var(--tile-h); padding:10px }
-.logo{ max-width:82%; max-height: 70%; height:auto; width:auto }
-
-/* ข้อความในการ์ด */
-.name{ display:block; font-weight:800; font-size:12.4px; padding:8px 10px 10px; opacity:.92; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-
-/* Wide logo */
-.channel[data-wide="true"] .logo{ max-width: 94%; max-height: 50% }
-
-/* ---------- Responsive ---------- */
-@media (max-width: 380px){
-  :root{ --tabW: 60px; --tabH: 50px; --tabBadge: 26px; --tab-font: 11px; --hs-size:32px }
-  .refresh-btn .t{ display:none } .refresh-btn{ padding:0 8px }
-}
-@media (min-width: 381px) and (max-width: 639px){
-  :root{ --tabW: 70px; --tabH: 56px; --tabBadge: 28px; --tab-font: 12px; --hs-size:36px; --hs-scale:.94 }
-}
-@media (min-width: 640px) and (max-width: 1023px){
-  :root{ --tabW: 78px; --tabH: 62px; --tabBadge: 30px; --tab-font: 12.4px; --hs-size:40px }
-}
-@media (min-width: 1024px){
-  :root{ --tabW: 84px; --tabH: 66px; --tabBadge: 32px; --tab-font: 12.8px; --hs-size:44px; --hs-scale:1.05 }
-}
-@media (min-width: 1280px){
-  #histats_counter{ transform:translateY(-50%) scale(var(--hs-scale)) }
-}
-
-/* ---------- เพิ่มเติมจากแพตช์ ---------- */
-/* โฟกัสสเตตสำหรับคีย์บอร์ด */
-.channel:focus-visible .ch-card{
-  outline:2px solid #8ab4ff;
-  outline-offset:2px;
-}
-.refresh-btn:focus-visible{
-  outline:2px solid #8ab4ff;
-  outline-offset:2px;
-}
-
-/* ลดแอนิเมชันสำหรับผู้ใช้ที่ตั้งค่าลด Motion */
-@media (prefers-reduced-motion: reduce){
-  .grid.switch-in .channel{ animation: none; }
-  .tabs .tab .tab-card, .channel .ch-card{ transition: none; }
-}
+/* Responsive */
+@media (max-width:380px){:root{--tabW:60px;--tabH:50px;--tab-font:11px;--hs-size:32px}.refresh-btn .t{display:none}.refresh-btn{padding:0 8px}}
+@media (min-width:381px) and (max-width:639px){:root{--tabW:70px;--tabH:56px;--tab-font:12px;--hs-size:36px;--hs-scale:.94}}
+@media (min-width:640px) and (max-width:1023px){:root{--tabW:78px;--tabH:62px;--tab-font:12.4px;--hs-size:40px}}
+@media (min-width:1024px){:root{--tabW:84px;--tabH:66px;--tab-font:12.8px;--hs-size:44px;--hs-scale:1.05}}
+@media (prefers-reduced-motion:reduce){.grid.switch-in .channel{animation:none}.tabs .tab .tab-card,.channel .ch-card{transition:none}}
