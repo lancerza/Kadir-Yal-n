@@ -14,77 +14,44 @@
   --maxw:1200px;
 
   /* Channel card sizing */
-  --tile-w:104px;
-  --tile-h:120px;
-  --tile-g:12px;
-  --logo-max-h:52px;
-  --logo-max-w:82px;
-  --logo-wide-h:42px;
+  --tile-w:110px;
+  --tile-h:96px;
+  --tile-g:10px;
 
-  /* Tabs (COMPACT + bigger icon/label) */
-  --tabW: 72px;
-  --tabH: 58px;
-  --tab-gap:6px;
-  --tabBadge:28px;     /* ไอคอนใหญ่ขึ้นอีกนิด */
-  --tab-font:12.2px;   /* ป้ายชื่อใหญ่ขึ้น */
+  /* Tabs */
+  --tabW: 66px;
+  --tabH: 54px;
+  --tabBadge: 26px;
+  --tab-font: 11.6px;
 
   /* Header HUD */
-  --hud-size:32px;
-  --hud-radius:12px;
+  --hud-size: 34px;
+  --hud-radius: 999px;
 
-  /* Histats size */
-  --hs-size: 40px;
-  --hs-scale: 1;
+  /* Histats badge */
+  --hs-size: 36px;
+  --hs-scale: .98;
 }
 
-/* ---------- Base / Reset ---------- */
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; background:var(--bg); color:var(--text);
-  font-family:system-ui,-apple-system,'Sarabun','Inter',Segoe UI,Roboto,Arial,sans-serif;
-  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-}
-img{max-width:100%;display:block}
-button{font:inherit;background:none;border:0;color:inherit}
-a{color:inherit;text-decoration:none}
-
-/* ---------- Layout ---------- */
-.container{ width:min(100%,var(--maxw)); margin:0 auto; padding:14px }
-.app{ width:min(100%,var(--maxw)); margin:0 auto; padding:12px 14px 40px }
+/* ---------- Page ---------- */
+html,body{ height:100%; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans Thai', sans-serif }
+*{ box-sizing: border-box }
 
 /* ---------- Header ---------- */
 header{
-  position:sticky; top:0; z-index:20;
-  border-bottom:1px solid var(--border);
-  background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0));
-  backdrop-filter: blur(6px);
+  position:sticky; top:0; z-index:5;
+  background:linear-gradient(180deg, rgba(12,13,15,.86), rgba(12,13,15,.74));
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .h-wrap{
-  position:relative; width:min(100%,var(--maxw)); margin:auto;
-  display:grid; justify-items:center; gap:4px;
-  min-height: calc(var(--hud-size) + 12px);
-  padding:10px 14px;
-  padding-left:  calc(var(--hud-size) + 16px);
-  padding-right: calc(max(var(--hud-size), var(--hs-size)) + 16px);
+  width:min(100%, var(--maxw));
+  margin:0 auto; height:56px; position:relative;
+  display:flex; align-items:center; justify-content:center;
 }
-.clock{
-  font-weight:800; font-size:clamp(16px,2.6vw,20px); letter-spacing:.3px;
-  font-variant-numeric: tabular-nums; color:#f4f7fb; text-align:center;
-  text-shadow:0 1px 0 rgba(0,0,0,.55), 0 0 18px rgba(255,255,255,.04);
-}
+.clock{ position:absolute; right:50%; transform:translateX(50%); font-weight:700; letter-spacing: .3px; opacity:.88 }
 
-/* Now Playing (เดิม, ไม่มีกรอบ) */
-.now-playing{
-  margin-top:2px; font-size:clamp(13.5px,2.1vw,17.5px); font-weight:700;
-  letter-spacing:.2px; color:#eaf1ff; opacity:.95; text-align:center;
-  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  background:none; border:none; box-shadow:none;
-}
-.now-playing.swap{ animation: npFade .24s ease both }
-@keyframes npFade{from{opacity:0;transform:translateY(4px)}to{opacity:.95;transform:none}}
-
-/* Histats */
+/* Histats holder (ติดมุมขวาใน header) */
 #histats_counter{
   position:absolute; right:8px; top:50%;
   height: var(--hs-size);
@@ -93,7 +60,11 @@ header{
   display:grid; place-items:center; z-index:2;
 }
 #histats_counter #histatsC{ position:static !important }
-#histats_counter img{ max-height:var(--hs-size) !important; height:var(--hs-size) !important; width:auto !important; opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45)) }
+#histats_counter img{
+  max-height:var(--hs-size) !important;
+  height:auto !important; width:auto !important;
+  opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))
+}
 
 /* Refresh button */
 .refresh-btn{
@@ -106,82 +77,51 @@ header{
   cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; z-index:3;
 }
 .refresh-btn .i{ font-size:14px; line-height:1 }
-.refresh-btn:hover{ transform:translateY(-50%) translateY(-1px); border-color:rgba(255,255,255,.5) }
-.refresh-btn:active{ transform:translateY(-50%) scale(.985) }
-.refresh-btn[disabled]{ opacity:.65; cursor:wait }
+.refresh-btn:hover{ transform:translateY(-50%) scale(1.03); box-shadow:0 8px 20px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.45) }
+.refresh-btn:active{ transform:translateY(-50%) scale(.98) }
+.refresh-btn[disabled]{ opacity:.55; cursor:not-allowed }
 
-/* Player */
-#player{
-  width:100%; aspect-ratio:16/9; background:#000; border-radius:16px; overflow:hidden;
-  border:1px solid var(--border); box-shadow:0 8px 18px rgba(0,0,0,.25) inset;
+/* Now playing */
+.now-playing{
+  font-weight:800; letter-spacing:.2px; text-align:center; opacity:.9;
+  max-width:min(80vw, 720px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  will-change: opacity;
 }
+.now-playing.swap{ animation: npSwap .32s ease }
+@keyframes npSwap{ from{opacity:.2} to{opacity:1} }
 
 /* ---------- Tabs ---------- */
 .tabs{
-  position:relative; display:flex; gap:clamp(8px, 1.1vw, 12px);
-  padding:12px 6px 14px; margin:10px auto 10px; overflow:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-  width:min(100%,var(--maxw));
+  width:min(100%,var(--maxw)); margin:4px auto 0; padding:6px 8px 0;
+  display:flex; gap:8px; overflow:auto; scrollbar-width:none;
 }
-.tabs::-webkit-scrollbar{height:6px}
-.tabs::-webkit-scrollbar-thumb{background:#2b2d30;border-radius:8px}
-.tabs.tabs--center{justify-content:center}
-.tabs::before{
-  content:""; position:absolute; inset:0; pointer-events:none; z-index:-1;
-  background:
-    radial-gradient(120% 80% at 10% 0%, rgba(99,102,241,.22) 0%, transparent 45%),
-    radial-gradient(120% 80% at 90% 100%, rgba(168,85,247,.22) 0%, transparent 45%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0));
-  filter:blur(20px); opacity:.8;
+.tabs::-webkit-scrollbar{ display:none }
+.tabs--center{ justify-content:center }
+.tabs .tab{
+  appearance:none; -webkit-appearance:none; border:0; background:transparent; color:inherit; cursor:pointer; padding:0;
 }
-.tab{position:relative; flex:0 0 auto; cursor:pointer; scroll-snap-align:center; -webkit-tap-highlight-color:transparent}
-
-.tab-card{
+.tabs .tab .tab-card{
   width:var(--tabW); height:var(--tabH);
-  border-radius:10px; display:grid; grid-template-rows:auto auto; place-items:center; gap:var(--tab-gap);
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 6px 14px rgba(0,0,0,.22); color:#fff;
-  transform: translateZ(0) scale(1); transform-origin:50% 50%;
-  transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease, border-color .18s ease;
-  will-change:transform; z-index:0;
+  display:grid; place-items:center; gap:6px;
+  border-radius:14px; border:1px solid rgba(255,255,255,.28);
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+  box-shadow:0 10px 18px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.28);
+  transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
 }
-
-/* Icon badge */
-.tab-icon{
-  width:var(--tabBadge); height:var(--tabBadge); display:grid; place-items:center; border-radius:12px;
-  background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-  border:1px solid rgba(255,255,255,.22);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 4px 12px rgba(0,0,0,.35);
+.tabs .tab .tab-icon{ width:22px; height:22px; display:grid; place-items:center; opacity:.92 }
+.tabs .tab .tab-label{
+  display:block; font-size:var(--tab-font); font-weight:800; line-height:1; opacity:.92; transform:translateY(-1px)
 }
-.tab-icon svg{ width:max(12px, calc(var(--tabBadge) - 6px)); height:max(12px, calc(var(--tabBadge) - 6px)); display:block }
-
-/* Label: ขยับขึ้น + ใหญ่ขึ้น */
-.tab-label{
-  position:relative;
-  top:-2px;                 /* << ขยับขึ้น */
-  font-weight:900;
-  font-size:var(--tab-font);
-  line-height:1.05;
-  letter-spacing:.25px;
-}
-
-/* Hover/Active */
-@media (hover:hover){
-  .tabs .tab:hover .tab-card{
-    transform:translateZ(0) scale(1.055);
-    box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 10px 18px rgba(0,0,0,.28), 0 0 14px rgba(255,255,255,.10);
-    border-color:rgba(255,255,255,.28);
-  }
-  .tabs .tab:active .tab-card{ transform:translateZ(0) scale(.985) }
-}
+.tabs .tab:hover .tab-card{ transform:translateZ(0) scale(1.03) }
 .tabs .tab:focus-visible .tab-card{ outline:2px solid #8ab4ff; outline-offset:3px }
 
-/* Selected accent */
-.tab[data-filter="IPTV"]   { --accent: #60a5fa; }
-.tab[data-filter="บันเทิง"] { --accent: #f59e0b; }
-.tab[data-filter="กีฬา"]    { --accent: #34d399; }
-.tab[data-filter="สารคดี"]  { --accent: #a78bfa; }
-.tab[data-filter="เด็ก"]    { --accent: #f472b6; }
-.tab[data-filter="หนัง"]    { --accent: #fb7185; }
+/* สีแอคทีฟรายหมวด */
+.tabs .tab[data-filter="IPTV"]   { --accent:#86efac }
+.tabs .tab[data-filter="บันเทิง"]{ --accent:#a78bfa }
+.tabs .tab[data-filter="กีฬา"]   { --accent:#60a5fa }
+.tabs .tab[data-filter="สารคดี"] { --accent:#f59e0b }
+.tabs .tab[data-filter="เด็ก"]   { --accent:#34d399 }
+.tabs .tab[data-filter="หนัง"]    { --accent:#fb7185 }
 .tabs .tab[aria-selected="true"] .tab-card{
   transform: translateZ(0) scale(1.06);
   border-color: var(--accent, rgba(255,255,255,.34));
@@ -197,56 +137,48 @@ header{
 /* ---------- Grid ---------- */
 .grid{
   width:min(100%,var(--maxw)); margin:12px auto 0; display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(var(--tile-w),1fr));
-  gap:var(--tile-g); justify-items:center;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-w),1fr));
+  gap: var(--tile-g);
 }
 .grid.switch-in .channel{
-  opacity:0; transform:translateY(6px) scale(.98); filter:blur(4px);
-  animation:tileIn .34s cubic-bezier(.2,.7,.2,1) forwards;
-  animation-delay:calc(var(--stagger) * var(--i,0));
+  animation: chIn .42s ease both;
+  animation-delay: calc(var(--i) * var(--stagger, 22ms));
 }
-@keyframes tileIn{to{opacity:1;transform:none;filter:none}}
-
-/* Channel card */
-.channel{position:relative;width:var(--tile-w);height:var(--tile-h);border-radius:14px;cursor:pointer;transform:translateZ(0)}
-.channel::after{
-  content:"";position:absolute;inset:-6px;border-radius:18px;
-  background:radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.55) 0%, transparent 70%);
-  filter:blur(12px);opacity:0;transition:opacity .25s ease;pointer-events:none;z-index:0;
-}
-.channel:hover::after,.channel.active::after{opacity:.9;animation:neonPulse 2.4s ease-in-out infinite}
-@keyframes neonPulse{0%{filter:blur(9px);opacity:.5}50%{filter:blur(14px);opacity:.95}100%{filter:blur(9px);opacity:.5}}
-
-.ch-card{
-  position:relative; z-index:1; width:100%; height:100%;
-  background:linear-gradient(180deg,var(--panel),var(--panel-2));
-  border:1px solid var(--border); border-radius:12px; padding:9px 8px 8px;
-  box-shadow:0 6px 16px rgba(0,0,0,.18);
-  display:grid; grid-template-rows:1fr auto; gap:6px; place-items:center; overflow:hidden;
-  transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
-}
-.channel:hover .ch-card{ transform:translateY(-1px);border-color:rgba(255,255,255,.7);
-  box-shadow:0 0 0 1px rgba(255,255,255,.75) inset, 0 0 10px rgba(255,255,255,.42), 0 0 20px rgba(255,255,255,.22) }
-.channel:active .ch-card{transform:scale(.985)}
-
-.logo-wrap{display:grid; place-items:center; width:100%; height:100%}
-.logo{max-height:var(--logo-max-h); max-width:var(--logo-max-w); object-fit:contain; filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
-.channel[data-wide="true"] .logo{max-height:var(--logo-wide-h)}
-.name{
-  width:100%; text-align:center; font-weight:700; font-size:12px; letter-spacing:.2px;
-  color:#eaeef3; opacity:.95; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+@keyframes chIn{
+  from{ transform:translateY(6px); opacity:.0 }
+  to{ transform:none; opacity:1 }
 }
 
-/* Ripple */
-.ripple{ position:absolute; border-radius:50%;
-  background:radial-gradient(circle at center, rgba(255,255,255,.55), rgba(255,255,255,0));
-  transform:scale(0); animation:ripple .5s ease-out; pointer-events:none }
-@keyframes ripple{to{transform:scale(1);opacity:0}}
+.channel{
+  appearance:none; -webkit-appearance:none; border:0; background:transparent; padding:0; cursor:pointer; text-align:left;
+}
+.channel .ch-card{
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow: 0 10px 18px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.28);
+  overflow:hidden; transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+.channel:hover .ch-card{ transform: translateZ(0) scale(1.035) }
+.channel:active .ch-card{ transform: translateZ(0) scale(.985) }
+.channel[aria-pressed="true"] .ch-card{
+  border-color: rgba(255,255,255,.32);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.22) inset, 0 12px 22px rgba(0,0,0,.32), 0 0 14px rgba(255,255,255,.18);
+}
 
-/* ---------- Responsive tweaks ---------- */
+/* โลโก้ */
+.logo-wrap{ display:grid; place-items:center; height: var(--tile-h); padding:10px }
+.logo{ max-width:82%; max-height: 70%; height:auto; width:auto }
+
+/* ข้อความในการ์ด */
+.name{ display:block; font-weight:800; font-size:12.4px; padding:8px 10px 10px; opacity:.92; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+
+/* Wide logo */
+.channel[data-wide="true"] .logo{ max-width: 94%; max-height: 50% }
+
+/* ---------- Responsive ---------- */
 @media (max-width: 380px){
-  :root{ --tabW: 66px; --tabH: 54px; --tabBadge: 26px; --tab-font: 11.6px; --hud-size:30px; --hs-size:34px; --hs-scale:.9 }
-  .tabs{ gap:8px; padding:10px 6px 12px }
+  :root{ --tabW: 60px; --tabH: 50px; --tabBadge: 26px; --tab-font: 11px; --hs-size:32px }
   .refresh-btn .t{ display:none } .refresh-btn{ padding:0 8px }
 }
 @media (min-width: 381px) and (max-width: 639px){
@@ -260,4 +192,21 @@ header{
 }
 @media (min-width: 1280px){
   #histats_counter{ transform:translateY(-50%) scale(var(--hs-scale)) }
+}
+
+/* ---------- เพิ่มเติมจากแพตช์ ---------- */
+/* โฟกัสสเตตสำหรับคีย์บอร์ด */
+.channel:focus-visible .ch-card{
+  outline:2px solid #8ab4ff;
+  outline-offset:2px;
+}
+.refresh-btn:focus-visible{
+  outline:2px solid #8ab4ff;
+  outline-offset:2px;
+}
+
+/* ลดแอนิเมชันสำหรับผู้ใช้ที่ตั้งค่าลด Motion */
+@media (prefers-reduced-motion: reduce){
+  .grid.switch-in .channel{ animation: none; }
+  .tabs .tab .tab-card, .channel .ch-card{ transition: none; }
 }
