@@ -45,6 +45,20 @@ header{
   border-bottom:1px solid var(--border);
   background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0));
   backdrop-filter: blur(6px);
+   /* === NEW: Refresh button (มุมซ้ายบน header) === */
+.refresh-btn{
+  position:absolute; top:6px; left:6px; z-index:30;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff; padding:6px 10px; border-radius:10px;
+  font-weight:700; font-size:12px; display:flex; gap:8px; align-items:center;
+  cursor:pointer; transition:transform .15s ease, border-color .15s ease;
+  backdrop-filter: blur(6px);
+}
+.refresh-btn:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,.5) }
+.refresh-btn:active{ transform:scale(.985) }
+.refresh-btn[disabled]{ opacity:.6; cursor:wait }
+.refresh-btn .i{ font-size:14px; line-height:0 }
 }
 .h-wrap{
   position:relative; width:min(100%,var(--maxw)); margin:auto;
