@@ -1,28 +1,35 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>FLOW TV</title>
-  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
-</head>
-<body>
-  <header>
-    <div class="h-wrap">
-      <div id="clock" class="clock" aria-live="polite"></div>
-      <!-- refresh button injected by app.js -->
+<!-- Histats (ติดขวาใน header, ไม่ fixed) -->
+<div id="histats_counter" aria-hidden="true"></div>
+<script>
+(function(){
+  var anchor = document.getElementById('histats_counter');
+
+  // ตั้งค่า Histats (ตัด CSS ที่ไป fixed ออก)
+  window._Hasync = window._Hasync || [];
+  _Hasync.push(['Histats.startgif','1,4970878,4,10052,""']);
+  _Hasync.push(['Histats.fasi','1']);
+  _Hasync.push(['Histats.track_hits','']);
+
+  // โหลดสคริปต์
+  var hs = document.createElement('script');
+  hs.type = 'text/javascript';
+  hs.async = true;
+  hs.src = '//s10.histats.com/js15_giftop_as.js';
+  (document.head || document.body).appendChild(hs);
+
+  // ย้าย #histatsC เข้ากล่อง #histats_counter เสมอ (กันโดนวางไว้ที่ body)
+  (function move(){
+    var c = document.getElementById('histatsC');
+    if (c && anchor && !anchor.contains(c)) anchor.appendChild(c);
+    requestAnimationFrame(move);
+  })();
+})();
+</script>
+
+<noscript>
+  <a href="/" target="_blank" rel="nofollow">
+    <div id="histatsC">
+      <img src="//s4is.histats.com/stats/i/4970878.gif?4970878&103" alt="histats">
     </div>
-  </header>
-
-  <main class="app">
-    <section id="player" aria-label="ตัวเล่นวิดีโอ"></section>
-    <nav id="tabs" class="tabs" role="tablist" aria-label="กรองช่อง"></nav>
-    <section class="grid" id="channel-list" aria-live="polite"></section>
-  </main>
-
-  <script>window.PROXY_BASE = window.PROXY_BASE || '';</script>
-  <script defer src="app.js"></script>
-</body>
-</html>
+  </a>
+</noscript>
