@@ -1,11 +1,11 @@
-/* ===================== styles.css (COMPACT TABS + BIGGER ICON) =====================
+/* ===================== styles.css (COMPACT TABS + BIGGER ICON/LABEL) =====================
    - Header สมดุล: ซ้าย Refresh ⟷ กลาง Clock ⟷ ขวา Histats
-   - ไม่มีสไตล์ now-playing / now-playing--main / swap
-   - Tabs แบบ badge โปร่ง (การ์ดคอมแพ็ค) + ไอคอนใหญ่ขึ้นอีก (responsive)
+   - now-playing อยู่ "ตำแหน่งเดิมใน header" (ไม่มีขอบ/พื้นหลัง)
+   - Tabs แบบ badge โปร่ง (การ์ดคอมแพ็ค) + ไอคอน & ป้ายชื่อใหญ่ขึ้น (responsive)
    - เอฟเฟกต์ hover/active/selected + accent รายหมวด
    - กริดช่อง + เอฟเฟกต์สลับหมวด
    - Histats ปรับขนาดด้วย --hs-size / --hs-scale
-=============================================================================== */
+================================================================================================ */
 
 /* ---------- Root tokens ---------- */
 :root{
@@ -25,12 +25,12 @@
   --logo-max-w:82px;
   --logo-wide-h:42px;
 
-  /* Tabs (COMPACT card + BIGGER icon) */
-  --tabW: 68px;      /* ความกว้างการ์ด */
-  --tabH: 54px;      /* ความสูงการ์ด */
+  /* Tabs (COMPACT card + BIGGER icon/label) */
+  --tabW: 70px;      /* ความกว้างการ์ด */
+  --tabH: 56px;      /* ความสูงการ์ด */
   --tab-gap:6px;
-  --tabBadge:24px;   /* ไอคอน: ใหญ่ขึ้นจากเดิม */
-  --tab-font:9.6px;  /* ฟอนต์ชื่อแท็บ */
+  --tabBadge:26px;   /* ไอคอนใหญ่ขึ้น */
+  --tab-font:10.8px; /* ขนาดตัวอักษรชื่อแท็บ */
 
   /* Header HUD (refresh/histats) */
   --hud-size:32px;
@@ -75,6 +75,25 @@ header{
 }
 .clock{font-weight:700;font-size:clamp(15px,2.3vw,19px);letter-spacing:.2px;text-align:center}
 
+/* ---------- Now Playing (ตำแหน่งเดิมใน header, ไม่มีขอบ) ---------- */
+.now-playing{
+  margin-top:2px;
+  font-size:clamp(13px,2vw,16px);
+  font-weight:600;
+  opacity:.92;
+  text-align:center;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  /* ไม่มี border/background ใด ๆ ตามที่ต้องการ */
+  background:none;
+  border:none;
+  box-shadow:none;
+}
+.now-playing.swap{ animation: npFade .24s ease both }
+@keyframes npFade{from{opacity:0;transform:translateY(4px)}to{opacity:.92;transform:none}}
+
 /* ---------- Histats (ขวาของ header) ---------- */
 #histats_counter{
   position:absolute; right:8px; top:50%;
@@ -114,7 +133,7 @@ header{
   border:1px solid var(--border); box-shadow:0 8px 18px rgba(0,0,0,.25) inset;
 }
 
-/* ---------- Tabs (badge โปร่ง, COMPACT card + BIGGER icon) ---------- */
+/* ---------- Tabs (badge โปร่ง, COMPACT + BIGGER icon/label) ---------- */
 .tabs{
   position:relative; display:flex; gap:clamp(8px, 1.1vw, 12px);
   padding:12px 6px 14px; margin:10px auto 10px;
@@ -166,7 +185,13 @@ header{
   height:max(12px, calc(var(--tabBadge) - 6px));
   display:block;
 }
-.tab-label{font-weight:700;font-size:var(--tab-font);letter-spacing:.2px}
+
+/* ป้ายชื่อแท็บ (ใหญ่ขึ้น) */
+.tab-label{
+  font-weight:800;
+  font-size:var(--tab-font);
+  letter-spacing:.2px;
+}
 
 /* Hover/Active base */
 @media (hover:hover){
@@ -245,7 +270,7 @@ header{
 /* XS: มือถือจอเล็กมาก */
 @media (max-width: 380px){
   :root{
-    --tabW: 62px; --tabH: 50px; --tabBadge: 22px; --tab-font: 9.2px;
+    --tabW: 64px; --tabH: 52px; --tabBadge: 24px; --tab-font: 10.2px;
     --hud-size:30px;
     --hs-size: 34px; --hs-scale: .90;
   }
@@ -258,7 +283,7 @@ header{
 /* SM: มือถือทั่วไป */
 @media (min-width: 381px) and (max-width: 639px){
   :root{
-    --tabW: 66px; --tabH: 52px; --tabBadge: 24px; --tab-font: 9.6px;
+    --tabW: 68px; --tabH: 54px; --tabBadge: 26px; --tab-font: 10.6px;
     --hud-size:31px;
     --hs-size: 36px; --hs-scale: .94;
   }
@@ -267,7 +292,7 @@ header{
 /* MD: แท็บเล็ต/เดสก์ท็อปเล็ก */
 @media (min-width: 640px) and (max-width: 1023px){
   :root{
-    --tabW: 74px; --tabH: 58px; --tabBadge: 26px; --tab-font: 10px;
+    --tabW: 76px; --tabH: 60px; --tabBadge: 28px; --tab-font: 11px;
     --hud-size:33px;
     --hs-size: 40px; --hs-scale: 1;
   }
@@ -276,7 +301,7 @@ header{
 /* LG: เดสก์ท็อป */
 @media (min-width: 1024px){
   :root{
-    --tabW: 78px; --tabH: 62px; --tabBadge: 28px; --tab-font: 10.6px;
+    --tabW: 82px; --tabH: 64px; --tabBadge: 30px; --tab-font: 11.4px;
     --hud-size:34px;
     --hs-size: 44px; --hs-scale: 1.05;
   }
