@@ -1,11 +1,11 @@
 /* ========================= app.js (FINAL) =========================
    - เปิดเว็บใหม่: ถ้ามี lastId → เล่นช่องนั้น + โชว์การ์ด/เลื่อนให้เห็น
                    ถ้าไม่มี → เล่นช่องแรกของหมวดแรก
-   - ปุ่มรีเฟรช: ล้าง cache แอป/Service Worker (ไม่ลบ lastId) แล้วโหลดข้อมูลใหม่
+   - ปุ่มรีเฟรช: ล้าง cache แอป (ไม่ลบ lastId) แล้วโหลดข้อมูลใหม่
    - เคลียร์แคชอัตโนมัติทุก 6 ชม. (ไม่พึ่งเซิร์ฟเวอร์)
    - now-playing อยู่ตำแหน่งเดิมใน header (ไม่มีกรอบ)
    - Histats ยึดมุมขวา header, กันโหลดซ้ำ, ไม่ลอยทับหน้า
-   - Tabs เอฟเฟกต์ครบ + label/ไอคอนใหญ่ขึ้น
+   - Tabs เอฟเฟกต์ครบ + label/ไอคอนใหญ่ขึ้น + จัดกึ่งกลางแบบแม่น (มี tolerance)
 =================================================================== */
 
 const CH_URL  = 'channels.json';
@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
+  if (document.fonts?.ready) document.fonts.ready.then(centerTabsIfPossible);
 });
 
 /* ------------------------ Load (fresh) ------------------------ */
@@ -186,7 +187,8 @@ function setActiveTab(name){
 }
 function centerTabsIfPossible(){
   const el = document.getElementById('tabs'); if(!el) return;
-  el.classList.toggle('tabs--center', el.scrollWidth <= el.clientWidth + 1);
+  const TOL = 24; // เผื่อ padding/scrollbar/ฟอนต์
+  el.classList.toggle('tabs--center', el.scrollWidth <= el.clientWidth + TOL);
 }
 
 /* ------------------------ Category logic ------------------------ */
