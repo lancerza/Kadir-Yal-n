@@ -1,8 +1,3 @@
-/* ===================== styles.css (TAB LABEL HIGHER + BIGGER) =====================
-   - ขยับ tab-label สูงขึ้นเล็กน้อย + ขยายใหญ่ขึ้น (responsive)
-   - ส่วนอื่นคงเดิม (header/now-playing/tabs/grid/refresh/histats)
-=================================================================================== */
-
 /* ---------- Root tokens ---------- */
 :root{
   --bg:#0b0c0e;
@@ -35,6 +30,13 @@
   /* Histats size */
   --hs-size: 40px;
   --hs-scale: 1;
+
+  /* Histats-derived accent (จะถูก override อัตโนมัติจาก JS เมื่ออ่าน @b1 ได้) */
+  /* Fallback โทนใกล้เคียง @b1:-92939533 (ARGB≈FA75DAF3 → RGB≈117,218,243) */
+  --hs-accent:  rgb(117, 218, 243);
+  --hs-accent-2: rgb(76, 141, 157);
+  --hs-glow:    rgba(117, 218, 243, .55);
+  --hs-glow-2:  rgba(76, 141, 157, .38);
 }
 
 /* ---------- Base / Reset ---------- */
@@ -93,21 +95,54 @@ header{
   display:grid; place-items:center; z-index:2;
 }
 #histats_counter #histatsC{ position:static !important }
-#histats_counter img{ max-height:var(--hs-size) !important; height:var(--hs-size) !important; width:auto !important; opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45)) }
+#histats_counter img{
+  max-height:var(--hs-size) !important; height:var(--hs-size) !important; width:auto !important;
+  opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))
+}
 
-/* Refresh button */
+/* Refresh button — โทนสีซิงก์กับ Histats */
 .refresh-btn{
   position:absolute; left:8px; top:50%; transform:translateY(-50%);
   height: var(--hud-size); line-height: var(--hud-size);
   display:inline-flex; align-items:center; gap:8px; padding:0 12px;
-  border-radius: var(--hud-radius); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border:1px solid rgba(255,255,255,.18); color:var(--text); font-weight:700; font-size:12px;
-  box-shadow:0 6px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35); backdrop-filter: blur(6px);
-  cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; z-index:3;
+
+  border-radius: var(--hud-radius);
+  /* Fallback ไล่ระดับ (ถ้าเบราว์เซอร์ไม่รองรับ color-mix จะเห็นเลเยอร์นี้) */
+  background: linear-gradient(180deg, rgba(117,218,243,.82), rgba(76,141,157,.78)),
+              linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+  /* ใช้ color-mix เพื่อปรับกับ --hs-accent แบบไดนามิก */
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--hs-accent) 72%, transparent),
+                           color-mix(in oklab, var(--hs-accent-2) 78%, rgba(0,0,0,.10))),
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+
+  border:1px solid color-mix(in oklab, var(--hs-accent) 65%, rgba(255,255,255,.25));
+  color:var(--text); font-weight:800; font-size:12px; letter-spacing:.15px;
+  text-shadow: 0 1px 0 rgba(0,0,0,.35);
+  box-shadow:
+    0 10px 22px var(--hs-glow),
+    0 0 0 1px rgba(0,0,0,.04) inset,
+    inset 0 1px 0 rgba(255,255,255,.45),
+    inset 0 -1px 0 rgba(0,0,0,.15);
+  backdrop-filter: blur(8px);
+  cursor:pointer; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, filter .15s ease;
+  z-index:3;
 }
 .refresh-btn .i{ font-size:14px; line-height:1 }
-.refresh-btn:hover{ transform:translateY(-50%) translateY(-1px); border-color:rgba(255,255,255,.5) }
-.refresh-btn:active{ transform:translateY(-50%) scale(.985) }
+@media (hover:hover){
+  .refresh-btn:hover{
+    transform:translateY(-50%) translateY(-1px);
+    border-color: color-mix(in oklab, var(--hs-accent) 82%, #fff);
+    box-shadow:
+      0 12px 26px var(--hs-glow),
+      0 0 18px color-mix(in oklab, var(--hs-accent) 45%, transparent),
+      inset 0 1px 0 rgba(255,255,255,.55);
+    filter: saturate(1.08);
+  }
+  .refresh-btn:active{
+    transform:translateY(-50%) scale(.985);
+  }
+}
 .refresh-btn[disabled]{ opacity:.65; cursor:wait }
 
 /* Player */
@@ -157,7 +192,7 @@ header{
 /* Label: ขยับขึ้น + ใหญ่ขึ้น */
 .tab-label{
   position:relative;
-  top:-2px;                 /* << ขยับขึ้น */
+  top:-2px;
   font-weight:900;
   font-size:var(--tab-font);
   line-height:1.05;
