@@ -1,12 +1,7 @@
-/* ========================= app.js (FINAL) =========================
-   - อ่าน categories.json + channels.json (รองรับสคีมาเก่า/ใหม่)
-   - สร้างแท็บตาม categories.order (ไม่มี “ทั้งหมด”)
-   - จัดหมวดแบบมี rule + tags + fallback
-   - กริดการ์ดขนาดเท่ากัน + เอฟเฟกต์สลับหมวด (สอดคล้อง styles.css)
-   - รองรับโลโก้แนวนอนด้วย data-wide / logoWide / rule.useWideLogo
-   - JWPlayer: auto-fallback หลายแหล่ง, retry, mute-first บนมือถือ
-   - Now playing ใต้เวลา + Toast บนวิดีโอในมือถือ
-   - Histats badge มุมขวาบนของ header
+/* ========================= app.js (CLEANED) =========================
+   - ไม่มี TV_DATA_CACHE_V1 และบล็อกซ้ำ
+   - ปุ่มรีเฟรช + ล้างแคช + ออโต้ 6 ชม.
+   - หมวดที่ใช้: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง
 =================================================================== */
 
 const CH_URL  = 'channels.json';
@@ -16,31 +11,35 @@ const TIMEZONE = 'Asia/Bangkok';
 const SWITCH_OUT_MS   = 140;
 const STAGGER_STEP_MS = 22;
 
-let categories = null;      // { order:[], default:"", rules:[...] }
-let channels   = [];        // รายการช่องทั้งหมด (รวมสคีมา)
-let currentFilter = '';     // ชื่อหมวดที่เลือก
-let currentIndex  = -1;     // index ของช่องใน "channels" ที่กำลังเล่น
+let categories = null;
+let channels   = [];
+let currentFilter = '';
+let currentIndex  = -1;
 
-// ใส่ key ถ้ามี (จะไม่มีผลถ้าตั้งไว้แล้วที่ HTML)
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ------------------------ Boot ------------------------ */
-document.addEventListener('DOMContentLoaded', async () => {  mountRefreshButton();
+document.addEventListener('DOMContentLoaded', async () => {
+  mountRefreshButton();
   scheduleAutoClear();
 
   mountClock();
   mountNowPlayingContainer();
   mountHistatsTopRight();
 
-  await loadData();
+  try {
+    await loadData();
+  } catch (e) {
+    console.error('โหลดข้อมูลไม่สำเร็จ:', e);
+    window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
+  }
 
   buildTabs();
-  setActiveTab((categories?.order?.[0]) || categories?.default || 'บันเทิง');
+  setActiveTab((categories?.order?.[0]) || categories?.default || 'IPTV');
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 
-  // เล่นช่องที่เคยเล่นครั้งล่าสุด (ถ้ามี)
   const lastId = safeGet('lastId');
   if (lastId) {
     const idx = channels.findIndex(c => c.id === lastId);
@@ -48,13 +47,12 @@ document.addEventListener('DOMContentLoaded', async () => {  mountRefreshButton(
   }
 });
 
-/* ------------------------ Load / Cache ------------------------ */
-
+/* ------------------------ Load ------------------------ */
 async function fetchJSONFresh(url){
   const u = new URL(url, location.href);
   u.searchParams.set('_t', String(Date.now()));
   const res = await fetch(u.toString(), { cache:'no-store' });
-  if (!res.ok) throw new Error('Fetch failed: ' + url);
+  if (!res.ok) throw new Error('Fetch failed: ' + url + ' (' + res.status + ')');
   return res.json();
 }
 async function loadData(){
@@ -62,34 +60,15 @@ async function loadData(){
     fetchJSONFresh(CAT_URL).catch(()=>null),
     fetchJSONFresh(CH_URL)
   ]);
+
   categories = catRes || {
     order: ['IPTV','บันเทิง','กีฬา','สารคดี','เด็ก','หนัง'],
     default: 'IPTV',
     rules: []
   };
-  channels = Array.isArray(chRes) ? chRes : (chRes.channels || []);
+
+  channels = Array.isArray(chRes) ? chRes : (chRes?.channels || []);
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
-}
-  } catch {}
-
-  const [catRes, chRes] = await Promise.all([
-    fetch(CAT_URL, {cache:'no-store'}).then(r=>r.json()).catch(()=>null),
-    fetch(CH_URL, {cache:'no-store'}).then(r=>r.json())
-  ]);
-
-  categories = catRes || {
-    order: ['ข่าว','บันเทิง','กีฬา','สารคดี','เพลง','หนัง'],
-    default: 'บันเทิง',
-    rules: []
-  };
-
-  // รองรับสคีมาเก่า (เป็น array) / ใหม่ ({channels:[]})
-  channels = Array.isArray(chRes) ? chRes : (chRes.channels || []);
-
-  // เติม id ถ้ายังไม่มี
-  channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
-
-  localStorage.setItem('TV_DATA_CACHE_V1', JSON.stringify({t:Date.now(), cat:categories, ch:channels}));
 }
 
 /* ------------------------ Header: Clock & Now Playing ------------------------ */
@@ -182,14 +161,15 @@ function centerTabsIfPossible(){
 function getCategory(ch){
   if (ch.category) return ch.category;
 
-  // tags → category map
+  // tags → category map (ไม่มีข่าว/เพลงแล้ว)
   if (Array.isArray(ch.tags)) {
     const t = ch.tags.map(x=>String(x).toLowerCase());
-    if (t.includes('news')) return 'ข่าว';
     if (t.includes('sports')) return 'กีฬา';
-    if (t.includes('music')) return 'เพลง';
     if (t.includes('documentary')) return 'สารคดี';
     if (t.includes('movie') || t.includes('film')) return 'หนัง';
+    if (t.includes('music')) return 'บันเทิง'; // จัดไปที่บันเทิง
+    if (t.includes('news'))  return 'IPTV';   // ข่าวโยนรวมที่ IPTV
+    if (t.includes('kids') || t.includes('cartoon') || t.includes('anime')) return 'เด็ก';
   }
 
   // rules
@@ -208,7 +188,7 @@ function getCategory(ch){
     });
     if (ok) return r.category;
   }
-  return categories?.default || 'บันเทิง';
+  return categories?.default || 'IPTV';
 }
 function useWideLogo(ch){
   if (ch.logoWide) return true;
@@ -252,7 +232,6 @@ function render(opt={withEnter:false}){
       scrollToPlayer();
     });
 
-    // คำนวณ order สำหรับเอฟเฟกต์ stagger
     const row = Math.floor(i / Math.max(cols,1));
     const col = i % Math.max(cols,1);
     const order = row + col;
@@ -300,18 +279,16 @@ function playByIndex(i, opt={scroll:true}){
   showMobileToast(ch.name || '');
 }
 function buildSources(ch){
-  // สคีมาใหม่
   if (Array.isArray(ch.sources) && ch.sources.length){
     return [...ch.sources].sort((a,b)=>(a.priority||99)-(b.priority||99));
   }
-  // สคีมาเก่า
   const s = ch.src || ch.file;
   const t = ch.type || detectType(s);
   const drm = ch.drm || (ch.keyId && ch.key ? {clearkey:{keyId:ch.keyId, key:ch.key}} : undefined);
   return [{ src:s, type:t, drm }];
 }
 function tryPlayJW(ch, list, idx){
-  if (idx >= list.length) { console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch.name); return; }
+  if (idx >= list.length) { console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); return; }
   const s = list[idx];
 
   const jwSrc = makeJwSource(s, ch);
@@ -389,9 +366,9 @@ function ripple(event, container){
   const y = (event.clientY ?? (r.top  + r.height/2)) - r.top;
   const s = document.createElement('span');
   s.className = 'ripple';
-  s.style.width = s.style.height = `${max}px`;
-  s.style.left = `${x - max/2}px`;
-  s.style.top  = `${y - max/2}px`;
+  s.style.width = s.style.height = `${max}px";
+  s.style.left = `${x - max/2}px";
+  s.style.top  = `${y - max/2}px";
   container.querySelector('.ripple')?.remove();
   container.appendChild(s);
   s.addEventListener('animationend', ()=>s.remove(), { once:true });
@@ -406,30 +383,28 @@ function safeGet(k){ try{ return localStorage.getItem(k); }catch{ return null; }
 function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
 function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
 
-/* ------------------------ Icons (filled) ------------------------ */
-
+/* ------------------------ Icons ------------------------ */
 function getIconSVG(n){
   const c='currentColor';
   switch(n){
-    case 'IPTV':       // antenna
+    case 'IPTV':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 20h16v-2H4v2zm5-4h6v-2H9v2zm-3-4h12V8H6v4zm4-9 2 2 2-2 1.4 1.4L12 6.8 8.6 4.4 10 3z"/></svg>`;
-    case 'เด็ก':       // balloon
+    case 'เด็ก':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a5 5 0 0 1 5 5c0 3.9-3.6 7-5 7s-5-3.1-5-7a5 5 0 0 1 5-5zm1 14c2 3 1 4-1 6h-1l1-3-2 1 2-4h1z"/></svg>`;
-    case 'บันเทิง':  // star
+    case 'บันเทิง':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.6L12 18.7 6.2 21l1.1-6.6-4.7-4.6 6.5-.9L12 3z"/></svg>`;
-    case 'กีฬา':     // ball
+    case 'กีฬา':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
-    case 'สารคดี':   // book
+    case 'สารคดี':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
-    case 'หนัง':     // clapper
+    case 'หนัง':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
-    default:          // square
+    default:
       return `<svg viewBox="0 0 24 24" fill="${c}"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>`;
   }
 }
-}
 
-/* ------------------------ Histats (top-right in header) ------------------------ */
+/* ------------------------ Histats ------------------------ */
 function mountHistatsTopRight(){
   const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let holder = document.getElementById('histats_counter');
@@ -444,16 +419,14 @@ function mountHistatsTopRight(){
   const hs = document.createElement('script'); hs.type='text/javascript'; hs.async=true; hs.src='//s10.histats.com/js15_giftop_as.js';
   (document.head || document.body).appendChild(hs);
 
-  // ย้ายตัว counter เข้า holder เมื่อโหลดเสร็จ
   const move = ()=>{ const c=document.getElementById('histatsC'); if(c && !holder.contains(c)){ holder.appendChild(c); return; } requestAnimationFrame(move); };
   move();
 }
 
-/* ------------------------ NEW: Refresh button + cache clearing ------------------------ */
+/* ------------------------ Refresh + Auto clear ------------------------ */
 function mountRefreshButton(){
   const wrap = document.querySelector('.h-wrap') || document.querySelector('header');
-  if (!wrap) return;
-  if (document.getElementById('refresh-btn')) return;
+  if (!wrap || document.getElementById('refresh-btn')) return;
 
   const btn = document.createElement('button');
   btn.id = 'refresh-btn';
@@ -474,25 +447,18 @@ function mountRefreshButton(){
       btn.querySelector('.t').textContent = 'รีเฟรช';
     }
   });
-
   wrap.appendChild(btn);
 }
 
 async function clearAppCache(opt={}){
   try {
     localStorage.removeItem('lastId');
-    localStorage.removeItem('TV_DATA_CACHE_V1'); // legacy
     const keys = Object.keys(localStorage);
     for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
   } catch {}
-
   if (window.caches) {
-    try {
-      const names = await caches.keys();
-      await Promise.all(names.map(n => caches.delete(n)));
-    } catch {}
+    try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
   }
-
   if (!opt.silent) {
     window.__setNowPlaying?.('ล้างแคชเรียบร้อย');
     setTimeout(()=>window.__setNowPlaying?.(''), 1200);
