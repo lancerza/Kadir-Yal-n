@@ -1,9 +1,10 @@
-/* ========================= app.js (AUTO-PLAY FIRST + CLEAN UI) =========================
-   - เปิดเว็บเล่นช่องแรกอัตโนมัติ (ไม่ใช้ lastId)
-   - ปุ่มรีเฟรช + ล้างแคช + เคลียร์อัตโนมัติทุก 6 ชม.
-   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง
+/* ========================= app.js (RESUME LAST + AUTOPLAY) =========================
+   - เปิดเว็บใหม่: ถ้ามีช่องที่เคยเลือก (lastId) → เปิดหมวดนั้น + เล่นช่องนั้นทันที
+                    ถ้าไม่มี → เล่นช่องแรกของหมวดแรก
+   - ปุ่มรีเฟรช + ล้างแคช (ไม่ลบ lastId) + เคลียร์อัตโนมัติทุก 6 ชม.
    - now-playing อยู่ตำแหน่งเดิมใน header (ไม่มีกรอบ)
-======================================================================================== */
+   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง
+==================================================================================== */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -25,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowPlayingInHeader();   // now-playing กลับมาตำแหน่งเดิม (กลางใต้ clock)
+  mountNowPlayingInHeader();
   mountHistatsTopRight();
 
   try {
@@ -37,11 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   buildTabs();
 
-  const firstCat = (categories?.order?.[0]) || categories?.default || 'IPTV';
-  setActiveTab(firstCat);
-
-  // ========= Auto-play ช่องแรกของหมวดแรกทุกครั้งที่เข้าเว็บ =========
-  autoplayFirstIn(firstCat);
+  // แสดงช่องล่าสุดถ้ามี ไม่งั้นเล่นช่องแรกของหมวดแรก
+  resumeLastOrAutoplayFirst();
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
@@ -72,14 +70,24 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Auto-play helper ------------------------ */
-function autoplayFirstIn(catName){
-  // หา "ดัชนีจริงในอาร์เรย์ channels" ของช่องแรกที่อยู่ในหมวด catName
-  const idx = channels.findIndex(c => getCategory(c) === catName);
-  if (idx >= 0) {
-    // เล่นโดยไม่เลื่อนหน้าอัตโนมัติ (กันรบกวนผู้ใช้ตอนโหลด)
-    playByIndex(idx, { scroll:false });
+/* ------------------------ Resume or Autoplay ------------------------ */
+function resumeLastOrAutoplayFirst(){
+  const firstCat = (categories?.order?.[0]) || categories?.default || 'IPTV';
+  const lastId = safeGet('lastId');
+  if (lastId){
+    const idx = channels.findIndex(c => c.id === lastId);
+    if (idx >= 0){
+      const cat = getCategory(channels[idx]);
+      setActiveTab(cat);
+      // เล่นทันทีโดยไม่เลื่อนหน้า
+      playByIndex(idx, { scroll:false });
+      return;
+    }
   }
+  // ไม่มีประวัติหรือหาไม่เจอ → ใช้ตัวแรกของหมวดแรก
+  setActiveTab(firstCat);
+  const firstIdx = channels.findIndex(c => getCategory(c) === firstCat);
+  if (firstIdx >= 0) playByIndex(firstIdx, { scroll:false });
 }
 
 /* ------------------------ Header: Clock + Now Playing ------------------------ */
@@ -278,7 +286,9 @@ function playByChannel(ch){
 function playByIndex(i, opt={scroll:true}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
-  // ไม่เซ็ต lastId เพื่อให้เข้าเว็บครั้งใหม่เล่นช่องแรกเสมอ
+
+  // จดจำช่องล่าสุดเสมอ
+  safeSet('lastId', ch.id);
 
   const srcList = buildSources(ch);
   tryPlayJW(ch, srcList, 0);
@@ -311,9 +321,7 @@ function tryPlayJW(ch, list, idx){
     playbackRateControls:true
   });
 
-  // Fallback: ถ้า autoplay ล้มเหลว ให้ mute แล้วพยายามเล่น
   player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
-
   player.on('error', ()=> {
     console.warn('แหล่งล้มเหลว ลองตัวถัดไป', s);
     tryPlayJW(ch, list, idx+1);
@@ -451,11 +459,10 @@ function mountRefreshButton(){
     try{
       btn.disabled = true;
       btn.querySelector('.t').textContent = 'กำลังรีเฟรช...';
-      await clearAppCache();
+      await clearAppCache();      // ไม่ลบ lastId
       await loadData();
       buildTabs();
-      setActiveTab((categories?.order?.[0]) || categories?.default || 'IPTV');
-      autoplayFirstIn((categories?.order?.[0]) || categories?.default || 'IPTV');
+      resumeLastOrAutoplayFirst();
     } finally {
       btn.disabled = false;
       btn.querySelector('.t').textContent = 'รีเฟรช';
@@ -467,7 +474,8 @@ function mountRefreshButton(){
 async function clearAppCache(){
   try {
     const keys = Object.keys(localStorage);
-    for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer') || k==='lastId') localStorage.removeItem(k);
+    // ล้างค่า jwplayer* เท่านั้น (คงค่า lastId)
+    for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
   } catch {}
   if (window.caches) {
     try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
@@ -480,7 +488,7 @@ function scheduleAutoClear(){
   const now = Date.now();
   const last = Number(localStorage.getItem(AUTO_CLEAR_KEY) || 0);
   if (!last || (now - last) >= SIX_HR_MS) {
-    clearAppCache();
+    clearAppCache(); // ไม่กระทบ lastId
     localStorage.setItem(AUTO_CLEAR_KEY, String(now));
   }
   const delay = Math.max(1000, SIX_HR_MS - ((now - last) % SIX_HR_MS || 0));
