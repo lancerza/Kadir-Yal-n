@@ -1,8 +1,8 @@
 /* ========================= app.js (CLEAN + UI TUNED) =========================
-   - ไม่มีโค้ดแคช TV_DATA_CACHE_V1 / ไม่มีบล็อกซ้ำ
+   - ไม่มีโค้ดแคช TV_DATA_CACHE_V1
    - ปุ่มรีเฟรช + ล้างแคช + เคลียร์อัตโนมัติทุก 6 ชม. (ไม่พึ่งเซิร์ฟเวอร์)
-   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง (ไม่มีข่าว/เพลง)
-   - ไม่มี now-playing / now-playing--main / swap
+   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง
+   - now-playing อยู่ "ตำแหน่งเดิมใน header" (ไม่มีขอบ)
 ============================================================================== */
 
 const CH_URL  = 'channels.json';
@@ -25,12 +25,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
+  mountNowPlayingInHeader();   // <<== เพิ่ม now-playing ที่ header (กลางด้านล่าง clock)
   mountHistatsTopRight();
 
   try {
     await loadData();
   } catch (e) {
     console.error('โหลดข้อมูลไม่สำเร็จ:', e);
+    window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
   }
 
   buildTabs();
@@ -70,7 +72,7 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Header: Clock ------------------------ */
+/* ------------------------ Header: Clock + Now Playing ------------------------ */
 function mountClock(){
   const el = document.getElementById('clock');
   if (!el) return;
@@ -84,6 +86,25 @@ function mountClock(){
   };
   tick();
   setInterval(tick, 1000);
+}
+
+/* Now Playing: ตำแหน่งเดิมใน header (ไม่มีขอบ/พื้นหลัง) */
+function mountNowPlayingInHeader(){
+  const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
+  let now = document.getElementById('now-playing');
+  if (!now) {
+    now = document.createElement('div');
+    now.id = 'now-playing';
+  }
+  now.className = 'now-playing';          // << ไม่มี --main และไม่มีการทำกรอบ
+  now.setAttribute('aria-live','polite');
+  host.appendChild(now);                   // ต่อท้ายใน header ใต้ clock
+
+  window.__setNowPlaying = (name='')=>{
+    now.textContent = name || '';
+    now.title = name || '';
+    now.classList.remove('swap'); void now.offsetWidth; now.classList.add('swap'); // เอฟเฟกต์จาง
+  };
 }
 
 /* ------------------------ Tabs ------------------------ */
@@ -252,7 +273,9 @@ function playByIndex(i, opt={scroll:true}){
   const srcList = buildSources(ch);
   tryPlayJW(ch, srcList, 0);
 
+  window.__setNowPlaying?.(ch.name || '');
   highlight(i);
+
   if (opt.scroll ?? true) scrollToPlayer();
   showMobileToast(ch.name || '');
 }
