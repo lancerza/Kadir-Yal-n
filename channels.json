@@ -428,6 +428,15 @@
           "key": "6ed6fe26daa4b926810869ff60254ebb"
         }
       }
+    },
+    {
+      "name": "SportHD 1",
+      "logo": "https://cms.dmpcdn.com/livetv/2024/01/16/cdd42d20-b44d-11ee-9687-e7ccd66e1ea3_webp_original.webp",
+      "src": "https://github.com/BONDiptv/m3u8/raw/refs/heads/main/true1.m3u8",
+      "type": "hls",
+      "category": "กีฬา"
+        }
+      }
     }
   ]
 }
