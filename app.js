@@ -1,9 +1,10 @@
-/* ========================= app.js (CLEAN & BALANCED HEADER) =========================
-   - ไม่มี TV_DATA_CACHE_V1 / ไม่มีโค้ดซ้ำ
-   - ปุ่มรีเฟรช + ล้างแคช + ออโต้ล้างทุก 6 ชม.
-   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง (ตัดข่าว/เพลง)
+/* ========================= app.js (CLEAN + UI TUNED) =========================
+   - ไม่มีโค้ดแคช TV_DATA_CACHE_V1 / ไม่มีบล็อกซ้ำ
+   - ปุ่มรีเฟรช + ล้างแคช + เคลียร์อัตโนมัติทุก 6 ชม. (ไม่พึ่งเซิร์ฟเวอร์)
+   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง (ไม่มีข่าว/เพลง)
+   - Now Playing ถูกย้ายไปอยู่ "กลางบนสุดของ <main class='app'>"
    - ปรับ Histats + Refresh ให้อยู่ซ้าย/ขวาสมดุลกับ .h-wrap
-===================================================================================== */
+============================================================================== */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -25,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowPlayingContainer();
+  mountNowPlayingContainer();     // <-- ย้าย/สร้าง now-playing บนสุดของ main
   mountHistatsTopRight();
 
   try {
@@ -87,20 +88,24 @@ function mountClock(){
   tick();
   setInterval(tick, 1000);
 }
+
+// ===== Now Playing: move to top of <main class="app"> =====
 function mountNowPlayingContainer(){
-  const clock = document.getElementById('clock');
-  if (!clock) return;
+  const main = document.querySelector('main.app') || document.querySelector('.app') || document.body;
+
+  // ถ้ามี now-playing เดิมอยู่ที่ header ให้ย้ายมาไว้บนสุดของ main
   let now = document.getElementById('now-playing');
   if (!now) {
     now = document.createElement('div');
     now.id = 'now-playing';
-    now.className = 'now-playing';
-    now.setAttribute('aria-live','polite');
-    clock.after(now);
   }
+  now.className = 'now-playing now-playing--main';
+  now.setAttribute('aria-live','polite');
+  main.prepend(now); // ทำให้เป็น element แรกของ main เสมอ
+
   window.__setNowPlaying = (name='')=>{
-    now.textContent = name;
-    now.title = name;
+    now.textContent = name || '';
+    now.title = name || '';
     now.classList.remove('swap'); void now.offsetWidth; now.classList.add('swap');
   };
 }
