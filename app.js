@@ -1,9 +1,12 @@
-/* ========================= app.js (RESUME + SHOW ACTIVE CARD) =========================
-   - เปิดเว็บใหม่: ถ้ามี lastId → เปิดหมวดนั้น + เล่นช่องนั้น + เลื่อนให้เห็น ch-card ที่เล่นอยู่
-                   ถ้าไม่มี → เล่นช่องแรกของหมวดแรก + เลื่อนให้เห็น ch-card เช่นกัน
-   - ปุ่มรีเฟรช + ล้างแคช (ไม่ลบ lastId) + เคลียร์อัตโนมัติทุก 6 ชม.
-   - now-playing ตำแหน่งเดิมใน header (ไม่มีกรอบ)
-======================================================================================= */
+/* ========================= app.js (FINAL) =========================
+   - เปิดเว็บใหม่: ถ้ามี lastId → เล่นช่องนั้น + โชว์การ์ด/เลื่อนให้เห็น
+                   ถ้าไม่มี → เล่นช่องแรกของหมวดแรก
+   - ปุ่มรีเฟรช: ล้าง cache แอป/Service Worker (ไม่ลบ lastId) แล้วโหลดข้อมูลใหม่
+   - เคลียร์แคชอัตโนมัติทุก 6 ชม. (ไม่พึ่งเซิร์ฟเวอร์)
+   - now-playing อยู่ตำแหน่งเดิมใน header (ไม่มีกรอบ)
+   - Histats ยึดมุมขวา header, กันโหลดซ้ำ, ไม่ลอยทับหน้า
+   - Tabs เอฟเฟกต์ครบ + label/ไอคอนใหญ่ขึ้น
+=================================================================== */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -12,16 +15,22 @@ const TIMEZONE = 'Asia/Bangkok';
 const SWITCH_OUT_MS   = 140;
 const STAGGER_STEP_MS = 22;
 
+const SHOW_LOGOS = true;        // เปิด/ปิดการแสดงโลโก้ช่อง
+const USE_LOGO_PROXY = false;   // ถ้าใช้รูปข้ามโดเมนแล้วโดนบล็อก hotlink ให้ true และตั้ง PROXY_BASE
+const PROXY_BASE = window.PROXY_BASE || '';
+
 let categories = null;
 let channels   = [];
 let currentFilter = '';
 let currentIndex  = -1;
-let didInitialReveal = false;   // ป้องกันเลื่อนซ้ำ
+let didInitialReveal = false;
 
-try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
+try { if (window.jwplayer) jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
+  if (!SHOW_LOGOS) document.documentElement.classList.add('no-logos');
+
   mountRefreshButton();
   scheduleAutoClear();
 
@@ -29,22 +38,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   mountNowPlayingInHeader();
   mountHistatsTopRight();
 
-  try {
-    await loadData();
-  } catch (e) {
-    console.error('โหลดข้อมูลไม่สำเร็จ:', e);
-    window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
-  }
+  try { await loadData(); }
+  catch (e) { console.error('โหลดข้อมูลไม่สำเร็จ:', e); window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ'); }
 
   buildTabs();
-  resumeLastOrAutoplayFirst();  // เล่น + เตรียมเลื่อนให้เห็นการ์ดที่กำลังเล่น
+  resumeLastOrAutoplayFirst();
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 });
 
-/* ------------------------ Load (fresh fetch) ------------------------ */
+/* ------------------------ Load (fresh) ------------------------ */
 async function fetchJSONFresh(url){
   const u = new URL(url, location.href);
   u.searchParams.set('_t', String(Date.now()));
@@ -79,11 +84,10 @@ function resumeLastOrAutoplayFirst(){
       const cat = getCategory(channels[idx]);
       setActiveTab(cat);
       playByIndex(idx, { scroll:false });
-      scheduleRevealActiveCard();     // << เลื่อนให้เห็นการ์ดที่กำลังเล่น
+      scheduleRevealActiveCard();
       return;
     }
   }
-  // ไม่มีประวัติ → หมวดแรก + ช่องแรก
   setActiveTab(firstCat);
   const firstIdx = channels.findIndex(c => getCategory(c) === firstCat);
   if (firstIdx >= 0) {
@@ -91,26 +95,17 @@ function resumeLastOrAutoplayFirst(){
     scheduleRevealActiveCard();
   }
 }
-
-/* หน่วงสั้น ๆ เพื่อให้ render grid เสร็จก่อนแล้วค่อยเลื่อน */
 function scheduleRevealActiveCard(){
   if (didInitialReveal) return;
   didInitialReveal = true;
-  // รอทั้ง switch-out + render + switch-in
   setTimeout(()=> revealActiveCardIntoView(), SWITCH_OUT_MS + 220);
 }
-
 function revealActiveCardIntoView(){
   const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
-  if (!active) {
-    // ลองอีกครั้งหาก grid ยังไม่พร้อม
-    setTimeout(revealActiveCardIntoView, 120);
-    return;
-  }
+  if (!active) { setTimeout(revealActiveCardIntoView, 120); return; }
   const header = document.querySelector('header');
-  const pad = 80; // เว้นว่างเหนือการ์ดให้หายใจ
-  const h = (header?.offsetHeight) || 0;
-  const y = active.getBoundingClientRect().top + window.pageYOffset - h - pad;
+  const pad = 80;
+  const y = active.getBoundingClientRect().top + window.pageYOffset - ((header?.offsetHeight)||0) - pad;
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
@@ -129,18 +124,12 @@ function mountClock(){
   tick();
   setInterval(tick, 1000);
 }
-
 function mountNowPlayingInHeader(){
   const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let now = document.getElementById('now-playing');
-  if (!now) {
-    now = document.createElement('div');
-    now.id = 'now-playing';
-  }
-  now.className = 'now-playing';
-  now.setAttribute('aria-live','polite');
+  if (!now) { now = document.createElement('div'); now.id = 'now-playing'; }
+  now.className = 'now-playing'; now.setAttribute('aria-live','polite');
   host.appendChild(now);
-
   window.__setNowPlaying = (name='')=>{
     now.textContent = name || '';
     now.title = name || '';
@@ -154,8 +143,7 @@ function buildTabs(){
   root.innerHTML = '';
   (categories?.order || []).forEach(name=>{
     const btn = document.createElement('button');
-    btn.className = 'tab';
-    btn.dataset.filter = name;
+    btn.className = 'tab'; btn.dataset.filter = name;
     btn.setAttribute('aria-selected','false');
     btn.innerHTML = `
       <span class="tab-card">
@@ -259,12 +247,15 @@ function render(opt={withEnter:false}){
     if (useWideLogo(ch)) btn.dataset.wide = 'true';
     btn.title = ch.name || 'ช่อง';
 
+    const imgUrl = ch.logo ? proxiedImage(ch.logo) : '';
+    const logoHTML = (SHOW_LOGOS && ch.logo)
+      ? `<img class="logo" loading="lazy" decoding="async" referrerpolicy="no-referrer"
+           src="${escapeHtml(imgUrl)}" alt="${escapeHtml(ch.name||'โลโก้ช่อง')}">`
+      : `<div class="logo-fallback" aria-hidden="true">${escapeHtml(getInitials(ch.name||''))}</div>`;
+
     btn.innerHTML = `
       <div class="ch-card">
-        <div class="logo-wrap">
-          <img class="logo" loading="lazy" decoding="async"
-               src="${escapeHtml(ch.logo || '')}" alt="${escapeHtml(ch.name||'โลโก้ช่อง')}">
-        </div>
+        <div class="logo-wrap">${logoHTML}</div>
         <div class="name">${escapeHtml(ch.name||'ช่อง')}</div>
       </div>`;
 
@@ -276,8 +267,7 @@ function render(opt={withEnter:false}){
 
     const row = Math.floor(i / Math.max(cols,1));
     const col = i % Math.max(cols,1);
-    const order = row + col;
-    btn.style.setProperty('--i', order);
+    btn.style.setProperty('--i', row + col);
 
     grid.appendChild(btn);
   });
@@ -310,8 +300,7 @@ function playByIndex(i, opt={scroll:true}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
 
-  // จดจำช่องล่าสุดเสมอ
-  safeSet('lastId', ch.id);
+  safeSet('lastId', ch.id); // จำช่องล่าสุดเสมอ
 
   const srcList = buildSources(ch);
   tryPlayJW(ch, srcList, 0);
@@ -332,6 +321,7 @@ function buildSources(ch){
   return [{ src:s, type:t, drm }];
 }
 function tryPlayJW(ch, list, idx){
+  if (!window.jwplayer) return;
   if (idx >= list.length) { console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); return; }
   const s = list[idx];
 
@@ -361,109 +351,37 @@ function makeJwSource(s, ch){
 }
 function detectType(u){ u=(u||'').split('?')[0].toLowerCase(); if(u.endsWith('.m3u8'))return'hls'; if(u.endsWith('.mpd'))return'dash'; return'auto'; }
 function wrapWithProxyIfNeeded(url, ch){
-  if (window.PROXY_BASE && (ch.proxy || false)) {
+  if (PROXY_BASE && (ch.proxy || false)) {
     const payload = { src:url, referrer: ch.referrer||'', ua: ch.ua||'', headers: ch.headers||{} };
     const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-    return `${window.PROXY_BASE}/p/${b64}`;
+    return `${PROXY_BASE}/p/${b64}`;
   }
   return url;
-}
-function showMobileToast(text){
-  if (!isMobile()) return;
-  let t = document.getElementById('mini-toast');
-  if (!t){
-    t = document.createElement('div');
-    t.id = 'mini-toast';
-    t.style.cssText = `
-      position:absolute; left:50%; top:10px; transform:translateX(-50%);
-      background:rgba(0,0,0,.65); color:#fff; padding:6px 10px; border-radius:8px;
-      font-size:13px; font-weight:600; z-index:9; pointer-events:none; opacity:0; transition:opacity .18s ease`;
-    const parent = document.getElementById('player');
-    parent.style.position = parent.style.position || 'relative';
-    parent.appendChild(t);
-  }
-  t.textContent = text;
-  requestAnimationFrame(()=>{ t.style.opacity = '1'; });
-  setTimeout(()=>{ t.style.opacity = '0'; }, 1500);
-}
-function isMobile(){ return /iPhone|iPad|Android/i.test(navigator.userAgent) }
-function scrollToPlayer(){
-  const el = document.getElementById('player');
-  const header = document.querySelector('header');
-  const y = el.getBoundingClientRect().top + window.pageYOffset - ((header?.offsetHeight)||0) - 8;
-  window.scrollTo({ top:y, behavior:'smooth' });
-}
-
-/* ------------------------ UI helpers ------------------------ */
-function highlight(globalIndex){
-  document.querySelectorAll('.channel').forEach(el=>{
-    const idx = Number(el.dataset.globalIndex);
-    el.classList.toggle('active', idx === globalIndex);
-    el.setAttribute('aria-pressed', idx === globalIndex ? 'true':'false');
-  });
-}
-function ripple(event, container){
-  if(!container) return;
-  const r = container.getBoundingClientRect();
-  const max = Math.max(r.width, r.height);
-  const x = (event.clientX ?? (r.left + r.width/2)) - r.left;
-  const y = (event.clientY ?? (r.top  + r.height/2)) - r.top;
-  const s = document.createElement('span');
-  s.className = 'ripple';
-  s.style.width = s.style.height = `${max}px`;
-  s.style.left = `${x - max/2}px`;
-  s.style.top  = `${y - max/2}px`;
-  container.querySelector('.ripple')?.remove();
-  container.appendChild(s);
-  s.addEventListener('animationend', ()=>s.remove(), { once:true });
-}
-function escapeHtml(s){
-  return String(s).replace(/[&<>"'`=\/]/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
-  }[c]));
-}
-function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
-function safeGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
-function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
-function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
-
-/* ------------------------ Icons ------------------------ */
-function getIconSVG(n){
-  const c='currentColor';
-  switch(n){
-    case 'IPTV':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 20h16v-2H4v2zm5-4h6v-2H9v2zm-3-4h12V8H6v4zm4-9 2 2 2-2 1.4 1.4L12 6.8 8.6 4.4 10 3z"/></svg>`;
-    case 'เด็ก':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a5 5 0 0 1 5 5c0 3.9-3.6 7-5 7s-5-3.1-5-7a5 5 0 0 1 5-5zm1 14c2 3 1 4-1 6h-1l1-3-2 1 2-4h1z"/></svg>`;
-    case 'บันเทิง':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.6L12 18.7 6.2 21l1.1-6.6-4.7-4.6 6.5-.9L12 3z"/></svg>`;
-    case 'กีฬา':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
-    case 'สารคดี':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
-    case 'หนัง':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
-    default:
-      return `<svg viewBox="0 0 24 24" fill="${c}"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>`;
-  }
 }
 
 /* ------------------------ Histats (ติดขวาใน .h-wrap) ------------------------ */
 function mountHistatsTopRight(){
+  if (window.__histatsMounted) return;
+  window.__histatsMounted = true;
+
   const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let holder = document.getElementById('histats_counter');
   if (!holder) { holder = document.createElement('div'); holder.id = 'histats_counter'; }
   anchor.appendChild(holder);
 
   window._Hasync = window._Hasync || [];
-  window._Hasync.push(['Histats.startgif','1,4970267,4,10024,""']);
+  window._Hasync.push(['Histats.startgif','1,4970878,4,10052,""']); // ตัด CSS fixed เดิมทิ้ง
   window._Hasync.push(['Histats.fasi','1']);
   window._Hasync.push(['Histats.track_hits','']);
-
   const hs = document.createElement('script'); hs.type='text/javascript'; hs.async=true; hs.src='//s10.histats.com/js15_giftop_as.js';
   (document.head || document.body).appendChild(hs);
 
-  const move = ()=>{ const c=document.getElementById('histatsC'); if(c && !holder.contains(c)){ holder.appendChild(c); } requestAnimationFrame(move); };
+  const move = () => {
+    const c = document.getElementById('histatsC');
+    if (c && holder && !holder.contains(c)) holder.appendChild(c);
+  };
+  const mo = new MutationObserver(move);
+  mo.observe(document.body, { childList:true, subtree:true });
   move();
 }
 
@@ -523,6 +441,46 @@ function scheduleAutoClear(){
 }
 
 /* ------------------------ Utils ------------------------ */
+function proxiedImage(url){
+  if (!USE_LOGO_PROXY || !PROXY_BASE || !url) return url;
+  const payload = { src: url };
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  return `${PROXY_BASE}/i/${b64}`;
+}
+function getInitials(name=''){
+  const s = String(name).trim(); if (!s) return 'TV';
+  const arr = Array.from(s); const a = arr[0]||'T'; const b = /[A-Za-z0-9]/.test(arr[1]||'')?arr[1]:'';
+  return (a+b).toUpperCase();
+}
+function highlight(globalIndex){
+  document.querySelectorAll('.channel').forEach(el=>{
+    const idx = Number(el.dataset.globalIndex);
+    el.classList.toggle('active', idx === globalIndex);
+    el.setAttribute('aria-pressed', idx === globalIndex ? 'true':'false');
+  });
+}
+function ripple(event, container){
+  if(!container) return;
+  const r = container.getBoundingClientRect();
+  const max = Math.max(r.width, r.height);
+  const x = (event.clientX ?? (r.left + r.width/2)) - r.left;
+  const y = (event.clientY ?? (r.top  + r.height/2)) - r.top;
+  const s = document.createElement('span');
+  s.className = 'ripple';
+  s.style.width = s.style.height = `${max}px`;
+  s.style.left = `${x - max/2}px`;
+  s.style.top  = `${y - max/2}px`;
+  container.querySelector('.ripple')?.remove();
+  container.appendChild(s);
+  s.addEventListener('animationend', ()=>s.remove(), { once:true });
+}
+function isMobile(){ return /iPhone|iPad|Android/i.test(navigator.userAgent) }
+function scrollToPlayer(){
+  const el = document.getElementById('player');
+  const header = document.querySelector('header');
+  const y = el.getBoundingClientRect().top + window.pageYOffset - ((header?.offsetHeight)||0) - 8;
+  window.scrollTo({ top:y, behavior:'smooth' });
+}
 function escapeHtml(s){
   return String(s).replace(/[&<>"'`=\/]/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
@@ -532,3 +490,24 @@ function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout
 function safeGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
 function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
 function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
+
+/* ------------------------ Icons ------------------------ */
+function getIconSVG(n){
+  const c='currentColor';
+  switch(n){
+    case 'IPTV':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 20h16v-2H4v2zm5-4h6v-2H9v2zm-3-4h12V8H6v4zm4-9 2 2 2-2 1.4 1.4L12 6.8 8.6 4.4 10 3z"/></svg>`;
+    case 'เด็ก':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a5 5 0 0 1 5 5c0 3.9-3.6 7-5 7s-5-3.1-5-7a5 5 0 0 1 5-5zm1 14c2 3 1 4-1 6h-1l1-3-2 1 2-4h1z"/></svg>`;
+    case 'บันเทิง':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.6L12 18.7 6.2 21l1.1-6.6-4.7-4.6 6.5-.9L12 3z"/></svg>`;
+    case 'กีฬา':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
+    case 'สารคดี':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
+    case 'หนัง':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
+    default:
+      return `<svg viewBox="0 0 24 24" fill="${c}"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>`;
+  }
+}
