@@ -3,7 +3,7 @@
    - Tabs แบบ badge โปร่ง (ย่อกว่าเดิม) + เอฟเฟกต์ hover/active/selected ชัด
    - กริดช่อง + เอฟเฟกต์สลับหมวด
    - รองรับโลโก้แนวนอน (data-wide)
-   - ปรับขนาดแท็บตามหน้าจอ (XS/SM/MD/LG)
+   - ขยาย/ย่อ Histats ด้วยตัวแปร --hs-size, --hs-scale
 =============================================================================== */
 
 /* ---------- Root tokens ---------- */
@@ -24,7 +24,7 @@
   --logo-max-w:82px;
   --logo-wide-h:42px;
 
-  /* Tabs (COMPACT v2 — เล็กลงกว่าเดิม) */
+  /* Tabs (COMPACT v2 — เล็กลง) */
   --tabW: 68px;      /* ความกว้างการ์ด */
   --tabH: 54px;      /* ความสูงการ์ด */
   --tab-gap:6px;
@@ -35,6 +35,10 @@
   --hud-size:32px;
   --hud-gap:10px;
   --hud-radius:12px;
+
+  /* Histats size controls */
+  --hs-size: 40px;   /* ความสูงจริงของ badge (px) */
+  --hs-scale: 1;     /* สเกลคูณ เพื่อขยาย/ย่ออย่างเร็ว */
 }
 
 /* ---------- Reset ---------- */
@@ -66,7 +70,8 @@ header{
   min-height: calc(var(--hud-size) + 12px);
   padding:10px 14px;
   padding-left:  calc(var(--hud-size) + 16px);
-  padding-right: calc(var(--hud-size) + 16px);
+  /* กันพื้นที่ด้านขวาตามขนาดที่ใหญ่กว่า ระหว่าง hud กับ histats */
+  padding-right: calc(max(var(--hud-size), var(--hs-size)) + 16px);
 }
 .clock{font-weight:700;font-size:clamp(15px,2.3vw,19px);letter-spacing:.2px;text-align:center}
 .now-playing{
@@ -79,13 +84,14 @@ header{
 /* ---------- Histats (ขวาของ header) ---------- */
 #histats_counter{
   position:absolute; right:8px; top:50%;
-  transform:translateY(-50%) scale(0.95);
+  height: var(--hs-size);
+  transform: translateY(-50%) scale(var(--hs-scale));
   transform-origin:100% 50%;
-  height:var(--hud-size); display:grid; place-items:center; z-index:2;
+  display:grid; place-items:center; z-index:2;
 }
 #histats_counter #histatsC{ position:static !important }
 #histats_counter img{
-  max-height:var(--hud-size) !important; height:var(--hud-size) !important; width:auto !important;
+  max-height:var(--hs-size) !important; height:var(--hs-size) !important; width:auto !important;
   opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))
 }
 
@@ -238,19 +244,18 @@ header{
 /* Misc */
 #mini-toast{ user-select:none }
 
-/* ---------- Responsive tweaks (Tabs/Header scale) ---------- */
+/* ---------- Responsive tweaks (Tabs/Header/Histats scale) ---------- */
 
 /* XS: มือถือจอเล็กมาก */
 @media (max-width: 380px){
   :root{
     --tabW: 62px; --tabH: 50px; --tabBadge: 16px; --tab-font: 9.2px;
     --hud-size:30px;
+    --hs-size: 34px; --hs-scale: .90;
   }
   .tabs{ gap:8px; padding:10px 6px 12px; }
   .refresh-btn .t{ display:none } /* เหลือไอคอนกันชนเวลา */
   .refresh-btn{ padding:0 8px }
-  #histats_counter{ transform:translateY(-50%) scale(0.78) }
-  .tabs .tab[aria-selected="true"] .tab-card::after{ bottom:-5px; height:3px; width:38% }
 }
 
 /* SM: มือถือทั่วไป */
@@ -258,8 +263,8 @@ header{
   :root{
     --tabW: 66px; --tabH: 52px; --tabBadge: 18px; --tab-font: 9.6px;
     --hud-size:31px;
+    --hs-size: 36px; --hs-scale: .94;
   }
-  #histats_counter{ transform:translateY(-50%) scale(0.84) }
 }
 
 /* MD: แท็บเล็ต/เดสก์ท็อปเล็ก */
@@ -267,6 +272,7 @@ header{
   :root{
     --tabW: 74px; --tabH: 58px; --tabBadge: 20px; --tab-font: 10px;
     --hud-size:33px;
+    --hs-size: 40px; --hs-scale: 1;
   }
 }
 
@@ -275,10 +281,11 @@ header{
   :root{
     --tabW: 78px; --tabH: 62px; --tabBadge: 22px; --tab-font: 10.6px;
     --hud-size:34px;
+    --hs-size: 44px; --hs-scale: 1.05;
   }
 }
 @media (min-width: 1280px){
-  #histats_counter{ transform:translateY(-50%) scale(1) }
+  #histats_counter{ transform:translateY(-50%) scale(var(--hs-scale)) }
 }
 
 /* ===== Selected tab: accent + underline + glow (ท้ายไฟล์) ===== */
