@@ -3,7 +3,7 @@
                    ถ้าไม่มี → เล่นช่องแรกของหมวดแรก + เลื่อนให้เห็น ch-card เช่นกัน
    - ปุ่มรีเฟรช + ล้างแคช (ไม่ลบ lastId) + เคลียร์อัตโนมัติทุก 6 ชม.
    - now-playing ตำแหน่งเดิมใน header (ไม่มีกรอบ)
-   - Histats ติดมุมขวาใน .h-wrap (ค่า 4970878/10052) + ซิงก์สีปุ่มรีเฟรชจาก @b1:
+   - Histats ติดมุมขวาใน .h-wrap (ค่า 4970878/10052) + ซิงก์สีปุ่มรีเฟรชจาก @b1: (รองรับ URL เข้ารหัส)
 ======================================================================================= */
 
 const CH_URL  = 'channels.json';
@@ -460,7 +460,9 @@ function mountHistatsTopRight(){
     (document.head || document.body).appendChild(hs);
   }
 
-  // ย้าย #histatsC มาไว้ใน holder เสมอ + ยกเลิก position เดิม ให้จัดวางตาม CSS เรา และซิงก์สีปุ่มรีเฟรช
+  let lastB1 = null;
+
+  // ย้าย #histatsC เข้า holder เสมอ และพยายามซิงก์สีจากพารามิเตอร์ @b1 (ทั้งแบบ raw และแบบเข้ารหัส)
   const ensureInside = () => {
     const c = document.getElementById('histatsC');
     if (c && c.parentNode !== holder) {
@@ -472,36 +474,69 @@ function mountHistatsTopRight(){
     trySyncRefreshColor();
   };
 
-  // พาร์สสีจากพารามิเตอร์ @b1: ใน URL รูป Histats (int 32-bit signed → ARGB)
-  function trySyncRefreshColor(){
-    const img = holder.querySelector('img[src*="histats"][src*="@b1:"]') || holder.querySelector('img[src*="@b1:"]');
-    if (!img) return;
-    const m = img.src.match(/@b1:(-?\d+)/);
-    if (!m) return;
-    const n = Number(m[1]);           // signed int
-    const v = (n >>> 0);              // uint32
-    const a = (v >>> 24) & 255;
+  // หา @b1 จากหลายรูปแบบใน src (raw @b1:, แบบ %40b1%3A, หรือ b1= ใน query)
+  function parseB1FromUrl(u){
+    if (!u) return null;
+    const tests = [
+      /@b1:(-?\d+)/i,           // raw
+      /%40b1%3A(-?\d+)/i,       // encoded (@ -> %40, ':' -> %3A)
+      /[?&]b1=(-?\d+)/i         // as query key
+    ];
+    for (const re of tests){
+      const m = u.match(re);
+      if (m) return Number(m[1]);
+    }
+    try {
+      const dec = decodeURIComponent(u);
+      const m2 = dec.match(/@b1:(-?\d+)/i);
+      if (m2) return Number(m2[1]);
+    } catch {}
+    return null;
+  }
+
+  function applyB1(n){
+    lastB1 = n;
+    const v = (n >>> 0); // signed -> uint32
     const r = (v >>> 16) & 255;
     const g = (v >>> 8)  & 255;
     const b = (v       ) & 255;
 
-    // เฉดเข้มลงไว้ทำไล่ระดับ
+    // เฉดเข้มไว้ทำไล่ระดับ
     const k = 0.35;
-    const r2 = Math.max(0, Math.floor(r * (1 - k)));
-    const g2 = Math.max(0, Math.floor(g * (1 - k)));
-    const b2 = Math.max(0, Math.floor(b * (1 - k)));
+    const r2 = Math.max(0, Math.floor(r*(1-k)));
+    const g2 = Math.max(0, Math.floor(g*(1-k)));
+    const b2 = Math.max(0, Math.floor(b*(1-k)));
 
     const root = document.documentElement.style;
     root.setProperty('--hs-accent',   `rgb(${r}, ${g}, ${b})`);
     root.setProperty('--hs-accent-2', `rgb(${r2}, ${g2}, ${b2})`);
     root.setProperty('--hs-glow',     `rgba(${r}, ${g}, ${b}, 0.55)`);
     root.setProperty('--hs-glow-2',   `rgba(${r2}, ${g2}, ${b2}, 0.38)`);
-    // ใช้ค่า alpha ถ้าจำเป็น: a อยู่ในช่วง 0..255 (ยังไม่ใช้ในธีม)
   }
 
+  function trySyncRefreshColor(){
+    const imgs = holder.querySelectorAll('img');
+    for (const img of imgs){
+      const src = img.currentSrc || img.src || '';
+      const b1 = parseB1FromUrl(src);
+      if (b1 !== null && b1 !== lastB1){
+        applyB1(b1);
+        break;
+      }
+    }
+  }
+
+  // ทำงานทันที + เฝ้าดู DOM (รวมถึงการสลับ src ของรูป)
   ensureInside();
   const obs = new MutationObserver(ensureInside);
-  obs.observe(document.documentElement, { childList:true, subtree:true });
+  obs.observe(document.documentElement, { childList:true, subtree:true, attributes:true, attributeFilter:['src'] });
+
+  // กันพลาด: ยิงสำรวจซ้ำช่วงสั้น ๆ เผื่อ histats เปลี่ยน src แบบ async
+  let tries = 0;
+  const retry = setInterval(()=>{
+    trySyncRefreshColor();
+    if (++tries >= 20) clearInterval(retry); // 20 ครั้ง ~ 10 วิ
+  }, 500);
 }
 
 /* ------------------------ Refresh + Auto clear ------------------------ */
