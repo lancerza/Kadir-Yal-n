@@ -1,7 +1,11 @@
-/* ===================== styles.css (TAB LABEL HIGHER + BIGGER) =====================
-   - ขยับ tab-label สูงขึ้นเล็กน้อย + ขยายใหญ่ขึ้น (responsive)
-   - ส่วนอื่นคงเดิม (header/now-playing/tabs/grid/refresh/histats)
-=================================================================================== */
+/* ===================== styles.css (FULL) =====================
+   - Glass header + เวลา + now playing (สมดุล: ซ้าย Refresh ⟷ กลาง Clock ⟷ ขวา Histats)
+   - Tabs แบบ badge โปร่ง + เอฟเฟกต์ hover/active/selected ครบ (label ขยับขึ้น+ใหญ่ขึ้น)
+   - กริดช่องขนาดคงที่ + เอฟเฟกต์สลับหมวด
+   - รองรับโลโก้แนวนอน (data-wide) + ฟอลแบ็กตัวอักษรย่อ
+   - ปุ่มรีเฟรชกลืนธีม, responsive ทุกหน้าจอ
+   - Histats ติดขวา header (ปรับขนาดด้วย --hs-size/--hs-scale)
+================================================================ */
 
 /* ---------- Root tokens ---------- */
 :root{
@@ -25,19 +29,19 @@
   --tabW: 72px;
   --tabH: 58px;
   --tab-gap:6px;
-  --tabBadge:28px;     /* ไอคอนใหญ่ขึ้นอีกนิด */
-  --tab-font:12.2px;   /* ป้ายชื่อใหญ่ขึ้น */
+  --tabBadge:28px;     /* ขนาด badge ไอคอน */
+  --tab-font:12.2px;   /* ขนาดตัวอักษร label */
 
-  /* Header HUD */
+  /* Header HUD (refresh/histats) */
   --hud-size:32px;
   --hud-radius:12px;
 
-  /* Histats size */
-  --hs-size: 40px;
-  --hs-scale: 1;
+  /* Histats */
+  --hs-size: 42px;     /* ความสูง counter */
+  --hs-scale: 1;       /* สเกลรวม */
 }
 
-/* ---------- Base / Reset ---------- */
+/* ---------- Reset ---------- */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -49,7 +53,7 @@ img{max-width:100%;display:block}
 button{font:inherit;background:none;border:0;color:inherit}
 a{color:inherit;text-decoration:none}
 
-/* ---------- Layout ---------- */
+/* ---------- Layout wrappers ---------- */
 .container{ width:min(100%,var(--maxw)); margin:0 auto; padding:14px }
 .app{ width:min(100%,var(--maxw)); margin:0 auto; padding:12px 14px 40px }
 
@@ -65,61 +69,82 @@ header{
   display:grid; justify-items:center; gap:4px;
   min-height: calc(var(--hud-size) + 12px);
   padding:10px 14px;
+  /* กันพื้นที่ซ้าย/ขวาให้ปุ่ม/เคาน์เตอร์ แล้วคงความกลางของเวลา */
   padding-left:  calc(var(--hud-size) + 16px);
   padding-right: calc(max(var(--hud-size), var(--hs-size)) + 16px);
 }
+
+/* Clock */
 .clock{
-  font-weight:800; font-size:clamp(16px,2.6vw,20px); letter-spacing:.3px;
-  font-variant-numeric: tabular-nums; color:#f4f7fb; text-align:center;
+  font-weight:800;
+  font-size:clamp(16px,2.6vw,20px);
+  letter-spacing:.3px;
+  font-variant-numeric: tabular-nums;
+  color:#f4f7fb;
+  text-align:center;
   text-shadow:0 1px 0 rgba(0,0,0,.55), 0 0 18px rgba(255,255,255,.04);
 }
 
-/* Now Playing (เดิม, ไม่มีกรอบ) */
+/* Now Playing (ไม่มีกรอบ/พื้นหลัง) */
 .now-playing{
-  margin-top:2px; font-size:clamp(13.5px,2.1vw,17.5px); font-weight:700;
-  letter-spacing:.2px; color:#eaf1ff; opacity:.95; text-align:center;
-  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  margin-top:2px;
+  font-size:clamp(13.5px,2.1vw,17.5px);
+  font-weight:700;
+  letter-spacing:.2px;
+  color:#eaf1ff;
+  opacity:.95;
+  text-align:center;
+  max-width:100%;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   background:none; border:none; box-shadow:none;
 }
 .now-playing.swap{ animation: npFade .24s ease both }
 @keyframes npFade{from{opacity:0;transform:translateY(4px)}to{opacity:.95;transform:none}}
 
-/* Histats */
+/* ---------- Histats (ขวาของ header) ---------- */
 #histats_counter{
-  position:absolute; right:8px; top:50%;
+  position:absolute; right:10px; top:50%;
   height: var(--hs-size);
   transform: translateY(-50%) scale(var(--hs-scale));
   transform-origin:100% 50%;
-  display:grid; place-items:center; z-index:2;
+  display:grid; place-items:center; z-index:5;
 }
 #histats_counter #histatsC{ position:static !important }
-#histats_counter img{ max-height:var(--hs-size) !important; height:var(--hs-size) !important; width:auto !important; opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45)) }
+#histats_counter img{
+  max-height:var(--hs-size) !important; height:var(--hs-size) !important; width:auto !important;
+  opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));
+}
 
-/* Refresh button */
+/* ---------- Refresh button (ซ้ายของ header) ---------- */
 .refresh-btn{
   position:absolute; left:8px; top:50%; transform:translateY(-50%);
   height: var(--hud-size); line-height: var(--hud-size);
-  display:inline-flex; align-items:center; gap:8px; padding:0 12px;
-  border-radius: var(--hud-radius); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border:1px solid rgba(255,255,255,.18); color:var(--text); font-weight:700; font-size:12px;
-  box-shadow:0 6px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35); backdrop-filter: blur(6px);
-  cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; z-index:3;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:0 12px; border-radius: var(--hud-radius);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.18);
+  color:var(--text); font-weight:700; font-size:12px;
+  box-shadow:0 6px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35);
+  backdrop-filter: blur(6px);
+  cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  z-index:3;
 }
 .refresh-btn .i{ font-size:14px; line-height:1 }
 .refresh-btn:hover{ transform:translateY(-50%) translateY(-1px); border-color:rgba(255,255,255,.5) }
 .refresh-btn:active{ transform:translateY(-50%) scale(.985) }
 .refresh-btn[disabled]{ opacity:.65; cursor:wait }
 
-/* Player */
+/* ---------- Player ---------- */
 #player{
   width:100%; aspect-ratio:16/9; background:#000; border-radius:16px; overflow:hidden;
   border:1px solid var(--border); box-shadow:0 8px 18px rgba(0,0,0,.25) inset;
 }
 
-/* ---------- Tabs ---------- */
+/* ---------- Tabs (badge โปร่ง) ---------- */
 .tabs{
   position:relative; display:flex; gap:clamp(8px, 1.1vw, 12px);
-  padding:12px 6px 14px; margin:10px auto 10px; overflow:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+  padding:12px 6px 14px; margin:10px auto 10px;
+  overflow:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
   width:min(100%,var(--maxw));
 }
 .tabs::-webkit-scrollbar{height:6px}
@@ -138,37 +163,49 @@ header{
 .tab-card{
   width:var(--tabW); height:var(--tabH);
   border-radius:10px; display:grid; grid-template-rows:auto auto; place-items:center; gap:var(--tab-gap);
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 6px 14px rgba(0,0,0,.22); color:#fff;
-  transform: translateZ(0) scale(1); transform-origin:50% 50%;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 6px 14px rgba(0,0,0,.22);
+  color:#fff;
+  transform: translateZ(0) scale(1);
+  transform-origin:50% 50%;
   transition: transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .18s ease, border-color .18s ease;
-  will-change:transform; z-index:0;
+  will-change:transform;
+  z-index:0;
 }
 
-/* Icon badge */
+/* badge ไอคอนใหญ่ */
 .tab-icon{
-  width:var(--tabBadge); height:var(--tabBadge); display:grid; place-items:center; border-radius:12px;
+  width:var(--tabBadge); height:var(--tabBadge);
+  display:grid; place-items:center; border-radius:12px;
   background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
   border:1px solid rgba(255,255,255,.22);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 4px 12px rgba(0,0,0,.35);
 }
-.tab-icon svg{ width:max(12px, calc(var(--tabBadge) - 6px)); height:max(12px, calc(var(--tabBadge) - 6px)); display:block }
+.tab-icon svg{
+  width:max(12px, calc(var(--tabBadge) - 6px));
+  height:max(12px, calc(var(--tabBadge) - 6px));
+  display:block;
+}
 
 /* Label: ขยับขึ้น + ใหญ่ขึ้น */
 .tab-label{
   position:relative;
-  top:-2px;                 /* << ขยับขึ้น */
+  top:-2px;
   font-weight:900;
   font-size:var(--tab-font);
   line-height:1.05;
   letter-spacing:.25px;
 }
 
-/* Hover/Active */
+/* Hover/Active base */
 @media (hover:hover){
   .tabs .tab:hover .tab-card{
     transform:translateZ(0) scale(1.055);
-    box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 10px 18px rgba(0,0,0,.28), 0 0 14px rgba(255,255,255,.10);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.08) inset,
+      0 10px 18px rgba(0,0,0,.28),
+      0 0 14px rgba(255,255,255,.10);
     border-color:rgba(255,255,255,.28);
   }
   .tabs .tab:active .tab-card{ transform:translateZ(0) scale(.985) }
@@ -182,32 +219,41 @@ header{
 .tab[data-filter="สารคดี"]  { --accent: #a78bfa; }
 .tab[data-filter="เด็ก"]    { --accent: #f472b6; }
 .tab[data-filter="หนัง"]    { --accent: #fb7185; }
+
 .tabs .tab[aria-selected="true"] .tab-card{
   transform: translateZ(0) scale(1.06);
   border-color: var(--accent, rgba(255,255,255,.34));
-  box-shadow: 0 0 0 2px rgba(255,255,255,.22) inset, 0 12px 22px rgba(0,0,0,.32), 0 0 14px rgba(255,255,255,.18);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.22) inset,
+    0 12px 22px rgba(0,0,0,.32),
+    0 0 14px rgba(255,255,255,.18);
   z-index: 2; position: relative;
 }
 .tabs .tab[aria-selected="true"] .tab-card::after{
-  content:""; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
-  width:40%; height:3px; border-radius:3px; background: var(--accent, #86efac);
-  filter: drop-shadow(0 0 6px rgba(255,255,255,.25)); pointer-events:none;
+  content:"";
+  position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
+  width:40%; height:3px; border-radius:3px;
+  background: var(--accent, #86efac);
+  filter: drop-shadow(0 0 6px rgba(255,255,255,.25));
+  pointer-events:none;
 }
 
-/* ---------- Grid ---------- */
+/* ---------- Grid (channels) ---------- */
 .grid{
   width:min(100%,var(--maxw)); margin:12px auto 0; display:grid;
   grid-template-columns:repeat(auto-fill,minmax(var(--tile-w),1fr));
   gap:var(--tile-g); justify-items:center;
+  opacity:1; transform:none; filter:none;
 }
 .grid.switch-in .channel{
   opacity:0; transform:translateY(6px) scale(.98); filter:blur(4px);
   animation:tileIn .34s cubic-bezier(.2,.7,.2,1) forwards;
-  animation-delay:calc(var(--stagger) * var(--i,0));
+  animation-delay:calc(var(--stagger) * var(--i,0)); will-change:transform,opacity,filter;
 }
 @keyframes tileIn{to{opacity:1;transform:none;filter:none}}
+.grid.switch-out,.grid.switch-in{contain:paint}
 
-/* Channel card */
+/* ---------- Channel card ---------- */
 .channel{position:relative;width:var(--tile-w);height:var(--tile-h);border-radius:14px;cursor:pointer;transform:translateZ(0)}
 .channel::after{
   content:"";position:absolute;inset:-6px;border-radius:18px;
@@ -220,44 +266,85 @@ header{
 .ch-card{
   position:relative; z-index:1; width:100%; height:100%;
   background:linear-gradient(180deg,var(--panel),var(--panel-2));
-  border:1px solid var(--border); border-radius:12px; padding:9px 8px 8px;
-  box-shadow:0 6px 16px rgba(0,0,0,.18);
+  border:1px solid var(--border); border-radius:12px;
+  padding:9px 8px 8px; box-shadow:0 6px 16px rgba(0,0,0,.18);
   display:grid; grid-template-rows:1fr auto; gap:6px; place-items:center; overflow:hidden;
   transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
 }
-.channel:hover .ch-card{ transform:translateY(-1px);border-color:rgba(255,255,255,.7);
-  box-shadow:0 0 0 1px rgba(255,255,255,.75) inset, 0 0 10px rgba(255,255,255,.42), 0 0 20px rgba(255,255,255,.22) }
+.channel:hover .ch-card{
+  transform:translateY(-1px);border-color:rgba(255,255,255,.7);
+  box-shadow:0 0 0 1px rgba(255,255,255,.75) inset, 0 0 10px rgba(255,255,255,.42), 0 0 20px rgba(255,255,255,.22);
+}
 .channel:active .ch-card{transform:scale(.985)}
 
-.logo-wrap{display:grid; place-items:center; width:100%; height:100%}
+/* โลโก้ + ฟอลแบ็กอักษรย่อ */
+.logo-wrap,.logo-zone{display:grid; place-items:center; width:100%; height:100%}
 .logo{max-height:var(--logo-max-h); max-width:var(--logo-max-w); object-fit:contain; filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
 .channel[data-wide="true"] .logo{max-height:var(--logo-wide-h)}
+
+.logo-fallback{
+  width:56px; height:56px; border-radius:12px;
+  display:grid; place-items:center;
+  font-weight:900; font-size:22px; letter-spacing:.5px;
+  color:#fff; text-shadow:0 1px 1px rgba(0,0,0,.45);
+  background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 4px 10px rgba(0,0,0,.28);
+}
+.channel[data-wide="true"] .logo-fallback{
+  width:72px; height:40px; border-radius:10px; font-size:18px;
+}
+
 .name{
   width:100%; text-align:center; font-weight:700; font-size:12px; letter-spacing:.2px;
   color:#eaeef3; opacity:.95; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
 /* Ripple */
-.ripple{ position:absolute; border-radius:50%;
+.ripple{
+  position:absolute; border-radius:50%;
   background:radial-gradient(circle at center, rgba(255,255,255,.55), rgba(255,255,255,0));
-  transform:scale(0); animation:ripple .5s ease-out; pointer-events:none }
+  transform:scale(0); animation:ripple .5s ease-out; pointer-events:none;
+}
 @keyframes ripple{to{transform:scale(1);opacity:0}}
+
+/* Misc */
+#mini-toast{ user-select:none }
 
 /* ---------- Responsive tweaks ---------- */
 @media (max-width: 380px){
-  :root{ --tabW: 66px; --tabH: 54px; --tabBadge: 26px; --tab-font: 11.6px; --hud-size:30px; --hs-size:34px; --hs-scale:.9 }
+  :root{
+    --tabW: 66px; --tabH: 54px; --tabBadge: 26px; --tab-font: 11.6px;
+    --hud-size:30px;
+    --hs-size: 34px; --hs-scale: .9;
+  }
   .tabs{ gap:8px; padding:10px 6px 12px }
-  .refresh-btn .t{ display:none } .refresh-btn{ padding:0 8px }
+  .refresh-btn .t{ display:none }
+  .refresh-btn{ padding:0 8px }
 }
 @media (min-width: 381px) and (max-width: 639px){
-  :root{ --tabW: 70px; --tabH: 56px; --tabBadge: 28px; --tab-font: 12px; --hs-size:36px; --hs-scale:.94 }
+  :root{
+    --tabW: 70px; --tabH: 56px; --tabBadge: 28px; --tab-font: 12px;
+    --hs-size: 36px; --hs-scale: .94;
+  }
 }
 @media (min-width: 640px) and (max-width: 1023px){
-  :root{ --tabW: 78px; --tabH: 62px; --tabBadge: 30px; --tab-font: 12.4px; --hs-size:40px }
+  :root{
+    --tabW: 78px; --tabH: 62px; --tabBadge: 30px; --tab-font: 12.4px;
+    --hs-size: 40px; --hs-scale: 1;
+  }
 }
 @media (min-width: 1024px){
-  :root{ --tabW: 84px; --tabH: 66px; --tabBadge: 32px; --tab-font: 12.8px; --hs-size:44px; --hs-scale:1.05 }
+  :root{
+    --tabW: 84px; --tabH: 66px; --tabBadge: 32px; --tab-font: 12.8px;
+    --hs-size: 44px; --hs-scale: 1.05;
+  }
 }
 @media (min-width: 1280px){
   #histats_counter{ transform:translateY(-50%) scale(var(--hs-scale)) }
 }
+
+/* โหมดไม่มีโลโก้ (ถ้า <html> มี class="no-logos") */
+.no-logos .logo-zone,.no-logos .logo-wrap{ display:none }
+.no-logos .ch-card{ grid-template-rows: 1fr }
+.no-logos .name{ font-size:14px }
