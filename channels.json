@@ -472,6 +472,8 @@
     "src": "https://keela2.com/stream/21/index.m3u8?username=PrVx9n8jKo&password=hw4bIEKgiM",
     "type": "hls",
     "category": "กีฬา"
+   },
+  {   
       "name": "TennisHD",
     "logo": "https://cms.dmpcdn.com/livetv/2023/04/28/f65ea900-e595-11ed-86b8-bb40638e3c49_webp_original.webp",
     "src": "https://www.livedoomovies.com:4432/02_TennisHD_720p/chunklist.m3u8",
@@ -490,8 +492,7 @@
     "logo": "https://img2.pic.in.th/pic/bg1.webp",
     "src": "https://keela2.com/stream/8/index.m3u8?token=mvFWafOIir5JDlQN",
     "type": "hls",
-    "category": "กีฬา",
-    "badge": "สำรอง"
+    "category": "กีฬา"
   },
   {
     "name": "beIN SPORTS 2",
@@ -505,8 +506,7 @@
     "logo": "https://img5.pic.in.th/file/secure-sv1/bg2d277716feb3f04d2.png",
     "src": "https://keela2.com/stream/2/index.m3u8?token=mvFWafOIir5JDlQN",
     "type": "hls",
-    "category": "กีฬา",
-    "badge": "สำรอง"
+    "category": "กีฬา"
   },
   {
     "name": "beIN SPORTS 3",
@@ -520,8 +520,7 @@
     "logo": "https://img2.pic.in.th/pic/bg37f188872f67815d9.webp",
     "src": "https://keela2.com/stream/10/index.m3u8?token=mvFWafOIir5JDlQN",
     "type": "hls",
-    "category": "กีฬา",
-    "badge": "สำรอง"  
+    "category": "กีฬา" 
   }
   ]
 }
