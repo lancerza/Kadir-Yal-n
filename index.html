@@ -18,42 +18,32 @@
         <span class="i">↻</span><span class="t">รีเฟรช</span>
       </button>
       <div id="clock" class="clock" aria-live="polite"></div>
-
-      <!-- Histats.com  (div with counter) -->
       <div id="histats_counter"></div>
     </div>
   </header>
 
   <main class="app">
-    <section id="player" aria-label="ตัวเล่นวิดีโอ"></section>
+    <section id="player" aria-label="ตัวเล่นวิดีโอ">
+      <!-- error & link zone will be injected -->
+    </section>
     <nav id="tabs" class="tabs" role="tablist" aria-label="กรองช่อง"></nav>
     <section class="grid" id="channel-list" aria-live="polite"></section>
   </main>
 
-  <!-- Histats.com  START  (aync) -->
-  <script type="text/javascript">
-    var _Hasync= _Hasync|| [];
-    _Hasync.push(['Histats.startgif', '1,4970878,4,10052,"div#histatsC {position: absolute;top:0px;right:0px;}body>div#histatsC {position: fixed;}"']);
-    _Hasync.push(['Histats.fasi', '1']);
-    _Hasync.push(['Histats.track_hits', '']);
-    (function() {
-      var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
-      hs.src = ('//s10.histats.com/js15_giftop_as.js');
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
-    })();
+  <!-- Histats -->
+  <script>
+    var _Hasync=_Hasync||[];
+    _Hasync.push(['Histats.startgif','1,4970878,4,10052,"div#histatsC {position: absolute;top:0px;right:0px;}body>div#histatsC {position: fixed;}"']);
+    _Hasync.push(['Histats.fasi','1']); _Hasync.push(['Histats.track_hits','']);
+    (function(){var s=document.createElement('script');s.async=true;s.src='//s10.histats.com/js15_giftop_as.js';
+      (document.head||document.body).appendChild(s)})();
   </script>
   <noscript>
-    <style type="text/css">
-      div#histatsC {position:absolute;top:0px;right:0px;}
-      body>div#histatsC {position:fixed;}
-    </style>
-    <a href="/" alt="" target="_blank">
-      <div id="histatsC"><img border="0" src="//s4is.histats.com/stats/i/4970878.gif?4970878&103"></div>
-    </a>
+    <style>div#histatsC{position:absolute;top:0;right:0}body>div#histatsC{position:fixed}</style>
+    <a href="/" target="_blank"><div id="histatsC"><img border="0" src="//s4is.histats.com/stats/i/4970878.gif?4970878&103"></div></a>
   </noscript>
-  <!-- Histats.com  END  -->
 
-  <!-- ตั้งค่า Proxy (ถ้ามี) ตัวอย่าง: https://your-worker.example.com -->
+  <!-- ตั้งค่า Proxy ถ้ามี (เช่น Cloudflare Worker ของคุณ) -->
   <script>window.PROXY_BASE = window.PROXY_BASE || '';</script>
   <script defer src="app.js"></script>
 </body>
