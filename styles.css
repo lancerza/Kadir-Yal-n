@@ -29,11 +29,11 @@
   --tab-font:12.2px;   /* ป้ายชื่อใหญ่ขึ้น */
 
   /* Header HUD */
-  --hud-size:32px;
+  --hud-size:32px;     /* ใช้เทียบ backup */
   --hud-radius:12px;
 
   /* Histats size */
-  --hs-size: 40px;
+  --hs-size: 40px;     /* ขนาดอ้างอิงของ histats (ปุ่มจะอิงค่านี้) */
   --hs-scale: 1;
 }
 
@@ -63,9 +63,10 @@ header{
 .h-wrap{
   position:relative; width:min(100%,var(--maxw)); margin:auto;
   display:grid; justify-items:center; gap:4px;
-  min-height: calc(var(--hud-size) + 12px);
+  min-height: calc(max(var(--hud-size), var(--hs-size)) + 12px);
   padding:10px 14px;
-  padding-left:  calc(var(--hud-size) + 16px);
+  /* สำรองพื้นที่ซ้าย/ขวาให้เท่ากับชิ้นส่วนที่ใหญ่สุด */
+  padding-left:  calc(max(var(--hud-size), var(--hs-size)) + 16px);
   padding-right: calc(max(var(--hud-size), var(--hs-size)) + 16px);
 }
 .clock{
@@ -98,17 +99,32 @@ header{
 /* Refresh button */
 .refresh-btn{
   position:absolute; left:8px; top:50%; transform:translateY(-50%);
-  height: var(--hud-size); line-height: var(--hud-size);
+  height: var(--hs-size); line-height: var(--hs-size);
   display:inline-flex; align-items:center; gap:8px; padding:0 12px;
-  border-radius: var(--hud-radius); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border:1px solid rgba(255,255,255,.18); color:var(--text); font-weight:700; font-size:12px;
+  border-radius: var(--hud-radius);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.18); color:var(--text); font-weight:800; font-size:12px;
   box-shadow:0 6px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35); backdrop-filter: blur(6px);
   cursor:pointer; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; z-index:3;
 }
-.refresh-btn .i{ font-size:14px; line-height:1 }
+.refresh-btn .i{ font-size: calc(var(--hs-size) * .38); line-height:1 }
 .refresh-btn:hover{ transform:translateY(-50%) translateY(-1px); border-color:rgba(255,255,255,.5) }
 .refresh-btn:active{ transform:translateY(-50%) scale(.985) }
 .refresh-btn[disabled]{ opacity:.65; cursor:wait }
+
+/* สถานะรีเฟรช (ข้อความข้างปุ่ม) */
+#refresh-status{
+  position:absolute; z-index:3;
+  left: calc(8px + var(--refresh-btn-w, 112px) + 8px);
+  top:50%; transform: translateY(-50%);
+  background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
+  border:1px solid rgba(255,255,255,.2);
+  box-shadow:0 6px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.25);
+  color:#e6f2ff; padding:4px 10px; border-radius:10px;
+  font-weight:800; font-size:12px; letter-spacing:.2px; white-space:nowrap;
+  opacity:0; pointer-events:none; transition:opacity .16s ease, transform .16s ease;
+}
+#refresh-status.on{ opacity:.98; transform: translateY(-50%) translateY(-2px); }
 
 /* Player */
 #player{
@@ -245,9 +261,10 @@ header{
 
 /* ---------- Responsive tweaks ---------- */
 @media (max-width: 380px){
-  :root{ --tabW: 66px; --tabH: 54px; --tabBadge: 26px; --tab-font: 11.6px; --hud-size:30px; --hs-size:34px; --hs-scale:.9 }
+  :root{ --tabW: 66px; --tabH: 54px; --tabBadge: 26px; --tab-font: 11.6px; --hs-size:34px; --hs-scale:.9 }
   .tabs{ gap:8px; padding:10px 6px 12px }
   .refresh-btn .t{ display:none } .refresh-btn{ padding:0 8px }
+  #refresh-status{ display:none }  /* มือถือเล็กๆ ซ่อนไว้ไม่เกะกะ */
 }
 @media (min-width: 381px) and (max-width: 639px){
   :root{ --tabW: 70px; --tabH: 56px; --tabBadge: 28px; --tab-font: 12px; --hs-size:36px; --hs-scale:.94 }
