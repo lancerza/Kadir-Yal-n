@@ -1,7 +1,7 @@
-/* ========================= app.js (CLEANED) =========================
-   - ไม่มี TV_DATA_CACHE_V1 และบล็อกซ้ำ
+/* ========================= app.js (CLEAN) =========================
+   - ไม่มีโค้ดซ้ำ/ไม่มี TV_DATA_CACHE_V1
    - ปุ่มรีเฟรช + ล้างแคช + ออโต้ 6 ชม.
-   - หมวดที่ใช้: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง
+   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง
 =================================================================== */
 
 const CH_URL  = 'channels.json';
@@ -16,6 +16,7 @@ let channels   = [];
 let currentFilter = '';
 let currentIndex  = -1;
 
+// ใส่ key ถ้ามี (จะไม่มีผลถ้าตั้งไว้แล้วที่ HTML)
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ------------------------ Boot ------------------------ */
@@ -27,12 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   mountNowPlayingContainer();
   mountHistatsTopRight();
 
-  try {
-    await loadData();
-  } catch (e) {
-    console.error('โหลดข้อมูลไม่สำเร็จ:', e);
-    window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
-  }
+  await loadData();
 
   buildTabs();
   setActiveTab((categories?.order?.[0]) || categories?.default || 'IPTV');
@@ -47,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-/* ------------------------ Load ------------------------ */
+/* ------------------------ Load (fresh) ------------------------ */
 async function fetchJSONFresh(url){
   const u = new URL(url, location.href);
   u.searchParams.set('_t', String(Date.now()));
@@ -169,7 +165,7 @@ function getCategory(ch){
     if (t.includes('movie') || t.includes('film')) return 'หนัง';
     if (t.includes('music')) return 'บันเทิง'; // จัดไปที่บันเทิง
     if (t.includes('news'))  return 'IPTV';   // ข่าวโยนรวมที่ IPTV
-    if (t.includes('kids') || t.includes('cartoon') || t.includes('anime')) return 'เด็ก';
+    if (t.includes('kids') || t.includes('cartoon') || t.includes('anime') || t.includes('toon')) return 'เด็ก';
   }
 
   // rules
@@ -366,9 +362,9 @@ function ripple(event, container){
   const y = (event.clientY ?? (r.top  + r.height/2)) - r.top;
   const s = document.createElement('span');
   s.className = 'ripple';
-  s.style.width = s.style.height = `${max}px";
-  s.style.left = `${x - max/2}px";
-  s.style.top  = `${y - max/2}px";
+  s.style.width = s.style.height = `${max}px`;
+  s.style.left = `${x - max/2}px`;
+  s.style.top  = `${y - max/2}px`;
   container.querySelector('.ripple')?.remove();
   container.appendChild(s);
   s.addEventListener('animationend', ()=>s.remove(), { once:true });
@@ -396,7 +392,7 @@ function getIconSVG(n){
     case 'กีฬา':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
     case 'สารคดี':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V2zM17 2h2a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-2V2z"/></svg>`;
     case 'หนัง':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
     default:
