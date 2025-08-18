@@ -1,10 +1,9 @@
-/* ========================= app.js (RESUME LAST + AUTOPLAY) =========================
-   - เปิดเว็บใหม่: ถ้ามีช่องที่เคยเลือก (lastId) → เปิดหมวดนั้น + เล่นช่องนั้นทันที
-                    ถ้าไม่มี → เล่นช่องแรกของหมวดแรก
+/* ========================= app.js (RESUME + SHOW ACTIVE CARD) =========================
+   - เปิดเว็บใหม่: ถ้ามี lastId → เปิดหมวดนั้น + เล่นช่องนั้น + เลื่อนให้เห็น ch-card ที่เล่นอยู่
+                   ถ้าไม่มี → เล่นช่องแรกของหมวดแรก + เลื่อนให้เห็น ch-card เช่นกัน
    - ปุ่มรีเฟรช + ล้างแคช (ไม่ลบ lastId) + เคลียร์อัตโนมัติทุก 6 ชม.
-   - now-playing อยู่ตำแหน่งเดิมใน header (ไม่มีกรอบ)
-   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง
-==================================================================================== */
+   - now-playing ตำแหน่งเดิมใน header (ไม่มีกรอบ)
+======================================================================================= */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -17,6 +16,7 @@ let categories = null;
 let channels   = [];
 let currentFilter = '';
 let currentIndex  = -1;
+let didInitialReveal = false;   // ป้องกันเลื่อนซ้ำ
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
@@ -37,9 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   buildTabs();
-
-  // แสดงช่องล่าสุดถ้ามี ไม่งั้นเล่นช่องแรกของหมวดแรก
-  resumeLastOrAutoplayFirst();
+  resumeLastOrAutoplayFirst();  // เล่น + เตรียมเลื่อนให้เห็นการ์ดที่กำลังเล่น
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
@@ -70,24 +68,50 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Resume or Autoplay ------------------------ */
+/* ------------------------ Resume / Autoplay + Reveal card ------------------------ */
 function resumeLastOrAutoplayFirst(){
   const firstCat = (categories?.order?.[0]) || categories?.default || 'IPTV';
   const lastId = safeGet('lastId');
+
   if (lastId){
     const idx = channels.findIndex(c => c.id === lastId);
     if (idx >= 0){
       const cat = getCategory(channels[idx]);
       setActiveTab(cat);
-      // เล่นทันทีโดยไม่เลื่อนหน้า
       playByIndex(idx, { scroll:false });
+      scheduleRevealActiveCard();     // << เลื่อนให้เห็นการ์ดที่กำลังเล่น
       return;
     }
   }
-  // ไม่มีประวัติหรือหาไม่เจอ → ใช้ตัวแรกของหมวดแรก
+  // ไม่มีประวัติ → หมวดแรก + ช่องแรก
   setActiveTab(firstCat);
   const firstIdx = channels.findIndex(c => getCategory(c) === firstCat);
-  if (firstIdx >= 0) playByIndex(firstIdx, { scroll:false });
+  if (firstIdx >= 0) {
+    playByIndex(firstIdx, { scroll:false });
+    scheduleRevealActiveCard();
+  }
+}
+
+/* หน่วงสั้น ๆ เพื่อให้ render grid เสร็จก่อนแล้วค่อยเลื่อน */
+function scheduleRevealActiveCard(){
+  if (didInitialReveal) return;
+  didInitialReveal = true;
+  // รอทั้ง switch-out + render + switch-in
+  setTimeout(()=> revealActiveCardIntoView(), SWITCH_OUT_MS + 220);
+}
+
+function revealActiveCardIntoView(){
+  const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
+  if (!active) {
+    // ลองอีกครั้งหาก grid ยังไม่พร้อม
+    setTimeout(revealActiveCardIntoView, 120);
+    return;
+  }
+  const header = document.querySelector('header');
+  const pad = 80; // เว้นว่างเหนือการ์ดให้หายใจ
+  const h = (header?.offsetHeight) || 0;
+  const y = active.getBoundingClientRect().top + window.pageYOffset - h - pad;
+  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
 /* ------------------------ Header: Clock + Now Playing ------------------------ */
@@ -106,7 +130,6 @@ function mountClock(){
   setInterval(tick, 1000);
 }
 
-/* Now Playing: ตำแหน่งเดิมใน header (ไม่มีขอบ/พื้นหลัง) */
 function mountNowPlayingInHeader(){
   const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let now = document.getElementById('now-playing');
@@ -363,7 +386,7 @@ function showMobileToast(text){
   requestAnimationFrame(()=>{ t.style.opacity = '1'; });
   setTimeout(()=>{ t.style.opacity = '0'; }, 1500);
 }
-function isMobile(){ return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) }
+function isMobile(){ return /iPhone|iPad|Android/i.test(navigator.userAgent) }
 function scrollToPlayer(){
   const el = document.getElementById('player');
   const header = document.querySelector('header');
@@ -498,3 +521,14 @@ function scheduleAutoClear(){
     setTimeout(tick, SIX_HR_MS);
   }, delay);
 }
+
+/* ------------------------ Utils ------------------------ */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"'`=\/]/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
+  }[c]));
+}
+function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
+function safeGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
+function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
+function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
