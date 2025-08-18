@@ -1,10 +1,10 @@
-/* ===================== styles.css (FULL, COMPACT TABS v2) =====================
+/* ===================== styles.css (COMPACT TABS + BIGGER ICON) =====================
    - Header สมดุล: ซ้าย Refresh ⟷ กลาง Clock ⟷ ขวา Histats
-   - Now Playing อยู่ "กลางบนสุดของ <main>" เป็นป้ายสวย ๆ
-   - Tabs แบบ badge โปร่ง (ย่อกว่าเดิม) + เอฟเฟกต์ hover/active/selected ชัด
+   - ไม่มีสไตล์ now-playing / now-playing--main / swap
+   - Tabs แบบ badge โปร่ง (การ์ดคอมแพ็ค) + ไอคอนใหญ่ขึ้นอีก (responsive)
+   - เอฟเฟกต์ hover/active/selected + accent รายหมวด
    - กริดช่อง + เอฟเฟกต์สลับหมวด
-   - รองรับโลโก้แนวนอน (data-wide)
-   - ขยาย/ย่อ Histats ด้วยตัวแปร --hs-size, --hs-scale
+   - Histats ปรับขนาดด้วย --hs-size / --hs-scale
 =============================================================================== */
 
 /* ---------- Root tokens ---------- */
@@ -25,21 +25,21 @@
   --logo-max-w:82px;
   --logo-wide-h:42px;
 
-  /* Tabs (COMPACT v2 — เล็กลง) */
+  /* Tabs (COMPACT card + BIGGER icon) */
   --tabW: 68px;      /* ความกว้างการ์ด */
   --tabH: 54px;      /* ความสูงการ์ด */
   --tab-gap:6px;
-  --tabBadge:18px;   /* เส้นผ่านศูนย์กลาง badge ไอคอน */
-  --tab-font:9.6px;  /* ขนาดตัวอักษร */
+  --tabBadge:24px;   /* ไอคอน: ใหญ่ขึ้นจากเดิม */
+  --tab-font:9.6px;  /* ฟอนต์ชื่อแท็บ */
 
   /* Header HUD (refresh/histats) */
   --hud-size:32px;
   --hud-gap:10px;
   --hud-radius:12px;
 
-  /* Histats size controls */
-  --hs-size: 40px;   /* ความสูงจริงของ badge (px) */
-  --hs-scale: 1;     /* สเกลคูณ เพื่อขยาย/ย่ออย่างเร็ว */
+  /* Histats size */
+  --hs-size: 40px;
+  --hs-scale: 1;
 }
 
 /* ---------- Reset ---------- */
@@ -71,29 +71,9 @@ header{
   min-height: calc(var(--hud-size) + 12px);
   padding:10px 14px;
   padding-left:  calc(var(--hud-size) + 16px);
-  /* กันพื้นที่ด้านขวาตามขนาดที่ใหญ่กว่า ระหว่าง hud กับ histats */
   padding-right: calc(max(var(--hud-size), var(--hs-size)) + 16px);
 }
 .clock{font-weight:700;font-size:clamp(15px,2.3vw,19px);letter-spacing:.2px;text-align:center}
-
-/* ---------- Now Playing at top of <main> ---------- */
-.now-playing--main{
-  width:min(100%, var(--maxw));
-  margin: 10px auto 6px;
-  padding: 8px 12px;
-  text-align:center;
-  font-weight: 700;
-  font-size: clamp(13px, 2.1vw, 17px);
-  color: var(--text);
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border: 1px solid rgba(255,255,255,.14);
-  box-shadow: 0 6px 14px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35);
-  backdrop-filter: blur(6px);
-}
-.now-playing.swap,
-.now-playing--main.swap{ animation: npFade .24s ease both; }
-@keyframes npFade{from{opacity:0;transform:translateY(4px)}to{opacity:.92;transform:none}}
 
 /* ---------- Histats (ขวาของ header) ---------- */
 #histats_counter{
@@ -134,7 +114,7 @@ header{
   border:1px solid var(--border); box-shadow:0 8px 18px rgba(0,0,0,.25) inset;
 }
 
-/* ---------- Tabs (badge โปร่ง, COMPACT v2) ---------- */
+/* ---------- Tabs (badge โปร่ง, COMPACT card + BIGGER icon) ---------- */
 .tabs{
   position:relative; display:flex; gap:clamp(8px, 1.1vw, 12px);
   padding:12px 6px 14px; margin:10px auto 10px;
@@ -154,7 +134,7 @@ header{
 }
 .tab{position:relative; flex:0 0 auto; cursor:pointer; scroll-snap-align:center; -webkit-tap-highlight-color:transparent}
 
-/* การ์ดแท็บ (ขนาดเล็กลง) */
+/* การ์ดแท็บ */
 .tab-card{
   width:var(--tabW); height:var(--tabH);
   border-radius:10px; display:grid; grid-template-rows:auto auto; place-items:center;
@@ -173,7 +153,7 @@ header{
   z-index:0;
 }
 
-/* badge ไอคอน (ขยายได้ผ่านตัวแปร) */
+/* badge ไอคอน (ใหญ่ขึ้น) */
 .tab-icon{
   width:var(--tabBadge); height:var(--tabBadge);
   display:grid; place-items:center; border-radius:12px;
@@ -182,8 +162,8 @@ header{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 4px 12px rgba(0,0,0,.35);
 }
 .tab-icon svg{
-  width:max(11px, calc(var(--tabBadge) - 8px));
-  height:max(11px, calc(var(--tabBadge) - 8px));
+  width:max(12px, calc(var(--tabBadge) - 6px));
+  height:max(12px, calc(var(--tabBadge) - 6px));
   display:block;
 }
 .tab-label{font-weight:700;font-size:var(--tab-font);letter-spacing:.2px}
@@ -260,17 +240,17 @@ header{
 /* Misc */
 #mini-toast{ user-select:none }
 
-/* ---------- Responsive tweaks (Tabs/Header/Histats scale) ---------- */
+/* ---------- Responsive tweaks (Tabs/Header/Histats) ---------- */
 
 /* XS: มือถือจอเล็กมาก */
 @media (max-width: 380px){
   :root{
-    --tabW: 62px; --tabH: 50px; --tabBadge: 20px; --tab-font: 9.2px;
+    --tabW: 62px; --tabH: 50px; --tabBadge: 22px; --tab-font: 9.2px;
     --hud-size:30px;
     --hs-size: 34px; --hs-scale: .90;
   }
   .tabs{ gap:8px; padding:10px 6px 12px; }
-  .refresh-btn .t{ display:none } /* เหลือไอคอนกันชนเวลา */
+  .refresh-btn .t{ display:none }
   .refresh-btn{ padding:0 8px }
   .tabs .tab[aria-selected="true"] .tab-card::after{ bottom:-5px; height:3px; width:38% }
 }
@@ -278,7 +258,7 @@ header{
 /* SM: มือถือทั่วไป */
 @media (min-width: 381px) and (max-width: 639px){
   :root{
-    --tabW: 66px; --tabH: 52px; --tabBadge: 22px; --tab-font: 9.6px;
+    --tabW: 66px; --tabH: 52px; --tabBadge: 24px; --tab-font: 9.6px;
     --hud-size:31px;
     --hs-size: 36px; --hs-scale: .94;
   }
@@ -287,7 +267,7 @@ header{
 /* MD: แท็บเล็ต/เดสก์ท็อปเล็ก */
 @media (min-width: 640px) and (max-width: 1023px){
   :root{
-    --tabW: 74px; --tabH: 58px; --tabBadge: 24px; --tab-font: 10px;
+    --tabW: 74px; --tabH: 58px; --tabBadge: 26px; --tab-font: 10px;
     --hud-size:33px;
     --hs-size: 40px; --hs-scale: 1;
   }
@@ -296,7 +276,7 @@ header{
 /* LG: เดสก์ท็อป */
 @media (min-width: 1024px){
   :root{
-    --tabW: 78px; --tabH: 62px; --tabBadge: 26px; --tab-font: 10.6px;
+    --tabW: 78px; --tabH: 62px; --tabBadge: 28px; --tab-font: 10.6px;
     --hud-size:34px;
     --hs-size: 44px; --hs-scale: 1.05;
   }
@@ -305,7 +285,7 @@ header{
   #histats_counter{ transform:translateY(-50%) scale(var(--hs-scale)) }
 }
 
-/* ===== Selected tab: accent + underline + glow (ท้ายไฟล์) ===== */
+/* ===== Selected tab: accent + underline + glow ===== */
 
 /* สี accent รายหมวด */
 .tab[data-filter="IPTV"]   { --accent: #60a5fa; } /* ฟ้า */
@@ -315,7 +295,6 @@ header{
 .tab[data-filter="เด็ก"]    { --accent: #f472b6; } /* ชมพู */
 .tab[data-filter="หนัง"]    { --accent: #fb7185; } /* ชมพูอมแดง */
 
-/* Hover ใช้ accent (fallback RGBA ให้ทุกเบราว์เซอร์) */
 @media (hover:hover){
   .tabs .tab:hover .tab-card{
     border-color: var(--accent, rgba(255,255,255,.28));
@@ -325,14 +304,10 @@ header{
       0 0 12px rgba(255,255,255,.14);
   }
 }
-
-/* โฟกัสจากคีย์บอร์ด */
 .tabs .tab:focus-visible .tab-card{
   outline: 2px solid var(--accent, #8ab4ff);
   outline-offset: 3px;
 }
-
-/* Selected: เด่นชัด + ขีดล่าง */
 .tabs .tab[aria-selected="true"] .tab-card{
   transform: translateZ(0) scale(1.06);
   border-color: var(--accent, rgba(255,255,255,.34));
@@ -350,8 +325,6 @@ header{
   filter: drop-shadow(0 0 6px rgba(255,255,255,.25));
   pointer-events:none;
 }
-
-/* กันโดนสไตล์อื่นกลบเอฟเฟกต์ */
 .tabs .tab[aria-selected="true"] .tab-card,
 .tabs .tab:hover .tab-card,
 .tabs .tab:focus-visible .tab-card{ z-index: 2; }
