@@ -57,7 +57,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/T-SPorts_7_Final.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/7/7.mpd",
       "type": "dash",
-      "category": "กีฬา",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "6187523f92b9475bb5b192f70cef1342",
@@ -265,7 +265,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/PPTV_2024e.jpg",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/36/36.mpd",
       "type": "dash",
-      "category": "กีฬา",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "0aeffa7753674e77b99443fac7757b8a",
