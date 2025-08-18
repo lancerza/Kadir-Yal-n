@@ -31,7 +31,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0014.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/3/3.mpd",
       "type": "dash",
-      "category": "สารคดี",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "4d4426a505f64382a9841155d721cee6",
@@ -44,7 +44,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/ALTV.PNG",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/4/4.mpd",
       "type": "dash",
-      "category": "สารคดี",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "1e98456bcbea44b7ad05831387e364ef",
@@ -122,7 +122,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0015_R.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/23/23.mpd",
       "type": "dash",
-      "category": "บันเทิง",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "87db4361f7894655a4656e9c8b935a02",
@@ -135,7 +135,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0054.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/24/24.mpd",
       "type": "dash",
-      "category": "บันเทิง",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "87db4361f7894655a4656e9c8b935a02",
@@ -148,7 +148,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0019.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/25/25.mpd",
       "type": "dash",
-      "category": "บันเทิง",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "87db4361f7894655a4656e9c8b935a02",
@@ -161,7 +161,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0006.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/27/27.mpd",
       "type": "dash",
-      "category": "บันเทิง",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "87db4361f7894655a4656e9c8b935a02",
@@ -200,7 +200,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0012.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/31/31.mpd",
       "type": "dash",
-      "category": "บันเทิง",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "87db4361f7894655a4656e9c8b935a02",
@@ -226,7 +226,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/LOGO3HD.PNG",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd",
       "type": "dash",
-      "category": "บันเทิง",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "9d76aea451d441a4913d4d70c4e586ab",
@@ -239,7 +239,7 @@
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0018.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/35/35.mpd",
       "type": "dash",
-      "category": "บันเทิง",
+      "category": "IPTV",
       "drm": {
         "clearkey": {
           "keyId": "4d4426a505f64382a9841155d721cee6",
