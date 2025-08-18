@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   mountClock();
   mountNowPlayingInHeader();
-  mountHistatsTopRight(); // << ใช้โค้ดใหม่
+  mountHistatsTopRight();
 
   try {
     await loadData();
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   buildTabs();
-  resumeLastOrAutoplayFirst();  // เล่น + เตรียมเลื่อนให้เห็นการ์ดที่กำลังเล่น
+  resumeLastOrAutoplayFirst();  // เล่น + เลื่อนให้เห็นการ์ดที่กำลังเล่น
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
@@ -80,7 +80,7 @@ function resumeLastOrAutoplayFirst(){
       const cat = getCategory(channels[idx]);
       setActiveTab(cat);
       playByIndex(idx, { scroll:false });
-      scheduleRevealActiveCard();     // << เลื่อนให้เห็นการ์ดที่กำลังเล่น
+      scheduleRevealActiveCard();
       return;
     }
   }
@@ -97,19 +97,14 @@ function resumeLastOrAutoplayFirst(){
 function scheduleRevealActiveCard(){
   if (didInitialReveal) return;
   didInitialReveal = true;
-  // รอทั้ง switch-out + render + switch-in
   setTimeout(()=> revealActiveCardIntoView(), SWITCH_OUT_MS + 220);
 }
 
 function revealActiveCardIntoView(){
   const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
-  if (!active) {
-    // ลองอีกครั้งหาก grid ยังไม่พร้อม
-    setTimeout(revealActiveCardIntoView, 120);
-    return;
-  }
+  if (!active) { setTimeout(revealActiveCardIntoView, 120); return; }
   const header = document.querySelector('header');
-  const pad = 80; // เว้นว่างเหนือการ์ดให้หายใจ
+  const pad = 80;
   const h = (header?.offsetHeight) || 0;
   const y = active.getBoundingClientRect().top + window.pageYOffset - h - pad;
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
@@ -117,8 +112,7 @@ function revealActiveCardIntoView(){
 
 /* ------------------------ Header: Clock + Now Playing ------------------------ */
 function mountClock(){
-  const el = document.getElementById('clock');
-  if (!el) return;
+  const el = document.getElementById('clock'); if (!el) return;
   const tick = () => {
     const now = new Date();
     el.textContent = new Intl.DateTimeFormat('th-TH',{
@@ -134,10 +128,7 @@ function mountClock(){
 function mountNowPlayingInHeader(){
   const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let now = document.getElementById('now-playing');
-  if (!now) {
-    now = document.createElement('div');
-    now.id = 'now-playing';
-  }
+  if (!now) { now = document.createElement('div'); now.id = 'now-playing'; }
   now.className = 'now-playing';
   now.setAttribute('aria-live','polite');
   host.appendChild(now);
@@ -536,7 +527,7 @@ function scheduleAutoClear(){
   const now = Date.now();
   const last = Number(localStorage.getItem(AUTO_CLEAR_KEY) || 0);
   if (!last || (now - last) >= SIX_HR_MS) {
-    clearAppCache(); // ไม่กระทบ lastId
+    clearAppCache();
     localStorage.setItem(AUTO_CLEAR_KEY, String(now));
   }
   const delay = Math.max(1000, SIX_HR_MS - ((now - last) % SIX_HR_MS || 0));
