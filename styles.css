@@ -5,6 +5,7 @@
    - Tabs / Grid / Channel card
    - ชื่อช่อง 2 บรรทัด + ellipsis
    - Responsive ครบ
+   - เพิ่มสถานะ "เล่นอยู่" (selected) ให้การ์ดมีขอบ/เรืองแสงคงอยู่
 ====================================================================== */
 
 /* ---------- Root tokens ---------- */
@@ -238,6 +239,7 @@ header{
   grid-template-columns:repeat(auto-fill,minmax(var(--tile-w),1fr));
   gap:var(--tile-g); justify-items:center;
   transition:opacity .14s ease, filter .14s ease;
+  overflow: visible; /* ปล่อยเงา/ขอบเรืองแสงไม่ให้ถูกตัด */
 }
 .grid.switch-out{ opacity:.3; filter:blur(2px) }
 .grid.switch-in .channel{
@@ -254,7 +256,8 @@ header{
   background:radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.5) 0%, transparent 70%);
   filter:blur(12px); opacity:0; transition:opacity .25s ease; pointer-events:none; z-index:0;
 }
-.channel:hover::after,.channel.active::after{ opacity:.9; animation:neonPulse 2.4s ease-in-out infinite }
+.channel:hover::after,
+.channel.active::after{ opacity:.9; animation:neonPulse 2.4s ease-in-out infinite }
 @keyframes neonPulse{ 0%{filter:blur(9px);opacity:.5} 50%{filter:blur(14px);opacity:.95} 100%{filter:blur(9px);opacity:.5} }
 
 .ch-card{
@@ -272,6 +275,20 @@ header{
 }
 .channel:active .ch-card{ transform:scale(.985) }
 
+/* ==== Channel selected (เล่นอยู่) – ไม่พึ่ง :focus/:hover ==== */
+.channel.active .ch-card,
+.channel[aria-selected="true"] .ch-card,
+.channel[data-selected="true"] .ch-card{
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,.85);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.6) inset,
+    0 0 12px rgba(255,255,255,.25);
+}
+.channel[aria-selected="true"]::after,
+.channel[data-selected="true"]::after{ opacity:.95; animation:neonPulse 2.4s ease-in-out infinite }
+
+/* โลโก้ */
 .logo-wrap{ display:grid; place-items:center; width:100%; height:100% }
 .logo{
   max-height: calc(var(--logo-max-h) - 2px);
