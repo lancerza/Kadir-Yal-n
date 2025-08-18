@@ -1,35 +1,66 @@
-<!-- Histats (ติดขวาใน header, ไม่ fixed) -->
-<div id="histats_counter" aria-hidden="true"></div>
-<script>
-(function(){
-  var anchor = document.getElementById('histats_counter');
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TV Online</title>
 
-  // ตั้งค่า Histats (ตัด CSS ที่ไป fixed ออก)
-  window._Hasync = window._Hasync || [];
-  _Hasync.push(['Histats.startgif','1,4970878,4,10052,""']);
-  _Hasync.push(['Histats.fasi','1']);
-  _Hasync.push(['Histats.track_hits','']);
+  <!-- ใช้พาธ relative (สำคัญมากสำหรับ GitHub Pages /tv-online/) -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <div class="h-wrap">
+      <!-- clock + now playing (มีตัวจริงใน JS อยู่แล้ว แต่ใส่ไว้เป็น anchor เผื่อ JS ยังไม่มาทัน) -->
+      <div id="clock" class="clock"></div>
+      <div id="now-playing" class="now-playing"></div>
 
-  // โหลดสคริปต์
-  var hs = document.createElement('script');
-  hs.type = 'text/javascript';
-  hs.async = true;
-  hs.src = '//s10.histats.com/js15_giftop_as.js';
-  (document.head || document.body).appendChild(hs);
+      <!-- ปุ่มรีเฟรช (JS จะไม่สร้างซ้ำถ้ามีแล้ว) -->
+      <button id="refresh-btn" class="refresh-btn" type="button" title="รีเฟรชช่อง + ล้างแคช">
+        <span class="i">↻</span><span class="t">รีเฟรช</span>
+      </button>
 
-  // ย้าย #histatsC เข้ากล่อง #histats_counter เสมอ (กันโดนวางไว้ที่ body)
-  (function move(){
-    var c = document.getElementById('histatsC');
-    if (c && anchor && !anchor.contains(c)) anchor.appendChild(c);
-    requestAnimationFrame(move);
-  })();
-})();
-</script>
-
-<noscript>
-  <a href="/" target="_blank" rel="nofollow">
-    <div id="histatsC">
-      <img src="//s4is.histats.com/stats/i/4970878.gif?4970878&103" alt="histats">
+      <!-- Histats อยู่มุมขวาของ header -->
+      <div id="histats_counter" aria-hidden="true"></div>
     </div>
-  </a>
-</noscript>
+  </header>
+
+  <main class="app">
+    <div id="player"></div>
+
+    <!-- แท็บหมวด -->
+    <div id="tabs" class="tabs"></div>
+
+    <!-- กริดช่อง -->
+    <div id="channel-list" class="grid"></div>
+  </main>
+
+  <!-- Histats loader: ไม่ fixed, ย้ายเข้า #histats_counter อัตโนมัติ -->
+  <script>
+    (function(){
+      window._Hasync = window._Hasync || [];
+      _Hasync.push(['Histats.startgif','1,4970878,4,10052,""']);
+      _Hasync.push(['Histats.fasi','1']);
+      _Hasync.push(['Histats.track_hits','']);
+      var hs = document.createElement('script');
+      hs.async = true; hs.src = '//s10.histats.com/js15_giftop_as.js';
+      (document.head || document.body).appendChild(hs);
+
+      (function move(){
+        var holder = document.getElementById('histats_counter');
+        var c = document.getElementById('histatsC');
+        if (holder && c && !holder.contains(c)) holder.appendChild(c);
+        requestAnimationFrame(move);
+      })();
+    })();
+  </script>
+  <noscript>
+    <a href="/" target="_blank" rel="nofollow">
+      <div id="histatsC"><img src="//s4is.histats.com/stats/i/4970878.gif?4970878&103" alt=""></div>
+    </a>
+  </noscript>
+
+  <!-- โหลดสคริปต์หลักด้วยพาธ relative (สำคัญ) -->
+  <script src="./app.js"></script>
+</body>
+</html>
