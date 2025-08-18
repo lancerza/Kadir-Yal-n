@@ -29,5 +29,14 @@
 
   <script>window.PROXY_BASE = window.PROXY_BASE || '';</script>
   <script defer src="app.js"></script>
+  <script>
+  function setHeaderOffset(){
+    const h = document.querySelector('header')?.offsetHeight || 72;
+    document.documentElement.style.setProperty('--header-offset', (h + 4) + 'px');
+  }
+  window.addEventListener('load', setHeaderOffset);
+  window.addEventListener('resize', setHeaderOffset);
+</script>
+
 </body>
 </html>
