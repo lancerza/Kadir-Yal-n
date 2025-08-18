@@ -4,6 +4,7 @@
    - ปุ่มรีเฟรช + ล้างแคช (ไม่ลบ lastId) + เคลียร์อัตโนมัติทุก 6 ชม.
    - now-playing ตำแหน่งเดิมใน header (ไม่มีกรอบ)
    - Histats ติดมุมขวาใน .h-wrap (โค้ดใหม่ 4970878/10052)
+   - เพิ่มข้อความ “รีเฟรชเสร็จแล้ว” โผล่ข้างปุ่มหลังทำงานเสร็จ
 ======================================================================================= */
 
 const CH_URL  = 'channels.json';
@@ -488,26 +489,69 @@ function mountRefreshButton(){
   const wrap = document.querySelector('.h-wrap') || document.querySelector('header');
   if (!wrap || document.getElementById('refresh-btn')) return;
 
+  // ปุ่ม
   const btn = document.createElement('button');
   btn.id = 'refresh-btn';
   btn.className = 'refresh-btn';
   btn.type = 'button';
   btn.title = 'รีเฟรชช่อง + ล้างแคช';
   btn.innerHTML = '<span class="i">↻</span><span class="t">รีเฟรช</span>';
+
+  // สถานะ (ข้อความข้างปุ่ม)
+  let status = document.getElementById('refresh-status');
+  if (!status){
+    status = document.createElement('span');
+    status.id = 'refresh-status';
+    status.setAttribute('role','status');
+    status.setAttribute('aria-live','polite');
+  }
+
+  // helper: อัปเดตความกว้างปุ่ม → ให้ CSS คำนวณตำแหน่งข้อความข้างปุ่ม
+  const updateBtnW = () => {
+    const w = btn.getBoundingClientRect().width;
+    document.documentElement.style.setProperty('--refresh-btn-w', `${Math.ceil(w)}px`);
+  };
+
+  // helper: โชว์ข้อความสำเร็จชั่วคราว
+  let hideTimer = null;
+  const showStatus = (text) => {
+    status.textContent = text;
+    status.classList.add('on');
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(()=> status.classList.remove('on'), 2600);
+  };
+
   btn.addEventListener('click', async ()=>{
     try{
       btn.disabled = true;
       btn.querySelector('.t').textContent = 'กำลังรีเฟรช...';
+      updateBtnW();
+
       await clearAppCache();      // ไม่ลบ lastId
       await loadData();
       buildTabs();
       resumeLastOrAutoplayFirst();
+
+      // เวลาแบบไทย เฉพาะเวลา
+      const t = new Intl.DateTimeFormat('th-TH', { timeStyle:'medium', hour12:false, timeZone: TIMEZONE }).format(new Date());
+      showStatus(`รีเฟรชเสร็จแล้ว • ${t}`);
     } finally {
       btn.disabled = false;
       btn.querySelector('.t').textContent = 'รีเฟรช';
+      updateBtnW();
     }
   });
+
   wrap.appendChild(btn);
+  wrap.appendChild(status);
+
+  // ติดตามการเปลี่ยนขนาดอัตโนมัติ
+  updateBtnW();
+  if ('ResizeObserver' in window){
+    const ro = new ResizeObserver(updateBtnW);
+    ro.observe(btn);
+  }
+  addEventListener('resize', debounce(updateBtnW, 120));
 }
 
 async function clearAppCache(){
