@@ -1,0 +1,57 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+
+  "rewrites": [
+    { "source": "/p/:b64", "destination": "/api/p/:b64" },
+    { "source": "/i/:b64", "destination": "/api/i/:b64" }
+  ],
+
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Permissions-Policy", "value": "autoplay=*, fullscreen=*" }
+      ]
+    },
+
+    { "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] },
+
+    { "source": "/channels.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0" }] },
+
+    { "source": "/categories.json",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0" }] },
+
+    { "source": "/app.js",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] },
+
+    { "source": "/styles.css",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] },
+
+    { "source": "/(assets|img|logos)/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=2592000" }] },
+
+    /* proxy สำหรับสตรีม */
+    { "source": "/api/p/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,HEAD,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Origin, X-Requested-With, Content-Type, Accept, Range" },
+        { "key": "Cache-Control", "value": "no-store" }
+      ]},
+
+    /* proxy สำหรับรูป (ตั้ง cache บน CDN ได้) */
+    { "source": "/api/i/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,HEAD,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Origin, X-Requested-With, Content-Type, Accept" },
+        { "key": "Cache-Control", "value": "public, s-maxage=86400, stale-while-revalidate=604800" }
+      ]}
+  ]
+}
