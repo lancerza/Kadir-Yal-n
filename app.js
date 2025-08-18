@@ -1,8 +1,9 @@
-/* ========================= app.js (CLEAN) =========================
-   - ไม่มีโค้ดซ้ำ/ไม่มี TV_DATA_CACHE_V1
-   - ปุ่มรีเฟรช + ล้างแคช + ออโต้ 6 ชม.
-   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง
-=================================================================== */
+/* ========================= app.js (CLEAN & BALANCED HEADER) =========================
+   - ไม่มี TV_DATA_CACHE_V1 / ไม่มีโค้ดซ้ำ
+   - ปุ่มรีเฟรช + ล้างแคช + ออโต้ล้างทุก 6 ชม.
+   - หมวด: IPTV, บันเทิง, กีฬา, สารคดี, เด็ก, หนัง (ตัดข่าว/เพลง)
+   - ปรับ Histats + Refresh ให้อยู่ซ้าย/ขวาสมดุลกับ .h-wrap
+===================================================================================== */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -16,7 +17,6 @@ let channels   = [];
 let currentFilter = '';
 let currentIndex  = -1;
 
-// ใส่ key ถ้ามี (จะไม่มีผลถ้าตั้งไว้แล้วที่ HTML)
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ------------------------ Boot ------------------------ */
@@ -28,7 +28,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   mountNowPlayingContainer();
   mountHistatsTopRight();
 
-  await loadData();
+  try {
+    await loadData();
+  } catch (e) {
+    console.error('โหลดข้อมูลไม่สำเร็จ:', e);
+    window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
+  }
 
   buildTabs();
   setActiveTab((categories?.order?.[0]) || categories?.default || 'IPTV');
@@ -43,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-/* ------------------------ Load (fresh) ------------------------ */
+/* ------------------------ Load (fresh fetch) ------------------------ */
 async function fetchJSONFresh(url){
   const u = new URL(url, location.href);
   u.searchParams.set('_t', String(Date.now()));
@@ -165,7 +170,7 @@ function getCategory(ch){
     if (t.includes('movie') || t.includes('film')) return 'หนัง';
     if (t.includes('music')) return 'บันเทิง'; // จัดไปที่บันเทิง
     if (t.includes('news'))  return 'IPTV';   // ข่าวโยนรวมที่ IPTV
-    if (t.includes('kids') || t.includes('cartoon') || t.includes('anime') || t.includes('toon')) return 'เด็ก';
+    if (t.includes('kids') || t.includes('cartoon') || t.includes('anime')) return 'เด็ก';
   }
 
   // rules
@@ -255,7 +260,7 @@ function computeGridCols(container){
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
 
-/* ------------------------ Player ------------------------ */
+/* ------------------------ Player (JW) ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -392,7 +397,7 @@ function getIconSVG(n){
     case 'กีฬา':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
     case 'สารคดี':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V2zM17 2h2a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-2V2z"/></svg>`;
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
     case 'หนัง':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
     default:
@@ -400,22 +405,23 @@ function getIconSVG(n){
   }
 }
 
-/* ------------------------ Histats ------------------------ */
+/* ------------------------ Histats (ติดขวาใน .h-wrap) ------------------------ */
 function mountHistatsTopRight(){
   const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let holder = document.getElementById('histats_counter');
-  if (!holder) { holder = document.createElement('div'); holder.id = 'histats_counter'; anchor.appendChild(holder); }
-  else if (holder.parentElement !== anchor) { anchor.appendChild(holder); }
+  if (!holder) { holder = document.createElement('div'); holder.id = 'histats_counter'; }
+  anchor.appendChild(holder);
 
   window._Hasync = window._Hasync || [];
-  window._Hasync.push(['Histats.startgif','1,4970267,4,10024,"div#histatsC {position: absolute; top:0; right:0;} body>div#histatsC {position: static;}"']);
+  window._Hasync.push(['Histats.startgif','1,4970267,4,10024,""']);
   window._Hasync.push(['Histats.fasi','1']);
   window._Hasync.push(['Histats.track_hits','']);
 
   const hs = document.createElement('script'); hs.type='text/javascript'; hs.async=true; hs.src='//s10.histats.com/js15_giftop_as.js';
   (document.head || document.body).appendChild(hs);
 
-  const move = ()=>{ const c=document.getElementById('histatsC'); if(c && !holder.contains(c)){ holder.appendChild(c); return; } requestAnimationFrame(move); };
+  // ย้ายกล่องจริง (#histatsC) เข้า holder เสมอ เพื่อให้ CSS คุมตำแหน่งได้
+  const move = ()=>{ const c=document.getElementById('histatsC'); if(c && !holder.contains(c)){ holder.appendChild(c); } requestAnimationFrame(move); };
   move();
 }
 
