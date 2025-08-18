@@ -3,7 +3,7 @@
                    ถ้าไม่มี → เล่นช่องแรกของหมวดแรก + เลื่อนให้เห็น ch-card เช่นกัน
    - ปุ่มรีเฟรช + ล้างแคช (ไม่ลบ lastId) + เคลียร์อัตโนมัติทุก 6 ชม.
    - now-playing ตำแหน่งเดิมใน header (ไม่มีกรอบ)
-   - Histats ติดมุมขวาใน .h-wrap (โค้ดใหม่ 4970878/10052)
+   - Histats ติดมุมขวาใน .h-wrap (ค่า 4970878/10052) + ซิงก์สีปุ่มรีเฟรชจาก @b1:
 ======================================================================================= */
 
 const CH_URL  = 'channels.json';
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   buildTabs();
-  resumeLastOrAutoplayFirst();  // เล่น + เลื่อนให้เห็นการ์ดที่กำลังเล่น
+  resumeLastOrAutoplayFirst();
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
@@ -84,7 +84,6 @@ function resumeLastOrAutoplayFirst(){
       return;
     }
   }
-  // ไม่มีประวัติ → หมวดแรก + ช่องแรก
   setActiveTab(firstCat);
   const firstIdx = channels.findIndex(c => getCategory(c) === firstCat);
   if (firstIdx >= 0) {
@@ -99,7 +98,6 @@ function scheduleRevealActiveCard(){
   didInitialReveal = true;
   setTimeout(()=> revealActiveCardIntoView(), SWITCH_OUT_MS + 220);
 }
-
 function revealActiveCardIntoView(){
   const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
   if (!active) { setTimeout(revealActiveCardIntoView, 120); return; }
@@ -124,7 +122,6 @@ function mountClock(){
   tick();
   setInterval(tick, 1000);
 }
-
 function mountNowPlayingInHeader(){
   const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let now = document.getElementById('now-playing');
@@ -255,7 +252,7 @@ function render(opt={withEnter:false}){
       <div class="ch-card">
         <div class="logo-wrap">
           <img class="logo" loading="lazy" decoding="async"
-               src="${escapeHtml(ch.logo || '')}" alt="${escapeHtml(ch.name||'โลโก้ช่อง')}">
+             src="${escapeHtml(ch.logo || '')}" alt="${escapeHtml(ch.name||'โลโก้ช่อง')}">
         </div>
         <div class="name">${escapeHtml(ch.name||'ช่อง')}</div>
       </div>`;
@@ -294,16 +291,11 @@ function computeGridCols(container){
 }
 
 /* ------------------------ Player (JW) ------------------------ */
-function playByChannel(ch){
-  const i = channels.indexOf(ch);
-  if (i >= 0) playByIndex(i);
-}
+function playByChannel(ch){ const i = channels.indexOf(ch); if (i >= 0) playByIndex(i); }
 function playByIndex(i, opt={scroll:true}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
-
-  // จดจำช่องล่าสุดเสมอ
-  safeSet('lastId', ch.id);
+  safeSet('lastId', ch.id); // จดจำช่องล่าสุด
 
   const srcList = buildSources(ch);
   tryPlayJW(ch, srcList, 0);
@@ -440,7 +432,7 @@ function getIconSVG(n){
   }
 }
 
-/* ------------------------ Histats (ติดขวาใน .h-wrap — โค้ดใหม่) ------------------------ */
+/* ------------------------ Histats (ติดขวาใน .h-wrap — + Sync สีจาก @b1) ------------------------ */
 function mountHistatsTopRight(){
   const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
 
@@ -468,7 +460,7 @@ function mountHistatsTopRight(){
     (document.head || document.body).appendChild(hs);
   }
 
-  // ย้าย #histatsC มาไว้ใน holder เสมอ + ยกเลิก position เดิม ให้จัดวางตาม CSS เรา
+  // ย้าย #histatsC มาไว้ใน holder เสมอ + ยกเลิก position เดิม ให้จัดวางตาม CSS เรา และซิงก์สีปุ่มรีเฟรช
   const ensureInside = () => {
     const c = document.getElementById('histatsC');
     if (c && c.parentNode !== holder) {
@@ -477,7 +469,36 @@ function mountHistatsTopRight(){
       c.style.top = '';
       c.style.right = '';
     }
+    trySyncRefreshColor();
   };
+
+  // พาร์สสีจากพารามิเตอร์ @b1: ใน URL รูป Histats (int 32-bit signed → ARGB)
+  function trySyncRefreshColor(){
+    const img = holder.querySelector('img[src*="histats"][src*="@b1:"]') || holder.querySelector('img[src*="@b1:"]');
+    if (!img) return;
+    const m = img.src.match(/@b1:(-?\d+)/);
+    if (!m) return;
+    const n = Number(m[1]);           // signed int
+    const v = (n >>> 0);              // uint32
+    const a = (v >>> 24) & 255;
+    const r = (v >>> 16) & 255;
+    const g = (v >>> 8)  & 255;
+    const b = (v       ) & 255;
+
+    // เฉดเข้มลงไว้ทำไล่ระดับ
+    const k = 0.35;
+    const r2 = Math.max(0, Math.floor(r * (1 - k)));
+    const g2 = Math.max(0, Math.floor(g * (1 - k)));
+    const b2 = Math.max(0, Math.floor(b * (1 - k)));
+
+    const root = document.documentElement.style;
+    root.setProperty('--hs-accent',   `rgb(${r}, ${g}, ${b})`);
+    root.setProperty('--hs-accent-2', `rgb(${r2}, ${g2}, ${b2})`);
+    root.setProperty('--hs-glow',     `rgba(${r}, ${g}, ${b}, 0.55)`);
+    root.setProperty('--hs-glow-2',   `rgba(${r2}, ${g2}, ${b2}, 0.38)`);
+    // ใช้ค่า alpha ถ้าจำเป็น: a อยู่ในช่วง 0..255 (ยังไม่ใช้ในธีม)
+  }
+
   ensureInside();
   const obs = new MutationObserver(ensureInside);
   obs.observe(document.documentElement, { childList:true, subtree:true });
@@ -509,18 +530,15 @@ function mountRefreshButton(){
   });
   wrap.appendChild(btn);
 }
-
 async function clearAppCache(){
   try {
     const keys = Object.keys(localStorage);
-    // ล้างค่า jwplayer* เท่านั้น (คงค่า lastId)
     for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
   } catch {}
   if (window.caches) {
     try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
   }
 }
-
 const AUTO_CLEAR_KEY = 'lastAutoClear';
 const SIX_HR_MS = 6 * 60 * 60 * 1000;
 function scheduleAutoClear(){
