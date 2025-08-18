@@ -166,6 +166,40 @@ body > #histatsC, body > div#histatsC, body > a > #histatsC{display:none!importa
   #histats_counter{transform:translateY(-50%) scale(var(--hs-scale))}
 }
 
+/* ===== FIX: center ทั้ง tab-card / ch-card + ชื่อช่อง 2 บรรทัด ===== */
+
+/* กึ่งกลางปุ่มแท็บเสมอ */
+.tabs { align-items: center; }
+.tabs .tab{ display: grid; place-items: center; }
+.tabs .tab .tab-card{
+  display: grid;
+  place-items: center;      /* center ไอคอน+ข้อความ */
+  align-content: center;    /* กันลอยบน/ล่าง */
+}
+
+/* กึ่งกลางการ์ดช่องในกริดเสมอ */
+.grid .channel{ display: grid; place-items: center; }
+.grid .channel .ch-card{
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+  align-content: center;
+}
+
+/* ชื่อช่อง: บังคับตัด 2 บรรทัด (รองรับ Chromium/Firefox/Safari) */
+.name{
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;    /* webkit */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal !important;   /* กันกฎเดิมที่เคย nowrap */
+  overflow-wrap: anywhere;          /* คำยาวๆ ให้ตัด */
+  line-height: 1.15;
+  height: calc(2 * 1.15em);         /* ความสูงคงที่ 2 บรรทัด */
+}
+
+
 /* No-logo mode */
 .no-logos .logo-wrap{display:none}
 .no-logos .ch-card{grid-template-rows:1fr}
