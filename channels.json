@@ -472,6 +472,56 @@
     "src": "https://keela2.com/stream/21/index.m3u8?username=PrVx9n8jKo&password=hw4bIEKgiM",
     "type": "hls",
     "category": "กีฬา"
-    }
+      "name": "TennisHD",
+    "logo": "https://cms.dmpcdn.com/livetv/2023/04/28/f65ea900-e595-11ed-86b8-bb40638e3c49_webp_original.webp",
+    "src": "https://www.livedoomovies.com:4432/02_TennisHD_720p/chunklist.m3u8",
+    "type": "hls",
+    "category": "กีฬา"
+  },
+  {
+    "name": "beIN SPORTS 1",
+    "logo": "https://cms.dmpcdn.com/livetv/2023/07/24/5f3c5240-29cc-11ee-b2f4-e9de482d866e_webp_original.webp",
+    "src": "https://dolive.thaim3u.com/doodii-live/siamsport-1/playlist.m3u8",
+    "type": "hls",
+    "category": "กีฬา"
+  },
+  {
+    "name": "beIN SPORTS 1 (สำรอง)",
+    "logo": "https://img2.pic.in.th/pic/bg1.webp",
+    "src": "https://keela2.com/stream/8/index.m3u8?token=mvFWafOIir5JDlQN",
+    "type": "hls",
+    "category": "กีฬา",
+    "badge": "สำรอง"
+  },
+  {
+    "name": "beIN SPORTS 2",
+    "logo": "https://img5.pic.in.th/file/secure-sv1/bg2d277716feb3f04d2.png",
+    "src": "https://keela2.com/stream/9/index.m3u8?token=mvFWafOIir5JDlQN",
+    "type": "hls",
+    "category": "กีฬา"
+  },
+  {
+    "name": "beIN SPORTS 2 (สำรอง)",
+    "logo": "https://img5.pic.in.th/file/secure-sv1/bg2d277716feb3f04d2.png",
+    "src": "https://keela2.com/stream/2/index.m3u8?token=mvFWafOIir5JDlQN",
+    "type": "hls",
+    "category": "กีฬา",
+    "badge": "สำรอง"
+  },
+  {
+    "name": "beIN SPORTS 3",
+    "logo": "https://img2.pic.in.th/pic/bg37f188872f67815d9.webp",
+    "src": "https://dolive.thaim3u.com/doodii-live/siamsport-3/playlist.m3u8",
+    "type": "hls",
+    "category": "กีฬา"
+  },
+  {
+    "name": "beIN SPORTS 3 (สำรอง)",
+    "logo": "https://img2.pic.in.th/pic/bg37f188872f67815d9.webp",
+    "src": "https://keela2.com/stream/10/index.m3u8?token=mvFWafOIir5JDlQN",
+    "type": "hls",
+    "category": "กีฬา",
+    "badge": "สำรอง"  
+  }
   ]
 }
