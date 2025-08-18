@@ -3,6 +3,7 @@
                    ถ้าไม่มี → เล่นช่องแรกของหมวดแรก + เลื่อนให้เห็น ch-card เช่นกัน
    - ปุ่มรีเฟรช + ล้างแคช (ไม่ลบ lastId) + เคลียร์อัตโนมัติทุก 6 ชม.
    - now-playing ตำแหน่งเดิมใน header (ไม่มีกรอบ)
+   - Histats ติดมุมขวาใน .h-wrap (โค้ดใหม่ 4970878/10052)
 ======================================================================================= */
 
 const CH_URL  = 'channels.json';
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   mountClock();
   mountNowPlayingInHeader();
-  mountHistatsTopRight();
+  mountHistatsTopRight(); // << ใช้โค้ดใหม่
 
   try {
     await loadData();
@@ -448,23 +449,47 @@ function getIconSVG(n){
   }
 }
 
-/* ------------------------ Histats (ติดขวาใน .h-wrap) ------------------------ */
+/* ------------------------ Histats (ติดขวาใน .h-wrap — โค้ดใหม่) ------------------------ */
 function mountHistatsTopRight(){
   const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
+
+  // จุดยึด
   let holder = document.getElementById('histats_counter');
   if (!holder) { holder = document.createElement('div'); holder.id = 'histats_counter'; }
-  anchor.appendChild(holder);
+  if (!holder.parentElement) anchor.appendChild(holder);
 
+  // ตั้งค่า Hasync (ใช้ค่าใหม่ของคุณ)
   window._Hasync = window._Hasync || [];
-  window._Hasync.push(['Histats.startgif','1,4970267,4,10024,""']);
+  window._Hasync.push([
+    'Histats.startgif',
+    '1,4970878,4,10052,"div#histatsC {position: absolute;top:0px;right:0px;}body>div#histatsC {position: fixed;}"'
+  ]);
   window._Hasync.push(['Histats.fasi','1']);
   window._Hasync.push(['Histats.track_hits','']);
 
-  const hs = document.createElement('script'); hs.type='text/javascript'; hs.async=true; hs.src='//s10.histats.com/js15_giftop_as.js';
-  (document.head || document.body).appendChild(hs);
+  // โหลดสคริปต์ (กันซ้ำ)
+  if (!document.getElementById('histats-loader')) {
+    const hs = document.createElement('script');
+    hs.id = 'histats-loader';
+    hs.type = 'text/javascript';
+    hs.async = true;
+    hs.src = '//s10.histats.com/js15_giftop_as.js';
+    (document.head || document.body).appendChild(hs);
+  }
 
-  const move = ()=>{ const c=document.getElementById('histatsC'); if(c && !holder.contains(c)){ holder.appendChild(c); } requestAnimationFrame(move); };
-  move();
+  // ย้าย #histatsC มาไว้ใน holder เสมอ + ยกเลิก position เดิม ให้จัดวางตาม CSS เรา
+  const ensureInside = () => {
+    const c = document.getElementById('histatsC');
+    if (c && c.parentNode !== holder) {
+      holder.appendChild(c);
+      c.style.position = 'static';
+      c.style.top = '';
+      c.style.right = '';
+    }
+  };
+  ensureInside();
+  const obs = new MutationObserver(ensureInside);
+  obs.observe(document.documentElement, { childList:true, subtree:true });
 }
 
 /* ------------------------ Refresh + Auto clear ------------------------ */
@@ -521,14 +546,3 @@ function scheduleAutoClear(){
     setTimeout(tick, SIX_HR_MS);
   }, delay);
 }
-
-/* ------------------------ Utils ------------------------ */
-function escapeHtml(s){
-  return String(s).replace(/[&<>"'`=\/]/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
-  }[c]));
-}
-function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
-function safeGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
-function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
-function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
