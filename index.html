@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>FLOW TV</title>
-  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANS...ABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
   <link rel="stylesheet" href="styles.css" />
   <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
 </head>
@@ -13,6 +13,9 @@
     <div class="h-wrap">
       <div id="clock" class="clock" aria-live="polite"></div>
       <!-- refresh button injected by app.js -->
+
+      <!-- Histats.com  (div with counter) -->
+      <div id="histats_counter"></div>
     </div>
   </header>
 
@@ -21,6 +24,29 @@
     <nav id="tabs" class="tabs" role="tablist" aria-label="กรองช่อง"></nav>
     <section class="grid" id="channel-list" aria-live="polite"></section>
   </main>
+
+  <!-- Histats.com  START  (aync) -->
+  <script type="text/javascript">
+    var _Hasync= _Hasync|| [];
+    _Hasync.push(['Histats.startgif', '1,4970878,4,10052,"div#histatsC {position: absolute;top:0px;right:0px;}body>div#histatsC {position: fixed;}"']);
+    _Hasync.push(['Histats.fasi', '1']);
+    _Hasync.push(['Histats.track_hits', '']);
+    (function() {
+      var hs = document.createElement('script'); hs.type = 'text/javascript'; hs.async = true;
+      hs.src = ('//s10.histats.com/js15_giftop_as.js');
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
+    })();
+  </script>
+  <noscript>
+    <style type="text/css">
+      div#histatsC {position:absolute;top:0px;right:0px;}
+      body>div#histatsC {position:fixed;}
+    </style>
+    <a href="/" alt="" target="_blank">
+      <div id="histatsC"><img border="0" src="//s4is.histats.com/stats/i/4970878.gif?4970878&103"></div>
+    </a>
+  </noscript>
+  <!-- Histats.com  END  -->
 
   <script>window.PROXY_BASE = window.PROXY_BASE || '';</script>
   <script defer src="app.js"></script>
