@@ -432,7 +432,7 @@
     {
       "name": "SportHD 1",
       "logo": "https://cms.dmpcdn.com/livetv/2024/01/16/cdd42d20-b44d-11ee-9687-e7ccd66e1ea3_webp_original.webp",
-      "src": "https://raw.githubusercontent.com/BONDiptv/m3u8/main/true1.m3u8",
+      "src": "http://localhost:3000/api/p/aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0JPTkRpcHR2L20zdTgvbWFpbi90cnVlMS5tM3U4?ua=Mozilla%2F5.0%20(Windows%20NT%2010.0%3B%20Win64%3B%20x64)%20AppleWebKit%2F537.36%20(KHTML%2C%20like%20Gecko)%20Chrome%2F139.0.0.0%20Safari%2F537.36&ref=http%3A%2F%2Flocalhost%3A3000%2F",
       "type": "hls",
       "category": "กีฬา"
     }
