@@ -1,5 +1,6 @@
 /* ===================== styles.css (FULL, COMPACT TABS v2) =====================
    - Header สมดุล: ซ้าย Refresh ⟷ กลาง Clock ⟷ ขวา Histats
+   - Now Playing อยู่ "กลางบนสุดของ <main>" เป็นป้ายสวย ๆ
    - Tabs แบบ badge โปร่ง (ย่อกว่าเดิม) + เอฟเฟกต์ hover/active/selected ชัด
    - กริดช่อง + เอฟเฟกต์สลับหมวด
    - รองรับโลโก้แนวนอน (data-wide)
@@ -74,11 +75,24 @@ header{
   padding-right: calc(max(var(--hud-size), var(--hs-size)) + 16px);
 }
 .clock{font-weight:700;font-size:clamp(15px,2.3vw,19px);letter-spacing:.2px;text-align:center}
-.now-playing{
-  margin-top:2px;font-size:clamp(13px,2vw,16px);font-weight:600;opacity:.92;
-  text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+
+/* ---------- Now Playing at top of <main> ---------- */
+.now-playing--main{
+  width:min(100%, var(--maxw));
+  margin: 10px auto 6px;
+  padding: 8px 12px;
+  text-align:center;
+  font-weight: 700;
+  font-size: clamp(13px, 2.1vw, 17px);
+  color: var(--text);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 6px 14px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35);
+  backdrop-filter: blur(6px);
 }
-.now-playing.swap{animation:npFade .24s ease both}
+.now-playing.swap,
+.now-playing--main.swap{ animation: npFade .24s ease both; }
 @keyframes npFade{from{opacity:0;transform:translateY(4px)}to{opacity:.92;transform:none}}
 
 /* ---------- Histats (ขวาของ header) ---------- */
@@ -158,6 +172,8 @@ header{
   will-change:transform;
   z-index:0;
 }
+
+/* badge ไอคอน (ขยายได้ผ่านตัวแปร) */
 .tab-icon{
   width:var(--tabBadge); height:var(--tabBadge);
   display:grid; place-items:center; border-radius:12px;
@@ -249,19 +265,20 @@ header{
 /* XS: มือถือจอเล็กมาก */
 @media (max-width: 380px){
   :root{
-    --tabW: 62px; --tabH: 50px; --tabBadge: 16px; --tab-font: 9.2px;
+    --tabW: 62px; --tabH: 50px; --tabBadge: 20px; --tab-font: 9.2px;
     --hud-size:30px;
     --hs-size: 34px; --hs-scale: .90;
   }
   .tabs{ gap:8px; padding:10px 6px 12px; }
   .refresh-btn .t{ display:none } /* เหลือไอคอนกันชนเวลา */
   .refresh-btn{ padding:0 8px }
+  .tabs .tab[aria-selected="true"] .tab-card::after{ bottom:-5px; height:3px; width:38% }
 }
 
 /* SM: มือถือทั่วไป */
 @media (min-width: 381px) and (max-width: 639px){
   :root{
-    --tabW: 66px; --tabH: 52px; --tabBadge: 18px; --tab-font: 9.6px;
+    --tabW: 66px; --tabH: 52px; --tabBadge: 22px; --tab-font: 9.6px;
     --hud-size:31px;
     --hs-size: 36px; --hs-scale: .94;
   }
@@ -270,7 +287,7 @@ header{
 /* MD: แท็บเล็ต/เดสก์ท็อปเล็ก */
 @media (min-width: 640px) and (max-width: 1023px){
   :root{
-    --tabW: 74px; --tabH: 58px; --tabBadge: 20px; --tab-font: 10px;
+    --tabW: 74px; --tabH: 58px; --tabBadge: 24px; --tab-font: 10px;
     --hud-size:33px;
     --hs-size: 40px; --hs-scale: 1;
   }
@@ -279,7 +296,7 @@ header{
 /* LG: เดสก์ท็อป */
 @media (min-width: 1024px){
   :root{
-    --tabW: 78px; --tabH: 62px; --tabBadge: 22px; --tab-font: 10.6px;
+    --tabW: 78px; --tabH: 62px; --tabBadge: 26px; --tab-font: 10.6px;
     --hud-size:34px;
     --hs-size: 44px; --hs-scale: 1.05;
   }
