@@ -11,58 +11,27 @@
   "rules": [
     {
       "category": "IPTV",
-      "include": [
-        "iptv",
-        "m3u8",
-        ".mpd",
-        "dash",
-        "hls",
-        "stream"
-      ]
+      "include": ["iptv","m3u8","news","breaking","ไทยรัฐ","อมรินทร์","workpoint","nation","pptv","one","mcot"]
     },
     {
-      "category": "หนัง",
-      "include": [
-        "hbo",
-        "cinemax",
-        "mono29plus",
-        "/109/",
-        "/10[3-7]/"
-      ],
-      "useWideLogo": true
+      "category": "บันเทิง",
+      "include": ["music","entertainment","gmm","rs","mono","true4u"]
     },
     {
       "category": "กีฬา",
-      "include": [
-        "sport",
-        "กีฬา",
-        "t\\s?sports",
-        "pptv\\s?hd\\s?36"
-      ]
+      "include": ["sport","bein","eleven","pptv36","true sport","stadium","บอล","ฟุตบอล","fifa","uefa","afc","fox sports","espn"]
     },
     {
       "category": "สารคดี",
-      "include": [
-        "สารคดี",
-        "discovery",
-        "animal",
-        "nat.?geo",
-        "history",
-        "documentary"
-      ]
+      "include": ["docu","documentary","animal","discovery","nat geo","history","travel","science","nature"]
+    },
+    {
+      "category": "หนัง",
+      "include": ["movie","film","cinema","hbo","fox movie","movie"]
     },
     {
       "category": "เด็ก",
-      "include": [
-        "เด็ก",
-        "kids",
-        "cartoon",
-        "anime",
-        "toon",
-        "nick",
-        "boomerang",
-        "baby"
-      ]
+      "include": ["เด็ก","kids","cartoon","anime","toon","nick","boomerang","baby"]
     }
   ]
 }
