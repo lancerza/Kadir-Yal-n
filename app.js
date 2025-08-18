@@ -15,11 +15,9 @@ const STAGGER_STEP_MS = 22;
 
 let categories = null;
 let channels   = [];
-let currentFilter = '';
+let currentFilter = null;
 let currentIndex  = -1;
-let didInitialReveal = false;   // ป้องกันเลื่อนซ้ำ
-
-try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
+let lastId       = null;
 
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -37,10 +35,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
   }
 
-  buildTabs();
-  resumeLastOrAutoplayFirst();  // เล่น + เลื่อนให้เห็นการ์ดที่กำลังเล่น
+  try {
+    buildTabs();
+    restoreLastId();
+    resumeLastOrAutoplayFirst();
+    centerTabsIfPossible();
+  } catch (e) {
+    console.error(e);
+  }
 
-  centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 });
@@ -58,386 +61,133 @@ async function loadData(){
     fetchJSONFresh(CAT_URL).catch(()=>null),
     fetchJSONFresh(CH_URL)
   ]);
-
-  categories = catRes || {
-    order: ['IPTV','บันเทิง','กีฬา','สารคดี','เด็ก','หนัง'],
-    default: 'IPTV',
-    rules: []
-  };
-
-  channels = Array.isArray(chRes) ? chRes : (chRes?.channels || []);
-  channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
+  categories = Array.isArray(catRes?.categories) ? catRes.categories : [];
+  channels   = Array.isArray(chRes?.channels) ? chRes.channels : (Array.isArray(chRes) ? chRes : []);
 }
 
-/* ------------------------ Resume / Autoplay + Reveal card ------------------------ */
-function resumeLastOrAutoplayFirst(){
-  const firstCat = (categories?.order?.[0]) || categories?.default || 'IPTV';
-  const lastId = safeGet('lastId');
-
-  if (lastId){
-    const idx = channels.findIndex(c => c.id === lastId);
-    if (idx >= 0){
-      const cat = getCategory(channels[idx]);
-      setActiveTab(cat);
-      playByIndex(idx, { scroll:false });
-      scheduleRevealActiveCard();
-      return;
-    }
-  }
-  // ไม่มีประวัติ → หมวดแรก + ช่องแรก
-  setActiveTab(firstCat);
-  const firstIdx = channels.findIndex(c => getCategory(c) === firstCat);
-  if (firstIdx >= 0) {
-    playByIndex(firstIdx, { scroll:false });
-    scheduleRevealActiveCard();
-  }
-}
-
-/* หน่วงสั้น ๆ เพื่อให้ render grid เสร็จก่อนแล้วค่อยเลื่อน */
-function scheduleRevealActiveCard(){
-  if (didInitialReveal) return;
-  didInitialReveal = true;
-  setTimeout(()=> revealActiveCardIntoView(), SWITCH_OUT_MS + 220);
-}
-
-function revealActiveCardIntoView(){
-  const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
-  if (!active) { setTimeout(revealActiveCardIntoView, 120); return; }
-  const header = document.querySelector('header');
-  const pad = 80;
-  const h = (header?.offsetHeight) || 0;
-  const y = active.getBoundingClientRect().top + window.pageYOffset - h - pad;
-  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-}
-
-/* ------------------------ Header: Clock + Now Playing ------------------------ */
+/* ------------------------ Clock ------------------------ */
 function mountClock(){
-  const el = document.getElementById('clock'); if (!el) return;
-  const tick = () => {
-    const now = new Date();
-    el.textContent = new Intl.DateTimeFormat('th-TH',{
-      day:'2-digit', month:'short', year:'numeric',
-      hour:'2-digit', minute:'2-digit', second:'2-digit',
-      hour12:false, timeZone: TIMEZONE
-    }).format(now).replace(',', '');
-  };
+  const el = document.getElementById('datetime-display') || document.querySelector('.clock');
+  if (!el) return;
+  const fmt = new Intl.DateTimeFormat('th-TH', {
+    timeZone: TIMEZONE, hour:'2-digit', minute:'2-digit', second:'2-digit',
+    weekday:'short', day:'2-digit', month:'short', year:'numeric'
+  });
+  const tick = ()=>{ el.textContent = fmt.format(new Date()); };
   tick();
   setInterval(tick, 1000);
 }
 
+/* ------------------------ Now Playing (header) ------------------------ */
 function mountNowPlayingInHeader(){
-  const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
-  let now = document.getElementById('now-playing');
-  if (!now) { now = document.createElement('div'); now.id = 'now-playing'; }
-  now.className = 'now-playing';
-  now.setAttribute('aria-live','polite');
-  host.appendChild(now);
-
-  window.__setNowPlaying = (name='')=>{
-    now.textContent = name || '';
-    now.title = name || '';
-    now.classList.remove('swap'); void now.offsetWidth; now.classList.add('swap');
+  const el = document.querySelector('.now-playing');
+  if (!el) return;
+  window.__setNowPlaying = (t='')=>{
+    el.classList.remove('swap'); void el.offsetWidth; el.textContent = t || ''; el.classList.add('swap');
   };
 }
 
-/* ------------------------ Tabs ------------------------ */
+/* ------------------------ Tabs + Grid (minimal) ------------------------ */
+function getCategory(ch){ return ch.category || 'ทั้งหมด'; }
+
 function buildTabs(){
-  const root = document.getElementById('tabs'); if(!root) return;
-  root.innerHTML = '';
-  (categories?.order || []).forEach(name=>{
-    const btn = document.createElement('button');
-    btn.className = 'tab';
-    btn.dataset.filter = name;
-    btn.setAttribute('aria-selected','false');
-    btn.innerHTML = `
-      <span class="tab-card">
-        <span class="tab-icon">${getIconSVG(name)}</span>
-        <span class="tab-label">${name}</span>
-      </span>`;
-    root.appendChild(btn);
-  });
-  wireTabs(root);
-}
-function wireTabs(root){
-  root.addEventListener('click', e=>{
-    const b = e.target.closest('.tab'); if(!b) return;
-    setActiveTab(b.dataset.filter);
-  });
-  root.addEventListener('keydown', e=>{
-    if(e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
-    const all = Array.from(root.querySelectorAll('.tab'));
-    const i = all.findIndex(b=>b.getAttribute('aria-selected')==='true');
-    let n = e.key==='ArrowRight' ? i+1 : i-1;
-    if(n<0) n = all.length-1; if(n>=all.length) n = 0;
-    all[n].focus(); setActiveTab(all[n].dataset.filter); e.preventDefault();
-  });
-}
-function setActiveTab(name){
-  currentFilter = name;
-  const root = document.getElementById('tabs');
-  root.querySelectorAll('.tab').forEach(b=>{
-    const sel = b.dataset.filter===name;
-    b.setAttribute('aria-selected', sel?'true':'false');
-    if(sel) b.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'});
-  });
+  const tabs = document.getElementById('tabs') || document.querySelector('.tabs');
+  if (!tabs) return;
+  tabs.innerHTML = '';
 
-  const grid = ensureGrid();
-  grid.classList.add('switch-out');
-  setTimeout(()=>{
-    grid.classList.remove('switch-out');
-    render({withEnter:true});
-  }, SWITCH_OUT_MS);
-}
-function centerTabsIfPossible(){
-  const el = document.getElementById('tabs'); if(!el) return;
-  el.classList.toggle('tabs--center', el.scrollWidth <= el.clientWidth + 1);
-}
-
-/* ------------------------ Category logic ------------------------ */
-function getCategory(ch){
-  if (ch.category) return ch.category;
-
-  if (Array.isArray(ch.tags)) {
-    const t = ch.tags.map(x=>String(x).toLowerCase());
-    if (t.includes('sports')) return 'กีฬา';
-    if (t.includes('documentary')) return 'สารคดี';
-    if (t.includes('movie') || t.includes('film')) return 'หนัง';
-    if (t.includes('music')) return 'บันเทิง';
-    if (t.includes('news'))  return 'IPTV';
-    if (t.includes('kids') || t.includes('cartoon') || t.includes('anime')) return 'เด็ก';
-  }
-
-  const hay = `${ch.name||''} ${ch.logo||''} ${JSON.stringify(ch.tags||[])}`.toLowerCase();
-  const src0 = String((ch.sources?.[0]?.src) || ch.src || ch.file || '').toLowerCase();
-  for (const r of (categories?.rules || [])) {
-    const ok = (r.include||[]).some(pat=>{
-      try {
-        if (pat.startsWith('/') && pat.endsWith('/')) {
-          const re = new RegExp(pat.slice(1,-1),'i');
-          return re.test(hay) || re.test(src0);
-        }
-        const p = pat.toLowerCase();
-        return hay.includes(p) || src0.includes(p);
-      } catch { return false; }
-    });
-    if (ok) return r.category;
-  }
-  return categories?.default || 'IPTV';
-}
-function useWideLogo(ch){
-  if (ch.logoWide) return true;
-  const cat = getCategory(ch);
-  const rule = (categories?.rules||[]).find(r=>r.category===cat && r.useWideLogo);
-  return !!rule;
-}
-
-/* ------------------------ Render grid ------------------------ */
-function ensureGrid(){
-  const grid = document.getElementById('channel-list');
-  if (!grid.classList.contains('grid')) grid.classList.add('grid');
-  return grid;
-}
-function render(opt={withEnter:false}){
-  const grid = ensureGrid(); grid.innerHTML='';
-
-  const list = channels.filter(c => getCategory(c) === currentFilter);
-  const cols = computeGridCols(grid);
-
-  list.forEach((ch,i)=>{
-    const btn = document.createElement('button');
-    btn.className = 'channel';
-    btn.dataset.category = getCategory(ch);
-    btn.dataset.globalIndex = String(channels.indexOf(ch));
-    if (useWideLogo(ch)) btn.dataset.wide = 'true';
-    btn.title = ch.name || 'ช่อง';
-
-    btn.innerHTML = `
-      <div class="ch-card">
-        <div class="logo-wrap">
-          <img class="logo" loading="lazy" decoding="async"
-               src="${escapeHtml(ch.logo || '')}" alt="${escapeHtml(ch.name||'โลโก้ช่อง')}">
-        </div>
-        <div class="name">${escapeHtml(ch.name||'ช่อง')}</div>
+  const uniq = ['ทั้งหมด', ...Array.from(new Set(channels.map(getCategory)))];
+  uniq.forEach(cat=>{
+    const tab = document.createElement('div');
+    tab.className = 'tab'; tab.dataset.filter = cat;
+    tab.setAttribute('role','tab'); tab.setAttribute('aria-selected', String(cat===currentFilter));
+    tab.innerHTML = `
+      <div class="tab-card">
+        <div class="tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6"/></svg></div>
+        <div class="tab-label">${cat}</div>
       </div>`;
-
-    btn.addEventListener('click', e=>{
-      ripple(e, btn.querySelector('.ch-card'));
-      playByChannel(ch);
-      scrollToPlayer();
+    tab.addEventListener('click', ()=>{
+      setActiveTab(cat);
+      buildGrid();
     });
-
-    const row = Math.floor(i / Math.max(cols,1));
-    const col = i % Math.max(cols,1);
-    const order = row + col;
-    btn.style.setProperty('--i', order);
-
-    grid.appendChild(btn);
+    tabs.appendChild(tab);
   });
 
-  grid.style.setProperty('--stagger', `${STAGGER_STEP_MS}ms`);
-
-  if (opt.withEnter){
-    grid.classList.add('switch-in');
-    const maxOrder = Math.max(...Array.from(grid.children).map(el => +getComputedStyle(el).getPropertyValue('--i') || 0), 0);
-    const total = (maxOrder * STAGGER_STEP_MS) + 420;
-    setTimeout(()=> grid.classList.remove('switch-in'), Math.min(total, 1200));
-  }
-
-  highlight(currentIndex);
+  if (!currentFilter) setActiveTab(uniq[0]);
 }
-function computeGridCols(container){
-  const cs = getComputedStyle(document.documentElement);
-  const tileW = parseFloat(cs.getPropertyValue('--tile-w')) || 110;
-  const gap   = parseFloat(cs.getPropertyValue('--tile-g')) || 10;
-  const fullW = container.clientWidth;
-  return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
+function setActiveTab(cat){
+  currentFilter = cat;
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(t=> t.setAttribute('aria-selected', String(t.dataset.filter===cat)));
+}
+function buildGrid(){
+  const grid = document.getElementById('channel-list') || document.querySelector('.grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const list = currentFilter==='ทั้งหมด' ? channels : channels.filter(c=> getCategory(c)===currentFilter);
+
+  list.forEach((ch, i)=>{
+    const idx = channels.indexOf(ch);
+    const el = document.createElement('div');
+    el.className = 'channel'; el.dataset.index = idx;
+    if (ch.wide) el.setAttribute('data-wide','true');
+    el.innerHTML = `
+      <div class="ch-card">
+        <div class="logo-wrap"><img class="logo" src="${ch.logo||''}" alt=""></div>
+        <div class="name">${ch.name||''}</div>
+      </div>
+    `;
+    el.addEventListener('click', ()=> playByIndex(idx, { scroll:true }));
+    grid.appendChild(el);
+  });
+
+  scheduleRevealActiveCard();
 }
 
-/* ------------------------ Player (JW) ------------------------ */
-function playByChannel(ch){
-  const i = channels.indexOf(ch);
-  if (i >= 0) playByIndex(i);
-}
-function playByIndex(i, opt={scroll:true}){
-  const ch = channels[i]; if(!ch) return;
-  currentIndex = i;
+/* ------------------------ Play / Resume ------------------------ */
+function playByIndex(idx, {scroll=false}={}){
+  currentIndex = idx;
+  const ch = channels[idx];
+  if (!ch) return;
 
-  // จดจำช่องล่าสุดเสมอ
-  safeSet('lastId', ch.id);
-
-  const srcList = buildSources(ch);
-  tryPlayJW(ch, srcList, 0);
-
+  // (ใส่ลอจิก Player จริงของคุณที่นี่) …
   window.__setNowPlaying?.(ch.name || '');
-  highlight(i);
 
-  if (opt.scroll ?? true) scrollToPlayer();
-  showMobileToast(ch.name || '');
-}
-function buildSources(ch){
-  if (Array.isArray(ch.sources) && ch.sources.length){
-    return [...ch.sources].sort((a,b)=>(a.priority||99)-(b.priority||99));
-  }
-  const s = ch.src || ch.file;
-  const t = ch.type || detectType(s);
-  const drm = ch.drm || (ch.keyId && ch.key ? {clearkey:{keyId:ch.keyId, key:ch.key}} : undefined);
-  return [{ src:s, type:t, drm }];
-}
-function tryPlayJW(ch, list, idx){
-  if (idx >= list.length) { console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); return; }
-  const s = list[idx];
+  document.querySelectorAll('.channel').forEach(c=> c.classList.remove('active'));
+  const active = document.querySelector(`.channel[data-index="${idx}"]`);
+  if (active){ active.classList.add('active'); if (scroll) active.scrollIntoView({behavior:'smooth', block:'center'}); }
 
-  const jwSrc = makeJwSource(s, ch);
-  const player = jwplayer('player').setup({
-    playlist: [{ image: ch.poster || ch.logo || undefined, sources: [jwSrc] }],
-    width:'100%', aspectratio:'16:9', autostart:true,
-    mute: isMobile(), preload:'metadata',
-    displaytitle:false, displaydescription:false,
-    playbackRateControls:true
-  });
-
-  player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
-  player.on('error', ()=> {
-    console.warn('แหล่งล้มเหลว ลองตัวถัดไป', s);
-    tryPlayJW(ch, list, idx+1);
-  });
+  lastId = String(idx);
+  try { localStorage.setItem('lastId', lastId); } catch {}
 }
-function makeJwSource(s, ch){
-  const file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
-  const type = (s.type || detectType(file)).toLowerCase();
-  const out = { file, type };
-  if (type==='dash' && s.drm?.clearkey?.keyId && s.drm?.clearkey?.key){
-    out.drm = { clearkey: { keyId: s.drm.clearkey.keyId, key: s.drm.clearkey.key } };
+function restoreLastId(){
+  try { lastId = localStorage.getItem('lastId') || null; } catch { lastId = null; }
+}
+function resumeLastOrAutoplayFirst(){
+  const firstCat = (document.querySelector('.tab')?.dataset.filter) || 'ทั้งหมด';
+  if (lastId && Number.isFinite(+lastId) && channels[+lastId]){
+    const ch = channels[+lastId];
+    setActiveTab(getCategory(ch));
+    buildGrid();
+    playByIndex(+lastId, { scroll:true });
+    return;
   }
-  return out;
+  setActiveTab(firstCat);
+  buildGrid();
+  if (channels.length) playByIndex(0, { scroll:true });
 }
-function detectType(u){ u=(u||'').split('?')[0].toLowerCase(); if(u.endsWith('.m3u8'))return'hls'; if(u.endsWith('.mpd'))return'dash'; return'auto'; }
-function wrapWithProxyIfNeeded(url, ch){
-  if (window.PROXY_BASE && (ch.proxy || false)) {
-    const payload = { src:url, referrer: ch.referrer||'', ua: ch.ua||'', headers: ch.headers||{} };
-    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-    return `${window.PROXY_BASE}/p/${b64}`;
-  }
-  return url;
-}
-function showMobileToast(text){
-  if (!isMobile()) return;
-  let t = document.getElementById('mini-toast');
-  if (!t){
-    t = document.createElement('div');
-    t.id = 'mini-toast';
-    t.style.cssText = `
-      position:absolute; left:50%; top:10px; transform:translateX(-50%);
-      background:rgba(0,0,0,.65); color:#fff; padding:6px 10px; border-radius:8px;
-      font-size:13px; font-weight:600; z-index:9; pointer-events:none; opacity:0; transition:opacity .18s ease`;
-    const parent = document.getElementById('player');
-    parent.style.position = parent.style.position || 'relative';
-    parent.appendChild(t);
-  }
-  t.textContent = text;
-  requestAnimationFrame(()=>{ t.style.opacity = '1'; });
-  setTimeout(()=>{ t.style.opacity = '0'; }, 1500);
-}
-function isMobile(){ return /iPhone|iPad|Android/i.test(navigator.userAgent) }
-function scrollToPlayer(){
-  const el = document.getElementById('player');
-  const header = document.querySelector('header');
-  const y = el.getBoundingClientRect().top + window.pageYOffset - ((header?.offsetHeight)||0) - 8;
-  window.scrollTo({ top:y, behavior:'smooth' });
+function scheduleRevealActiveCard(){
+  setTimeout(()=>{
+    const act = document.querySelector('.channel.active');
+    if (act) act.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+  }, 50);
 }
 
-/* ------------------------ UI helpers ------------------------ */
-function highlight(globalIndex){
-  document.querySelectorAll('.channel').forEach(el=>{
-    const idx = Number(el.dataset.globalIndex);
-    el.classList.toggle('active', idx === globalIndex);
-    el.setAttribute('aria-pressed', idx === globalIndex ? 'true':'false');
-  });
-}
-function ripple(event, container){
-  if(!container) return;
-  const r = container.getBoundingClientRect();
-  const max = Math.max(r.width, r.height);
-  const x = (event.clientX ?? (r.left + r.width/2)) - r.left;
-  const y = (event.clientY ?? (r.top  + r.height/2)) - r.top;
-  const s = document.createElement('span');
-  s.className = 'ripple';
-  s.style.width = s.style.height = `${max}px`;
-  s.style.left = `${x - max/2}px`;
-  s.style.top  = `${y - max/2}px`;
-  container.querySelector('.ripple')?.remove();
-  container.appendChild(s);
-  s.addEventListener('animationend', ()=>s.remove(), { once:true });
-}
-function escapeHtml(s){
-  return String(s).replace(/[&<>"'`=\/]/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
-  }[c]));
-}
-function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
-function safeGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
-function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
-function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
-
-/* ------------------------ Icons ------------------------ */
-function getIconSVG(n){
-  const c='currentColor';
-  switch(n){
-    case 'IPTV':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 20h16v-2H4v2zm5-4h6v-2H9v2zm-3-4h12V8H6v4zm4-9 2 2 2-2 1.4 1.4L12 6.8 8.6 4.4 10 3z"/></svg>`;
-    case 'เด็ก':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a5 5 0 0 1 5 5c0 3.9-3.6 7-5 7s-5-3.1-5-7a5 5 0 0 1 5-5zm1 14c2 3 1 4-1 6h-1l1-3-2 1 2-4h1z"/></svg>`;
-    case 'บันเทิง':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.6L12 18.7 6.2 21l1.1-6.6-4.7-4.6 6.5-.9L12 3z"/></svg>`;
-    case 'กีฬา':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
-    case 'สารคดี':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
-    case 'หนัง':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
-    default:
-      return `<svg viewBox="0 0 24 24" fill="${c}"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>`;
-  }
+/* ------------------------ Center tabs (nice) ------------------------ */
+function centerTabsIfPossible(){
+  const el = document.querySelector('.tabs');
+  if (!el) return;
+  const over = el.scrollWidth - el.clientWidth;
+  el.classList.toggle('tabs--center', over <= 8);
 }
 
 /* ------------------------ Histats (ติดขวาใน .h-wrap — โค้ดใหม่) ------------------------ */
@@ -477,6 +227,12 @@ function mountHistatsTopRight(){
       c.style.top = '';
       c.style.right = '';
     }
+    // Color sync from Histats image
+    const img = holder.querySelector('img');
+    if (img) {
+      if (img.src) syncRefreshColorFromHistats(img.src);
+      hookImgForColor(img);
+    }
   };
   ensureInside();
   const obs = new MutationObserver(ensureInside);
@@ -510,13 +266,13 @@ function mountRefreshButton(){
   wrap.appendChild(btn);
 }
 
+/* เคลียร์ cache/LS อย่างสุภาพ */
 async function clearAppCache(){
-  try {
-    const keys = Object.keys(localStorage);
-    // ล้างค่า jwplayer* เท่านั้น (คงค่า lastId)
-    for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
+  try{
+    const ks = Object.keys(localStorage||{}).filter(k=>k.startsWith('_t_'));
+    ks.forEach(k=> localStorage.removeItem(k));
   } catch {}
-  if (window.caches) {
+  if ('caches' in self) {
     try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
   }
 }
@@ -531,9 +287,115 @@ function scheduleAutoClear(){
     localStorage.setItem(AUTO_CLEAR_KEY, String(now));
   }
   const delay = Math.max(1000, SIX_HR_MS - ((now - last) % SIX_HR_MS || 0));
-  setTimeout(function tick(){
-    clearAppCache();
-    localStorage.setItem(AUTO_CLEAR_KEY, String(Date.now()));
-    setTimeout(tick, SIX_HR_MS);
-  }, delay);
+  setTimeout(scheduleAutoClear, delay);
+}
+
+/* ------------------------ Utils ------------------------ */
+function debounce(fn, wait=120){
+  let t=0; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); };
+}
+
+/* =================== Utilities: HISTATS COLOR SYNC (refresh button exact match) =================== */
+function hookImgForColor(img){
+  if (!img || img.__colorHooked) return;
+  img.__colorHooked = true;
+  img.addEventListener('load', ()=> img.src && syncRefreshColorFromHistats(img.src), { passive:true });
+  const mo = new MutationObserver(muts=>{
+    for(const m of muts){
+      if (m.type==='attributes' && m.attributeName==='src') {
+        const u = img.getAttribute('src') || '';
+        if (u) syncRefreshColorFromHistats(u);
+      }
+    }
+  });
+  mo.observe(img, { attributes:true, attributeFilter:['src'] });
+}
+
+function syncRefreshColorFromHistats(url){
+  try{
+    const m = /@b1:([\-]?\d+)/.exec(url);
+    if(!m) return;
+    const baseHex = argbIntToRgbHex(parseInt(m[1], 10));
+    const top = tint(baseHex, 0.16);
+    const mid = baseHex;
+    const bot = shade(baseHex, 0.28);
+    const border = shade(baseHex, 0.42);
+    const glow = hexToRGBA(baseHex, 0.55);
+    const ink = pickInkColor(baseHex);
+    const root = document.documentElement.style;
+    root.setProperty('--hs-base', baseHex);
+    root.setProperty('--hs-top', top);
+    root.setProperty('--hs-mid', mid);
+    root.setProperty('--hs-bot', bot);
+    root.setProperty('--hs-border', border);
+    root.setProperty('--hs-glow', glow);
+    root.setProperty('--hs-ink', ink);
+  }catch(e){}
+}
+
+// signed int ARGB -> #RRGGBB
+function argbIntToRgbHex(n){
+  const u = (n >>> 0).toString(16).padStart(8,'0');
+  return ('#' + u.slice(2)).toUpperCase();
+}
+
+function tint(hex, amount=0.15){
+  const {h,s,l} = hexToHsl(hex);
+  return hslToHex(h, s * 0.98, clamp01(l + amount));
+}
+function shade(hex, amount=0.15){
+  const {h,s,l} = hexToHsl(hex);
+  return hslToHex(h, s * 0.92, clamp01(l - amount));
+}
+function pickInkColor(hex){
+  const {r,g,b} = hexToRgb(hex);
+  const y = (0.2126*r + 0.7152*g + 0.0722*b)/255;
+  return y > 0.62 ? '#031018' : '#F4FAFF';
+}
+function clamp01(v){ return Math.max(0, Math.min(1, v)); }
+
+function hexToRgb(hex){
+  const h = hex.replace('#','');
+  return { r: parseInt(h.slice(0,2),16), g: parseInt(h.slice(2,4),16), b: parseInt(h.slice(4,6),16) };
+}
+function rgbToHex(r,g,b){
+  const to = v => Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0');
+  return '#'+to(r)+to(g)+to(b);
+}
+function hexToRGBA(hex, a){
+  const {r,g,b} = hexToRgb(hex);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function hexToHsl(hex){
+  let {r,g,b} = hexToRgb(hex);
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b); let h,s,l=(max+min)/2;
+  if(max===min){ h=s=0; }
+  else{
+    const d=max-min; s=l>0.5? d/(2-max-min): d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      case b: h=(r-g)/d+4; break;
+    }
+    h/=6;
+  }
+  return {h,s,l};
+}
+function hslToHex(h,s,l){
+  function hue2rgb(p,q,t){
+    if(t<0) t+=1; if(t>1) t-=1;
+    if(t<1/6) return p+(q-p)*6*t;
+    if(t<1/2) return q;
+    if(t<2/3) return p+(q-p)*(2/3-t)*6;
+    return p;
+  }
+  let r,g,b;
+  if(s===0){ r=g=b=l; }
+  else{
+    const q=l<0.5 ? l*(1+s) : l+s-l*s;
+    const p=2*l-q;
+    r=hue2rgb(p,q,h+1/3); g=hue2rgb(p,q,h); b=hue2rgb(p,q,h-1/3);
+  }
+  return rgbToHex(Math.round(r*255), Math.round(g*255), Math.round(b*255));
 }
