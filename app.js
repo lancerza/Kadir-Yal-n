@@ -1,12 +1,12 @@
-/* ========================= app.js =========================
-   - Presence counter ต่อ "ช่อง" ด้วย Cloudflare Worker (มือถือ/คอม)
-   - now-playing ใต้ VDO (ไม่มี live-on-player แล้ว)
-   - ป้าย Live + ผู้ชม แสดงเฉพาะใต้เวลา (header)
-   - หน่วงการนับใหม่เมื่อสลับช่อง 4s (ครั้งแรกนับทันที)
-   - อัปเดตตัวเลขผู้ชมอัตโนมัติทุก 5s โดยไม่ต้องรีโหลด
-   - Badge "สำรอง" + Auto backup เมื่อเล่นไม่ได้
-   - Histats แบบซ่อน, ปุ่มรีเฟรช, Tabs/Grid/JWPlayer ครบ
-=========================================================== */
+/* ========================= app.js (HISTATS USERS ONLINE, NO CLOUDFLARE) =========================
+   - Live viewers (#live-viewers .n) อ่านค่าจาก Histats (Users online) โดยตรง
+   - ไม่ใช้ Cloudflare Worker สำหรับตัวนับผู้ชมอีกต่อไป (startPresence/stopPresence = no-op)
+   - บังคับ autoplay ผ่าน policy (autostart:'viewable', mute:true + playAttemptFailed)
+   - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
+   - ปุ่มรีเฟรช + ล้าง cache + เคลียร์อัตโนมัติทุก 6 ชม.
+   - now-playing ใต้ VDO (ไม่มี live-on-player ใต้จอ)
+   - live-pill ใต้เวลา (มี label) แสดง Users online จาก Histats
+================================================================================================== */
 
 const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
@@ -24,22 +24,78 @@ let didInitialReveal = false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ===== Presence (Concurrent Viewers) ===== */
-const PRESENCE_URL = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
-const VIEWER_TTL_S = 120;     // TTL เผื่อมือถือพักจอ
-const PING_INTERVAL_S = 25;   // ping คงสภาพผู้ชม
-const COUNT_REFRESH_MS = 5000; // รีเฟรชตัวเลขผู้ชมถี่ๆ
+/* ===== Live viewers = Histats Users online (no Cloudflare) ===== */
 
-// หน่วงการนับใหม่เมื่อสลับช่อง (ครั้งแรกไม่หน่วง)
-const PRESENCE_SWITCH_DELAY_MS = 4000;
+const HISTATS_POLL_MS = 5000; // สำรอง: เช็คซ้ำทุก 5 วิ
+let histatsObs = null;
 
-let presenceTimer = null;        // setInterval ของ ping หลัก
-let countTimer = null;           // setInterval ของเลขผู้ชม
-let presenceSwitchTimer = null;  // setTimeout ดีเลย์ตอนสลับช่อง
-let presenceFirstStart = true;
-let currentPresenceKey = null;
-let presenceBound = false;
-const VIEWER_ID_KEY = 'viewer_id';
+// เข้ากันได้กับโค้ดเดิม: ให้ฟังก์ชันตัวนับเป็น no-op
+function startPresence(){ /* no-op */ }
+function stopPresence(){  /* no-op */ }
+function bindPresenceWakeEvents(){ /* no-op */ }
+
+/** ดึงตัวเลข Users online จาก Histats DOM */
+function readHistatsUsersOnline(){
+  try{
+    const cont = document.getElementById('histatsC') || document.getElementById('histats_counter');
+    if(!cont) return null;
+
+    // 1) ภาพ .gif ที่มีพารามิเตอร์ @hXX (เช่น @h21)
+    const img = cont.querySelector('img[src*="/stats/i/"]') || cont.querySelector('img[src*="histats"]');
+    if(img && img.src){
+      // รูปแบบพบบ่อย: ...?@h21&@i1 ... หรือ ...&@h21&...
+      let m = img.src.match(/@h(\d+)/);
+      if(m) return parseInt(m[1],10);
+      // เผื่อรูปแบบ query ต่างไป
+      m = img.src.match(/[?&]@h(\d+)/);
+      if(m) return parseInt(m[1],10);
+    }
+
+    // 2) ถ้า Histats แทรกตัวเลขใน text
+    const txt = (cont.textContent || '').trim();
+    const m2 = txt.match(/online[^0-9]*([0-9]+)/i);
+    if(m2) return parseInt(m2[1],10);
+
+    // 3) เผื่อซ่อนใน alt/title
+    if(img && img.alt){
+      const m3 = img.alt.match(/([0-9]+)/);
+      if(m3) return parseInt(m3[1],10);
+    }
+  }catch{}
+  return null;
+}
+
+/** ผูกตัวสังเกต + อัปเดตเลขจาก Histats */
+function startHistatsUsersOnlineWatcher(){
+  const tick = ()=>{
+    const n = readHistatsUsersOnline();
+    if(typeof n === 'number' && !Number.isNaN(n)) updateLiveViewers(n);
+  };
+
+  // ยิงครั้งแรก
+  tick();
+
+  // Observe การเปลี่ยนแปลงใน container ของ Histats
+  const root = document.getElementById('histats_counter') || document.body;
+  try{
+    if(histatsObs) histatsObs.disconnect();
+    histatsObs = new MutationObserver(()=> tick());
+    histatsObs.observe(root, {
+      childList:true,
+      subtree:true,
+      attributes:true,
+      attributeFilter:['src','alt','title']
+    });
+  }catch{}
+
+  // Poll สำรอง (กันพลาดจาก mutation)
+  setInterval(tick, HISTATS_POLL_MS);
+
+  // รีเฟรชเมื่อโฟกัส/กลับหน้า/ออนไลน์
+  ['visibilitychange','focus','pageshow','online'].forEach(ev=>{
+    window.addEventListener(ev, tick, { passive:true });
+  });
+}
 
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -49,9 +105,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowBarUnderPlayer();     // now-playing ใต้ VDO (ไม่มี live-on-player)
+  mountNowBarUnderPlayer();     // now-playing ใต้ VDO
   mountLiveViewersUnderClock(); // live-pill ใต้เวลา (มี label)
-  mountHistatsHidden();
+  mountHistatsHidden();         // โหลด Histats + เปิด watcher
 
   try { await loadData(); }
   catch (e){ console.error('โหลดข้อมูลไม่สำเร็จ:', e); window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ'); }
@@ -63,13 +119,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 
+  // เดิมเคย bindPresenceWakeEvents(); ตอนนี้เป็น no-op เพื่อความเข้ากันได้
   bindPresenceWakeEvents();
 });
 
 /* ------------------------ Load ------------------------ */
 async function fetchJSONFresh(url){
   const u = new URL(url, location.href);
-  u.searchParams.set('_t', String(Date.now()));
+  u.searchParams.set('_t', String(Date.now()));      // กัน cache
   const res = await fetch(u.toString(), { cache:'no-store' });
   if (!res.ok) throw new Error('Fetch failed: ' + url + ' (' + res.status + ')');
   return res.json();
@@ -146,10 +203,7 @@ function mountNowBarUnderPlayer(){
   const old = document.getElementById('live-on-player');
   if (old && old.parentElement) old.parentElement.removeChild(old);
 
-  window.__setNowPlaying = (name='')=>{
-    now.textContent = name || '';
-    now.title = name || '';
-  };
+  window.__setNowPlaying = (name='')=>{ now.textContent = name || ''; now.title = name || ''; };
 }
 
 /* ------------------------ Live viewers ใต้ clock (มี label) ------------------------ */
@@ -351,7 +405,7 @@ function playByIndex(i, opt={scroll:true, noAutoBackup:false}){
   tryPlayJW(ch, srcList, 0, onFailAll);
 
   window.__setNowPlaying?.(ch.name || '');
-  startPresence(ch.id || ch.name || `ch-${i}`);   // เริ่มนับคนดู (หน่วงเมื่อสลับช่อง)
+  startPresence(ch.id || ch.name || `ch-${i}`);   // no-op แต่คงไว้เพื่อความเข้ากันได้
   highlight(i);
 
   if (opt.scroll ?? true) scrollToPlayer();
@@ -431,7 +485,7 @@ function tryBackupSequence(cands){
   window.__setNowPlaying?.(name);
   currentIndex = idx;
   highlight(idx);
-  startPresence(next.id || name || `ch-${idx}`);
+  startPresence(next.id || name || `ch-${idx}`); // no-op
   scrollToPlayer();
   showMobileToast(`สำรอง: ${name}`);
 
@@ -465,72 +519,7 @@ function normalizeNameForMatch(s){
   s = s.replace(/[^a-z0-9ก-๙]+/g,''); return s.trim();
 }
 
-/* ------------------------ Presence Impl ------------------------ */
-function getViewerId(){
-  try{
-    let id = localStorage.getItem(VIEWER_ID_KEY);
-    if (!id){
-      const rnd = (crypto?.getRandomValues) ? crypto.getRandomValues(new Uint8Array(8)) : null;
-      id = rnd ? Array.from(rnd).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,16) : Math.random().toString(36).slice(2,10);
-      localStorage.setItem(VIEWER_ID_KEY, id);
-    }
-    return id;
-  }catch{ return Math.random().toString(36).slice(2,10); }
-}
-function stopPresence(){
-  if (presenceTimer){ clearInterval(presenceTimer); presenceTimer = null; }
-  if (countTimer){ clearInterval(countTimer); countTimer = null; }
-  if (presenceSwitchTimer){ clearTimeout(presenceSwitchTimer); presenceSwitchTimer = null; }
-}
-function startPresence(key){
-  currentPresenceKey = key;
-  stopPresence();
-
-  const delay = presenceFirstStart ? 0 : PRESENCE_SWITCH_DELAY_MS;
-  presenceFirstStart = false;
-
-  presenceSwitchTimer = setTimeout(()=>{
-    // ping แรก (จะได้ตัวเลขทันที)
-    heartbeat(key);
-
-    // ping คงสภาพผู้ชม (ไม่ถี่มาก)
-    presenceTimer = setInterval(()=>{
-      if (!document.hidden) heartbeat(key);
-    }, PING_INTERVAL_S * 1000);
-
-    // รีเฟรชตัวเลขถี่ ๆ ให้ UI อัปเดตไว (ใช้ endpoint เดิม)
-    countTimer = setInterval(()=>{
-      if (!document.hidden) heartbeat(key);
-    }, COUNT_REFRESH_MS);
-  }, delay);
-}
-async function heartbeat(key){
-  const vId = getViewerId();
-
-  const u = new URL(PRESENCE_URL);
-  u.searchParams.set('ch', key);
-  u.searchParams.set('v', vId);
-  u.searchParams.set('ttl', VIEWER_TTL_S);
-  u.searchParams.set('_t', Date.now());          // กันแคช
-
-  try{
-    const res = await fetch(u.toString(), {
-      cache: 'no-store',
-      headers: { 'cache-control': 'no-cache' }
-    });
-    const js  = await res.json().catch(()=> ({}));
-    if (typeof js.count === 'number') updateLiveViewers(js.count);
-  }catch{ /* เงียบไว้ */ }
-}
-function bindPresenceWakeEvents(){
-  if (presenceBound) return; presenceBound = true;
-  const kick = ()=>{ if (currentPresenceKey) heartbeat(currentPresenceKey); };
-  ['visibilitychange','focus','pageshow','online','resume'].forEach(ev=>{
-    window.addEventListener(ev, kick, { passive:true });
-  });
-}
-
-/* ------------------------ Player status / Utils / Histats / Refresh ------------------------ */
+/* ------------------------ Player status / Utils ------------------------ */
 function showPlayerStatus(text){
   const parent = document.getElementById('player'); if (!parent) return;
   let box = document.getElementById('player-msg');
@@ -585,26 +574,39 @@ function getIconSVG(n){
   }
 }
 
-/* ------------------------ Histats (ซ่อน) ------------------------ */
+/* ------------------------ Histats (ซ่อน + เริ่ม watcher) ------------------------ */
 function mountHistatsHidden(){
   let holder = document.getElementById('histats_counter');
   if (!holder) { holder = document.createElement('div'); holder.id='histats_counter'; document.body.appendChild(holder); }
   const hiddenCSS = `position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;opacity:0!important;pointer-events:none!important;z-index:-1!important;`;
   holder.style.cssText = hiddenCSS;
 
+  // Init Histats
   window._Hasync = window._Hasync || [];
   window._Hasync.push(['Histats.startgif','1,4970878,4,10052,"div#histatsC {position:absolute;top:0;right:0;}body>div#histatsC {position:fixed;}"']);
   window._Hasync.push(['Histats.fasi','1']);
   window._Hasync.push(['Histats.track_hits','']);
 
+  let scriptJustInserted = false;
   if (!document.getElementById('histats-loader')) {
     const hs = document.createElement('script'); hs.id='histats-loader'; hs.async=true; hs.src='//s10.histats.com/js15_giftop_as.js';
+    hs.addEventListener('load', ()=> { setTimeout(startHistatsUsersOnlineWatcher, 800); }, { once:true });
     (document.head || document.body).appendChild(hs);
+    scriptJustInserted = true;
   }
-  const ensureInside = () => { const c = document.getElementById('histatsC'); if (c && c.parentNode !== holder) holder.appendChild(c); if (c) c.style.cssText = hiddenCSS; };
+
+  // บังคับให้ #histatsC อยู่ใน holder และถูกซ่อนเสมอ
+  const ensureInside = () => {
+    const c = document.getElementById('histatsC');
+    if (c && c.parentNode !== holder) holder.appendChild(c);
+    if (c) c.style.cssText = hiddenCSS;
+  };
   ensureInside();
   const obs = new MutationObserver(ensureInside);
   obs.observe(document.documentElement, { childList:true, subtree:true });
+
+  // ถ้าเคยโหลดแล้ว ให้เริ่ม watcher เลย
+  if (!scriptJustInserted) setTimeout(startHistatsUsersOnlineWatcher, 800);
 }
 
 /* ------------------------ Refresh + Auto clear ------------------------ */
