@@ -1,16 +1,9 @@
 /* ======================================================================
    styles.css — UI for IPTV page
-   - Dark theme tokens + base reset
-   - Header (clock, refresh, histats) + live-pill ใต้ clock
-   - Player
-   - Tabs + Grid + Channel cards (+ Badge "สำรอง")
-   - Now bar ใต้วิดีโอ (now-playing กึ่งกลาง)
-   - Responsive
 ====================================================================== */
 
 /* ---------- Root tokens ---------- */
 :root{
-  /* Colors */
   --bg:#0b0c0e;
   --panel:#141516;
   --panel-2:#101112;
@@ -18,39 +11,32 @@
   --muted:#a0a7b0;
   --border:#242628;
 
-  /* Layout */
   --maxw:1200px;
 
-  /* Font (clean Thai) */
   --font: "Sarabun","Noto Sans Thai","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   --font-size: 14.5px;
   --font-weight: 600;
   --font-strong: 700;
 
-  /* Channel card sizing */
   --tile-w:104px;
-  --tile-h:128px;       /* +สูงขึ้นเพื่อรองรับชื่อ 2 บรรทัด */
+  --tile-h:128px;
   --tile-g:12px;
   --logo-max-h:52px;
   --logo-max-w:82px;
   --logo-wide-h:42px;
 
-  /* Tabs (compact + readable) */
   --tabW: 72px;
   --tabH: 58px;
   --tab-gap:6px;
   --tabBadge:28px;
   --tab-font:12.2px;
 
-  /* Header HUD */
   --hud-size:32px;
   --hud-radius:12px;
 
-  /* Histats size (ปุ่มรีเฟรชอิงขนาดนี้) */
   --hs-size: 40px;
   --hs-scale: 1;
 
-  /* ค่ากว้างปุ่มรีเฟรช (เซ็ตโดย JS) */
   --refresh-btn-w: 112px;
 }
 
@@ -89,8 +75,6 @@ header{
   display:grid; justify-items:center; gap:4px;
   min-height: calc(max(var(--hud-size), var(--hs-size)) + 12px);
   padding:10px 14px;
-
-  /* เผื่อซ้าย/ขวาเท่าขนาด Refresh/Histats */
   padding-left:  calc(max(var(--hud-size), var(--hs-size)) + 16px);
   padding-right: calc(max(var(--hud-size), var(--hs-size)) + 16px);
 }
@@ -100,27 +84,19 @@ header{
   text-shadow:none; opacity:.98;
 }
 
-/* ---------- Live viewers (ใช้ class เดียว ทั้งหัวเว็บและใต้ VDO) ---------- */
+/* ---------- Live viewers (ทั้งหัวเว็บและใต้ VDO) ---------- */
 .live-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:6px 10px;
-  border-radius:999px;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 10px; border-radius:999px;
 
-  /* Fallback */
   border:1px solid rgba(255,255,255,.14);
   background:rgba(255,255,255,.06);
 
-  /* Modern mix */
   border:1px solid color-mix(in oklab, currentColor 16%, transparent);
   background:color-mix(in oklab, currentColor 6%, transparent);
 
-  font-size:13px;
-  font-weight:700;
-  color:inherit;
-  backdrop-filter:saturate(1.05) blur(6px);
-  -webkit-backdrop-filter:saturate(1.05) blur(6px);
+  font-size:13px; font-weight:700; color:inherit;
+  backdrop-filter:saturate(1.05) blur(6px); -webkit-backdrop-filter:saturate(1.05) blur(6px);
 }
 .live-pill .dot{
   width:8px; height:8px; border-radius:50%;
@@ -129,11 +105,10 @@ header{
 }
 .live-pill .label{ opacity:.72; font-weight:600 }
 
-/* (ตำแหน่งพิเศษเมื่อติดใต้ clock) */
 #live-viewers{ margin-top:4px; }
 @media (max-width:540px){ .h-wrap #live-viewers{ margin-top:6px; } }
 
-/* ---------- Histats (ตรึงขวาใน header — ถ้าไม่ซ่อนด้วย JS) ---------- */
+/* ---------- Histats (ถ้าไม่ได้ซ่อนด้วย JS) ---------- */
 #histats_counter{
   position:absolute; right:8px; top:50%;
   height: var(--hs-size);
@@ -147,7 +122,7 @@ header{
   opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))
 }
 
-/* ---------- Refresh button (ตรึงซ้ายใน header) ---------- */
+/* ---------- Refresh button ---------- */
 .refresh-btn{
   position:absolute; left:8px; top:50%; transform:translateY(-50%);
   height: var(--hs-size); line-height: var(--hs-size);
@@ -166,7 +141,6 @@ header{
 .refresh-btn:active{ transform:translateY(-50%) scale(.985) }
 .refresh-btn[disabled]{ opacity:.65; cursor:wait }
 
-/* ข้อความสถานะข้างปุ่ม */
 #refresh-status{
   position:absolute; z-index:3;
   left: calc(8px + var(--refresh-btn-w) + 8px);
@@ -186,7 +160,7 @@ header{
   border:1px solid var(--border); box-shadow:0 8px 18px rgba(0,0,0,.25) inset;
 }
 
-/* ---------- Now bar ใต้ VDO (now-playing กึ่งกลาง + live-pill) ---------- */
+/* ---------- Now bar ใต้ VDO ---------- */
 #now-bar{
   display:flex; align-items:center; justify-content:center;
   gap:10px; margin:10px 0 16px;
@@ -307,34 +281,18 @@ header{
 }
 .channel:active .ch-card{ transform:scale(.985) }
 
-/* ==== Badge: ป้ายมุมขวาบนของการ์ด ==== */
+/* Badge มุมขวาบน */
 .ch-badge{
-  position:absolute;
-  top:6px; right:6px;
-  padding:2px 6px;
-  border-radius:999px;
-  font-weight:800;
-  font-size: clamp(10px, 1.15vw, 11.5px);
-  letter-spacing:.2px;
-  line-height:1.1;
-  pointer-events:none;
-  z-index:2;
-
-  /* โทนกลาง (fallback) */
+  position:absolute; top:6px; right:6px;
+  padding:2px 6px; border-radius:999px;
+  font-weight:800; font-size: clamp(10px, 1.15vw, 11.5px); letter-spacing:.2px; line-height:1.1;
+  pointer-events:none; z-index:2;
   color:#eaf1ff;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.18);
-
-  /* กลมกลืนกับธีม (รองรับ color-mix) */
   background: color-mix(in oklab, currentColor 8%, transparent);
   border: 1px solid color-mix(in oklab, currentColor 18%, transparent);
-
   backdrop-filter: saturate(1.05) blur(4px);
   -webkit-backdrop-filter: saturate(1.05) blur(4px);
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.22) inset,
-    0 2px 6px rgba(0,0,0,.18);
+  box-shadow: 0 1px 0 rgba(255,255,255,.22) inset, 0 2px 6px rgba(0,0,0,.18);
 }
 .ch-badge[data-variant="backup"]{
   color:#eafff3;
@@ -342,15 +300,13 @@ header{
   border-color: color-mix(in oklab, #22c55e 42%, transparent);
 }
 
-/* ==== Channel selected ==== */
+/* เลือกการ์ด */
 .channel.active .ch-card,
 .channel[aria-selected="true"] .ch-card,
 .channel[data-selected="true"] .ch-card{
   transform: translateY(-1px);
   border-color: rgba(255,255,255,.85);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.6) inset,
-    0 0 12px rgba(255,255,255,.25);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.6) inset, 0 0 12px rgba(255,255,255,.25);
 }
 .channel[aria-selected="true"]::after,
 .channel[data-selected="true"]::after{ opacity:.95; animation:neonPulse 2.4s ease-in-out infinite }
@@ -365,7 +321,7 @@ header{
 }
 .channel[data-wide="true"] .logo{ max-height:var(--logo-wide-h) }
 
-/* ชื่อช่อง: 2 บรรทัด + ellipsis */
+/* ชื่อช่อง */
 .name{
   width:100%;
   text-align:center;
@@ -374,14 +330,12 @@ header{
   font-size:13px;
   line-height:1.22;
   color:#eaeef3; opacity:.95;
-
   white-space: normal;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-
   min-height: calc(2 * 1.22em);
 }
 
