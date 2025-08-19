@@ -339,8 +339,8 @@ header{
   text-align:center;
   font-family:var(--font);
   font-weight:700;
-  font-size:13px;
-  line-height:1.22;
+  font-size:11px;
+  line-height:1.18;
   color:#eaeef3; opacity:.95;
 
   white-space: normal;
