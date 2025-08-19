@@ -2,8 +2,7 @@
    - เปิดเว็บ: เลือกหมวดแรกที่ "มีช่องจริง" แล้วเล่นช่องแรก (ถ้าทุกหมวดว่าง จะข้ามไปช่องแรกของทั้งรายการ)
    - บังคับ autoplay ให้ผ่านนโยบายเบราว์เซอร์ (autostart:'viewable', mute:true + playAttemptFailed)
    - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
-   - ปุ่มรีเฟรช + ล้าง cache + Histats  (ล้างคีย์จำพวก lastId/lastTab/lastCategory ออกด้วย)
-   - ไม่จำ lastId / lastTab / lastCategory
+   - ปุ่มรีเฟรช + ล้าง cache (ไม่จำค่า lastId)
    - Histats ตรึงขวาบน .h-wrap
 ============================================================================================================== */
 
@@ -582,28 +581,12 @@ function mountRefreshButton(){
 }
 
 async function clearAppCache(){
-  // ลบค่า last* ที่อาจจำไว้จากเวอร์ชันเก่าให้หมด (ไม่ให้จำอะไรเลย)
   try {
-    const lsKeys = Object.keys(localStorage);
-    for (const k of lsKeys) {
-      if (/^jwplayer\./i.test(k) || /last(id|tab|category|channel)/i.test(k)) {
-        localStorage.removeItem(k);
-      }
-    }
-  } catch {}
-  try {
-    const ssKeys = Object.keys(sessionStorage);
-    for (const k of ssKeys) {
-      if (/^jwplayer\./i.test(k) || /last(id|tab|category|channel)/i.test(k)) {
-        sessionStorage.removeItem(k);
-      }
-    }
+    const keys = Object.keys(localStorage);
+    for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
   } catch {}
   if (window.caches) {
-    try {
-      const names = await caches.keys();
-      await Promise.all(names.map(n => caches.delete(n)));
-    } catch {}
+    try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
   }
 }
 
@@ -616,8 +599,7 @@ function scheduleAutoClear(){
     clearAppCache();
     localStorage.setItem(AUTO_CLEAR_KEY, String(now));
   }
-  const elapsed = now - last;
-  const delay = !last ? 1000 : Math.max(1000, SIX_HR_MS - (elapsed % SIX_HR_MS));
+  const delay = Math.max(1000, SIX_HR_MS - ((now - last) % SIX_HR_MS || 0));
   setTimeout(function tick(){
     clearAppCache();
     localStorage.setItem(AUTO_CLEAR_KEY, String(Date.now()));
