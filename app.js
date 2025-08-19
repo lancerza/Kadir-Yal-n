@@ -1,11 +1,10 @@
-/* ========================= app.js (NO FIRST SCROLL + FORCED AUTOPLAY + PLAYER STATUS + HISTATS AUTO-REFRESH) =========================
-   - เปิดเว็บ: เลือกหมวดแรกที่ "มีช่องจริง" แล้วเล่นช่องแรก (ไม่เลื่อนลงกริดเพื่อกันบังวิดีโอ)
-   - บังคับ autoplay ให้ผ่านนโยบายเบราว์เซอร์ (autostart:'viewable', mute:true + playAttemptFailed)
-   - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
-   - ปุ่มรีเฟรช + ล้าง cache (ไม่จำค่า lastId)
-   - Histats ตรึงขวาบน .h-wrap + รีเฟรชตัวเลขอัตโนมัติทุกช่วงเวลา
-   - เลื่อนหน้าอิงความสูง header ผ่านตัวแปร CSS --header-offset
-===================================================================================================================================== */
+/* ========================= app.js (BASE + HISTATS AUTO-REFRESH) =========================
+   - เปิดเว็บ: เลือกหมวดแรกที่ "มีช่องจริง" แล้วเล่นช่องแรก (ไม่เลื่อนลงกริด เพื่อไม่บังวิดีโอ)
+   - Player: autostart แบบปลอดภัยต่อ policy (viewable + mute) และ fallback playAttemptFailed
+   - Header: นาฬิกา + now-playing + ปุ่มรีเฟรช (ล้าง cache แต่ไม่จำช่องล่าสุด)
+   - Tabs/Grid/Channel card ครบ
+   - Histats: ติดมุมขวาบน .h-wrap + รีเฟรชเฉพาะรูปภาพเป็นระยะ (ไม่เพิ่มนับวิว) + รีเฟรชเมื่อกลับมาโฟกัสแท็บ
+========================================================================================== */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -13,10 +12,10 @@ const TIMEZONE = 'Asia/Bangkok';
 
 const SWITCH_OUT_MS   = 140;
 const STAGGER_STEP_MS = 22;
-const SCROLL_CARD_ON_LOAD = false;    // ❗ ปิดการเลื่อนการ์ดตอนเปิดเว็บครั้งแรก
-const HISTATS_REFRESH_MS   = 60 * 1000; // รีเฟรชตัวเลข Histats ทุก 60 วิ (ปรับได้)
+const SCROLL_CARD_ON_LOAD = false;       // ❗ เปิดเว็บครั้งแรกไม่เลื่อนการ์ด
+const HISTATS_REFRESH_MS   = 60 * 1000;  // รีเฟรชตัวเลข Histats ทุก 60 วินาที (ปรับได้)
 
-/* -------------------------------- State -------------------------------- */
+/* ------------------------ State ------------------------ */
 let categories = null;
 let channels   = [];
 let currentFilter = '';
@@ -25,9 +24,8 @@ let didInitialReveal = false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* -------------------------------- Boot -------------------------------- */
+/* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
-  // กันหน้าอยู่บนสุดเสมอ เมื่อเพิ่งโหลด (มือถือ/แถบ address)
   window.scrollTo({ top: 0, behavior: 'auto' });
 
   mountRefreshButton();
@@ -35,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   mountClock();
   mountNowPlayingInHeader();
-  mountHistatsTopRight();
+  mountHistatsTopRight();     // ⭐ เน้นฟีเจอร์นี้
 
   try {
     await loadData();
@@ -45,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   buildTabs();
-  autoplayFirst();  // เล่น (ไม่เลื่อนลงกริด)
+  autoplayFirst();            // เล่นช่องแรกของหมวดแรกที่มีจริง (ไม่เลื่อนลง)
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
@@ -86,22 +84,19 @@ function autoplayFirst(){
     idx = channels.findIndex(ch => getCategory(ch) === c);
     if (idx >= 0) { cat = c; break; }
   }
-  if (idx < 0 && channels.length) {  // ทุกหมวดว่าง → ใช้ช่องแรกของทั้งรายการ
+  if (idx < 0 && channels.length) {
     idx = 0;
     cat = getCategory(channels[0]) || cat;
   }
 
   if (idx >= 0) {
     setActiveTab(cat);
-    playByIndex(idx, { scroll:false });           // ❗ ไม่เลื่อนขึ้น/ลง
-    if (SCROLL_CARD_ON_LOAD) scheduleRevealActiveCard(); // เลื่อนการ์ดแบบ optional
+    playByIndex(idx, { scroll:false });
+    if (SCROLL_CARD_ON_LOAD) scheduleRevealActiveCard();
   } else {
     showPlayerStatus('ไม่พบช่องสำหรับเล่น');
-    console.warn('ไม่พบช่องให้เล่น');
   }
 }
-
-/* หน่วงสั้น ๆ เพื่อให้ render grid เสร็จก่อนแล้วค่อยเลื่อน (ใช้เมื่อ SCROLL_CARD_ON_LOAD=true) */
 function scheduleRevealActiveCard(){
   if (didInitialReveal) return;
   didInitialReveal = true;
@@ -144,7 +139,7 @@ function mountNowPlayingInHeader(){
   };
 }
 
-/* -------------------------------- Tabs -------------------------------- */
+/* ------------------------ Tabs ------------------------ */
 function buildTabs(){
   const root = document.getElementById('tabs'); if(!root) return;
   root.innerHTML = '';
@@ -235,7 +230,7 @@ function useWideLogo(ch){
   return !!rule;
 }
 
-/* -------------------------------- Grid -------------------------------- */
+/* ------------------------ Grid ------------------------ */
 function ensureGrid(){
   const grid = document.getElementById('channel-list');
   if (!grid.classList.contains('grid')) grid.classList.add('grid');
@@ -267,7 +262,7 @@ function render(opt={withEnter:false}){
     btn.addEventListener('click', e=>{
       ripple(e, btn.querySelector('.ch-card'));
       playByChannel(ch);
-      scrollToPlayer();                      // คลิกการ์ด → เลื่อนกลับขึ้นผู้เล่น
+      scrollToPlayer();  // คลิกการ์ด → เลื่อนกลับผู้เล่น
     });
 
     const row = Math.floor(i / Math.max(cols,1));
@@ -297,7 +292,7 @@ function computeGridCols(container){
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
 
-/* -------------------- Player (JW) + Forced Autoplay + Status -------------------- */
+/* ------------------------ Player (JW) ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -326,7 +321,7 @@ function buildSources(ch){
   return [{ src:s, type:t, drm }];
 }
 function tryPlayJW(ch, list, idx){
-  if (idx >= list.length) { showPlayerStatus('เล่นไม่ได้ทุกแหล่ง'); console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); return; }
+  if (idx >= list.length) { showPlayerStatus('เล่นไม่ได้ทุกแหล่ง'); return; }
   const s = list[idx];
 
   const jwSrc = makeJwSource(s, ch);
@@ -334,35 +329,20 @@ function tryPlayJW(ch, list, idx){
 
   const player = jwplayer('player').setup({
     playlist: [{ image: ch.poster || ch.logo || undefined, sources: [jwSrc] }],
-    width:'100%',
-    aspectratio:'16:9',
-    autostart: 'viewable',   // ปลอดภัยต่อ autoplay policy
-    mute: true,              // บังคับ mute เพื่อให้เบราว์เซอร์อนุญาตเล่นอัตโนมัติ
+    width:'100%', aspectratio:'16:9',
+    autostart:'viewable',   // ปลอดภัยกับ autoplay policy
+    mute:true,              // ช่วยให้เล่นอัตโนมัติผ่านได้
     preload:'metadata',
-    displaytitle:false,
-    displaydescription:false,
+    displaytitle:false, displaydescription:false,
     playbackRateControls:true
   });
 
-  // กันกรณี autoplay ยังไม่ติด
   player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
-
-  // สถานะบัฟเฟอร์/เล่น/เฟรมแรก
   player.on('buffer', ()=> showPlayerStatus('กำลังบัฟเฟอร์…'));
   player.on('play',   ()=> showPlayerStatus(''));
   player.on('firstFrame', ()=> showPlayerStatus(''));
-
-  // error/ตั้งค่าไม่ได้ → ลองแหล่งถัดไป
-  player.on('setupError', e => {
-    console.warn('setupError:', e);
-    showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…');
-    tryPlayJW(ch, list, idx+1);
-  });
-  player.on('error', e => {
-    console.warn('playError:', e);
-    showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
-    tryPlayJW(ch, list, idx+1);
-  });
+  player.on('setupError', ()=>{ showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…'); tryPlayJW(ch, list, idx+1); });
+  player.on('error',      ()=>{ showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…'); tryPlayJW(ch, list, idx+1); });
 }
 function makeJwSource(s, ch){
   const file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
@@ -427,9 +407,8 @@ function showPlayerStatus(text){
   box.style.display = text ? 'block' : 'none';
 }
 
-/* -------------------------------- Utilities -------------------------------- */
+/* ------------------------ Utilities ------------------------ */
 function headerOffset(){
-  // อ่านจากตัวแปร CSS --header-offset ถ้าไม่มีให้ fallback เป็นความสูง .h-wrap
   const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
   const num = parseFloat(v);
   if (!isNaN(num) && num > 0) return num;
@@ -465,7 +444,7 @@ function escapeHtml(s){
 function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
 function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
 
-/* -------------------------------- Icons -------------------------------- */
+/* ------------------------ Icons ------------------------ */
 function getIconSVG(n){
   const c='currentColor';
   switch(n){
@@ -486,7 +465,7 @@ function getIconSVG(n){
   }
 }
 
-/* ---------------- Histats (ติดขวาใน .h-wrap + Auto-Refresh ตัวเลข) ---------------- */
+/* ------------------------ Histats (ติดขวา + Auto-Refresh ตัวเลข) ------------------------ */
 function mountHistatsTopRight(){
   const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
 
@@ -494,25 +473,24 @@ function mountHistatsTopRight(){
   if (!holder) { holder = document.createElement('div'); holder.id = 'histats_counter'; }
   if (!holder.parentElement) anchor.appendChild(holder);
 
-  // ติดตั้ง Histats (ใช้แบบ startgif)
+  // ติดตั้ง Histats แบบ startgif (ใช้ id ของคุณ)
   window._Hasync = window._Hasync || [];
   window._Hasync.push([
     'Histats.startgif',
     '1,4970878,4,10052,"div#histatsC {position: absolute;top:0px;right:0px;}body>div#histatsC {position: fixed;}"'
   ]);
   window._Hasync.push(['Histats.fasi','1']);
-  window._Hasync.push(['Histats.track_hits','']);
+  window._Hasync.push(['Histats.track_hits','']);  // เรียกครั้งเดียว
 
   if (!document.getElementById('histats-loader')) {
     const hs = document.createElement('script');
     hs.id = 'histats-loader';
-    hs.type = 'text/javascript';
     hs.async = true;
     hs.src = '//s10.histats.com/js15_giftop_as.js';
     (document.head || document.body).appendChild(hs);
   }
 
-  // จัด DOM ให้อยู่ในตำแหน่งที่เราควบคุม
+  // ให้ #histatsC มาอยู่ในตำแหน่งที่เราคุม
   const ensureInside = () => {
     const c = document.getElementById('histatsC');
     if (c && c.parentNode !== holder) {
@@ -523,26 +501,25 @@ function mountHistatsTopRight(){
     }
   };
   ensureInside();
-  const obs = new MutationObserver(ensureInside);
-  obs.observe(document.documentElement, { childList:true, subtree:true });
+  new MutationObserver(ensureInside).observe(document.documentElement, { childList:true, subtree:true });
 
-  // รีเฟรช "เฉพาะรูปภาพ" เพื่อลากตัวเลขล่าสุด (ไม่เพิ่ม count)
+  // รีเฟรช "เฉพาะรูปภาพ" เพื่ออัปเดตตัวเลขโดยไม่รีเฟรชหน้า/ไม่นับวิวเพิ่ม
   function refreshHistatsImage(){
     const c = document.getElementById('histatsC');
     if (!c) return;
     c.querySelectorAll('img').forEach(img=>{
       try{
         const u = new URL(img.src, location.href);
-        u.searchParams.set('r', Date.now().toString()); // bust cache
+        u.searchParams.set('r', Date.now().toString());
         img.src = u.toString();
       }catch{
         img.src = img.src + (img.src.includes('?') ? '&' : '?') + 'r=' + Date.now();
       }
     });
   }
-  setInterval(refreshHistatsImage, HISTATS_REFRESH_MS);
+  window.refreshHistatsImage = refreshHistatsImage;
 
-  // ถ้า widget เอ๋อ ไม่มีรูป → โหลด script ใหม่แบบเนียน ๆ
+  // ถ้าวิดเจ็ตหาย/เอ๋อ ให้โหลดสคริปต์ใหม่
   function rebuildHistatsIfBroken(){
     const c = document.getElementById('histatsC');
     if (!c || !c.querySelector('img')) {
@@ -554,7 +531,21 @@ function mountHistatsTopRight(){
       (document.head || document.body).appendChild(hs);
     }
   }
-  setInterval(rebuildHistatsIfBroken, 5 * 60 * 1000);
+  window.rebuildHistatsIfBroken = rebuildHistatsIfBroken;
+
+  // รีเฟรชเลขเป็นระยะ
+  setInterval(refreshHistatsImage, HISTATS_REFRESH_MS);
+  // ปลุกทันทีเมื่อกลับมาโฟกัส/ออนไลน์
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      refreshHistatsImage();
+      rebuildHistatsIfBroken();
+    }
+  });
+  window.addEventListener('online', () => {
+    refreshHistatsImage();
+    rebuildHistatsIfBroken();
+  });
 }
 
 /* ------------------------ Refresh + Auto clear ------------------------ */
