@@ -1,8 +1,9 @@
 /* ========================= app.js =========================
-   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือ)
-   - now-playing + live-pill: ใต้ VDO (กึ่งกลาง) + จะมีที่หัวเว็บได้ด้วย
-   - Badge "สำรอง" บนการ์ด + Auto backup เมื่อเล่นไม่ได้
-   - Histats แบบซ่อน, แคชรีเฟรช, Tabs/Grid/JWPlayer ครบ
+   - Presence counter ต่อ "ช่อง" ด้วย Cloudflare Worker (มือถือ/คอม)
+   - now-playing + live counter ใต้ VDO (ไม่มี label), live อีกจุดใต้เวลา
+   - หน่วงการนับใหม่เมื่อสลับช่อง 4s (ครั้งแรกนับทันที)
+   - Badge "สำรอง" + Auto backup เมื่อเล่นไม่ได้
+   - Histats แบบซ่อน, ปุ่มรีเฟรช, Tabs/Grid/JWPlayer ครบ
 =========================================================== */
 
 const CH_URL   = 'channels.json';
@@ -22,13 +23,18 @@ let didInitialReveal = false;
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ===== Presence (Concurrent Viewers) ===== */
-const PRESENCE_URL    = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
-const VIEWER_TTL_S    = 120;         // TTL เผื่อจอมือถือพัก
-const PING_INTERVAL_S = 25;          // ส่ง heartbeat ทุก ~25 วิ
-const VIEWER_ID_KEY   = 'viewer_id';
-let presenceTimer     = null;
-let currentPresenceKey= null;
-let presenceBound     = false;
+const PRESENCE_URL = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
+const VIEWER_TTL_S = 120;     // TTL เผื่อมือถือพักจอ
+const PING_INTERVAL_S = 25;   // ping ทุก ~25 วิ
+
+// หน่วงการนับใหม่เมื่อสลับช่อง (ครั้งแรกไม่หน่วง)
+const PRESENCE_SWITCH_DELAY_MS = 4000;
+let presenceTimer = null;
+let presenceSwitchTimer = null;
+let presenceFirstStart = true;
+let currentPresenceKey = null;
+let presenceBound = false;
+const VIEWER_ID_KEY = 'viewer_id';
 
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -38,8 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowBarUnderPlayer();     // now-playing + live-pill ใต้ VDO (กึ่งกลาง)
-  mountLiveViewersUnderClock(); // (ทางเลือก) live-pill ใต้เวลา
+  mountNowBarUnderPlayer();     // now-playing + live-pill ใต้ VDO (ไม่มี label)
+  mountLiveViewersUnderClock(); // live-pill ใต้เวลา (มี label)
   mountHistatsHidden();
 
   try { await loadData(); }
@@ -52,7 +58,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 
-  // ปรับปรุงความเสถียรบนมือถือ: กระตุ้น ping เมื่อ “กลับมาใช้งาน”
   bindPresenceWakeEvents();
 });
 
@@ -115,7 +120,7 @@ function mountNowBarUnderPlayer(){
     const s = document.createElement('style'); s.id='now-bar-styles';
     s.textContent = `
 #now-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 14px;}
-#now-playing{font-weight:700;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+#now-playing{font-weight:700;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center;}
 .live-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);font-size:13px;font-weight:700;}
 .live-pill .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px color-mix(in oklab,#22c55e 25%,transparent);}
 .live-pill .label{opacity:.72;font-weight:600}
@@ -124,27 +129,26 @@ function mountNowBarUnderPlayer(){
   }
 
   let bar = document.getElementById('now-bar');
-  if (!bar) { bar = document.createElement('div'); bar.id='now-bar'; player.insertAdjacentElement?.('afterend', bar); }
+  if (!bar) { bar = document.createElement('div'); bar.id='now-bar'; player.insertAdjacentElement('afterend', bar); }
 
   let now = document.getElementById('now-playing');
   if (!now) { now = document.createElement('div'); now.id='now-playing'; now.className='now-playing'; now.setAttribute('aria-live','polite'); }
   if (now.parentElement !== bar) bar.appendChild(now);
 
-  // live-pill ใต้ VDO (กึ่งกลาง)
+  // live-pill ใต้ VDO (ไม่มี label)
   let live2 = document.getElementById('live-on-player');
   if (!live2){
     live2 = document.createElement('span');
     live2.id = 'live-on-player';
     live2.className = 'live-pill';
-    const label = window.LIVE_LABEL || 'Live';
-    live2.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="label">${label}</span><span class="n">0</span>`;
+    live2.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="n">0</span>`;
   }
   if (live2.parentElement !== bar) bar.appendChild(live2);
 
   window.__setNowPlaying = (name='')=>{ now.textContent = name || ''; now.title = name || ''; };
 }
 
-/* ------------------------ Live viewers ใต้ clock (ทางเลือก) ------------------------ */
+/* ------------------------ Live viewers ใต้ clock (มี label) ------------------------ */
 function mountLiveViewersUnderClock(){
   const label = (window.LIVE_LABEL || 'Live');
   const header = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
@@ -344,7 +348,7 @@ function playByIndex(i, opt={scroll:true, noAutoBackup:false}){
   tryPlayJW(ch, srcList, 0, onFailAll);
 
   window.__setNowPlaying?.(ch.name || '');
-  startPresence(ch.id || ch.name || `ch-${i}`);   // <-- เริ่มนับคนดูที่นี่
+  startPresence(ch.id || ch.name || `ch-${i}`);   // เริ่มนับคนดู (หน่วงเมื่อสลับช่อง)
   highlight(i);
 
   if (opt.scroll ?? true) scrollToPlayer();
@@ -463,7 +467,6 @@ function getViewerId(){
   try{
     let id = localStorage.getItem(VIEWER_ID_KEY);
     if (!id){
-      // สร้าง id แบบสั้น ๆ
       const rnd = (crypto?.getRandomValues) ? crypto.getRandomValues(new Uint8Array(8)) : null;
       id = rnd ? Array.from(rnd).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,16) : Math.random().toString(36).slice(2,10);
       localStorage.setItem(VIEWER_ID_KEY, id);
@@ -471,33 +474,34 @@ function getViewerId(){
     return id;
   }catch{ return Math.random().toString(36).slice(2,10); }
 }
-function stopPresence(){ if (presenceTimer) { clearInterval(presenceTimer); presenceTimer = null; } }
+function stopPresence(){
+  if (presenceTimer){ clearInterval(presenceTimer); presenceTimer = null; }
+  if (presenceSwitchTimer){ clearTimeout(presenceSwitchTimer); presenceSwitchTimer = null; }
+}
 function startPresence(key){
   currentPresenceKey = key;
   stopPresence();
-  updateLiveViewers(0);
 
-  // ส่งทันทีรอบแรก
-  heartbeat(key, true);
+  const delay = presenceFirstStart ? 0 : PRESENCE_SWITCH_DELAY_MS;
+  presenceFirstStart = false;
 
-  // วนส่งตามช่วงเวลา (ไม่ส่งเมื่อแท็บถูกซ่อนไว้ เพื่อลดโหลด)
-  presenceTimer = setInterval(()=>{ if (!document.hidden) heartbeat(key); }, PING_INTERVAL_S * 1000);
+  presenceSwitchTimer = setTimeout(()=>{
+    heartbeat(key, true); // ping แรก
+    presenceTimer = setInterval(()=>{ if (!document.hidden) heartbeat(key); }, PING_INTERVAL_S * 1000);
+  }, delay);
 }
-async function heartbeat(key, immediate=false){
+async function heartbeat(key){
   const vId = getViewerId();
   const u = `${PRESENCE_URL}?ch=${encodeURIComponent(key)}&v=${encodeURIComponent(vId)}&ttl=${VIEWER_TTL_S}`;
   try{
     const res = await fetch(u, { cache:'no-store' });
     const js  = await res.json().catch(()=> ({}));
     if (typeof js.count === 'number') updateLiveViewers(js.count);
-    else updateLiveViewers(0);
-  }catch{
-    // เงียบไว้ / แสดงค่าเดิม
-  }
+  }catch{ /* เงียบไว้ */ }
 }
 function bindPresenceWakeEvents(){
   if (presenceBound) return; presenceBound = true;
-  const kick = ()=>{ if (currentPresenceKey) heartbeat(currentPresenceKey, true); };
+  const kick = ()=>{ if (currentPresenceKey) heartbeat(currentPresenceKey); };
   ['visibilitychange','focus','pageshow','online','resume'].forEach(ev=>{
     window.addEventListener(ev, kick, { passive:true });
   });
@@ -514,7 +518,6 @@ function showPlayerStatus(text){
   }
   box.textContent = text || ''; box.style.display = text ? 'block' : 'none';
 }
-
 function headerOffset(){
   const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
   const num = parseFloat(v); if (!isNaN(num) && num > 0) return num;
@@ -542,7 +545,7 @@ function ripple(event, container){
   container.appendChild(s);
   s.addEventListener('animationend', ()=>s.remove(), { once:true });
 }
-function escapeHtml(s){ return String(s).replace(/[&<>"'`=\/]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'}[c])); }
+function escapeHtml(s){ return String(s).replace(/[&<>"'`=\/]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"\'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'}[c])); }
 function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
 function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
 
