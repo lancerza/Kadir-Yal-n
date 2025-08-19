@@ -3,7 +3,7 @@
    - Dark theme tokens + base reset
    - Header (clock, refresh, histats) + live-viewers ใต้ clock
    - Player
-   - Tabs + Grid + Channel cards
+   - Tabs + Grid + Channel cards (+ Badge "สำรอง")
    - Now bar ใต้วิดีโอ (now-playing กึ่งกลาง)
    - Responsive
 ====================================================================== */
@@ -90,7 +90,7 @@ header{
   min-height: calc(max(var(--hud-size), var(--hs-size)) + 12px);
   padding:10px 14px;
 
-  /* เผื่อที่ซ้าย/ขวาให้เท่ากับชิ้นส่วนใหญ่สุด (Refresh / Histats) */
+  /* เผื่อซ้าย/ขวาเท่าขนาด Refresh/Histats */
   padding-left:  calc(max(var(--hud-size), var(--hs-size)) + 16px);
   padding-right: calc(max(var(--hud-size), var(--hs-size)) + 16px);
 }
@@ -99,13 +99,12 @@ header{
   font-variant-numeric: tabular-nums; color:#f4f7fb; text-align:center;
   text-shadow:none; opacity:.98;
 }
-/* เดิมเคยแสดง now-playing ใน header — ตอนนี้ย้ายลงไปใต้ VDO แล้ว */
+/* เดิมเคยแสดง now-playing บน header — ตอนนี้ย้ายลงใต้ VDO */
 .now-playing{
   margin-top:2px; font-size:clamp(13.5px,2.1vw,17.5px);
   font-weight:var(--font-strong); letter-spacing:.2px;
   color:#eaf1ff; opacity:.96; text-align:center;
   max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-  background:none; border:none; box-shadow:none;
 }
 .now-playing.swap{ animation: npFade .24s ease both }
 @keyframes npFade{from{opacity:0;transform:translateY(4px)}to{opacity:.96;transform:none}}
@@ -139,8 +138,7 @@ header{
 }
 #live-viewers .label{ opacity:.72; font-weight:600 }
 #live-viewers .n{ font-variant-numeric: tabular-nums }
-
-/* จัดระยะเมื่ออยู่ใน header grid (อยู่ใต้ clock) */
+/* ระยะเมื่อติดใน header grid */
 .h-wrap #live-viewers{ margin-top:4px; }
 @media (max-width:540px){ .h-wrap #live-viewers{ margin-top:6px; } }
 
@@ -177,7 +175,7 @@ header{
 .refresh-btn:active{ transform:translateY(-50%) scale(.985) }
 .refresh-btn[disabled]{ opacity:.65; cursor:wait }
 
-/* ข้อความสถานะข้างปุ่ม (โชว์หลังรีเฟรชเสร็จ) */
+/* ข้อความสถานะข้างปุ่ม */
 #refresh-status{
   position:absolute; z-index:3;
   left: calc(8px + var(--refresh-btn-w) + 8px);
@@ -247,21 +245,18 @@ header{
   }
   .tabs .tab:active .tab-card{ transform:translateZ(0) scale(.985) }
 }
-.tabs .tab:focus-visible .tab-card{ outline:2px solid #8ab4ff; outline-offset:3px }
-
-/* Selected accent per category */
-.tab[data-filter="IPTV"]   { --accent: #60a5fa; }
-.tab[data-filter="บันเทิง"] { --accent: #f59e0b; }
-.tab[data-filter="กีฬา"]    { --accent: #34d399; }
-.tab[data-filter="สารคดี"]  { --accent: #a78bfa; }
-.tab[data-filter="เด็ก"]    { --accent: #f472b6; }
-.tab[data-filter="หนัง"]    { --accent: #fb7185; }
 .tabs .tab[aria-selected="true"] .tab-card{
   transform: translateZ(0) scale(1.06);
   border-color: var(--accent, rgba(255,255,255,.34));
   box-shadow: 0 0 0 2px rgba(255,255,255,.22) inset, 0 12px 22px rgba(0,0,0,.32), 0 0 14px rgba(255,255,255,.18);
   z-index: 2; position: relative;
 }
+.tab[data-filter="IPTV"]   { --accent: #60a5fa; }
+.tab[data-filter="บันเทิง"] { --accent: #f59e0b; }
+.tab[data-filter="กีฬา"]    { --accent: #34d399; }
+.tab[data-filter="สารคดี"]  { --accent: #a78bfa; }
+.tab[data-filter="เด็ก"]    { --accent: #f472b6; }
+.tab[data-filter="หนัง"]    { --accent: #fb7185; }
 .tabs .tab[aria-selected="true"] .tab-card::after{
   content:""; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
   width:40%; height:3px; border-radius:3px; background: var(--accent, #86efac);
@@ -274,7 +269,7 @@ header{
   grid-template-columns:repeat(auto-fill,minmax(var(--tile-w),1fr));
   gap:var(--tile-g); justify-items:center;
   transition:opacity .14s ease, filter .14s ease;
-  overflow: visible; /* ปล่อยเงา/ขอบเรืองแสงไม่ให้ถูกตัด */
+  overflow: visible;
 }
 .grid.switch-out{ opacity:.3; filter:blur(2px) }
 .grid.switch-in .channel{
@@ -310,7 +305,42 @@ header{
 }
 .channel:active .ch-card{ transform:scale(.985) }
 
-/* ==== Channel selected (เล่นอยู่) ==== */
+/* ==== Badge: ป้ายมุมขวาบนของการ์ด ==== */
+.ch-badge{
+  position:absolute;
+  top:6px; right:6px;
+  padding:2px 6px;
+  border-radius:999px;
+  font-weight:800;
+  font-size: clamp(10px, 1.15vw, 11.5px);
+  letter-spacing:.2px;
+  line-height:1.1;
+  pointer-events:none;
+  z-index:2;
+
+  /* โทนกลาง (fallback) */
+  color:#eaf1ff;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.18);
+
+  /* กลมกลืนกับธีม (รองรับ color-mix) */
+  background: color-mix(in oklab, currentColor 8%, transparent);
+  border: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+
+  backdrop-filter: saturate(1.05) blur(4px);
+  -webkit-backdrop-filter: saturate(1.05) blur(4px);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.22) inset,
+    0 2px 6px rgba(0,0,0,.18);
+}
+.ch-badge[data-variant="backup"]{
+  color:#eafff3;
+  background: color-mix(in oklab, #22c55e 18%, transparent);
+  border-color: color-mix(in oklab, #22c55e 42%, transparent);
+}
+
+/* ==== Channel selected ==== */
 .channel.active .ch-card,
 .channel[aria-selected="true"] .ch-card,
 .channel[data-selected="true"] .ch-card{
@@ -339,8 +369,8 @@ header{
   text-align:center;
   font-family:var(--font);
   font-weight:700;
-  font-size:11px;
-  line-height:1.18;
+  font-size:13px;
+  line-height:1.22;
   color:#eaeef3; opacity:.95;
 
   white-space: normal;
