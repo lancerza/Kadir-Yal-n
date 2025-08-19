@@ -1,6 +1,7 @@
 /* ========================= app.js =========================
    - Presence counter ต่อ "ช่อง" ด้วย Cloudflare Worker (มือถือ/คอม)
-   - now-playing + live counter ใต้ VDO (ไม่มี label), live อีกจุดใต้เวลา
+   - now-playing ใต้ VDO (ไม่มี live-on-player แล้ว)
+   - ป้าย Live + ผู้ชม ปรากฏแค่ใต้เวลา (header)
    - หน่วงการนับใหม่เมื่อสลับช่อง 4s (ครั้งแรกนับทันที)
    - Badge "สำรอง" + Auto backup เมื่อเล่นไม่ได้
    - Histats แบบซ่อน, ปุ่มรีเฟรช, Tabs/Grid/JWPlayer ครบ
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowBarUnderPlayer();     // now-playing + live-pill ใต้ VDO (ไม่มี label)
+  mountNowBarUnderPlayer();     // now-playing ใต้ VDO (ไม่มี live-on-player)
   mountLiveViewersUnderClock(); // live-pill ใต้เวลา (มี label)
   mountHistatsHidden();
 
@@ -119,11 +120,8 @@ function mountNowBarUnderPlayer(){
   if (!document.getElementById('now-bar-styles')) {
     const s = document.createElement('style'); s.id='now-bar-styles';
     s.textContent = `
-#now-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 14px;}
+#now-bar{display:flex;align-items:center;justify-content:center;margin:10px 0 14px;}
 #now-playing{font-weight:700;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center;}
-.live-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);font-size:13px;font-weight:700;}
-.live-pill .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px color-mix(in oklab,#22c55e 25%,transparent);}
-.live-pill .label{opacity:.72;font-weight:600}
     `.trim();
     document.head.appendChild(s);
   }
@@ -132,20 +130,22 @@ function mountNowBarUnderPlayer(){
   if (!bar) { bar = document.createElement('div'); bar.id='now-bar'; player.insertAdjacentElement('afterend', bar); }
 
   let now = document.getElementById('now-playing');
-  if (!now) { now = document.createElement('div'); now.id='now-playing'; now.className='now-playing'; now.setAttribute('aria-live','polite'); }
+  if (!now) {
+    now = document.createElement('div');
+    now.id = 'now-playing';
+    now.className = 'now-playing';
+    now.setAttribute('aria-live','polite');
+  }
   if (now.parentElement !== bar) bar.appendChild(now);
 
-  // live-pill ใต้ VDO (ไม่มี label)
-  let live2 = document.getElementById('live-on-player');
-  if (!live2){
-    live2 = document.createElement('span');
-    live2.id = 'live-on-player';
-    live2.className = 'live-pill';
-    live2.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="n">0</span>`;
-  }
-  if (live2.parentElement !== bar) bar.appendChild(live2);
+  // ถ้ามี live-on-player ค้างอยู่จากโค้ดเก่า ให้ถอดออกเลย
+  const old = document.getElementById('live-on-player');
+  if (old && old.parentElement) old.parentElement.removeChild(old);
 
-  window.__setNowPlaying = (name='')=>{ now.textContent = name || ''; now.title = name || ''; };
+  window.__setNowPlaying = (name='')=>{
+    now.textContent = name || '';
+    now.title = name || '';
+  };
 }
 
 /* ------------------------ Live viewers ใต้ clock (มี label) ------------------------ */
@@ -165,9 +165,8 @@ function mountLiveViewersUnderClock(){
 }
 function updateLiveViewers(n){
   const v = (typeof n==='number' && n>=0) ? String(n) : '0';
-  ['#live-viewers .n', '#live-on-player .n'].forEach(sel=>{
-    const el = document.querySelector(sel); if (el) el.textContent = v;
-  });
+  const el = document.querySelector('#live-viewers .n');
+  if (el) el.textContent = v;
 }
 
 /* ------------------------ Clock ------------------------ */
