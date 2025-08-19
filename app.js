@@ -1,11 +1,10 @@
-/* ========================= app.js (NO FIRST SCROLL + FORCED AUTOPLAY + PLAYER STATUS) =========================
-   - เปิดเว็บ: เลือกหมวดแรกที่ "มีช่องจริง" แล้วเล่นช่องแรก (ไม่เลื่อนลงกริดเพื่อกันบังวิดีโอ)
-   - บังคับ autoplay ให้ผ่านนโยบายเบราว์เซอร์ (autostart:'viewable', mute:true + playAttemptFailed)
-   - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
-   - ปุ่มรีเฟรช + ล้าง cache (ไม่จำค่า lastId)
-   - Histats ตรึงขวาบน .h-wrap
-   - เลื่อนหน้าอิงความสูง header ผ่านตัวแปร CSS --header-offset
-================================================================================================================ */
+/* ========================= app.js =========================
+   - Histats: นับแต่ "ไม่โชว์"
+   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง ด้วย Cloudflare Worker
+   - JW Player: เล่นอัตโนมัติแบบปลอดภัย + สถานะบนตัวเล่น
+   - UI: แท็บหมวด/กริดช่อง/ไฮไลต์/แอนิเมชัน ripple
+   - Tools: ปุ่มรีเฟรช + ล้างแคช + ล้างอัตโนมัติทุก 6 ชม.
+=========================================================== */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -13,7 +12,7 @@ const TIMEZONE = 'Asia/Bangkok';
 
 const SWITCH_OUT_MS   = 140;
 const STAGGER_STEP_MS = 22;
-const SCROLL_CARD_ON_LOAD = false;    // ❗ ปิดการเลื่อนการ์ดตอนเปิดเว็บครั้งแรก
+const SCROLL_CARD_ON_LOAD = false;
 
 let categories = null;
 let channels   = [];
@@ -23,9 +22,17 @@ let didInitialReveal = false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
+/* ===== Presence (Concurrent Viewers) =====
+   เปลี่ยนได้ด้วย <script>window.PRESENCE_URL='.../hb'</script> ก่อนโหลดไฟล์นี้ */
+const PRESENCE_URL   = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
+const VIEWER_TTL_S   = 60;      // อายุการถือว่ายังออนไลน์ (วินาที)
+const PING_INTERVAL_S= 30;      // ส่ง heartbeat ทุกกี่วิ (ควร ~ ครึ่งของ TTL)
+const VIEWER_ID_KEY  = 'viewer_id';
+let presenceTimer = null;
+let currentPresenceKey = null;
+
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
-  // กันหน้าอยู่บนสุดเสมอ เมื่อเพิ่งโหลด (สำคัญสำหรับมือถือ/แถบ address)
   window.scrollTo({ top: 0, behavior: 'auto' });
 
   mountRefreshButton();
@@ -33,7 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   mountClock();
   mountNowPlayingInHeader();
-  mountHistatsTopRight();
+  mountLiveViewersPill();     // ป้าย 👁 คนดูตอนนี้
+  mountHistatsHidden();       // Histats ซ่อนแต่ยังนับ
 
   try {
     await loadData();
@@ -43,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   buildTabs();
-  autoplayFirst();  // เล่น (ไม่เลื่อนลงกริด)
+  autoplayFirst();
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
@@ -74,7 +82,7 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Autoplay (เลือกหมวดที่มีช่องจริง) + OPTIONAL reveal card ------------------------ */
+/* ------------------------ Autoplay + optional scroll ------------------------ */
 function autoplayFirst(){
   const order = (categories?.order || []);
   let idx = -1;
@@ -84,28 +92,24 @@ function autoplayFirst(){
     idx = channels.findIndex(ch => getCategory(ch) === c);
     if (idx >= 0) { cat = c; break; }
   }
-  if (idx < 0 && channels.length) {  // ทุกหมวดว่าง → ใช้ช่องแรกของทั้งรายการ
+  if (idx < 0 && channels.length) {
     idx = 0;
     cat = getCategory(channels[0]) || cat;
   }
 
   if (idx >= 0) {
     setActiveTab(cat);
-    playByIndex(idx, { scroll:false });           // ❗ ไม่เลื่อนขึ้น/ลง
-    if (SCROLL_CARD_ON_LOAD) scheduleRevealActiveCard(); // เลื่อนการ์ดแบบ optional
+    playByIndex(idx, { scroll:false });
+    if (SCROLL_CARD_ON_LOAD) scheduleRevealActiveCard();
   } else {
     showPlayerStatus('ไม่พบช่องสำหรับเล่น');
-    console.warn('ไม่พบช่องให้เล่น');
   }
 }
-
-/* หน่วงสั้น ๆ เพื่อให้ render grid เสร็จก่อนแล้วค่อยเลื่อน (ใช้เมื่อ SCROLL_CARD_ON_LOAD=true) */
 function scheduleRevealActiveCard(){
   if (didInitialReveal) return;
   didInitialReveal = true;
   setTimeout(()=> revealActiveCardIntoView(), SWITCH_OUT_MS + 220);
 }
-
 function revealActiveCardIntoView(){
   const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
   if (!active) { setTimeout(revealActiveCardIntoView, 120); return; }
@@ -128,7 +132,6 @@ function mountClock(){
   tick();
   setInterval(tick, 1000);
 }
-
 function mountNowPlayingInHeader(){
   const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let now = document.getElementById('now-playing');
@@ -136,7 +139,6 @@ function mountNowPlayingInHeader(){
   now.className = 'now-playing';
   now.setAttribute('aria-live','polite');
   host.appendChild(now);
-
   window.__setNowPlaying = (name='')=>{
     now.textContent = name || '';
     now.title = name || '';
@@ -217,11 +219,9 @@ function getCategory(ch){
     const ok = (r.include||[]).some(pat=>{
       try {
         if (pat.startsWith('/') && pat.endsWith('/')) {
-          const re = new RegExp(pat.slice(1,-1),'i');
-          return re.test(hay) || re.test(src0);
+          const re = new RegExp(pat.slice(1,-1),'i'); return re.test(hay) || re.test(src0);
         }
-        const p = pat.toLowerCase();
-        return hay.includes(p) || src0.includes(p);
+        const p = pat.toLowerCase(); return hay.includes(p) || src0.includes(p);
       } catch { return false; }
     });
     if (ok) return r.category;
@@ -267,7 +267,7 @@ function render(opt={withEnter:false}){
     btn.addEventListener('click', e=>{
       ripple(e, btn.querySelector('.ch-card'));
       playByChannel(ch);
-      scrollToPlayer();                      // คลิกการ์ด → เลื่อนกลับขึ้นผู้เล่น
+      scrollToPlayer();
     });
 
     const row = Math.floor(i / Math.max(cols,1));
@@ -297,7 +297,7 @@ function computeGridCols(container){
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
 
-/* ------------------------ Player (JW) + Forced Autoplay + Status ------------------------ */
+/* ------------------------ Player (JW) + Status ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -311,6 +311,7 @@ function playByIndex(i, opt={scroll:true}){
   tryPlayJW(ch, srcList, 0);
 
   window.__setNowPlaying?.(ch.name || '');
+  startPresence(ch.id || ch.name || `ch-${i}`);   // เริ่มนับคนดูของช่องนี้
   highlight(i);
 
   if (opt.scroll ?? true) scrollToPlayer();
@@ -336,23 +337,18 @@ function tryPlayJW(ch, list, idx){
     playlist: [{ image: ch.poster || ch.logo || undefined, sources: [jwSrc] }],
     width:'100%',
     aspectratio:'16:9',
-    autostart: 'viewable',   // ปลอดภัยต่อ autoplay policy
-    mute: true,              // บังคับ mute เพื่อให้เบราว์เซอร์อนุญาตเล่นอัตโนมัติ
+    autostart: 'viewable',
+    mute: true,
     preload:'metadata',
     displaytitle:false,
     displaydescription:false,
     playbackRateControls:true
   });
 
-  // กันกรณี autoplay ยังไม่ติด
   player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
-
-  // สถานะบัฟเฟอร์/เล่น/เฟรมแรก
   player.on('buffer', ()=> showPlayerStatus('กำลังบัฟเฟอร์…'));
   player.on('play',   ()=> showPlayerStatus(''));
   player.on('firstFrame', ()=> showPlayerStatus(''));
-
-  // error/ตั้งค่าไม่ได้ → ลองแหล่งถัดไป
   player.on('setupError', e => {
     console.warn('setupError:', e);
     showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…');
@@ -429,13 +425,11 @@ function showPlayerStatus(text){
 
 /* ------------------------ Utilities ------------------------ */
 function headerOffset(){
-  // อ่านจากตัวแปร CSS --header-offset ถ้าไม่มีให้ fallback เป็นความสูง .h-wrap
   const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
   const num = parseFloat(v);
   if (!isNaN(num) && num > 0) return num;
   return document.querySelector('.h-wrap')?.offsetHeight || 0;
 }
-
 function highlight(globalIndex){
   document.querySelectorAll('.channel').forEach(el=>{
     const idx = Number(el.dataset.globalIndex);
@@ -487,18 +481,24 @@ function getIconSVG(n){
   }
 }
 
-/* ------------------------ Histats (ติดขวาใน .h-wrap — โค้ดใหม่) ------------------------ */
-function mountHistatsTopRight(){
-  const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
-
+/* ------------------------ Histats (ซ่อนแต่ยังนับ) ------------------------ */
+function mountHistatsHidden(){
   let holder = document.getElementById('histats_counter');
-  if (!holder) { holder = document.createElement('div'); holder.id = 'histats_counter'; }
-  if (!holder.parentElement) anchor.appendChild(holder);
+  if (!holder) {
+    holder = document.createElement('div');
+    holder.id = 'histats_counter';
+    document.body.appendChild(holder);
+  }
+  const hiddenCSS = `
+    position:absolute!important; width:1px!important; height:1px!important;
+    overflow:hidden!important; clip:rect(0 0 0 0)!important; clip-path: inset(50%)!important;
+    opacity:0!important; pointer-events:none!important; z-index:-1!important;`;
+  holder.style.cssText = hiddenCSS;
 
   window._Hasync = window._Hasync || [];
   window._Hasync.push([
     'Histats.startgif',
-    '1,4970878,4,10052,"div#histatsC {position: absolute;top:0px;right:0px;}body>div#histatsC {position: fixed;}"'
+    '1,4970878,4,10052,"div#histatsC {position: absolute;top:0;right:0;}body>div#histatsC {position: fixed;}"'
   ]);
   window._Hasync.push(['Histats.fasi','1']);
   window._Hasync.push(['Histats.track_hits','']);
@@ -514,12 +514,8 @@ function mountHistatsTopRight(){
 
   const ensureInside = () => {
     const c = document.getElementById('histatsC');
-    if (c && c.parentNode !== holder) {
-      holder.appendChild(c);
-      c.style.position = 'static';
-      c.style.top = '';
-      c.style.right = '';
-    }
+    if (c && c.parentNode !== holder) holder.appendChild(c);
+    if (c) c.style.cssText = hiddenCSS;
   };
   ensureInside();
   const obs = new MutationObserver(ensureInside);
@@ -589,7 +585,6 @@ function mountRefreshButton(){
   }
   addEventListener('resize', debounce(updateBtnW, 120));
 }
-
 async function clearAppCache(){
   try {
     const keys = Object.keys(localStorage);
@@ -599,7 +594,6 @@ async function clearAppCache(){
     try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
   }
 }
-
 const AUTO_CLEAR_KEY = 'lastAutoClear';
 const SIX_HR_MS = 6 * 60 * 60 * 1000;
 function scheduleAutoClear(){
@@ -615,4 +609,71 @@ function scheduleAutoClear(){
     localStorage.setItem(AUTO_CLEAR_KEY, String(Date.now()));
     setTimeout(tick, SIX_HR_MS);
   }, delay);
+}
+
+/* ------------------------ Live viewers pill ------------------------ */
+function mountLiveViewersPill(){
+  const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
+  if (document.getElementById('live-viewers')) return;
+
+  const pill = document.createElement('span');
+  pill.id = 'live-viewers';
+  pill.setAttribute('aria-live','polite');
+  pill.style.cssText = `
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 8px; margin-left:8px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    border-radius:999px; font-size:13px; font-weight:700; color:#fff;
+    backdrop-filter:saturate(1.2) blur(6px); -webkit-backdrop-filter:saturate(1.2) blur(6px);`;
+  pill.innerHTML = `<span class="eye" style="font-size:14px;line-height:1">👁</span><span class="n">0</span>`;
+  host.appendChild(pill);
+}
+function updateLiveViewers(n){
+  const el = document.querySelector('#live-viewers .n');
+  if (el) el.textContent = (typeof n==='number' && n>=0) ? String(n) : '0';
+}
+
+/* ------------------------ Presence (heartbeat) ------------------------ */
+function getViewerId(){
+  try{
+    let id = localStorage.getItem(VIEWER_ID_KEY);
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+Math.random()).toString(36));
+      localStorage.setItem(VIEWER_ID_KEY, id);
+    }
+    return id;
+  }catch{ return String(Date.now()); }
+}
+function startPresence(channelKey){
+  currentPresenceKey = String(channelKey||'global');
+  const v = getViewerId();
+
+  const ping = async (useBeacon=false) => {
+    const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey)}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
+    if (useBeacon && 'sendBeacon' in navigator) {
+      navigator.sendBeacon(url);  // keep-alive ไม่อัปเดต UI
+      return;
+    }
+    try{
+      const r = await fetch(url, { cache:'no-store' });
+      if (!r.ok) throw 0;
+      const data = await r.json().catch(()=> ({}));
+      if (typeof data.count === 'number') updateLiveViewers(data.count);
+    }catch{}
+  };
+
+  if (presenceTimer) clearInterval(presenceTimer);
+  ping(false);  // ครั้งแรกอัปเดต UI
+
+  presenceTimer = setInterval(()=>{
+    const hidden = document.visibilityState === 'hidden';
+    ping(hidden);  // แท็บซ่อน → beacon / โชว์ → fetch + อัปเดต UI
+  }, Math.max(10, PING_INTERVAL_S) * 1000);
+
+  addEventListener('beforeunload', () => {
+    try{
+      const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey)}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
+      if ('sendBeacon' in navigator) navigator.sendBeacon(url);
+    }catch{}
+  }, { once:true });
 }
