@@ -1,11 +1,11 @@
 /* ======================================================================
-   styles.css – Flow TV (clean Thai UI)
-   - ฟอนต์ทั้งเว็บแบบคลีน
-   - ปุ่มรีเฟรชขนาดเท่า Histats + ข้อความสถานะข้างปุ่ม
-   - Tabs / Grid / Channel card
-   - ชื่อช่อง 2 บรรทัด + ellipsis
-   - Responsive ครบ
-   - เพิ่มสถานะ "เล่นอยู่" (selected) ให้การ์ดมีขอบ/เรืองแสงคงอยู่
+   styles.css — UI for IPTV page
+   - Dark theme tokens + base reset
+   - Header (clock, refresh, histats)
+   - Player
+   - Tabs + Grid + Channel cards
+   - Now bar ใต้วิดีโอ (now-playing + live-viewers แบบคลีน)
+   - Responsive
 ====================================================================== */
 
 /* ---------- Root tokens ---------- */
@@ -99,6 +99,8 @@ header{
   font-variant-numeric: tabular-nums; color:#f4f7fb; text-align:center;
   text-shadow:none; opacity:.98;
 }
+/* เดิมเคยแสดง now-playing ใน header — ตอนนี้เราย้ายลงไปใต้ VDO แล้ว
+   ถ้าอยากซ่อนของเดิมทั้งก้อน สามารถลบ .now-playing ตรงนี้ได้ */
 .now-playing{
   margin-top:2px; font-size:clamp(13.5px,2.1vw,17.5px);
   font-weight:var(--font-strong); letter-spacing:.2px;
@@ -326,6 +328,56 @@ header{
 }
 @keyframes ripple{ to{ transform:scale(1); opacity:0 } }
 
+/* ---------- Now bar ใต้ VDO (ใหม่) ---------- */
+#now-bar.now-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:10px 0 16px;
+}
+/* ข้อความ now-playing (ฝั่งซ้าย) */
+#now-playing{
+  font-weight:700;
+  font-size:14px;
+  letter-spacing:.2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:70%;
+  color:inherit;
+  opacity:.95;
+}
+/* ป้าย live viewers (ฝั่งขวา — คลีน) */
+#live-viewers{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+
+  /* Fallback */
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.06);
+
+  /* Modern blend */
+  border:1px solid color-mix(in oklab, currentColor 16%, transparent);
+  background:color-mix(in oklab, currentColor 6%, transparent);
+
+  font-size:13px;
+  font-weight:700;
+  color:inherit;
+  backdrop-filter:saturate(1.05) blur(6px);
+  -webkit-backdrop-filter:saturate(1.05) blur(6px);
+}
+#live-viewers .dot{
+  width:8px; height:8px; border-radius:50%;
+  background:#22c55e; /* live */
+  box-shadow:0 0 0 2px color-mix(in oklab, #22c55e 25%, transparent);
+}
+#live-viewers .label{ opacity:.72; font-weight:600 }
+#live-viewers .n{ font-variant-numeric: tabular-nums }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 380px){
   :root{
@@ -336,6 +388,7 @@ header{
   .tabs{ gap:8px; padding:10px 6px 12px }
   .refresh-btn .t{ display:none }     /* ปุ่มเหลือไอคอนบนจอเล็กมาก */
   #refresh-status{ display:none }     /* ซ่อนข้อความสถานะไม่ให้เกะกะ */
+  #now-playing{ max-width:60%; }
 }
 @media (min-width: 381px) and (max-width: 639px){
   :root{ --tabW: 70px; --tabH: 56px; --tabBadge: 28px; --tab-font: 12px; --hs-size:36px; --hs-scale:.94 }
