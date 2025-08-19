@@ -1,8 +1,9 @@
 /* ========================= app.js =========================
    - Presence counter ต่อ "ช่อง" ด้วย Cloudflare Worker (มือถือ/คอม)
    - now-playing ใต้ VDO (ไม่มี live-on-player แล้ว)
-   - ป้าย Live + ผู้ชม ปรากฏแค่ใต้เวลา (header)
+   - ป้าย Live + ผู้ชม แสดงเฉพาะใต้เวลา (header)
    - หน่วงการนับใหม่เมื่อสลับช่อง 4s (ครั้งแรกนับทันที)
+   - อัปเดตตัวเลขผู้ชมอัตโนมัติทุก 5s โดยไม่ต้องรีโหลด
    - Badge "สำรอง" + Auto backup เมื่อเล่นไม่ได้
    - Histats แบบซ่อน, ปุ่มรีเฟรช, Tabs/Grid/JWPlayer ครบ
 =========================================================== */
@@ -26,12 +27,15 @@ try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGG
 /* ===== Presence (Concurrent Viewers) ===== */
 const PRESENCE_URL = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
 const VIEWER_TTL_S = 120;     // TTL เผื่อมือถือพักจอ
-const PING_INTERVAL_S = 25;   // ping ทุก ~25 วิ
+const PING_INTERVAL_S = 25;   // ping คงสภาพผู้ชม
+const COUNT_REFRESH_MS = 5000; // รีเฟรชตัวเลขผู้ชมถี่ๆ
 
 // หน่วงการนับใหม่เมื่อสลับช่อง (ครั้งแรกไม่หน่วง)
-const PRESENCE_SWITCH_DELAY_MS = 5000;
-let presenceTimer = null;
-let presenceSwitchTimer = null;
+const PRESENCE_SWITCH_DELAY_MS = 4000;
+
+let presenceTimer = null;        // setInterval ของ ping หลัก
+let countTimer = null;           // setInterval ของเลขผู้ชม
+let presenceSwitchTimer = null;  // setTimeout ดีเลย์ตอนสลับช่อง
 let presenceFirstStart = true;
 let currentPresenceKey = null;
 let presenceBound = false;
@@ -138,7 +142,7 @@ function mountNowBarUnderPlayer(){
   }
   if (now.parentElement !== bar) bar.appendChild(now);
 
-  // ถ้ามี live-on-player ค้างอยู่จากโค้ดเก่า ให้ถอดออกเลย
+  // ล้าง live-on-player เก่า (ถ้ามี)
   const old = document.getElementById('live-on-player');
   if (old && old.parentElement) old.parentElement.removeChild(old);
 
@@ -475,6 +479,7 @@ function getViewerId(){
 }
 function stopPresence(){
   if (presenceTimer){ clearInterval(presenceTimer); presenceTimer = null; }
+  if (countTimer){ clearInterval(countTimer); countTimer = null; }
   if (presenceSwitchTimer){ clearTimeout(presenceSwitchTimer); presenceSwitchTimer = null; }
 }
 function startPresence(key){
@@ -485,15 +490,34 @@ function startPresence(key){
   presenceFirstStart = false;
 
   presenceSwitchTimer = setTimeout(()=>{
-    heartbeat(key, true); // ping แรก
-    presenceTimer = setInterval(()=>{ if (!document.hidden) heartbeat(key); }, PING_INTERVAL_S * 1000);
+    // ping แรก (จะได้ตัวเลขทันที)
+    heartbeat(key);
+
+    // ping คงสภาพผู้ชม (ไม่ถี่มาก)
+    presenceTimer = setInterval(()=>{
+      if (!document.hidden) heartbeat(key);
+    }, PING_INTERVAL_S * 1000);
+
+    // รีเฟรชตัวเลขถี่ ๆ ให้ UI อัปเดตไว (ใช้ endpoint เดิม)
+    countTimer = setInterval(()=>{
+      if (!document.hidden) heartbeat(key);
+    }, COUNT_REFRESH_MS);
   }, delay);
 }
 async function heartbeat(key){
   const vId = getViewerId();
-  const u = `${PRESENCE_URL}?ch=${encodeURIComponent(key)}&v=${encodeURIComponent(vId)}&ttl=${VIEWER_TTL_S}`;
+
+  const u = new URL(PRESENCE_URL);
+  u.searchParams.set('ch', key);
+  u.searchParams.set('v', vId);
+  u.searchParams.set('ttl', VIEWER_TTL_S);
+  u.searchParams.set('_t', Date.now());          // กันแคช
+
   try{
-    const res = await fetch(u, { cache:'no-store' });
+    const res = await fetch(u.toString(), {
+      cache: 'no-store',
+      headers: { 'cache-control': 'no-cache' }
+    });
     const js  = await res.json().catch(()=> ({}));
     if (typeof js.count === 'number') updateLiveViewers(js.count);
   }catch{ /* เงียบไว้ */ }
