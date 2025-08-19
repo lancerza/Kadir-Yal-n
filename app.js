@@ -1,35 +1,36 @@
 /* ========================= app.js =========================
-   - Histats: นับแต่ "ไม่โชว์"
-   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง ด้วย Cloudflare Worker
-   - JW Player: เล่นอัตโนมัติแบบปลอดภัย + สถานะบนตัวเล่น
-   - UI: แท็บหมวด/กริดช่อง/ไฮไลต์/แอนิเมชัน ripple
-   - Tools: ปุ่มรีเฟรช + ล้างแคช + ล้างอัตโนมัติทุก 6 ชม.
+   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
+   - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
+   - JW Player: เล่นแบบปลอดภัย + สถานะ overlay
+   - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
 =========================================================== */
 
-const CH_URL  = 'channels.json';
-const CAT_URL = 'categories.json';
+const CH_URL   = 'channels.json';
+const CAT_URL  = 'categories.json';
 const TIMEZONE = 'Asia/Bangkok';
 
-const SWITCH_OUT_MS   = 140;
-const STAGGER_STEP_MS = 22;
+const SWITCH_OUT_MS       = 140;
+const STAGGER_STEP_MS     = 22;
 const SCROLL_CARD_ON_LOAD = false;
 
-let categories = null;
-let channels   = [];
-let currentFilter = '';
-let currentIndex  = -1;
-let didInitialReveal = false;
+let categories      = null;
+let channels        = [];
+let currentFilter   = '';
+let currentIndex    = -1;
+let didInitialReveal= false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ===== Presence (Concurrent Viewers) =====
-   เปลี่ยนได้ด้วย <script>window.PRESENCE_URL='.../hb'</script> ก่อนโหลดไฟล์นี้ */
-const PRESENCE_URL   = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
-const VIEWER_TTL_S   = 60;      // อายุการถือว่ายังออนไลน์ (วินาที)
-const PING_INTERVAL_S= 30;      // ส่ง heartbeat ทุกกี่วิ (ควร ~ ครึ่งของ TTL)
-const VIEWER_ID_KEY  = 'viewer_id';
-let presenceTimer = null;
+/* ===== Presence (Concurrent Viewers) — Mobile friendly =====
+   ตั้งค่าได้ด้วย <script>window.PRESENCE_URL='https://.../hb'</script> ก่อนโหลดไฟล์นี้
+*/
+const PRESENCE_URL     = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
+const VIEWER_TTL_S     = 120; // ยืด TTL เผื่อมือถือโดนพัก
+const PING_INTERVAL_S  = 25;  // ส่ง heartbeat ประมาณทุก 25 วิ
+const VIEWER_ID_KEY    = 'viewer_id';
+let presenceTimer      = null;
 let currentPresenceKey = null;
+let lastPingAt         = 0;
 
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -40,8 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   mountClock();
   mountNowPlayingInHeader();
-  mountLiveViewersPill();     // ป้าย 👁 คนดูตอนนี้
-  mountHistatsHidden();       // Histats ซ่อนแต่ยังนับ
+  mountLiveViewersPill();   // ป้าย 👁
+  mountHistatsHidden();     // Histats แบบซ่อน
 
   try {
     await loadData();
@@ -454,7 +455,7 @@ function ripple(event, container){
 }
 function escapeHtml(s){
   return String(s).replace(/[&<>"'`=\/]/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
   }[c]));
 }
 function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
@@ -633,47 +634,65 @@ function updateLiveViewers(n){
   if (el) el.textContent = (typeof n==='number' && n>=0) ? String(n) : '0';
 }
 
-/* ------------------------ Presence (heartbeat) ------------------------ */
+/* ------------------------ Presence (heartbeat) — mobile friendly ------------------------ */
 function getViewerId(){
   try{
     let id = localStorage.getItem(VIEWER_ID_KEY);
-    if (!id) {
-      id = (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+Math.random()).toString(36));
-      localStorage.setItem(VIEWER_ID_KEY, id);
-    }
+    if (!id) { id = (crypto.randomUUID?.() || (Date.now()+Math.random()).toString(36)); localStorage.setItem(VIEWER_ID_KEY, id); }
     return id;
   }catch{ return String(Date.now()); }
 }
 function startPresence(channelKey){
-  currentPresenceKey = String(channelKey||'global');
+  currentPresenceKey = String(channelKey || 'global');
   const v = getViewerId();
 
-  const ping = async (useBeacon=false) => {
-    const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey)}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
-    if (useBeacon && 'sendBeacon' in navigator) {
-      navigator.sendBeacon(url);  // keep-alive ไม่อัปเดต UI
-      return;
-    }
+  const doFetch = async () => {
     try{
-      const r = await fetch(url, { cache:'no-store' });
+      const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey)}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
+      const r = await fetch(url, { cache:'no-store', keepalive:true });
       if (!r.ok) throw 0;
       const data = await r.json().catch(()=> ({}));
       if (typeof data.count === 'number') updateLiveViewers(data.count);
     }catch{}
   };
-
-  if (presenceTimer) clearInterval(presenceTimer);
-  ping(false);  // ครั้งแรกอัปเดต UI
-
-  presenceTimer = setInterval(()=>{
-    const hidden = document.visibilityState === 'hidden';
-    ping(hidden);  // แท็บซ่อน → beacon / โชว์ → fetch + อัปเดต UI
-  }, Math.max(10, PING_INTERVAL_S) * 1000);
-
-  addEventListener('beforeunload', () => {
+  const doBeacon = () => {
     try{
       const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey)}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
       if ('sendBeacon' in navigator) navigator.sendBeacon(url);
+      else fetch(url, { cache:'no-store', keepalive:true }).catch(()=>{});
     }catch{}
-  }, { once:true });
+  };
+
+  const tick = async (immediate=false) => {
+    clearTimeout(presenceTimer);
+    const hidden = document.visibilityState === 'hidden' || document.hidden;
+
+    if (immediate) {
+      hidden ? doBeacon() : await doFetch();
+      lastPingAt = Date.now();
+    } else {
+      const late = Date.now() - lastPingAt;
+      if (late >= PING_INTERVAL_S*1000*0.9) {
+        hidden ? doBeacon() : await doFetch();
+        lastPingAt = Date.now();
+      }
+    }
+    const delay = Math.max(800, PING_INTERVAL_S*1000 - (Date.now()-lastPingAt));
+    presenceTimer = setTimeout(()=>tick(false), delay);
+  };
+
+  lastPingAt = 0;
+  tick(true);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') tick(true);
+    else doBeacon();
+  });
+  addEventListener('pageshow', () => tick(true));
+  addEventListener('pagehide', () => doBeacon(), { capture:true });
+  addEventListener('freeze',   () => doBeacon());
+  addEventListener('focus',    () => tick(true));
+  addEventListener('blur',     () => doBeacon());
+  addEventListener('online',   () => tick(true));
+  addEventListener('beforeunload', () => { try{ doBeacon(); }catch{} }, { once:true });
 }
