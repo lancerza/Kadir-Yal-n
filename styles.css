@@ -1,5 +1,9 @@
 /* ======================================================================
-   styles.css — UI for IPTV page
+   styles.css (HISTATS USERS ONLINE + CLEAN UI)
+   - Live-pill ใต้เวลา + นับคนดูแบบ tabular-nums
+   - ปุ่มรีเฟรช + สถานะ
+   - ซ่อน Histats ด้วย JS และมี CSS fallback สำรอง
+   - แท็บ + กริดการ์ดช่อง + Ripple
 ====================================================================== */
 
 /* ---------- Root tokens ---------- */
@@ -18,6 +22,7 @@
   --font-weight: 600;
   --font-strong: 700;
 
+  /* Channel card sizing */
   --tile-w:104px;
   --tile-h:128px;
   --tile-g:12px;
@@ -25,19 +30,26 @@
   --logo-max-w:82px;
   --logo-wide-h:42px;
 
+  /* Tabs (COMPACT + bigger icon/label) */
   --tabW: 72px;
   --tabH: 58px;
   --tab-gap:6px;
   --tabBadge:28px;
   --tab-font:12.2px;
 
+  /* Header HUD sizes */
   --hud-size:32px;
   --hud-radius:12px;
 
+  /* Histats gif box */
   --hs-size: 40px;
   --hs-scale: 1;
 
+  /* Refresh btn width placeholder (auto from JS) */
   --refresh-btn-w: 112px;
+
+  /* Optional header offset (JS จะ fallback ให้อยู่ดี) */
+  --header-offset: 0px;
 }
 
 /* ---------- Base / Reset ---------- */
@@ -89,6 +101,7 @@ header{
   display:inline-flex; align-items:center; gap:8px;
   padding:6px 10px; border-radius:999px;
 
+  /* faint border + glass */
   border:1px solid rgba(255,255,255,.14);
   background:rgba(255,255,255,.06);
 
@@ -105,10 +118,17 @@ header{
 }
 .live-pill .label{ opacity:.72; font-weight:600 }
 
+/* ทำให้เลขนิ่ง ไม่สั่นเวลาเปลี่ยนหลัก + ชิดขวาเล็กน้อย */
+#live-viewers .n{
+  font-variant-numeric: tabular-nums;
+  min-width: 2ch;
+  text-align: right;
+}
+
 #live-viewers{ margin-top:4px; }
 @media (max-width:540px){ .h-wrap #live-viewers{ margin-top:6px; } }
 
-/* ---------- Histats (ถ้าไม่ได้ซ่อนด้วย JS) ---------- */
+/* ---------- Histats (ตำแหน่งถ้าไม่ได้ซ่อนด้วย JS) ---------- */
 #histats_counter{
   position:absolute; right:8px; top:50%;
   height: var(--hs-size);
@@ -120,6 +140,19 @@ header{
 #histats_counter img{
   max-height:var(--hs-size) !important; height:var(--hs-size) !important; width:auto !important;
   opacity:.92; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))
+}
+
+/* Fallback ซ่อน Histats เมื่อ JS ถูกบล็อก/โหลดไม่ทัน */
+#histats_counter,
+#histats_counter #histatsC{
+  position:absolute !important;
+  width:1px !important; height:1px !important;
+  overflow:hidden !important;
+  clip:rect(0 0 0 0) !important;
+  clip-path:inset(50%) !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+  z-index:-1 !important;
 }
 
 /* ---------- Refresh button ---------- */
