@@ -1,10 +1,11 @@
 /* ========================= app.js =========================
-   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
-   - Now bar ใต้ VDO: now-playing (กึ่งกลาง)
-   - Live viewers: ย้ายไปอยู่ใต้เวลา (clock) ใน header
-   - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
-   - JW Player: เล่นแบบปลอดภัย + สถานะ overlay
-   - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
+   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือ)
+   - now-playing: ใต้วิดีโอ (จัดกึ่งกลาง)
+   - live-viewers: ใต้ clock ใน header
+   - Badge ป้าย "สำรอง" มุมขวาบนของการ์ดช่อง
+   - Auto backup: ช่องหลักเล่นไม่ได้ → ลองช่องสำรองอัตโนมัติ
+   - Histats: นับแต่ซ่อนไว้
+   - JW Player + สถานะ overlay + UI หลัก
 =========================================================== */
 
 const CH_URL   = 'channels.json';
@@ -24,11 +25,11 @@ let didInitialReveal= false;
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ===== Presence (Concurrent Viewers) — Mobile friendly =====
-   ตั้งค่าได้ด้วย <script>window.PRESENCE_URL='https://.../hb'</script> ก่อนโหลดไฟล์นี้
+   ตั้งค่าเองได้ด้วย <script>window.PRESENCE_URL='https://.../hb'</script>
 */
 const PRESENCE_URL     = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
 const VIEWER_TTL_S     = 120; // ยืด TTL เผื่อมือถือโดนพัก
-const PING_INTERVAL_S  = 25;  // ส่ง heartbeat ประมาณทุก 25 วิ
+const PING_INTERVAL_S  = 25;  // heartbeat ทุก ~25 วิ
 const VIEWER_ID_KEY    = 'viewer_id';
 let presenceTimer      = null;
 let currentPresenceKey = null;
@@ -43,9 +44,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowBarUnderPlayer();   // now-playing ใต้ VDO (กึ่งกลาง)
-  mountLiveViewersUnderClock(); // live-viewers ใต้ clock ใน header
-  mountHistatsHidden();       // Histats แบบซ่อน
+  mountNowBarUnderPlayer();     // now-playing ใต้ VDO (กึ่งกลาง)
+  mountLiveViewersUnderClock(); // live-viewers ใต้ clock
+  mountHistatsHidden();         // Histats แบบซ่อน
 
   try {
     await loadData();
@@ -126,7 +127,7 @@ function revealActiveCardIntoView(){
 function mountNowBarUnderPlayer(){
   const player = document.getElementById('player') || document.body;
 
-  // inject style (กันกรณีไม่มี styles.css)
+  // inject style เฉพาะองค์ประกอบนี้ (กรณีไม่มีในไฟล์ CSS)
   if (!document.getElementById('now-bar-styles')) {
     const css = `
 #now-bar.now-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0 14px;}
@@ -146,7 +147,6 @@ function mountNowBarUnderPlayer(){
     player.insertAdjacentElement?.('afterend', bar);
   }
 
-  // now-playing (กึ่งกลาง)
   let now = document.getElementById('now-playing');
   if (!now) {
     now = document.createElement('div');
@@ -156,7 +156,6 @@ function mountNowBarUnderPlayer(){
   }
   if (now.parentElement !== bar) bar.appendChild(now);
 
-  // setter สำหรับอัปเดตชื่อ/ช่อง
   window.__setNowPlaying = (name='')=>{
     now.textContent = name || '';
     now.title = name || '';
@@ -170,9 +169,10 @@ function mountLiveViewersUnderClock(){
 
   let pill = document.getElementById('live-viewers');
   if (!pill) {
+    const label = (window.LIVE_LABEL || 'Live');
     pill = document.createElement('span');
     pill.id = 'live-viewers';
-    pill.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="label">ออนไลน์</span><span class="n">0</span>`;
+    pill.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="label">${label}</span><span class="n">0</span>`;
   }
   if (clock) clock.insertAdjacentElement('afterend', pill);
   else header.appendChild(pill);
@@ -306,8 +306,17 @@ function render(opt={withEnter:false}){
     if (useWideLogo(ch)) btn.dataset.wide = 'true';
     btn.title = ch.name || 'ช่อง';
 
+    // ------- ป้าย "สำรอง" มุมขวาบน -------
+    const badgeLabel = (typeof ch.badge === 'string' && ch.badge.trim())
+      ? ch.badge.trim()
+      : (ch.backup ? 'สำรอง' : '');
+    const badgeHtml = badgeLabel
+      ? `<span class="ch-badge" data-variant="${ch.backup?'backup':'custom'}" title="${escapeHtml(badgeLabel)}">${escapeHtml(badgeLabel)}</span>`
+      : '';
+
     btn.innerHTML = `
       <div class="ch-card">
+        ${badgeHtml}
         <div class="logo-wrap">
           <img class="logo" loading="lazy" decoding="async"
                src="${escapeHtml(ch.logo || '')}" alt="${escapeHtml(ch.name||'โลโก้ช่อง')}">
@@ -348,21 +357,32 @@ function computeGridCols(container){
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
 
-/* ------------------------ Player (JW) + Status ------------------------ */
+/* ------------------------ Player (JW) + Auto-backup ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
 }
-function playByIndex(i, opt={scroll:true}){
+function playByIndex(i, opt={scroll:true, noAutoBackup:false}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
 
   const srcList = buildSources(ch);
   showPlayerStatus(`กำลังเตรียมเล่น: ${ch.name || ''}`);
-  tryPlayJW(ch, srcList, 0);
+
+  const onFailAll = () => {
+    if (opt.noAutoBackup) return; // กันลูป
+    const cands = getBackupCandidates(ch);
+    if (!cands.length){
+      showPlayerStatus('เล่นไม่ได้ทุกแหล่ง (ไม่มีช่องสำรอง)');
+      return;
+    }
+    tryBackupSequence(cands);
+  };
+
+  tryPlayJW(ch, srcList, 0, onFailAll);
 
   window.__setNowPlaying?.(ch.name || '');
-  startPresence(ch.id || ch.name || `ch-${i}`);   // เริ่มนับคนดูของช่องนี้
+  startPresence(ch.id || ch.name || `ch-${i}`);
   highlight(i);
 
   if (opt.scroll ?? true) scrollToPlayer();
@@ -377,8 +397,13 @@ function buildSources(ch){
   const drm = ch.drm || (ch.keyId && ch.key ? {clearkey:{keyId:ch.keyId, key:ch.key}} : undefined);
   return [{ src:s, type:t, drm }];
 }
-function tryPlayJW(ch, list, idx){
-  if (idx >= list.length) { showPlayerStatus('เล่นไม่ได้ทุกแหล่ง'); console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); return; }
+function tryPlayJW(ch, list, idx, onFailAll){
+  if (idx >= list.length) {
+    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง');
+    console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name);
+    if (typeof onFailAll === 'function') onFailAll();
+    return;
+  }
   const s = list[idx];
 
   const jwSrc = makeJwSource(s, ch);
@@ -403,12 +428,12 @@ function tryPlayJW(ch, list, idx){
   player.on('setupError', e => {
     console.warn('setupError:', e);
     showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…');
-    tryPlayJW(ch, list, idx+1);
+    tryPlayJW(ch, list, idx+1, onFailAll);
   });
   player.on('error', e => {
     console.warn('playError:', e);
     showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
-    tryPlayJW(ch, list, idx+1);
+    tryPlayJW(ch, list, idx+1, onFailAll);
   });
 }
 function makeJwSource(s, ch){
@@ -454,70 +479,92 @@ function scrollToPlayer(){
   window.scrollTo({ top:y, behavior:'smooth' });
 }
 
-/* ------------------------ Presence (heartbeat) — mobile friendly ------------------------ */
-function getViewerId(){
-  try{
-    let id = localStorage.getItem(VIEWER_ID_KEY);
-    if (!id) { id = (crypto.randomUUID?.() || (Date.now()+Math.random()).toString(36)); localStorage.setItem(VIEWER_ID_KEY, id); }
-    return id;
-  }catch{ return String(Date.now()); }
-}
-async function presenceDoFetch(){
-  try{
-    const v = getViewerId();
-    const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey||'global')}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
-    const r = await fetch(url, { cache:'no-store', keepalive:true });
-    if (!r.ok) throw 0;
-    const data = await r.json().catch(()=> ({}));
-    if (typeof data.count === 'number') updateLiveViewers(data.count);
-  }catch{}
-}
-function presenceDoBeacon(){
-  try{
-    const v = getViewerId();
-    const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey||'global')}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
-    if ('sendBeacon' in navigator) navigator.sendBeacon(url);
-    else fetch(url, { cache:'no-store', keepalive:true }).catch(()=>{});
-  }catch{}
-}
-async function presenceTick(immediate=false){
-  clearTimeout(presenceTimer);
-  const hidden = document.visibilityState === 'hidden' || document.hidden;
-
-  if (immediate) {
-    hidden ? presenceDoBeacon() : await presenceDoFetch();
-    lastPingAt = Date.now();
-  } else {
-    const late = Date.now() - lastPingAt;
-    if (late >= PING_INTERVAL_S*1000*0.9) {
-      hidden ? presenceDoBeacon() : await presenceDoFetch();
-      lastPingAt = Date.now();
-    }
+/* --------- Auto-backup helpers --------- */
+function tryBackupSequence(cands){
+  if (!Array.isArray(cands) || !cands.length){
+    showPlayerStatus('เล่นช่องสำรองทั้งหมดไม่สำเร็จ');
+    return;
   }
-  const delay = Math.max(800, PING_INTERVAL_S*1000 - (Date.now()-lastPingAt));
-  presenceTimer = setTimeout(()=>presenceTick(false), delay);
-}
-function bindPresenceEventsOnce(){
-  if (presenceBound) return;
-  presenceBound = true;
+  const next = cands.shift();
+  const idx = channels.indexOf(next);
+  if (idx < 0) return tryBackupSequence(cands);
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') presenceTick(true);
-    else presenceDoBeacon();
-  });
-  addEventListener('pageshow', () => presenceTick(true));
-  addEventListener('pagehide', () => presenceDoBeacon(), { capture:true });
-  addEventListener('freeze',   () => presenceDoBeacon());
-  addEventListener('focus',    () => presenceTick(true));
-  addEventListener('blur',     () => presenceDoBeacon());
-  addEventListener('online',   () => presenceTick(true));
-  addEventListener('beforeunload', () => { try{ presenceDoBeacon(); }catch{} }, { once:true });
+  const name = next.name || 'สำรอง';
+  showPlayerStatus(`สลับไปช่องสำรอง: ${name}`);
+  window.__setNowPlaying?.(name);
+  currentIndex = idx;
+  highlight(idx);
+  startPresence(next.id || name || `ch-${idx}`);
+  scrollToPlayer();
+  showMobileToast(`สำรอง: ${name}`);
+
+  const srcList = buildSources(next);
+  tryPlayJW(next, srcList, 0, ()=> tryBackupSequence(cands));
 }
-function startPresence(channelKey){
-  currentPresenceKey = String(channelKey || 'global');
-  lastPingAt = 0;
-  presenceTick(true);       // ยิงครั้งแรก + อัปเดต UI
-  bindPresenceEventsOnce(); // bind handler แค่ครั้งเดียว
+
+/* หา "ช่องสำรอง" สำหรับช่องหลัก */
+function getBackupCandidates(main){
+  if (!main) return [];
+  const seen = new Set();
+  const out = [];
+
+  const mainId   = main.id || genIdFrom(main, 0);
+  const baseKey  = getGroupKey(main);
+  const normMain = normalizeNameForMatch(main.name || '');
+
+  // 1) ระบุชัด
+  if (main.fallbackId){
+    const target = channels.find(c => (c.id||'') === main.fallbackId);
+    if (target) pushOnce(target, 10);
+  }
+  channels.forEach(c=>{
+    if (!c || c===main) return;
+    if (c.aliasOf === mainId || c.mainId === mainId || c.primaryId === mainId) pushOnce(c, 8);
+  });
+
+  // 2) กลุ่มเดียวกัน
+  if (baseKey){
+    channels.forEach(c=>{
+      if (!c || c===main) return;
+      if (getGroupKey(c) === baseKey) pushOnce(c, scoreBackupLike(c)+4);
+    });
+  }
+
+  // 3) เดาจากชื่อ
+  channels.forEach(c=>{
+    if (!c || c===main) return;
+    const nn = normalizeNameForMatch(c.name || '');
+    if (nn && nn === normMain) pushOnce(c, scoreBackupLike(c)+2);
+  });
+
+  out.sort((a,b)=> (b._score||0) - (a._score||0));
+  return out.filter(c => (c && (c.id||c.name) !== (main.id||main.name)));
+
+  function pushOnce(c, score=0){
+    const key = c.id || c.name || '';
+    if (seen.has(key)) return;
+    seen.add(key);
+    c._score = (c._score || 0) + score;
+    out.push(c);
+  }
+  function getGroupKey(c){ return c.group || c.groupId || c.series || c.bundle || null; }
+  function scoreBackupLike(c){
+    const badge = (c.badge||'') + ' ' + (c.tag||'') + ' ' + (Array.isArray(c.tags)?c.tags.join(' '):'');
+    const hay = ((c.name||'') + ' ' + badge).toLowerCase();
+    let s = 0;
+    if (c.backup === true) s += 5;
+    if (/สำรอง|ทางสำรอง|backup|mirror|alt/.test(hay)) s += 3;
+    if (/hd|uhd|4k/.test(hay)) s -= 1;
+    return s;
+  }
+}
+function normalizeNameForMatch(s){
+  s = String(s||'').toLowerCase();
+  s = s.replace(/[\(\)\[\]\{\}]+/g,' ');
+  s = s.replace(/\b(hd|uhd|4k|sd)\b/g,' ');
+  s = s.replace(/ช่อง|สำรอง|ทางสำรอง|backup|mirror|alt|live|tv|channel/gi,' ');
+  s = s.replace(/[^a-z0-9ก-๙]+/g,'');
+  return s.trim();
 }
 
 /* ------------------------ Player status overlay ------------------------ */
