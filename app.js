@@ -1,7 +1,6 @@
-/* ========================= app.js (RESUME + SHOW ACTIVE CARD) =========================
-   - เปิดเว็บใหม่: ถ้ามี lastId → เปิดหมวดนั้น + เล่นช่องนั้น + เลื่อนให้เห็น ch-card ที่เล่นอยู่
-                   ถ้าไม่มี → เล่นช่องแรกของหมวดแรก + เลื่อนให้เห็น ch-card เช่นกัน
-   - ปุ่มรีเฟรช + ล้างแคช (ไม่ลบ lastId) + เคลียร์อัตโนมัติทุก 6 ชม.
+/* ========================= app.js (NO MEMORY OF LAST CHANNEL) =========================
+   - เปิดเว็บใหม่: เล่นช่องแรกของหมวดแรกเสมอ + เลื่อนให้เห็น ch-card ที่เล่นอยู่
+   - ปุ่มรีเฟรช + ล้างแคช (คงอยู่ แต่ไม่ได้แตะ lastId เพราะไม่มีแล้ว)
    - now-playing ตำแหน่งเดิมใน header (ไม่มีกรอบ)
    - Histats ติดมุมขวาใน .h-wrap (โค้ดใหม่ 4970878/10052)
    - เพิ่มข้อความ “รีเฟรชเสร็จแล้ว” โผล่ข้างปุ่มหลังทำงานเสร็จ
@@ -39,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   buildTabs();
-  resumeLastOrAutoplayFirst();  // เล่น + เลื่อนให้เห็นการ์ดที่กำลังเล่น
+  autoplayFirst();  // เล่น + เลื่อนให้เห็นการ์ดที่กำลังเล่น
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
@@ -70,22 +69,9 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Resume / Autoplay + Reveal card ------------------------ */
-function resumeLastOrAutoplayFirst(){
+/* ------------------------ Autoplay + Reveal card ------------------------ */
+function autoplayFirst(){
   const firstCat = (categories?.order?.[0]) || categories?.default || 'IPTV';
-  const lastId = safeGet('lastId');
-
-  if (lastId){
-    const idx = channels.findIndex(c => c.id === lastId);
-    if (idx >= 0){
-      const cat = getCategory(channels[idx]);
-      setActiveTab(cat);
-      playByIndex(idx, { scroll:false });
-      scheduleRevealActiveCard();
-      return;
-    }
-  }
-  // ไม่มีประวัติ → หมวดแรก + ช่องแรก
   setActiveTab(firstCat);
   const firstIdx = channels.findIndex(c => getCategory(c) === firstCat);
   if (firstIdx >= 0) {
@@ -303,9 +289,6 @@ function playByIndex(i, opt={scroll:true}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
 
-  // จดจำช่องล่าสุดเสมอ
-  safeSet('lastId', ch.id);
-
   const srcList = buildSources(ch);
   tryPlayJW(ch, srcList, 0);
 
@@ -416,8 +399,6 @@ function escapeHtml(s){
   }[c]));
 }
 function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
-function safeGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
-function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
 function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
 
 /* ------------------------ Icons ------------------------ */
@@ -457,7 +438,7 @@ function mountHistatsTopRight(){
     '1,4970878,4,10052,"div#histatsC {position: absolute;top:0px;right:0px;}body>div#histatsC {position: fixed;}"'
   ]);
   window._Hasync.push(['Histats.fasi','1']);
-  window._Hasync.push(['Histats.track_hits','']);
+  window._Hasync.push(['Histats.track_hits','']];
 
   // โหลดสคริปต์ (กันซ้ำ)
   if (!document.getElementById('histats-loader')) {
@@ -527,10 +508,10 @@ function mountRefreshButton(){
       btn.querySelector('.t').textContent = 'กำลังรีเฟรช...';
       updateBtnW();
 
-      await clearAppCache();      // ไม่ลบ lastId
+      await clearAppCache();
       await loadData();
       buildTabs();
-      resumeLastOrAutoplayFirst();
+      autoplayFirst();
 
       // เวลาแบบไทย เฉพาะเวลา
       const t = new Intl.DateTimeFormat('th-TH', { timeStyle:'medium', hour12:false, timeZone: TIMEZONE }).format(new Date());
@@ -557,7 +538,7 @@ function mountRefreshButton(){
 async function clearAppCache(){
   try {
     const keys = Object.keys(localStorage);
-    // ล้างค่า jwplayer* เท่านั้น (คงค่า lastId)
+    // ล้างค่า jwplayer* เท่านั้น (ไม่มี lastId แล้ว)
     for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
   } catch {}
   if (window.caches) {
