@@ -1,11 +1,11 @@
-/* ========================= app.js (NO FIRST SCROLL + FORCED AUTOPLAY + PLAYER STATUS) =========================
+/* ========================= app.js (NO FIRST SCROLL + FORCED AUTOPLAY + PLAYER STATUS + HISTATS AUTO-REFRESH) =========================
    - เปิดเว็บ: เลือกหมวดแรกที่ "มีช่องจริง" แล้วเล่นช่องแรก (ไม่เลื่อนลงกริดเพื่อกันบังวิดีโอ)
    - บังคับ autoplay ให้ผ่านนโยบายเบราว์เซอร์ (autostart:'viewable', mute:true + playAttemptFailed)
    - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
    - ปุ่มรีเฟรช + ล้าง cache (ไม่จำค่า lastId)
-   - Histats ตรึงขวาบน .h-wrap
+   - Histats ตรึงขวาบน .h-wrap + รีเฟรชตัวเลขอัตโนมัติทุกช่วงเวลา
    - เลื่อนหน้าอิงความสูง header ผ่านตัวแปร CSS --header-offset
-================================================================================================================ */
+===================================================================================================================================== */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -14,7 +14,9 @@ const TIMEZONE = 'Asia/Bangkok';
 const SWITCH_OUT_MS   = 140;
 const STAGGER_STEP_MS = 22;
 const SCROLL_CARD_ON_LOAD = false;    // ❗ ปิดการเลื่อนการ์ดตอนเปิดเว็บครั้งแรก
+const HISTATS_REFRESH_MS   = 60 * 1000; // รีเฟรชตัวเลข Histats ทุก 60 วิ (ปรับได้)
 
+/* -------------------------------- State -------------------------------- */
 let categories = null;
 let channels   = [];
 let currentFilter = '';
@@ -23,9 +25,9 @@ let didInitialReveal = false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ------------------------ Boot ------------------------ */
+/* -------------------------------- Boot -------------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
-  // กันหน้าอยู่บนสุดเสมอ เมื่อเพิ่งโหลด (สำคัญสำหรับมือถือ/แถบ address)
+  // กันหน้าอยู่บนสุดเสมอ เมื่อเพิ่งโหลด (มือถือ/แถบ address)
   window.scrollTo({ top: 0, behavior: 'auto' });
 
   mountRefreshButton();
@@ -74,7 +76,7 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Autoplay (เลือกหมวดที่มีช่องจริง) + OPTIONAL reveal card ------------------------ */
+/* ---------------- Autoplay (หมวดแรกที่มีช่อง) + OPTIONAL reveal card ---------------- */
 function autoplayFirst(){
   const order = (categories?.order || []);
   let idx = -1;
@@ -105,7 +107,6 @@ function scheduleRevealActiveCard(){
   didInitialReveal = true;
   setTimeout(()=> revealActiveCardIntoView(), SWITCH_OUT_MS + 220);
 }
-
 function revealActiveCardIntoView(){
   const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
   if (!active) { setTimeout(revealActiveCardIntoView, 120); return; }
@@ -128,7 +129,6 @@ function mountClock(){
   tick();
   setInterval(tick, 1000);
 }
-
 function mountNowPlayingInHeader(){
   const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   let now = document.getElementById('now-playing');
@@ -144,7 +144,7 @@ function mountNowPlayingInHeader(){
   };
 }
 
-/* ------------------------ Tabs ------------------------ */
+/* -------------------------------- Tabs -------------------------------- */
 function buildTabs(){
   const root = document.getElementById('tabs'); if(!root) return;
   root.innerHTML = '';
@@ -235,7 +235,7 @@ function useWideLogo(ch){
   return !!rule;
 }
 
-/* ------------------------ Render grid ------------------------ */
+/* -------------------------------- Grid -------------------------------- */
 function ensureGrid(){
   const grid = document.getElementById('channel-list');
   if (!grid.classList.contains('grid')) grid.classList.add('grid');
@@ -297,7 +297,7 @@ function computeGridCols(container){
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
 
-/* ------------------------ Player (JW) + Forced Autoplay + Status ------------------------ */
+/* -------------------- Player (JW) + Forced Autoplay + Status -------------------- */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -427,7 +427,7 @@ function showPlayerStatus(text){
   box.style.display = text ? 'block' : 'none';
 }
 
-/* ------------------------ Utilities ------------------------ */
+/* -------------------------------- Utilities -------------------------------- */
 function headerOffset(){
   // อ่านจากตัวแปร CSS --header-offset ถ้าไม่มีให้ fallback เป็นความสูง .h-wrap
   const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
@@ -435,7 +435,6 @@ function headerOffset(){
   if (!isNaN(num) && num > 0) return num;
   return document.querySelector('.h-wrap')?.offsetHeight || 0;
 }
-
 function highlight(globalIndex){
   document.querySelectorAll('.channel').forEach(el=>{
     const idx = Number(el.dataset.globalIndex);
@@ -466,7 +465,7 @@ function escapeHtml(s){
 function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
 function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
 
-/* ------------------------ Icons ------------------------ */
+/* -------------------------------- Icons -------------------------------- */
 function getIconSVG(n){
   const c='currentColor';
   switch(n){
@@ -487,7 +486,7 @@ function getIconSVG(n){
   }
 }
 
-/* ------------------------ Histats (ติดขวาใน .h-wrap — โค้ดใหม่) ------------------------ */
+/* ---------------- Histats (ติดขวาใน .h-wrap + Auto-Refresh ตัวเลข) ---------------- */
 function mountHistatsTopRight(){
   const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
 
@@ -495,6 +494,7 @@ function mountHistatsTopRight(){
   if (!holder) { holder = document.createElement('div'); holder.id = 'histats_counter'; }
   if (!holder.parentElement) anchor.appendChild(holder);
 
+  // ติดตั้ง Histats (ใช้แบบ startgif)
   window._Hasync = window._Hasync || [];
   window._Hasync.push([
     'Histats.startgif',
@@ -512,6 +512,7 @@ function mountHistatsTopRight(){
     (document.head || document.body).appendChild(hs);
   }
 
+  // จัด DOM ให้อยู่ในตำแหน่งที่เราควบคุม
   const ensureInside = () => {
     const c = document.getElementById('histatsC');
     if (c && c.parentNode !== holder) {
@@ -524,6 +525,36 @@ function mountHistatsTopRight(){
   ensureInside();
   const obs = new MutationObserver(ensureInside);
   obs.observe(document.documentElement, { childList:true, subtree:true });
+
+  // รีเฟรช "เฉพาะรูปภาพ" เพื่อลากตัวเลขล่าสุด (ไม่เพิ่ม count)
+  function refreshHistatsImage(){
+    const c = document.getElementById('histatsC');
+    if (!c) return;
+    c.querySelectorAll('img').forEach(img=>{
+      try{
+        const u = new URL(img.src, location.href);
+        u.searchParams.set('r', Date.now().toString()); // bust cache
+        img.src = u.toString();
+      }catch{
+        img.src = img.src + (img.src.includes('?') ? '&' : '?') + 'r=' + Date.now();
+      }
+    });
+  }
+  setInterval(refreshHistatsImage, HISTATS_REFRESH_MS);
+
+  // ถ้า widget เอ๋อ ไม่มีรูป → โหลด script ใหม่แบบเนียน ๆ
+  function rebuildHistatsIfBroken(){
+    const c = document.getElementById('histatsC');
+    if (!c || !c.querySelector('img')) {
+      document.getElementById('histats-loader')?.remove();
+      const hs = document.createElement('script');
+      hs.id = 'histats-loader';
+      hs.async = true;
+      hs.src = '//s10.histats.com/js15_giftop_as.js';
+      (document.head || document.body).appendChild(hs);
+    }
+  }
+  setInterval(rebuildHistatsIfBroken, 5 * 60 * 1000);
 }
 
 /* ------------------------ Refresh + Auto clear ------------------------ */
