@@ -1,7 +1,7 @@
 /* ======================================================================
    styles.css — UI for IPTV page
    - Dark theme tokens + base reset
-   - Header (clock, refresh, histats) + live-viewers ใต้ clock
+   - Header (clock, refresh, histats) + live-pill ใต้ clock
    - Player
    - Tabs + Grid + Channel cards (+ Badge "สำรอง")
    - Now bar ใต้วิดีโอ (now-playing กึ่งกลาง)
@@ -99,18 +99,9 @@ header{
   font-variant-numeric: tabular-nums; color:#f4f7fb; text-align:center;
   text-shadow:none; opacity:.98;
 }
-/* เดิมเคยแสดง now-playing บน header — ตอนนี้ย้ายลงใต้ VDO */
-.now-playing{
-  margin-top:2px; font-size:clamp(13.5px,2.1vw,17.5px);
-  font-weight:var(--font-strong); letter-spacing:.2px;
-  color:#eaf1ff; opacity:.96; text-align:center;
-  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-.now-playing.swap{ animation: npFade .24s ease both }
-@keyframes npFade{from{opacity:0;transform:translateY(4px)}to{opacity:.96;transform:none}}
 
-/* ---------- Live viewers (ใต้ clock) ---------- */
-#live-viewers{
+/* ---------- Live viewers (ใช้ class เดียว ทั้งหัวเว็บและใต้ VDO) ---------- */
+.live-pill{
   display:inline-flex;
   align-items:center;
   gap:8px;
@@ -131,18 +122,18 @@ header{
   backdrop-filter:saturate(1.05) blur(6px);
   -webkit-backdrop-filter:saturate(1.05) blur(6px);
 }
-#live-viewers .dot{
+.live-pill .dot{
   width:8px; height:8px; border-radius:50%;
   background:#22c55e;
   box-shadow:0 0 0 2px color-mix(in oklab, #22c55e 25%, transparent);
 }
-#live-viewers .label{ opacity:.72; font-weight:600 }
-#live-viewers .n{ font-variant-numeric: tabular-nums }
-/* ระยะเมื่อติดใน header grid */
-.h-wrap #live-viewers{ margin-top:4px; }
+.live-pill .label{ opacity:.72; font-weight:600 }
+
+/* (ตำแหน่งพิเศษเมื่อติดใต้ clock) */
+#live-viewers{ margin-top:4px; }
 @media (max-width:540px){ .h-wrap #live-viewers{ margin-top:6px; } }
 
-/* ---------- Histats (ตรึงขวาใน header) ---------- */
+/* ---------- Histats (ตรึงขวาใน header — ถ้าไม่ซ่อนด้วย JS) ---------- */
 #histats_counter{
   position:absolute; right:8px; top:50%;
   height: var(--hs-size);
@@ -193,6 +184,17 @@ header{
 #player{
   width:100%; aspect-ratio:16/9; background:#000; border-radius:16px; overflow:hidden;
   border:1px solid var(--border); box-shadow:0 8px 18px rgba(0,0,0,.25) inset;
+}
+
+/* ---------- Now bar ใต้ VDO (now-playing กึ่งกลาง + live-pill) ---------- */
+#now-bar{
+  display:flex; align-items:center; justify-content:center;
+  gap:10px; margin:10px 0 16px;
+}
+#now-playing{
+  font-weight:700; font-size:14px; letter-spacing:.2px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:100%; text-align:center;
 }
 
 /* ---------- Tabs ---------- */
@@ -390,27 +392,6 @@ header{
   transform:scale(0); animation:ripple .5s ease-out; pointer-events:none
 }
 @keyframes ripple{ to{ transform:scale(1); opacity:0 } }
-
-/* ---------- Now bar ใต้ VDO (now-playing กึ่งกลาง) ---------- */
-#now-bar.now-bar{
-  display:flex;
-  align-items:center;
-  justify-content:center;   /* กึ่งกลาง */
-  gap:12px;
-  margin:10px 0 16px;
-}
-#now-playing{
-  font-weight:700;
-  font-size:14px;
-  letter-spacing:.2px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:100%;
-  color:inherit;
-  opacity:.95;
-  text-align:center;        /* กึ่งกลางข้อความ */
-}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 380px){
