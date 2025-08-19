@@ -172,7 +172,7 @@ function mountLiveViewersUnderClock(){
   if (!pill) {
     pill = document.createElement('span');
     pill.id = 'live-viewers';
-    pill.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="label">Live</span><span class="n">0</span>`;
+    pill.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="label">ออนไลน์</span><span class="n">0</span>`;
   }
   if (clock) clock.insertAdjacentElement('afterend', pill);
   else header.appendChild(pill);
