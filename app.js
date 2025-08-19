@@ -4,6 +4,7 @@
    - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
    - ปุ่มรีเฟรช + ล้าง cache (ไม่จำค่า lastId)
    - Histats ตรึงขวาบน .h-wrap
+   - เลื่อนหน้าอิงความสูง header ผ่านตัวแปร CSS --header-offset
 ============================================================================================================== */
 
 const CH_URL  = 'channels.json';
@@ -104,10 +105,8 @@ function scheduleRevealActiveCard(){
 function revealActiveCardIntoView(){
   const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
   if (!active) { setTimeout(revealActiveCardIntoView, 120); return; }
-  const header = document.querySelector('header');
   const pad = 80;
-  const h = (header?.offsetHeight) || 0;
-  const y = active.getBoundingClientRect().top + window.pageYOffset - h - pad;
+  const y = active.getBoundingClientRect().top + window.pageYOffset - headerOffset() - pad;
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
@@ -400,8 +399,7 @@ function showMobileToast(text){
 function isMobile(){ return /iPhone|iPad|Android/i.test(navigator.userAgent) }
 function scrollToPlayer(){
   const el = document.getElementById('player');
-  const header = document.querySelector('header');
-  const y = el.getBoundingClientRect().top + window.pageYOffset - ((header?.offsetHeight)||0) - 8;
+  const y = el.getBoundingClientRect().top + window.pageYOffset - headerOffset() - 8;
   window.scrollTo({ top:y, behavior:'smooth' });
 }
 
@@ -425,7 +423,15 @@ function showPlayerStatus(text){
   box.style.display = text ? 'block' : 'none';
 }
 
-/* ------------------------ UI helpers ------------------------ */
+/* ------------------------ Utilities ------------------------ */
+function headerOffset(){
+  // อ่านจากตัวแปร CSS --header-offset ถ้าไม่มีให้ fallback เป็นความสูง .h-wrap
+  const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
+  const num = parseFloat(v);
+  if (!isNaN(num) && num > 0) return num;
+  return document.querySelector('.h-wrap')?.offsetHeight || 0;
+}
+
 function highlight(globalIndex){
   document.querySelectorAll('.channel').forEach(el=>{
     const idx = Number(el.dataset.globalIndex);
