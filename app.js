@@ -29,7 +29,7 @@ const VIEWER_TTL_S = 120;     // TTL เผื่อมือถือพัก�
 const PING_INTERVAL_S = 25;   // ping ทุก ~25 วิ
 
 // หน่วงการนับใหม่เมื่อสลับช่อง (ครั้งแรกไม่หน่วง)
-const PRESENCE_SWITCH_DELAY_MS = 4000;
+const PRESENCE_SWITCH_DELAY_MS = 5000;
 let presenceTimer = null;
 let presenceSwitchTimer = null;
 let presenceFirstStart = true;
