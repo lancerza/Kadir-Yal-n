@@ -1,6 +1,7 @@
 /* ========================= app.js =========================
    - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
-   - Now bar ใต้ VDO: now-playing (ซ้าย) + live-viewers (ขวา)
+   - Now bar ใต้ VDO: now-playing (กึ่งกลาง)
+   - Live viewers: ย้ายไปอยู่ใต้เวลา (clock) ใน header
    - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
    - JW Player: เล่นแบบปลอดภัย + สถานะ overlay
    - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
@@ -42,8 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowBarUnderPlayer(); // now-playing + live-viewers ใต้ VDO
-  mountHistatsHidden();     // Histats แบบซ่อน
+  mountNowBarUnderPlayer();   // now-playing ใต้ VDO (กึ่งกลาง)
+  mountLiveViewersUnderClock(); // live-viewers ใต้ clock ใน header
+  mountHistatsHidden();       // Histats แบบซ่อน
 
   try {
     await loadData();
@@ -124,15 +126,11 @@ function revealActiveCardIntoView(){
 function mountNowBarUnderPlayer(){
   const player = document.getElementById('player') || document.body;
 
-  // style ใต้ VDO (inject แค่ครั้งเดียว)
+  // inject style (กันกรณีไม่มี styles.css)
   if (!document.getElementById('now-bar-styles')) {
     const css = `
-#now-bar.now-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 16px;}
-#now-playing{font-weight:700;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%;color:inherit;opacity:.95;}
-#live-viewers{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid color-mix(in oklab,currentColor 16%,transparent);background:color-mix(in oklab,currentColor 6%,transparent);font-size:13px;font-weight:700;color:inherit;backdrop-filter:saturate(1.05) blur(6px);-webkit-backdrop-filter:saturate(1.05) blur(6px);}
-#live-viewers .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px color-mix(in oklab,#22c55e 25%,transparent);}
-#live-viewers .label{opacity:.72;font-weight:600;}
-@media (max-width:540px){#now-playing{max-width:60%;}}
+#now-bar.now-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0 14px;}
+#now-playing{font-weight:700;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:inherit;opacity:.95;text-align:center;}
     `.trim();
     const s = document.createElement('style');
     s.id = 'now-bar-styles';
@@ -140,45 +138,44 @@ function mountNowBarUnderPlayer(){
     document.head.appendChild(s);
   }
 
-  // แถบใต้ player
   let bar = document.getElementById('now-bar');
   if (!bar) {
     bar = document.createElement('div');
     bar.id = 'now-bar';
     bar.className = 'now-bar';
-    // ใต้ #player
-    if (player.insertAdjacentElement) player.insertAdjacentElement('afterend', bar);
-    else player.parentNode?.insertBefore(bar, player.nextSibling);
+    player.insertAdjacentElement?.('afterend', bar);
   }
 
-  // now-playing (ซ้าย)
+  // now-playing (กึ่งกลาง)
   let now = document.getElementById('now-playing');
   if (!now) {
     now = document.createElement('div');
     now.id = 'now-playing';
     now.className = 'now-playing';
     now.setAttribute('aria-live','polite');
-    bar.appendChild(now);
-  } else if (now.parentElement !== bar) {
-    bar.appendChild(now);
   }
+  if (now.parentElement !== bar) bar.appendChild(now);
 
-  // live-viewers (ขวา)
+  // setter สำหรับอัปเดตชื่อ/ช่อง
+  window.__setNowPlaying = (name='')=>{
+    now.textContent = name || '';
+    now.title = name || '';
+  };
+}
+
+/* ------------------------ Live viewers ใต้ clock ------------------------ */
+function mountLiveViewersUnderClock(){
+  const header = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
+  const clock  = document.getElementById('clock');
+
   let pill = document.getElementById('live-viewers');
   if (!pill) {
     pill = document.createElement('span');
     pill.id = 'live-viewers';
     pill.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="label">Live</span><span class="n">0</span>`;
-    bar.appendChild(pill);
-  } else if (pill.parentElement !== bar) {
-    bar.appendChild(pill);
   }
-
-  // setter สำหรับอัปเดตชื่อรายการ/ช่อง
-  window.__setNowPlaying = (name='')=>{
-    now.textContent = name || '';
-    now.title = name || '';
-  };
+  if (clock) clock.insertAdjacentElement('afterend', pill);
+  else header.appendChild(pill);
 }
 function updateLiveViewers(n){
   const el = document.querySelector('#live-viewers .n');
@@ -457,214 +454,6 @@ function scrollToPlayer(){
   window.scrollTo({ top:y, behavior:'smooth' });
 }
 
-/* ------------------------ Player status overlay ------------------------ */
-function showPlayerStatus(text){
-  const parent = document.getElementById('player');
-  if (!parent) return;
-  let box = document.getElementById('player-msg');
-  if (!box){
-    box = document.createElement('div');
-    box.id = 'player-msg';
-    box.style.cssText = `
-      position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-      background:rgba(0,0,0,.60);color:#fff;padding:8px 12px;border-radius:10px;
-      font-weight:800;letter-spacing:.2px;z-index:5;max-width:70%;text-align:center;
-      box-shadow:0 6px 16px rgba(0,0,0,.35)`;
-    parent.style.position = parent.style.position || 'relative';
-    parent.appendChild(box);
-  }
-  box.textContent = text || '';
-  box.style.display = text ? 'block' : 'none';
-}
-
-/* ------------------------ Utilities ------------------------ */
-function headerOffset(){
-  const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
-  const num = parseFloat(v);
-  if (!isNaN(num) && num > 0) return num;
-  return document.querySelector('.h-wrap')?.offsetHeight || 0;
-}
-function highlight(globalIndex){
-  document.querySelectorAll('.channel').forEach(el=>{
-    const idx = Number(el.dataset.globalIndex);
-    el.classList.toggle('active', idx === globalIndex);
-    el.setAttribute('aria-pressed', idx === globalIndex ? 'true':'false');
-  });
-}
-function ripple(event, container){
-  if(!container) return;
-  const r = container.getBoundingClientRect();
-  const max = Math.max(r.width, r.height);
-  const x = (event.clientX ?? (r.left + r.width/2)) - r.left;
-  const y = (event.clientY ?? (r.top  + r.height/2)) - r.top;
-  const s = document.createElement('span');
-  s.className = 'ripple';
-  s.style.width = s.style.height = `${max}px`;
-  s.style.left = `${x - max/2}px`;
-  s.style.top  = `${y - max/2}px`;
-  container.querySelector('.ripple')?.remove();
-  container.appendChild(s);
-  s.addEventListener('animationend', ()=>s.remove(), { once:true });
-}
-function escapeHtml(s){
-  return String(s).replace(/[&<>"'`=\/]/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
-  }[c]));
-}
-function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
-function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
-
-/* ------------------------ Icons ------------------------ */
-function getIconSVG(n){
-  const c='currentColor';
-  switch(n){
-    case 'IPTV':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 20h16v-2H4v2zm5-4h6v-2H9v2zm-3-4h12V8H6v4zm4-9 2 2 2-2 1.4 1.4L12 6.8 8.6 4.4 10 3z"/></svg>`;
-    case 'เด็ก':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a5 5 0 0 1 5 5c0 3.9-3.6 7-5 7s-5-3.1-5-7a5 5 0 0 1 5-5zm1 14c2 3 1 4-1 6h-1l1-3-2 1 2-4h1z"/></svg>`;
-    case 'บันเทิง':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.6L12 18.7 6.2 21l1.1-6.6-4.7-4.6 6.5-.9L12 3z"/></svg>`;
-    case 'กีฬา':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
-    case 'สารคดี':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
-    case 'หนัง':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
-    default:
-      return `<svg viewBox="0 0 24 24" fill="${c}"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>`;
-  }
-}
-
-/* ------------------------ Histats (ซ่อนแต่ยังนับ) ------------------------ */
-function mountHistatsHidden(){
-  let holder = document.getElementById('histats_counter');
-  if (!holder) {
-    holder = document.createElement('div');
-    holder.id = 'histats_counter';
-    document.body.appendChild(holder);
-  }
-  const hiddenCSS = `
-    position:absolute!important; width:1px!important; height:1px!important;
-    overflow:hidden!important; clip:rect(0 0 0 0)!important; clip-path: inset(50%)!important;
-    opacity:0!important; pointer-events:none!important; z-index:-1!important;`;
-  holder.style.cssText = hiddenCSS;
-
-  window._Hasync = window._Hasync || [];
-  window._Hasync.push([
-    'Histats.startgif',
-    '1,4970878,4,10052,"div#histatsC {position: absolute;top:0;right:0;}body>div#histatsC {position: fixed;}"'
-  ]);
-  window._Hasync.push(['Histats.fasi','1']);
-  window._Hasync.push(['Histats.track_hits','']);
-
-  if (!document.getElementById('histats-loader')) {
-    const hs = document.createElement('script');
-    hs.id = 'histats-loader';
-    hs.type = 'text/javascript';
-    hs.async = true;
-    hs.src = '//s10.histats.com/js15_giftop_as.js';
-    (document.head || document.body).appendChild(hs);
-  }
-
-  const ensureInside = () => {
-    const c = document.getElementById('histatsC');
-    if (c && c.parentNode !== holder) holder.appendChild(c);
-    if (c) c.style.cssText = hiddenCSS;
-  };
-  ensureInside();
-  const obs = new MutationObserver(ensureInside);
-  obs.observe(document.documentElement, { childList:true, subtree:true });
-}
-
-/* ------------------------ Refresh + Auto clear ------------------------ */
-function mountRefreshButton(){
-  const wrap = document.querySelector('.h-wrap') || document.querySelector('header');
-  if (!wrap || document.getElementById('refresh-btn')) return;
-
-  const btn = document.createElement('button');
-  btn.id = 'refresh-btn';
-  btn.className = 'refresh-btn';
-  btn.type = 'button';
-  btn.title = 'รีเฟรชช่อง + ล้างแคช';
-  btn.innerHTML = '<span class="i">↻</span><span class="t">รีเฟรช</span>';
-
-  let status = document.getElementById('refresh-status');
-  if (!status){
-    status = document.createElement('span');
-    status.id = 'refresh-status';
-    status.setAttribute('role','status');
-    status.setAttribute('aria-live','polite');
-  }
-
-  const updateBtnW = () => {
-    const w = btn.getBoundingClientRect().width;
-    document.documentElement.style.setProperty('--refresh-btn-w', `${Math.ceil(w)}px`);
-  };
-
-  let hideTimer = null;
-  const showStatus = (text) => {
-    status.textContent = text;
-    status.classList.add('on');
-    if (hideTimer) clearTimeout(hideTimer);
-    hideTimer = setTimeout(()=> status.classList.remove('on'), 2600);
-  };
-
-  btn.addEventListener('click', async ()=>{
-    try{
-      btn.disabled = true;
-      btn.querySelector('.t').textContent = 'กำลังรีเฟรช...';
-      updateBtnW();
-
-      await clearAppCache();
-      await loadData();
-      buildTabs();
-      autoplayFirst();
-
-      const t = new Intl.DateTimeFormat('th-TH', { timeStyle:'medium', hour12:false, timeZone: TIMEZONE }).format(new Date());
-      showStatus(`รีเฟรชเสร็จแล้ว • ${t}`);
-    } finally {
-      btn.disabled = false;
-      btn.querySelector('.t').textContent = 'รีเฟรช';
-      updateBtnW();
-    }
-  });
-
-  wrap.appendChild(btn);
-  wrap.appendChild(status);
-
-  updateBtnW();
-  if ('ResizeObserver' in window){
-    const ro = new ResizeObserver(updateBtnW);
-    ro.observe(btn);
-  }
-  addEventListener('resize', debounce(updateBtnW, 120));
-}
-async function clearAppCache(){
-  try {
-    const keys = Object.keys(localStorage);
-    for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
-  } catch {}
-  if (window.caches) {
-    try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
-  }
-}
-const AUTO_CLEAR_KEY = 'lastAutoClear';
-const SIX_HR_MS = 6 * 60 * 60 * 1000;
-function scheduleAutoClear(){
-  const now = Date.now();
-  const last = Number(localStorage.getItem(AUTO_CLEAR_KEY) || 0);
-  if (!last || (now - last) >= SIX_HR_MS) {
-    clearAppCache();
-    localStorage.setItem(AUTO_CLEAR_KEY, String(now));
-  }
-  const delay = Math.max(1000, SIX_HR_MS - ((now - last) % SIX_HR_MS || 0));
-  setTimeout(function tick(){
-    clearAppCache();
-    localStorage.setItem(AUTO_CLEAR_KEY, String(Date.now()));
-    setTimeout(tick, SIX_HR_MS);
-  }, delay);
-}
-
 /* ------------------------ Presence (heartbeat) — mobile friendly ------------------------ */
 function getViewerId(){
   try{
@@ -803,8 +592,138 @@ function getIconSVG(n){
     case 'สารคดี':
       return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
     case 'หนัง':
-      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2z"/></svg>`;
     default:
       return `<svg viewBox="0 0 24 24" fill="${c}"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>`;
   }
+}
+
+/* ------------------------ Histats (ซ่อนแต่ยังนับ) ------------------------ */
+function mountHistatsHidden(){
+  let holder = document.getElementById('histats_counter');
+  if (!holder) {
+    holder = document.createElement('div');
+    holder.id = 'histats_counter';
+    document.body.appendChild(holder);
+  }
+  const hiddenCSS = `
+    position:absolute!important; width:1px!important; height:1px!important;
+    overflow:hidden!important; clip:rect(0 0 0 0)!important; clip-path: inset(50%)!important;
+    opacity:0!important; pointer-events:none!important; z-index:-1!important;`;
+  holder.style.cssText = hiddenCSS;
+
+  window._Hasync = window._Hasync || [];
+  window._Hasync.push([
+    'Histats.startgif',
+    '1,4970878,4,10052,"div#histatsC {position: absolute;top:0;right:0;}body>div#histatsC {position: fixed;}"'
+  ]);
+  window._Hasync.push(['Histats.fasi','1']);
+  window._Hasync.push(['Histats.track_hits','']);
+
+  if (!document.getElementById('histats-loader')) {
+    const hs = document.createElement('script');
+    hs.id = 'histats-loader';
+    hs.type = 'text/javascript';
+    hs.async = true;
+    hs.src = '//s10.histats.com/js15_giftop_as.js';
+    (document.head || document.body).appendChild(hs);
+  }
+
+  const ensureInside = () => {
+    const c = document.getElementById('histatsC');
+    if (c && c.parentNode !== holder) holder.appendChild(c);
+    if (c) c.style.cssText = hiddenCSS;
+  };
+  ensureInside();
+  const obs = new MutationObserver(ensureInside);
+  obs.observe(document.documentElement, { childList:true, subtree:true });
+}
+
+/* ------------------------ Refresh + Auto clear ------------------------ */
+function mountRefreshButton(){
+  const wrap = document.querySelector('.h-wrap') || document.querySelector('header');
+  if (!wrap || document.getElementById('refresh-btn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'refresh-btn';
+  btn.className = 'refresh-btn';
+  btn.type = 'button';
+  btn.title = 'รีเฟรชช่อง + ล้างแคช';
+  btn.innerHTML = '<span class="i">↻</span><span class="t">รีเฟรช</span>';
+
+  let status = document.getElementById('refresh-status');
+  if (!status){
+    status = document.createElement('span');
+    status.id = 'refresh-status';
+    status.setAttribute('role','status');
+    status.setAttribute('aria-live','polite');
+  }
+
+  const updateBtnW = () => {
+    const w = btn.getBoundingClientRect().width;
+    document.documentElement.style.setProperty('--refresh-btn-w', `${Math.ceil(w)}px`);
+  };
+
+  let hideTimer = null;
+  const showStatus = (text) => {
+    status.textContent = text;
+    status.classList.add('on');
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(()=> status.classList.remove('on'), 2600);
+  };
+
+  btn.addEventListener('click', async ()=>{
+    try{
+      btn.disabled = true;
+      btn.querySelector('.t').textContent = 'กำลังรีเฟรช...';
+      updateBtnW();
+
+      await clearAppCache();
+      await loadData();
+      buildTabs();
+      autoplayFirst();
+
+      const t = new Intl.DateTimeFormat('th-TH', { timeStyle:'medium', hour12:false, timeZone: TIMEZONE }).format(new Date());
+      showStatus(`รีเฟรชเสร็จแล้ว • ${t}`);
+    } finally {
+      btn.disabled = false;
+      btn.querySelector('.t').textContent = 'รีเฟรช';
+      updateBtnW();
+    }
+  });
+
+  wrap.appendChild(btn);
+  wrap.appendChild(status);
+
+  updateBtnW();
+  if ('ResizeObserver' in window){
+    const ro = new ResizeObserver(updateBtnW);
+    ro.observe(btn);
+  }
+  addEventListener('resize', debounce(updateBtnW, 120));
+}
+async function clearAppCache(){
+  try {
+    const keys = Object.keys(localStorage);
+    for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
+  } catch {}
+  if (window.caches) {
+    try { const names = await caches.keys(); await Promise.all(names.map(n => caches.delete(n))); } catch {}
+  }
+}
+const AUTO_CLEAR_KEY = 'lastAutoClear';
+const SIX_HR_MS = 6 * 60 * 60 * 1000;
+function scheduleAutoClear(){
+  const now = Date.now();
+  const last = Number(localStorage.getItem(AUTO_CLEAR_KEY) || 0);
+  if (!last || (now - last) >= SIX_HR_MS) {
+    clearAppCache();
+    localStorage.setItem(AUTO_CLEAR_KEY, String(now));
+  }
+  const delay = Math.max(1000, SIX_HR_MS - ((now - last) % SIX_HR_MS || 0));
+  setTimeout(function tick(){
+    clearAppCache();
+    localStorage.setItem(AUTO_CLEAR_KEY, String(Date.now()));
+    setTimeout(tick, SIX_HR_MS);
+  }, delay);
 }
