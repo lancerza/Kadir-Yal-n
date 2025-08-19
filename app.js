@@ -1,10 +1,10 @@
-/* ========================= app.js (NO MEMORY OF LAST CHANNEL) =========================
-   - เปิดเว็บใหม่: เล่นช่องแรกของหมวดแรกเสมอ + เลื่อนให้เห็น ch-card ที่เล่นอยู่
-   - ปุ่มรีเฟรช + ล้างแคช (คงอยู่ แต่ไม่ได้แตะ lastId เพราะไม่มีแล้ว)
-   - now-playing ตำแหน่งเดิมใน header (ไม่มีกรอบ)
-   - Histats ติดมุมขวาใน .h-wrap (โค้ดใหม่ 4970878/10052)
-   - เพิ่มข้อความ “รีเฟรชเสร็จแล้ว” โผล่ข้างปุ่มหลังทำงานเสร็จ
-======================================================================================= */
+/* ========================= app.js (FORCED AUTOPLAY + PLAYER STATUS + NO LAST MEMORY) =========================
+   - เปิดเว็บ: เลือกหมวดแรกที่ "มีช่องจริง" แล้วเล่นช่องแรก (ถ้าทุกหมวดว่าง จะข้ามไปช่องแรกของทั้งรายการ)
+   - บังคับ autoplay ให้ผ่านนโยบายเบราว์เซอร์ (autostart:'viewable', mute:true + playAttemptFailed)
+   - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
+   - ปุ่มรีเฟรช + ล้าง cache (ไม่จำค่า lastId)
+   - Histats ตรึงขวาบน .h-wrap
+============================================================================================================== */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -17,7 +17,7 @@ let categories = null;
 let channels   = [];
 let currentFilter = '';
 let currentIndex  = -1;
-let didInitialReveal = false;   // ป้องกันเลื่อนซ้ำ
+let didInitialReveal = false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
@@ -69,9 +69,8 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Autoplay + Reveal card ------------------------ */
+/* ------------------------ Autoplay (เลือกหมวดที่มีช่องจริง) + Reveal card ------------------------ */
 function autoplayFirst(){
-  // หา cat ตัวแรกที่ "มีช่องจริง"
   const order = (categories?.order || []);
   let idx = -1;
   let cat = order[0] || categories?.default || 'IPTV';
@@ -80,16 +79,17 @@ function autoplayFirst(){
     idx = channels.findIndex(ch => getCategory(ch) === c);
     if (idx >= 0) { cat = c; break; }
   }
-  // ถ้าทุกหมวดว่าง ให้ใช้ "ช่องแรกของทั้งรายการ"
-  if (idx < 0 && channels.length) {
+  if (idx < 0 && channels.length) {  // ทุกหมวดว่าง → ใช้ช่องแรกของทั้งรายการ
     idx = 0;
     cat = getCategory(channels[0]) || cat;
   }
+
   if (idx >= 0) {
     setActiveTab(cat);
     playByIndex(idx, { scroll:false });
     scheduleRevealActiveCard();
   } else {
+    showPlayerStatus('ไม่พบช่องสำหรับเล่น');
     console.warn('ไม่พบช่องให้เล่น');
   }
 }
@@ -294,7 +294,7 @@ function computeGridCols(container){
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
 
-/* ------------------------ Player (JW) ------------------------ */
+/* ------------------------ Player (JW) + Forced Autoplay + Status ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -304,6 +304,7 @@ function playByIndex(i, opt={scroll:true}){
   currentIndex = i;
 
   const srcList = buildSources(ch);
+  showPlayerStatus(`กำลังเตรียมเล่น: ${ch.name || ''}`);
   tryPlayJW(ch, srcList, 0);
 
   window.__setNowPlaying?.(ch.name || '');
@@ -322,21 +323,41 @@ function buildSources(ch){
   return [{ src:s, type:t, drm }];
 }
 function tryPlayJW(ch, list, idx){
-  if (idx >= list.length) { console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); return; }
+  if (idx >= list.length) { showPlayerStatus('เล่นไม่ได้ทุกแหล่ง'); console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); return; }
   const s = list[idx];
 
   const jwSrc = makeJwSource(s, ch);
+  showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${list.length}…`);
+
   const player = jwplayer('player').setup({
     playlist: [{ image: ch.poster || ch.logo || undefined, sources: [jwSrc] }],
-    width:'100%', aspectratio:'16:9', autostart:true,
-    mute: isMobile(), preload:'metadata',
-    displaytitle:false, displaydescription:false,
+    width:'100%',
+    aspectratio:'16:9',
+    autostart: 'viewable',   // ปลอดภัยต่อ autoplay policy
+    mute: true,              // บังคับ mute เพื่อให้เบราว์เซอร์อนุญาตเล่นอัตโนมัติ
+    preload:'metadata',
+    displaytitle:false,
+    displaydescription:false,
     playbackRateControls:true
   });
 
+  // กันกรณี autoplay ยังไม่ติด
   player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
-  player.on('error', ()=> {
-    console.warn('แหล่งล้มเหลว ลองตัวถัดไป', s);
+
+  // สถานะบัฟเฟอร์/เล่น/เฟรมแรก
+  player.on('buffer', ()=> showPlayerStatus('กำลังบัฟเฟอร์…'));
+  player.on('play',   ()=> showPlayerStatus(''));
+  player.on('firstFrame', ()=> showPlayerStatus(''));
+
+  // error/ตั้งค่าไม่ได้ → ลองแหล่งถัดไป
+  player.on('setupError', e => {
+    console.warn('setupError:', e);
+    showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…');
+    tryPlayJW(ch, list, idx+1);
+  });
+  player.on('error', e => {
+    console.warn('playError:', e);
+    showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
     tryPlayJW(ch, list, idx+1);
   });
 }
@@ -382,6 +403,26 @@ function scrollToPlayer(){
   const header = document.querySelector('header');
   const y = el.getBoundingClientRect().top + window.pageYOffset - ((header?.offsetHeight)||0) - 8;
   window.scrollTo({ top:y, behavior:'smooth' });
+}
+
+/* ------------------------ Player status overlay ------------------------ */
+function showPlayerStatus(text){
+  const parent = document.getElementById('player');
+  if (!parent) return;
+  let box = document.getElementById('player-msg');
+  if (!box){
+    box = document.createElement('div');
+    box.id = 'player-msg';
+    box.style.cssText = `
+      position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+      background:rgba(0,0,0,.60);color:#fff;padding:8px 12px;border-radius:10px;
+      font-weight:800;letter-spacing:.2px;z-index:5;max-width:70%;text-align:center;
+      box-shadow:0 6px 16px rgba(0,0,0,.35)`;
+    parent.style.position = parent.style.position || 'relative';
+    parent.appendChild(box);
+  }
+  box.textContent = text || '';
+  box.style.display = text ? 'block' : 'none';
 }
 
 /* ------------------------ UI helpers ------------------------ */
@@ -440,21 +481,18 @@ function getIconSVG(n){
 function mountHistatsTopRight(){
   const anchor = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
 
-  // จุดยึด
   let holder = document.getElementById('histats_counter');
   if (!holder) { holder = document.createElement('div'); holder.id = 'histats_counter'; }
   if (!holder.parentElement) anchor.appendChild(holder);
 
-  // ตั้งค่า Hasync (ใช้ค่าใหม่ของคุณ)
   window._Hasync = window._Hasync || [];
   window._Hasync.push([
     'Histats.startgif',
     '1,4970878,4,10052,"div#histatsC {position: absolute;top:0px;right:0px;}body>div#histatsC {position: fixed;}"'
   ]);
   window._Hasync.push(['Histats.fasi','1']);
-  window._Hasync.push(['Histats.track_hits','']];
+  window._Hasync.push(['Histats.track_hits','']);
 
-  // โหลดสคริปต์ (กันซ้ำ)
   if (!document.getElementById('histats-loader')) {
     const hs = document.createElement('script');
     hs.id = 'histats-loader';
@@ -464,7 +502,6 @@ function mountHistatsTopRight(){
     (document.head || document.body).appendChild(hs);
   }
 
-  // ย้าย #histatsC มาไว้ใน holder เสมอ + ยกเลิก position เดิม ให้จัดวางตาม CSS เรา
   const ensureInside = () => {
     const c = document.getElementById('histatsC');
     if (c && c.parentNode !== holder) {
@@ -484,7 +521,6 @@ function mountRefreshButton(){
   const wrap = document.querySelector('.h-wrap') || document.querySelector('header');
   if (!wrap || document.getElementById('refresh-btn')) return;
 
-  // ปุ่ม
   const btn = document.createElement('button');
   btn.id = 'refresh-btn';
   btn.className = 'refresh-btn';
@@ -492,7 +528,6 @@ function mountRefreshButton(){
   btn.title = 'รีเฟรชช่อง + ล้างแคช';
   btn.innerHTML = '<span class="i">↻</span><span class="t">รีเฟรช</span>';
 
-  // สถานะ (ข้อความข้างปุ่ม)
   let status = document.getElementById('refresh-status');
   if (!status){
     status = document.createElement('span');
@@ -501,13 +536,11 @@ function mountRefreshButton(){
     status.setAttribute('aria-live','polite');
   }
 
-  // helper: อัปเดตความกว้างปุ่ม → ให้ CSS คำนวณตำแหน่งข้อความข้างปุ่ม
   const updateBtnW = () => {
     const w = btn.getBoundingClientRect().width;
     document.documentElement.style.setProperty('--refresh-btn-w', `${Math.ceil(w)}px`);
   };
 
-  // helper: โชว์ข้อความสำเร็จชั่วคราว
   let hideTimer = null;
   const showStatus = (text) => {
     status.textContent = text;
@@ -527,7 +560,6 @@ function mountRefreshButton(){
       buildTabs();
       autoplayFirst();
 
-      // เวลาแบบไทย เฉพาะเวลา
       const t = new Intl.DateTimeFormat('th-TH', { timeStyle:'medium', hour12:false, timeZone: TIMEZONE }).format(new Date());
       showStatus(`รีเฟรชเสร็จแล้ว • ${t}`);
     } finally {
@@ -540,7 +572,6 @@ function mountRefreshButton(){
   wrap.appendChild(btn);
   wrap.appendChild(status);
 
-  // ติดตามการเปลี่ยนขนาดอัตโนมัติ
   updateBtnW();
   if ('ResizeObserver' in window){
     const ro = new ResizeObserver(updateBtnW);
@@ -552,7 +583,6 @@ function mountRefreshButton(){
 async function clearAppCache(){
   try {
     const keys = Object.keys(localStorage);
-    // ล้างค่า jwplayer* เท่านั้น (ไม่มี lastId แล้ว)
     for (const k of keys) if (/^jwplayer\./i.test(k) || k.includes('jwplayer')) localStorage.removeItem(k);
   } catch {}
   if (window.caches) {
