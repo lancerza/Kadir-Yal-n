@@ -1,5 +1,6 @@
 /* ========================= app.js =========================
    - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
+   - Now bar ใต้ VDO: now-playing (ซ้าย) + live-viewers (ขวา)
    - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
    - JW Player: เล่นแบบปลอดภัย + สถานะ overlay
    - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
@@ -31,6 +32,7 @@ const VIEWER_ID_KEY    = 'viewer_id';
 let presenceTimer      = null;
 let currentPresenceKey = null;
 let lastPingAt         = 0;
+let presenceBound      = false;
 
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -40,8 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowPlayingInHeader();
-  mountLiveViewersPill();   // ป้าย 👁
+  mountNowBarUnderPlayer(); // now-playing + live-viewers ใต้ VDO
   mountHistatsHidden();     // Histats แบบซ่อน
 
   try {
@@ -119,7 +120,72 @@ function revealActiveCardIntoView(){
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
-/* ------------------------ Header: Clock + Now Playing ------------------------ */
+/* ------------------------ Now bar ใต้ VDO ------------------------ */
+function mountNowBarUnderPlayer(){
+  const player = document.getElementById('player') || document.body;
+
+  // style ใต้ VDO (inject แค่ครั้งเดียว)
+  if (!document.getElementById('now-bar-styles')) {
+    const css = `
+#now-bar.now-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 16px;}
+#now-playing{font-weight:700;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%;color:inherit;opacity:.95;}
+#live-viewers{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid color-mix(in oklab,currentColor 16%,transparent);background:color-mix(in oklab,currentColor 6%,transparent);font-size:13px;font-weight:700;color:inherit;backdrop-filter:saturate(1.05) blur(6px);-webkit-backdrop-filter:saturate(1.05) blur(6px);}
+#live-viewers .dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px color-mix(in oklab,#22c55e 25%,transparent);}
+#live-viewers .label{opacity:.72;font-weight:600;}
+@media (max-width:540px){#now-playing{max-width:60%;}}
+    `.trim();
+    const s = document.createElement('style');
+    s.id = 'now-bar-styles';
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+
+  // แถบใต้ player
+  let bar = document.getElementById('now-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'now-bar';
+    bar.className = 'now-bar';
+    // ใต้ #player
+    if (player.insertAdjacentElement) player.insertAdjacentElement('afterend', bar);
+    else player.parentNode?.insertBefore(bar, player.nextSibling);
+  }
+
+  // now-playing (ซ้าย)
+  let now = document.getElementById('now-playing');
+  if (!now) {
+    now = document.createElement('div');
+    now.id = 'now-playing';
+    now.className = 'now-playing';
+    now.setAttribute('aria-live','polite');
+    bar.appendChild(now);
+  } else if (now.parentElement !== bar) {
+    bar.appendChild(now);
+  }
+
+  // live-viewers (ขวา)
+  let pill = document.getElementById('live-viewers');
+  if (!pill) {
+    pill = document.createElement('span');
+    pill.id = 'live-viewers';
+    pill.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="label">Live</span><span class="n">0</span>`;
+    bar.appendChild(pill);
+  } else if (pill.parentElement !== bar) {
+    bar.appendChild(pill);
+  }
+
+  // setter สำหรับอัปเดตชื่อรายการ/ช่อง
+  window.__setNowPlaying = (name='')=>{
+    now.textContent = name || '';
+    now.title = name || '';
+  };
+}
+function updateLiveViewers(n){
+  const el = document.querySelector('#live-viewers .n');
+  if (el) el.textContent = (typeof n==='number' && n>=0) ? String(n) : '0';
+}
+
+/* ------------------------ Header: Clock ------------------------ */
 function mountClock(){
   const el = document.getElementById('clock'); if (!el) return;
   const tick = () => {
@@ -132,19 +198,6 @@ function mountClock(){
   };
   tick();
   setInterval(tick, 1000);
-}
-function mountNowPlayingInHeader(){
-  const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
-  let now = document.getElementById('now-playing');
-  if (!now) { now = document.createElement('div'); now.id = 'now-playing'; }
-  now.className = 'now-playing';
-  now.setAttribute('aria-live','polite');
-  host.appendChild(now);
-  window.__setNowPlaying = (name='')=>{
-    now.textContent = name || '';
-    now.title = name || '';
-    now.classList.remove('swap'); void now.offsetWidth; now.classList.add('swap');
-  };
 }
 
 /* ------------------------ Tabs ------------------------ */
@@ -612,28 +665,6 @@ function scheduleAutoClear(){
   }, delay);
 }
 
-/* ------------------------ Live viewers pill ------------------------ */
-function mountLiveViewersPill(){
-  const host = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
-  if (document.getElementById('live-viewers')) return;
-
-  const pill = document.createElement('span');
-  pill.id = 'live-viewers';
-  pill.setAttribute('aria-live','polite');
-  pill.style.cssText = `
-    display:inline-flex; align-items:center; gap:6px;
-    padding:4px 8px; margin-left:8px;
-    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
-    border-radius:999px; font-size:13px; font-weight:700; color:#fff;
-    backdrop-filter:saturate(1.2) blur(6px); -webkit-backdrop-filter:saturate(1.2) blur(6px);`;
-  pill.innerHTML = `<span class="eye" style="font-size:14px;line-height:1">👁</span><span class="n">0</span>`;
-  host.appendChild(pill);
-}
-function updateLiveViewers(n){
-  const el = document.querySelector('#live-viewers .n');
-  if (el) el.textContent = (typeof n==='number' && n>=0) ? String(n) : '0';
-}
-
 /* ------------------------ Presence (heartbeat) — mobile friendly ------------------------ */
 function getViewerId(){
   try{
@@ -642,57 +673,138 @@ function getViewerId(){
     return id;
   }catch{ return String(Date.now()); }
 }
-function startPresence(channelKey){
-  currentPresenceKey = String(channelKey || 'global');
-  const v = getViewerId();
+async function presenceDoFetch(){
+  try{
+    const v = getViewerId();
+    const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey||'global')}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
+    const r = await fetch(url, { cache:'no-store', keepalive:true });
+    if (!r.ok) throw 0;
+    const data = await r.json().catch(()=> ({}));
+    if (typeof data.count === 'number') updateLiveViewers(data.count);
+  }catch{}
+}
+function presenceDoBeacon(){
+  try{
+    const v = getViewerId();
+    const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey||'global')}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
+    if ('sendBeacon' in navigator) navigator.sendBeacon(url);
+    else fetch(url, { cache:'no-store', keepalive:true }).catch(()=>{});
+  }catch{}
+}
+async function presenceTick(immediate=false){
+  clearTimeout(presenceTimer);
+  const hidden = document.visibilityState === 'hidden' || document.hidden;
 
-  const doFetch = async () => {
-    try{
-      const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey)}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
-      const r = await fetch(url, { cache:'no-store', keepalive:true });
-      if (!r.ok) throw 0;
-      const data = await r.json().catch(()=> ({}));
-      if (typeof data.count === 'number') updateLiveViewers(data.count);
-    }catch{}
-  };
-  const doBeacon = () => {
-    try{
-      const url = `${PRESENCE_URL}?ch=${encodeURIComponent(currentPresenceKey)}&v=${encodeURIComponent(v)}&ttl=${VIEWER_TTL_S}`;
-      if ('sendBeacon' in navigator) navigator.sendBeacon(url);
-      else fetch(url, { cache:'no-store', keepalive:true }).catch(()=>{});
-    }catch{}
-  };
-
-  const tick = async (immediate=false) => {
-    clearTimeout(presenceTimer);
-    const hidden = document.visibilityState === 'hidden' || document.hidden;
-
-    if (immediate) {
-      hidden ? doBeacon() : await doFetch();
+  if (immediate) {
+    hidden ? presenceDoBeacon() : await presenceDoFetch();
+    lastPingAt = Date.now();
+  } else {
+    const late = Date.now() - lastPingAt;
+    if (late >= PING_INTERVAL_S*1000*0.9) {
+      hidden ? presenceDoBeacon() : await presenceDoFetch();
       lastPingAt = Date.now();
-    } else {
-      const late = Date.now() - lastPingAt;
-      if (late >= PING_INTERVAL_S*1000*0.9) {
-        hidden ? doBeacon() : await doFetch();
-        lastPingAt = Date.now();
-      }
     }
-    const delay = Math.max(800, PING_INTERVAL_S*1000 - (Date.now()-lastPingAt));
-    presenceTimer = setTimeout(()=>tick(false), delay);
-  };
-
-  lastPingAt = 0;
-  tick(true);
+  }
+  const delay = Math.max(800, PING_INTERVAL_S*1000 - (Date.now()-lastPingAt));
+  presenceTimer = setTimeout(()=>presenceTick(false), delay);
+}
+function bindPresenceEventsOnce(){
+  if (presenceBound) return;
+  presenceBound = true;
 
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') tick(true);
-    else doBeacon();
+    if (document.visibilityState === 'visible') presenceTick(true);
+    else presenceDoBeacon();
   });
-  addEventListener('pageshow', () => tick(true));
-  addEventListener('pagehide', () => doBeacon(), { capture:true });
-  addEventListener('freeze',   () => doBeacon());
-  addEventListener('focus',    () => tick(true));
-  addEventListener('blur',     () => doBeacon());
-  addEventListener('online',   () => tick(true));
-  addEventListener('beforeunload', () => { try{ doBeacon(); }catch{} }, { once:true });
+  addEventListener('pageshow', () => presenceTick(true));
+  addEventListener('pagehide', () => presenceDoBeacon(), { capture:true });
+  addEventListener('freeze',   () => presenceDoBeacon());
+  addEventListener('focus',    () => presenceTick(true));
+  addEventListener('blur',     () => presenceDoBeacon());
+  addEventListener('online',   () => presenceTick(true));
+  addEventListener('beforeunload', () => { try{ presenceDoBeacon(); }catch{} }, { once:true });
+}
+function startPresence(channelKey){
+  currentPresenceKey = String(channelKey || 'global');
+  lastPingAt = 0;
+  presenceTick(true);       // ยิงครั้งแรก + อัปเดต UI
+  bindPresenceEventsOnce(); // bind handler แค่ครั้งเดียว
+}
+
+/* ------------------------ Player status overlay ------------------------ */
+function showPlayerStatus(text){
+  const parent = document.getElementById('player');
+  if (!parent) return;
+  let box = document.getElementById('player-msg');
+  if (!box){
+    box = document.createElement('div');
+    box.id = 'player-msg';
+    box.style.cssText = `
+      position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+      background:rgba(0,0,0,.60);color:#fff;padding:8px 12px;border-radius:10px;
+      font-weight:800;letter-spacing:.2px;z-index:5;max-width:70%;text-align:center;
+      box-shadow:0 6px 16px rgba(0,0,0,.35)`;
+    parent.style.position = parent.style.position || 'relative';
+    parent.appendChild(box);
+  }
+  box.textContent = text || '';
+  box.style.display = text ? 'block' : 'none';
+}
+
+/* ------------------------ Utilities ------------------------ */
+function headerOffset(){
+  const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
+  const num = parseFloat(v);
+  if (!isNaN(num) && num > 0) return num;
+  return document.querySelector('.h-wrap')?.offsetHeight || 0;
+}
+function highlight(globalIndex){
+  document.querySelectorAll('.channel').forEach(el=>{
+    const idx = Number(el.dataset.globalIndex);
+    el.classList.toggle('active', idx === globalIndex);
+    el.setAttribute('aria-pressed', idx === globalIndex ? 'true':'false');
+  });
+}
+function ripple(event, container){
+  if(!container) return;
+  const r = container.getBoundingClientRect();
+  const max = Math.max(r.width, r.height);
+  const x = (event.clientX ?? (r.left + r.width/2)) - r.left;
+  const y = (event.clientY ?? (r.top  + r.height/2)) - r.top;
+  const s = document.createElement('span');
+  s.className = 'ripple';
+  s.style.width = s.style.height = `${max}px`;
+  s.style.left = `${x - max/2}px`;
+  s.style.top  = `${y - max/2}px`;
+  container.querySelector('.ripple')?.remove();
+  container.appendChild(s);
+  s.addEventListener('animationend', ()=>s.remove(), { once:true });
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"'`=\/]/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'
+  }[c]));
+}
+function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
+function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
+
+/* ------------------------ Icons ------------------------ */
+function getIconSVG(n){
+  const c='currentColor';
+  switch(n){
+    case 'IPTV':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 20h16v-2H4v2zm5-4h6v-2H9v2zm-3-4h12V8H6v4zm4-9 2 2 2-2 1.4 1.4L12 6.8 8.6 4.4 10 3z"/></svg>`;
+    case 'เด็ก':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a5 5 0 0 1 5 5c0 3.9-3.6 7-5 7s-5-3.1-5-7a5 5 0 0 1 5-5zm1 14c2 3 1 4-1 6h-1l1-3-2 1 2-4h1z"/></svg>`;
+    case 'บันเทิง':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.6L12 18.7 6.2 21l1.1-6.6-4.7-4.6 6.5-.9L12 3z"/></svg>`;
+    case 'กีฬา':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
+    case 'สารคดี':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
+    case 'หนัง':
+      return `<svg viewBox="0 0 24 24" fill="${c}"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2H3V6.1a2 2 0 0 1 1.7-2z"/></svg>`;
+    default:
+      return `<svg viewBox="0 0 24 24" fill="${c}"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>`;
+  }
 }
