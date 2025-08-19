@@ -71,12 +71,26 @@ async function loadData(){
 
 /* ------------------------ Autoplay + Reveal card ------------------------ */
 function autoplayFirst(){
-  const firstCat = (categories?.order?.[0]) || categories?.default || 'IPTV';
-  setActiveTab(firstCat);
-  const firstIdx = channels.findIndex(c => getCategory(c) === firstCat);
-  if (firstIdx >= 0) {
-    playByIndex(firstIdx, { scroll:false });
+  // หา cat ตัวแรกที่ "มีช่องจริง"
+  const order = (categories?.order || []);
+  let idx = -1;
+  let cat = order[0] || categories?.default || 'IPTV';
+
+  for (const c of order) {
+    idx = channels.findIndex(ch => getCategory(ch) === c);
+    if (idx >= 0) { cat = c; break; }
+  }
+  // ถ้าทุกหมวดว่าง ให้ใช้ "ช่องแรกของทั้งรายการ"
+  if (idx < 0 && channels.length) {
+    idx = 0;
+    cat = getCategory(channels[0]) || cat;
+  }
+  if (idx >= 0) {
+    setActiveTab(cat);
+    playByIndex(idx, { scroll:false });
     scheduleRevealActiveCard();
+  } else {
+    console.warn('ไม่พบช่องให้เล่น');
   }
 }
 
