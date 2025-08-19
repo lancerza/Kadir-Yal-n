@@ -1,11 +1,11 @@
-/* ========================= app.js (HISTATS USERS ONLINE, NO CLOUDFLARE) =========================
-   - Live viewers (#live-viewers .n) อ่านค่าจาก Histats (Users online) โดยตรง
-   - ไม่ใช้ Cloudflare Worker สำหรับตัวนับผู้ชมอีกต่อไป (startPresence/stopPresence = no-op)
+/* ========================= app.js (HISTATS USERS ONLINE – FINAL) =========================
+   - Live viewers (#live-viewers .n) อ่านค่าจาก Histats (Users online) โดยตรง — ไม่ใช้ Cloudflare
+   - Hook <img> ของ Histats + เฝ้า attributes + polling สำรอง → ตัวเลขอัปเดตตรงกับรูป
    - บังคับ autoplay ผ่าน policy (autostart:'viewable', mute:true + playAttemptFailed)
    - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
    - ปุ่มรีเฟรช + ล้าง cache + เคลียร์อัตโนมัติทุก 6 ชม.
-   - now-playing ใต้ VDO (ไม่มี live-on-player ใต้จอ)
-   - live-pill ใต้เวลา (มี label) แสดง Users online จาก Histats
+   - now-playing ใต้ VDO (ถอด live-on-player เก่า)
+   - live-pill ใต้เวลา (มี label) แสดง Users online
 ================================================================================================== */
 
 const CH_URL   = 'channels.json';
@@ -25,75 +25,137 @@ let didInitialReveal = false;
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ===== Live viewers = Histats Users online (no Cloudflare) ===== */
-
-const HISTATS_POLL_MS = 5000; // สำรอง: เช็คซ้ำทุก 5 วิ
+const HISTATS_POLL_MS = 2000; // เช็คสำรองทุก 2 วิ
 let histatsObs = null;
+let histatsImg = null;
 
 // เข้ากันได้กับโค้ดเดิม: ให้ฟังก์ชันตัวนับเป็น no-op
 function startPresence(){ /* no-op */ }
 function stopPresence(){  /* no-op */ }
 function bindPresenceWakeEvents(){ /* no-op */ }
 
-/** ดึงตัวเลข Users online จาก Histats DOM */
-function readHistatsUsersOnline(){
+/** หา <img> ของ Histats ที่เป็นเคาน์เตอร์ */
+function findHistatsImage(){
+  const root = document.getElementById('histatsC') || document.getElementById('histats_counter') || document.body;
+  if(!root) return null;
+  const imgs = Array.from(root.querySelectorAll('img'));
+  const ranked = imgs
+    .map(img => ({
+      img,
+      score:
+        (/\/stats\/i\/.+\.gif/i.test(img.getAttribute('src') || img.src) ? 2 : 0) +
+        (/histats/i.test((img.getAttribute('src') || img.src)) ? 1 : 0)
+    }))
+    .sort((a,b)=> b.score - a.score);
+  return ranked.length ? ranked[0].img : null;
+}
+
+/** ดึงเลข Users online จาก src/alt/title/ข้อความ */
+function readHistatsUsersOnline(targetImg){
   try{
     const cont = document.getElementById('histatsC') || document.getElementById('histats_counter');
-    if(!cont) return null;
+    const img  = targetImg || findHistatsImage();
+    if(!cont && !img) return null;
 
-    // 1) ภาพ .gif ที่มีพารามิเตอร์ @hXX (เช่น @h21)
-    const img = cont.querySelector('img[src*="/stats/i/"]') || cont.querySelector('img[src*="histats"]');
-    if(img && img.src){
-      // รูปแบบพบบ่อย: ...?@h21&@i1 ... หรือ ...&@h21&...
-      let m = img.src.match(/@h(\d+)/);
-      if(m) return parseInt(m[1],10);
-      // เผื่อรูปแบบ query ต่างไป
-      m = img.src.match(/[?&]@h(\d+)/);
-      if(m) return parseInt(m[1],10);
-    }
+    const src = (img?.getAttribute('src') || img?.src || '').toString();
 
-    // 2) ถ้า Histats แทรกตัวเลขใน text
-    const txt = (cont.textContent || '').trim();
-    const m2 = txt.match(/online[^0-9]*([0-9]+)/i);
-    if(m2) return parseInt(m2[1],10);
+    // รูปแบบพบบ่อย: ...?@h21&... หรือ ...&@h21&... → เอาค่าสุดท้าย
+    let num = null;
+    const re = /[@&?]@h(\d+)/g;
+    let m;
+    while ((m = re.exec(src)) !== null) { num = parseInt(m[1],10); }
+    if (typeof num === 'number' && !Number.isNaN(num)) return num;
 
-    // 3) เผื่อซ่อนใน alt/title
-    if(img && img.alt){
+    // Fallback: ในข้อความ DOM
+    const txt = ((cont && cont.textContent) || '').trim();
+    const m2  = txt.match(/online[^0-9]*([0-9]+)/i);
+    if (m2) return parseInt(m2[1],10);
+
+    // Fallback: alt/title
+    if (img?.alt){
       const m3 = img.alt.match(/([0-9]+)/);
-      if(m3) return parseInt(m3[1],10);
+      if (m3) return parseInt(m3[1],10);
+    }
+    if (img?.title){
+      const m4 = img.title.match(/([0-9]+)/);
+      if (m4) return parseInt(m4[1],10);
     }
   }catch{}
   return null;
 }
 
-/** ผูกตัวสังเกต + อัปเดตเลขจาก Histats */
-function startHistatsUsersOnlineWatcher(){
-  const tick = ()=>{
-    const n = readHistatsUsersOnline();
-    if(typeof n === 'number' && !Number.isNaN(n)) updateLiveViewers(n);
+/** ผูก event กับรูป Histats เพื่ออัปเดตเลขทันทีที่รีเฟรช */
+function hookHistatsImage(img){
+  if (!img) return;
+  if (histatsImg === img) return; // ฮุคไว้แล้ว
+
+  histatsImg = img;
+
+  const updateFromImg = ()=> {
+    const n = readHistatsUsersOnline(img);
+    if (typeof n === 'number' && !Number.isNaN(n)) updateLiveViewers(n);
   };
 
-  // ยิงครั้งแรก
-  tick();
+  // อัปเดตครั้งแรก
+  updateFromImg();
 
-  // Observe การเปลี่ยนแปลงใน container ของ Histats
+  // เกาะการเปลี่ยนแปลงของรูป
+  const onLoad = ()=> updateFromImg();
+  const onErr  = ()=> {/* เงียบไว้ */};
+
+  img.addEventListener('load', onLoad);
+  img.addEventListener('error', onErr);
+
+  // เฝ้าดู attribute เปลี่ยน (src/srcset/alt/title)
+  const attrObs = new MutationObserver((mutList)=>{
+    for (const m of mutList) {
+      if (m.type === 'attributes' && (m.attributeName === 'src' || m.attributeName === 'srcset' || m.attributeName === 'alt' || m.attributeName === 'title')) {
+        updateFromImg();
+      }
+    }
+  });
+  attrObs.observe(img, { attributes:true, attributeFilter:['src','srcset','alt','title'] });
+
+  // กัน GC เก็บ observer เร็วไป
+  img.__histatsAttrObs = attrObs;
+}
+
+/** ตัวเริ่มระบบอ่านเลขจาก Histats */
+function startHistatsUsersOnlineWatcher(){
+  // 1) ลองหา/ฮุครูปทันที
+  hookHistatsImage(findHistatsImage());
+
+  // 2) สังเกต DOM ของ histatsC ให้ฮุคใหม่เมื่อ Histats เปลี่ยนโครงสร้าง
   const root = document.getElementById('histats_counter') || document.body;
   try{
-    if(histatsObs) histatsObs.disconnect();
-    histatsObs = new MutationObserver(()=> tick());
-    histatsObs.observe(root, {
-      childList:true,
-      subtree:true,
-      attributes:true,
-      attributeFilter:['src','alt','title']
+    if (histatsObs) histatsObs.disconnect();
+    histatsObs = new MutationObserver(()=>{
+      const img = findHistatsImage();
+      if (img) hookHistatsImage(img);
     });
+    histatsObs.observe(root, { childList:true, subtree:true, attributes:true });
   }catch{}
 
-  // Poll สำรอง (กันพลาดจาก mutation)
-  setInterval(tick, HISTATS_POLL_MS);
+  // 3) Poll สำรอง (กันพลาดจาก event/mutation)
+  setInterval(()=>{
+    const img = findHistatsImage();
+    if (img) {
+      hookHistatsImage(img);     // เผื่อ instance ของ <img> เปลี่ยน
+      const n = readHistatsUsersOnline(img);
+      if (typeof n === 'number' && !Number.isNaN(n)) updateLiveViewers(n);
+    }
+  }, HISTATS_POLL_MS);
 
-  // รีเฟรชเมื่อโฟกัส/กลับหน้า/ออนไลน์
+  // 4) รีเฟรชเมื่อโฟกัส/กลับหน้า/ออนไลน์
   ['visibilitychange','focus','pageshow','online'].forEach(ev=>{
-    window.addEventListener(ev, tick, { passive:true });
+    window.addEventListener(ev, ()=>{
+      const img = findHistatsImage();
+      if (img) {
+        hookHistatsImage(img);
+        const n = readHistatsUsersOnline(img);
+        if (typeof n === 'number' && !Number.isNaN(n)) updateLiveViewers(n);
+      }
+    }, { passive:true });
   });
 }
 
@@ -119,8 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 
-  // เดิมเคย bindPresenceWakeEvents(); ตอนนี้เป็น no-op เพื่อความเข้ากันได้
-  bindPresenceWakeEvents();
+  bindPresenceWakeEvents(); // no-op (คงไว้เพื่อความเข้ากันได้)
 });
 
 /* ------------------------ Load ------------------------ */
@@ -405,7 +466,7 @@ function playByIndex(i, opt={scroll:true, noAutoBackup:false}){
   tryPlayJW(ch, srcList, 0, onFailAll);
 
   window.__setNowPlaying?.(ch.name || '');
-  startPresence(ch.id || ch.name || `ch-${i}`);   // no-op แต่คงไว้เพื่อความเข้ากันได้
+  startPresence(ch.id || ch.name || `ch-${i}`);   // no-op (คงไว้เพื่อความเข้ากันได้)
   highlight(i);
 
   if (opt.scroll ?? true) scrollToPlayer();
