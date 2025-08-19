@@ -1,10 +1,11 @@
-/* ========================= app.js (FORCED AUTOPLAY + PLAYER STATUS + NO LAST MEMORY) =========================
-   - เปิดเว็บ: เลือกหมวดแรกที่ "มีช่องจริง" แล้วเล่นช่องแรก (ถ้าทุกหมวดว่าง จะข้ามไปช่องแรกของทั้งรายการ)
+/* ========================= app.js (NO FIRST SCROLL + FORCED AUTOPLAY + PLAYER STATUS) =========================
+   - เปิดเว็บ: เลือกหมวดแรกที่ "มีช่องจริง" แล้วเล่นช่องแรก (ไม่เลื่อนลงกริดเพื่อกันบังวิดีโอ)
    - บังคับ autoplay ให้ผ่านนโยบายเบราว์เซอร์ (autostart:'viewable', mute:true + playAttemptFailed)
    - กล่องข้อความสถานะบนตัวเล่น showPlayerStatus()
    - ปุ่มรีเฟรช + ล้าง cache (ไม่จำค่า lastId)
    - Histats ตรึงขวาบน .h-wrap
-============================================================================================================== */
+   - เลื่อนหน้าอิงความสูง header ผ่านตัวแปร CSS --header-offset
+================================================================================================================ */
 
 const CH_URL  = 'channels.json';
 const CAT_URL = 'categories.json';
@@ -12,6 +13,7 @@ const TIMEZONE = 'Asia/Bangkok';
 
 const SWITCH_OUT_MS   = 140;
 const STAGGER_STEP_MS = 22;
+const SCROLL_CARD_ON_LOAD = false;    // ❗ ปิดการเลื่อนการ์ดตอนเปิดเว็บครั้งแรก
 
 let categories = null;
 let channels   = [];
@@ -23,6 +25,9 @@ try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGG
 
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
+  // กันหน้าอยู่บนสุดเสมอ เมื่อเพิ่งโหลด (สำคัญสำหรับมือถือ/แถบ address)
+  window.scrollTo({ top: 0, behavior: 'auto' });
+
   mountRefreshButton();
   scheduleAutoClear();
 
@@ -38,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   buildTabs();
-  autoplayFirst();  // เล่น + เลื่อนให้เห็นการ์ดที่กำลังเล่น
+  autoplayFirst();  // เล่น (ไม่เลื่อนลงกริด)
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
@@ -69,7 +74,7 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Autoplay (เลือกหมวดที่มีช่องจริง) + Reveal card ------------------------ */
+/* ------------------------ Autoplay (เลือกหมวดที่มีช่องจริง) + OPTIONAL reveal card ------------------------ */
 function autoplayFirst(){
   const order = (categories?.order || []);
   let idx = -1;
@@ -86,15 +91,15 @@ function autoplayFirst(){
 
   if (idx >= 0) {
     setActiveTab(cat);
-    playByIndex(idx, { scroll:false });
-    scheduleRevealActiveCard();
+    playByIndex(idx, { scroll:false });           // ❗ ไม่เลื่อนขึ้น/ลง
+    if (SCROLL_CARD_ON_LOAD) scheduleRevealActiveCard(); // เลื่อนการ์ดแบบ optional
   } else {
     showPlayerStatus('ไม่พบช่องสำหรับเล่น');
     console.warn('ไม่พบช่องให้เล่น');
   }
 }
 
-/* หน่วงสั้น ๆ เพื่อให้ render grid เสร็จก่อนแล้วค่อยเลื่อน */
+/* หน่วงสั้น ๆ เพื่อให้ render grid เสร็จก่อนแล้วค่อยเลื่อน (ใช้เมื่อ SCROLL_CARD_ON_LOAD=true) */
 function scheduleRevealActiveCard(){
   if (didInitialReveal) return;
   didInitialReveal = true;
@@ -104,10 +109,8 @@ function scheduleRevealActiveCard(){
 function revealActiveCardIntoView(){
   const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
   if (!active) { setTimeout(revealActiveCardIntoView, 120); return; }
-  const header = document.querySelector('header');
   const pad = 80;
-  const h = (header?.offsetHeight) || 0;
-  const y = active.getBoundingClientRect().top + window.pageYOffset - h - pad;
+  const y = active.getBoundingClientRect().top + window.pageYOffset - headerOffset() - pad;
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
@@ -264,7 +267,7 @@ function render(opt={withEnter:false}){
     btn.addEventListener('click', e=>{
       ripple(e, btn.querySelector('.ch-card'));
       playByChannel(ch);
-      scrollToPlayer();
+      scrollToPlayer();                      // คลิกการ์ด → เลื่อนกลับขึ้นผู้เล่น
     });
 
     const row = Math.floor(i / Math.max(cols,1));
@@ -400,8 +403,7 @@ function showMobileToast(text){
 function isMobile(){ return /iPhone|iPad|Android/i.test(navigator.userAgent) }
 function scrollToPlayer(){
   const el = document.getElementById('player');
-  const header = document.querySelector('header');
-  const y = el.getBoundingClientRect().top + window.pageYOffset - ((header?.offsetHeight)||0) - 8;
+  const y = el.getBoundingClientRect().top + window.pageYOffset - headerOffset() - 8;
   window.scrollTo({ top:y, behavior:'smooth' });
 }
 
@@ -425,7 +427,15 @@ function showPlayerStatus(text){
   box.style.display = text ? 'block' : 'none';
 }
 
-/* ------------------------ UI helpers ------------------------ */
+/* ------------------------ Utilities ------------------------ */
+function headerOffset(){
+  // อ่านจากตัวแปร CSS --header-offset ถ้าไม่มีให้ fallback เป็นความสูง .h-wrap
+  const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
+  const num = parseFloat(v);
+  if (!isNaN(num) && num > 0) return num;
+  return document.querySelector('.h-wrap')?.offsetHeight || 0;
+}
+
 function highlight(globalIndex){
   document.querySelectorAll('.channel').forEach(el=>{
     const idx = Number(el.dataset.globalIndex);
