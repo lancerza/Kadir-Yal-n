@@ -3,7 +3,7 @@
    - Dark theme tokens + base reset
    - Header (clock, refresh, histats) + live-viewers ใต้ clock
    - Player
-   - Tabs + Grid + Channel cards (+ badge สำรอง)
+   - Tabs + Grid + Channel cards
    - Now bar ใต้วิดีโอ (now-playing กึ่งกลาง)
    - Responsive + A11y + Reduced motion + Safe-area
 ====================================================================== */
@@ -71,16 +71,6 @@ body{
 img{ max-width:100%; display:block }
 button{ font:inherit; background:none; border:0; color:inherit; cursor:pointer }
 a{ color:inherit; text-decoration:none }
-
-/* ---------- Skip link ---------- */
-.skip-link{
-  position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;
-}
-.skip-link:focus{
-  left:12px; top:12px; width:auto; height:auto; padding:8px 10px; z-index:9999;
-  background:rgba(0,0,0,.75); color:#fff; border-radius:10px;
-  border:1px solid rgba(255,255,255,.25); font-weight:800; letter-spacing:.2px;
-}
 
 /* ---------- Containers ---------- */
 .container{ width:min(100%,var(--maxw)); margin:0 auto; padding:14px }
@@ -378,23 +368,6 @@ header{
   min-height: calc(2 * 1.18em); /* ให้ตรงกับ line-height */
 }
 
-/* Badge: สำรอง (backup) */
-.badge{
-  position:absolute; top:6px; right:6px;
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:2px 6px; border-radius:999px;
-  font-size:10px; font-weight:800; letter-spacing:.2px;
-  background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.25);
-  color:#eaf1ff; pointer-events:none; user-select:none;
-  text-shadow:0 1px 0 rgba(0,0,0,.35);
-  backdrop-filter: blur(4px);
-}
-.badge.backup{
-  background:linear-gradient(180deg, rgba(59,130,246,.25), rgba(59,130,246,.10));
-  border-color:rgba(59,130,246,.45);
-}
-
 /* Ripple */
 .ripple{
   position:absolute; border-radius:50%;
@@ -423,9 +396,6 @@ header{
   opacity:.95;
   text-align:center;        /* กึ่งกลางข้อความ */
 }
-
-/* Grid busy state */
-#channel-list[aria-busy="true"]{ cursor:progress }
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce){
