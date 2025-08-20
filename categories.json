@@ -10,22 +10,12 @@
   "default": "IPTV",
   "rules": [
     {
-      "category": "IPTV",
-      "include": [
-        "iptv",
-        "m3u8",
-        ".mpd",
-        "dash",
-        "hls",
-        "stream"
-      ]
-    },
-    {
       "category": "หนัง",
       "include": [
         "hbo",
         "cinemax",
         "mono29plus",
+        "/mono\\s?29(plus)?/",
         "/109/",
         "/10[3-7]/"
       ],
@@ -36,8 +26,8 @@
       "include": [
         "sport",
         "กีฬา",
-        "t\\s?sports",
-        "pptv\\s?hd\\s?36"
+        "/t\\s?sports/",
+        "/pptv\\s?hd\\s?36/"
       ]
     },
     {
@@ -46,9 +36,9 @@
         "สารคดี",
         "discovery",
         "animal",
-        "nat.?geo",
         "history",
-        "documentary"
+        "documentary",
+        "/nat.?geo/"
       ]
     },
     {
@@ -61,7 +51,30 @@
         "toon",
         "nick",
         "boomerang",
-        "baby"
+        "baby",
+        "/nick\\s?jr/",
+        "/cartoon\\s?network/",
+        "/disney/",
+        "/cartoonito/",
+        "/\\bcn\\b/"
+      ]
+    },
+    {
+      "category": "บันเทิง",
+      "include": [
+        "/workpoint/",
+        "/one\\s?31/",
+        "/amarin/",
+        "/gmm\\s?25/",
+        "/true\\s?4u/"
+      ]
+    },
+    {
+      "category": "IPTV",
+      "include": [
+        "iptv",
+        "news",
+        "/live\\s?news/"
       ]
     }
   ]
