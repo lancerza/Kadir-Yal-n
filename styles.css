@@ -2,11 +2,10 @@
    styles.css — UI for IPTV page
    - Dark theme tokens + base reset
    - Header (clock, refresh, histats) + live-viewers ใต้ clock
-   - Player
-   - Tabs + Grid + Channel cards
-   - Now bar ใต้วิดีโอ (now-playing กึ่งกลาง)
-   - Responsive + A11y + Reduced motion + Safe-area
-   - ปรับ: ตัด inset stroke บน hover/active เพื่อลดกรอบซ้อน
+   - Player (ambient glow skeleton จางออกเมื่อพร้อม)
+   - Tabs + Grid + Channel cards (+ badge "สำรอง")
+   - Now bar ใต้วิดีโอ
+   - Offline banner, Reduced motion, Responsive
 ====================================================================== */
 
 /* ---------- Root tokens ---------- */
@@ -30,13 +29,13 @@
 
   /* Channel card sizing */
   --tile-w:104px;
-  --tile-h:128px;       /* +สูงขึ้นเพื่อรองรับชื่อ 2 บรรทัด */
+  --tile-h:128px;
   --tile-g:12px;
   --logo-max-h:52px;
   --logo-max-w:82px;
   --logo-wide-h:42px;
 
-  /* Tabs (compact + readable) */
+  /* Tabs */
   --tabW: 72px;
   --tabH: 58px;
   --tab-gap:6px;
@@ -51,7 +50,7 @@
   --hs-size: 40px;
   --hs-scale: 1;
 
-  /* ค่ากว้างปุ่มรีเฟรช (เซ็ตโดย JS) */
+  /* กว้างปุ่มรีเฟรช (เซ็ตโดย JS) */
   --refresh-btn-w: 112px;
 }
 
@@ -104,7 +103,6 @@ header{
   font-variant-numeric: tabular-nums; color:#f4f7fb; text-align:center;
   text-shadow:none; opacity:.98;
 }
-/* เดิมเคยแสดง now-playing ใน header — ตอนนี้ย้ายลงไปใต้ VDO แล้ว */
 .now-playing{
   margin-top:2px; font-size:clamp(13.5px,2.1vw,17.5px);
   font-weight:var(--font-strong); letter-spacing:.2px;
@@ -123,11 +121,6 @@ header{
   padding:6px 10px;
   border-radius:999px;
 
-  /* Fallback */
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(255,255,255,.06);
-
-  /* Modern mix */
   border:1px solid color-mix(in oklab, currentColor 16%, transparent);
   background:color-mix(in oklab, currentColor 6%, transparent);
 
@@ -144,12 +137,10 @@ header{
 }
 #live-viewers .label{ opacity:.72; font-weight:600 }
 #live-viewers .n{ font-variant-numeric: tabular-nums }
-
-/* จัดระยะเมื่ออยู่ใน header grid (อยู่ใต้ clock) */
 .h-wrap #live-viewers{ margin-top:4px; }
 @media (max-width:540px){ .h-wrap #live-viewers{ margin-top:6px; } }
 
-/* ---------- Histats (ซ่อนตั้งแต่ต้น ป้องกัน flash) ---------- */
+/* ---------- Histats (ซ่อนตั้งแต่ต้น) ---------- */
 #histats_counter{
   position:absolute!important;
   width:1px!important; height:1px!important;
@@ -165,7 +156,7 @@ header{
   max-height:var(--hs-size) !important; height:var(--hs-size) !important; width:auto !important;
 }
 
-/* ---------- Refresh button (ตรึงซ้ายใน header) ---------- */
+/* ---------- Refresh button ---------- */
 .refresh-btn{
   position:absolute; left:8px; top:50%; transform:translateY(-50%);
   height: var(--hs-size); line-height: var(--hs-size);
@@ -200,9 +191,28 @@ header{
 
 /* ---------- Player ---------- */
 #player{
-  width:100%; aspect-ratio:16/9; background:#000; border-radius:16px; overflow:hidden;
-  border:1px solid var(--border); box-shadow:0 8px 18px rgba(0,0,0,.25) inset;
+  position: relative;
+  width:100%; aspect-ratio:16/9;
+  background:#0d0f12;                       /* สว่างขึ้นเล็กน้อย */
+  border-radius:16px; overflow:hidden;
+  border:1px solid #2a2d31;                 /* เส้นชัดขึ้น */
+  box-shadow:0 18px 32px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.03);
 }
+/* Ambient glow + skeleton ระหว่างรอเล่น */
+#player::before{
+  content:"";
+  position:absolute; inset:-10px; border-radius:22px;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(99,102,241,.10), transparent 60%),
+    radial-gradient(120% 80% at 50% 100%, rgba(20,184,166,.08), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.03), rgba(255,255,255,.03) 2px, transparent 2px, transparent 8px);
+  filter: blur(16px);
+  opacity:.85;
+  transition: opacity .35s ease;
+  pointer-events:none;
+}
+/* เมื่อวิดีโอเริ่มแล้ว ค่อยเฟดเอฟเฟกต์ออก */
+#player.ready::before{ opacity:0 }
 
 /* ---------- Tabs ---------- */
 .tabs{
@@ -210,8 +220,8 @@ header{
   padding:12px 6px 14px; margin:10px auto 10px;
   overflow:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
   width:min(100%,var(--maxw));
-  scrollbar-color: #2b2d30 transparent; /* Firefox */
-  scrollbar-width: thin;                /* Firefox */
+  scrollbar-color: #2b2d30 transparent;
+  scrollbar-width: thin;
 }
 .tabs::-webkit-scrollbar{ height:6px }
 .tabs::-webkit-scrollbar-thumb{ background:#2b2d30; border-radius:8px }
@@ -280,10 +290,10 @@ header{
 /* ---------- Grid ---------- */
 .grid{
   width:min(100%,var(--maxw)); margin:12px auto 0; display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(var(--tile-w),1fr)); /* auto-fit เพื่อไม่ให้มีคอลัมน์ว่าง */
+  grid-template-columns:repeat(auto-fit,minmax(var(--tile-w),1fr));
   gap:var(--tile-g); justify-items:center;
   transition:opacity .14s ease, filter .14s ease;
-  overflow: visible; /* ปล่อยเงา/ขอบเรืองแสงไม่ให้ถูกตัด */
+  overflow: visible;
 }
 .grid.switch-out{ opacity:.3; filter:blur(2px) }
 .grid.switch-in .channel{
@@ -301,8 +311,8 @@ header{
   filter:blur(12px); opacity:0; transition:opacity .25s ease; pointer-events:none; z-index:0;
 }
 .channel:hover::after,
-.channel.active::after{ opacity:.9; animation:neonPulse 2.4s ease-in-out infinite }
-@keyframes neonPulse{ 0%{filter:blur(9px);opacity:.5} 50%{filter:blur(14px);opacity:.95} 100%{filter:blur(9px);opacity:.5} }
+.channel.active::after{ opacity:.85; animation:neonPulse 2.4s ease-in-out infinite }
+@keyframes neonPulse{ 0%{filter:blur(9px);opacity:.45} 50%{filter:blur(14px);opacity:.95} 100%{filter:blur(9px);opacity:.45} }
 
 .ch-card{
   position:relative; z-index:1; width:100%; height:100%;
@@ -312,32 +322,40 @@ header{
   display:grid; grid-template-rows:1fr auto; gap:6px; place-items:center; overflow:hidden;
   transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
 }
-/* ตัด inset stroke ออก (แก้กรอบหลายชั้น) */
 .channel:hover .ch-card{
   transform:translateY(-1px);
   border-color:rgba(255,255,255,.7);
-  box-shadow:0 0 10px rgba(255,255,255,.22);
+  box-shadow:0 0 0 1px rgba(255,255,255,.45), 0 0 10px rgba(255,255,255,.22);
 }
 .channel:active .ch-card{ transform:scale(.985) }
 
-/* Focus ring สำหรับคีย์บอร์ด/โฟกัสอัตโนมัติ */
+/* Focus ring สำหรับคีย์บอร์ด (เบา ๆ) */
 .channel:focus-visible .ch-card{
   outline: 2px solid #8ab4ff;
   outline-offset: 2px;
-  box-shadow: 0 0 10px rgba(138,180,255,.35);
+  box-shadow: 0 0 10px rgba(138,180,255,.25);
 }
 
 /* ==== Channel selected (เล่นอยู่) ==== */
-/* ตัด inset ออก เหลือเงาวงเดียว */
+/* ตัด "เส้นซ้อน" — ไม่ใช้ inset stroke แล้ว */
 .channel.active .ch-card,
 .channel[aria-selected="true"] .ch-card,
 .channel[data-selected="true"] .ch-card{
   transform: translateY(-1px);
   border-color: rgba(255,255,255,.85);
-  box-shadow: 0 0 12px rgba(255,255,255,.25);
+  box-shadow: 0 0 12px rgba(255,255,255,.20);  /* ไม่มี 0 0 0 1px inset */
 }
-.channel[aria-selected="true"]::after,
-.channel[data-selected="true"]::after{ opacity:.95; animation:neonPulse 2.4s ease-in-out infinite }
+
+/* Badge "สำรอง" มุมขวาบน */
+.channel .badge{
+  position:absolute; right:6px; top:6px;
+  padding:2px 6px; border-radius:999px;
+  font-size:10px; font-weight:800; letter-spacing:.2px;
+  color:#e9f3ff;
+  background:linear-gradient(180deg, rgba(59,130,246,.95), rgba(59,130,246,.75));
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow:0 1px 6px rgba(0,0,0,.35);
+}
 
 /* โลโก้ */
 .logo-wrap{ display:grid; place-items:center; width:100%; height:100% }
@@ -348,16 +366,6 @@ header{
   filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));
 }
 .channel[data-wide="true"] .logo{ max-height:var(--logo-wide-h) }
-
-/* ป้าย "สำรอง" มุมขวาบน */
-.badge-alt{
-  position:absolute; top:6px; right:6px;
-  padding:2px 6px; border-radius:8px;
-  font-size:10px; font-weight:800; letter-spacing:.2px;
-  background:rgba(255,255,255,.14);
-  border:1px solid rgba(255,255,255,.35);
-  box-shadow:0 2px 6px rgba(0,0,0,.35);
-}
 
 /* ชื่อช่อง: 2 บรรทัด + ellipsis */
 .name{
@@ -387,11 +395,11 @@ header{
 }
 @keyframes ripple{ to{ transform:scale(1); opacity:0 } }
 
-/* ---------- Now bar ใต้ VDO (now-playing กึ่งกลาง) ---------- */
+/* ---------- Now bar ใต้ VDO ---------- */
 #now-bar.now-bar{
   display:flex;
   align-items:center;
-  justify-content:center;   /* กึ่งกลาง */
+  justify-content:center;
   gap:12px;
   margin:10px 0 16px;
 }
@@ -405,8 +413,22 @@ header{
   max-width:100%;
   color:inherit;
   opacity:.95;
-  text-align:center;        /* กึ่งกลางข้อความ */
+  text-align:center;
 }
+
+/* ---------- Offline banner ---------- */
+#offline-banner{
+  position:fixed; left:50%; top:calc(var(--header-offset,68px) + 6px);
+  transform:translateX(-50%); z-index:40;
+  display:flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:999px;
+  color:#fff; background:rgba(220,38,38,.92);
+  box-shadow:0 10px 24px rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.28);
+  opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
+}
+#offline-banner .dot{ width:8px; height:8px; border-radius:50%; background:#fff }
+#offline-banner.on{ opacity:.98; transform:translateX(-50%) translateY(-2px) }
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce){
