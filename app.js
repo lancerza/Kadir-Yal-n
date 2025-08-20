@@ -1,9 +1,9 @@
 /* ========================= app.js =========================
    - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
    - Now bar ใต้ VDO: now-playing (กึ่งกลาง)
-   - Live viewers: ย้ายไปอยู่ใต้เวลา (clock) ใน header
+   - Live viewers: ย้ายไปอยู่ใต้เวลา (clock) ใน header + smooth easing
    - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
-   - JW Player: เล่นแบบปลอดภัย + สถานะ overlay
+   - JW Player: remove อินสแตนซ์เก่าก่อน setup + fallback ด้วย session token
    - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
 =========================================================== */
 
@@ -21,10 +21,10 @@ let currentFilter   = '';
 let currentIndex    = -1;
 let didInitialReveal= false;
 
-// ✅ เพิ่มตัวแปรสำหรับกัน fallback ค้าง + smooth live-viewers
-let playSession = 0;        // token ของการเล่นปัจจุบัน
-let __lvCurrent = 0;        // ค่าที่แสดงอยู่
-let __lvAnimRAF = 0;        // requestAnimationFrame id
+// ===== คุม fallback ค้าง + live-viewers smooth =====
+let playSession = 0;   // token ของการเล่นปัจจุบัน
+let __lvCurrent = 0;   // ค่าที่แสดงอยู่
+let __lvAnimRAF = 0;   // requestAnimationFrame id
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   mountNowBarUnderPlayer();     // now-playing ใต้ VDO (กึ่งกลาง)
   mountLiveViewersUnderClock(); // live-viewers ใต้ clock ใน header
   mountHistatsHidden();         // Histats แบบซ่อน
-  ensureBadgeStyles();          // ✅ สไตล์ป้าย "สำรอง"
 
   try {
     await loadData();
@@ -70,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 
-  // ✅ realtime grid re-render เฉพาะเมื่อ "จำนวนคอลัมน์" เปลี่ยน
+  // realtime grid re-render เฉพาะเมื่อ "จำนวนคอลัมน์" เปลี่ยน
   addEventListener('resize', debounce(rerenderOnResize, 120));
   addEventListener('orientationchange', rerenderOnResize);
 });
@@ -192,7 +191,7 @@ function mountLiveViewersUnderClock(){
   if (clock) clock.insertAdjacentElement('afterend', pill);
   else header.appendChild(pill);
 }
-// ✅ เวอร์ชัน smooth (ease-out cubic ~ 360ms)
+// Smooth easing (ease-out cubic ~ 360ms)
 function updateLiveViewers(n){
   const el = document.querySelector('#live-viewers .n'); if (!el) return;
   const target = Math.max(0, Math.floor(Number.isFinite(n) ? n : 0));
@@ -377,7 +376,7 @@ function render(opt={withEnter:false}){
 
   highlight(currentIndex);
 
-  // ✅ เก็บจำนวนคอลัมน์ล่าสุดไว้ เปรียบเทียบตอน resize
+  // เก็บจำนวนคอลัมน์ล่าสุดไว้ เปรียบเทียบตอน resize
   __lastGridCols = computeGridCols(grid);
 }
 function computeGridCols(container){
@@ -387,7 +386,7 @@ function computeGridCols(container){
   const fullW = container.clientWidth;
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
-// ✅ เรียกใช้เมื่อ resize/orientationchange: re-render เฉพาะเมื่อจำนวนคอลัมน์เปลี่ยน
+// เรียกใช้เมื่อ resize/orientationchange: re-render เฉพาะเมื่อจำนวนคอลัมน์เปลี่ยน
 function rerenderOnResize(){
   const grid = document.getElementById('channel-list'); 
   if (!grid) return;
@@ -409,7 +408,7 @@ function playByIndex(i, opt={scroll:true}){
   const srcList = buildSources(ch);
   showPlayerStatus(`กำลังเตรียมเล่น: ${ch.name || ''}`);
 
-  const session = ++playSession;           // ✅ เริ่ม session ใหม่ (กัน fallback ค้าง)
+  const session = ++playSession; // เริ่ม session ใหม่ (กัน fallback ค้าง)
   tryPlayJW(ch, srcList, 0, session);
 
   window.__setNowPlaying?.(ch.name || '');
@@ -430,16 +429,15 @@ function buildSources(ch){
   return [{ src:s, type:t, drm }];
 }
 function tryPlayJW(ch, list, idx, session){
-  // ✅ ถ้าเปลี่ยนช่องไปแล้ว ยุติทันที
-  if (session !== playSession) return;
+  if (session !== playSession) return; // เปลี่ยนช่องไปแล้ว ยุติทันที
 
   if (idx >= list.length) { 
-    // ✅ ทุกแหล่งใน "ช่องนี้" เล่นไม่ได้ → ลองสลับไป "ช่องสำรอง"
+    // ทุกแหล่งใน "ช่องนี้" เล่นไม่ได้ → ลองสลับไป "ช่องสำรอง"
     autoSwitchToBackupChannel(ch, session);
     return; 
   }
 
-  // ✅ กัน event/listener สะสมจากอินสแตนซ์ก่อนหน้า
+  // กัน event/listener สะสมจากอินสแตนซ์ก่อนหน้า
   try { jwplayer('player').remove(); } catch {}
 
   const s = list[idx];
@@ -475,7 +473,7 @@ function tryPlayJW(ch, list, idx, session){
     tryPlayJW(ch, list, idx+1, session);
   });
 }
-// ✅ สลับไป "ช่องสำรอง" อัตโนมัติ เมื่อช่องหลักล้มเหลวหมดทุกแหล่ง
+// สลับไป "ช่องสำรอง" อัตโนมัติ เมื่อช่องหลักล้มเหลวหมดทุกแหล่ง
 function autoSwitchToBackupChannel(ch, session){
   if (session !== playSession) return;
   const candidates = findBackupCandidates(ch);
@@ -654,81 +652,6 @@ function escapeHtml(s){
 function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
 function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
 
-/* ------------------------ Backup helpers ------------------------ */
-// ✅ ตรวจว่านี่คือ "ช่องสำรอง" ไหม (รองรับทั้ง field และ heuristic จากชื่อ/แท็ก)
-function isBackupChannel(ch){
-  if (!ch) return false;
-  if (ch.backup === true || ch.isBackup === true) return true;
-  const tags = (ch.tags || []).map(t=>String(t).toLowerCase());
-  if (tags.includes('backup') || tags.includes('สำรอง') || tags.includes('mirror') || tags.includes('alt')) return true;
-  const name = String(ch.name||'').toLowerCase();
-  if (/(สำรอง|backup|mirror|alt)\b/.test(name)) return true;
-  return false;
-}
-function normalizeBaseName(name){
-  return String(name||'')
-    .toLowerCase()
-    .replace(/\((?:.*?)\)/g, '')               // วงเล็บ
-    .replace(/\b(สำรอง|backup|mirror|alt)\b\s*\d*/g,'') // คำบอกสำรอง
-    .replace(/\s{2,}/g,' ')
-    .trim();
-}
-function extractBackupNumber(name){
-  const m = /(สำรอง|backup|mirror|alt)\s*(\d+)/i.exec(String(name||''));
-  return m ? parseInt(m[2],10) : null;
-}
-// ✅ หา candidate ช่องสำรองของช่องปัจจุบัน (priority: explicit -> heuristic)
-function findBackupCandidates(ch){
-  const outIdxs = [];
-  const seen = new Set();
-
-  // 1) explicit fields ในไฟล์ channels.json ที่อาจใช้ได้
-  const explicitIds = [];
-  if (Array.isArray(ch.backupIds)) explicitIds.push(...ch.backupIds);
-  ['backupId','fallbackId','altId','mirrorId'].forEach(k => { if (ch[k]) explicitIds.push(ch[k]); });
-  explicitIds.forEach(id=>{
-    const idx = channels.findIndex(x => String(x.id)===String(id));
-    if (idx>=0 && !seen.has(idx)) { seen.add(idx); outIdxs.push(idx); }
-  });
-
-  // 2) heuristic ตามชื่อฐานเดียวกัน
-  const base = normalizeBaseName(ch.name||'');
-  const cands = channels
-    .map((c,idx)=>({c,idx}))
-    .filter(o=> o.c!==ch && normalizeBaseName(o.c.name||'')===base);
-
-  cands.sort((a,b)=>{
-    const ab=isBackupChannel(a.c)?1:0, bb=isBackupChannel(b.c)?1:0;
-    if (ab!==bb) return bb-ab;                     // ช่องที่ถูกมาร์กสำรองมาก่อน
-    const an=extractBackupNumber(a.c.name), bn=extractBackupNumber(b.c.name);
-    if (an!==bn) return (an||99)-(bn||99);         // สำรอง 1 มาก่อน 2 3 ...
-    return a.idx-b.idx;
-  });
-  cands.forEach(o=>{ if(!seen.has(o.idx)) { seen.add(o.idx); outIdxs.push(o.idx); } });
-
-  return outIdxs;
-}
-// ✅ สไตล์ป้าย "สำรอง" บนการ์ด (inject ครั้งเดียว)
-function ensureBadgeStyles(){
-  if (document.getElementById('badge-styles')) return;
-  const s = document.createElement('style');
-  s.id = 'badge-styles';
-  s.textContent = `
-    .ch-card .badge{
-      position:absolute; top:6px; right:6px;
-      padding:2px 6px; border-radius:999px;
-      font-size:10px; font-weight:800; letter-spacing:.2px; line-height:1;
-      background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.25); color:#fff;
-      text-shadow:0 1px 0 rgba(0,0,0,.25);
-      backdrop-filter: blur(4px);
-    }
-    .ch-card .badge.backup{
-      background: #fb71851a;
-      border-color:#fb718566;
-    }`;
-  document.head.appendChild(s);
-}
-
 /* ------------------------ Icons ------------------------ */
 function getIconSVG(n){
   const c='currentColor';
@@ -878,4 +801,57 @@ function scheduleAutoClear(){
     localStorage.setItem(AUTO_CLEAR_KEY, String(Date.now()));
     setTimeout(tick, SIX_HR_MS);
   }, delay);
+}
+
+/* ------------------------ Backup helpers ------------------------ */
+function isBackupChannel(ch){
+  if (!ch) return false;
+  if (ch.backup === true || ch.isBackup === true) return true;
+  const tags = (ch.tags || []).map(t=>String(t).toLowerCase());
+  if (tags.includes('backup') || tags.includes('สำรอง') || tags.includes('mirror') || tags.includes('alt')) return true;
+  const name = String(ch.name||'').toLowerCase();
+  if (/(สำรอง|backup|mirror|alt)\b/.test(name)) return true;
+  return false;
+}
+function normalizeBaseName(name){
+  return String(name||'')
+    .toLowerCase()
+    .replace(/\((?:.*?)\)/g, '')               // วงเล็บ
+    .replace(/\b(สำรอง|backup|mirror|alt)\b\s*\d*/g,'') // คำบอกสำรอง
+    .replace(/\s{2,}/g,' ')
+    .trim();
+}
+function extractBackupNumber(name){
+  const m = /(สำรอง|backup|mirror|alt)\s*(\d+)/i.exec(String(name||''));
+  return m ? parseInt(m[2],10) : null;
+}
+function findBackupCandidates(ch){
+  const outIdxs = [];
+  const seen = new Set();
+
+  // 1) explicit fields
+  const explicitIds = [];
+  if (Array.isArray(ch.backupIds)) explicitIds.push(...ch.backupIds);
+  ['backupId','fallbackId','altId','mirrorId'].forEach(k => { if (ch[k]) explicitIds.push(ch[k]); });
+  explicitIds.forEach(id=>{
+    const idx = channels.findIndex(x => String(x.id)===String(id));
+    if (idx>=0 && !seen.has(idx)) { seen.add(idx); outIdxs.push(idx); }
+  });
+
+  // 2) heuristic ตามชื่อฐานเดียวกัน
+  const base = normalizeBaseName(ch.name||'');
+  const cands = channels
+    .map((c,idx)=>({c,idx}))
+    .filter(o=> o.c!==ch && normalizeBaseName(o.c.name||'')===base);
+
+  cands.sort((a,b)=>{
+    const ab=isBackupChannel(a.c)?1:0, bb=isBackupChannel(b.c)?1:0;
+    if (ab!==bb) return bb-ab;                     // ช่องที่ถูกมาร์กสำรองมาก่อน
+    const an=extractBackupNumber(a.c.name), bn=extractBackupNumber(b.c.name);
+    if (an!==bn) return (an||99)-(bn||99);         // สำรอง 1 มาก่อน 2 3 ...
+    return a.idx-b.idx;
+  });
+  cands.forEach(o=>{ if(!seen.has(o.idx)) { seen.add(o.idx); outIdxs.push(o.idx); } });
+
+  return outIdxs;
 }
