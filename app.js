@@ -21,19 +21,19 @@ let didInitialReveal = false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ===== Site-wide Presence (Concurrent Users on the whole website) ===== */
-// กำหนดค่าเหล่านี้ "ก่อน" โหลดไฟล์นี้ได้ เช่นใน <script> บนหน้า HTML
-window.PRESENCE_URL = 'https://presence-counter.don147ok.workers.dev';
-window.PRESENCE_SITE_KEY = 'site:lancerza.github.io'; 
-// window.DEBUG_PRESENCE = true;
-
-const PRESENCE_URL = (window.PRESENCE_URL || ''); // แนะนำตั้งจากหน้า HTML
+/* ===== Site-wide Presence (Concurrent Users on the whole website) =====
+   คุณสามารถตั้งค่าก่อนโหลดไฟล์นี้บนหน้า HTML:
+   window.PRESENCE_URL = 'https://presence-counter.don147ok.workers.dev';
+   window.PRESENCE_SITE_KEY = 'site:yourdomain.com';
+   window.DEBUG_PRESENCE = true;
+*/
+const PRESENCE_URL = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev');
 const VIEWER_TTL_S = 120;        // อายุสถานะ (เผื่อจอพัก)
 const PING_INTERVAL_S = 25;      // ping คงสภาพผู้ใช้
 const COUNT_REFRESH_MS = 5000;   // รีเฟรชตัวเลขถี่ ๆ
 const DEBUG_PRESENCE = !!window.DEBUG_PRESENCE;
 
-// กุญแจรวมทั้งเว็บ (ตั้งคงที่ทุกหน้า)
+// กุญแจรวมทั้งเว็บ (ตั้งคงที่ทุกหน้า) — แนะนำรูปแบบสั้น ๆ เช่น 'site:yourdomain.com'
 const SITE_KEY = (window.PRESENCE_SITE_KEY) || (`site:${location.hostname}`);
 
 let presenceTimer = null;
@@ -66,6 +66,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
+
+  bindPresenceWakeEvents(); // กันโดน sleep แล้วเลขค้าง
 });
 
 /* ------------------------ Load ------------------------ */
@@ -497,15 +499,13 @@ function startSitePresence(){
   countTimer = setInterval(()=>{
     if (!document.hidden) heartbeatSite();
   }, COUNT_REFRESH_MS);
-
-  // wake events → ดึงล่าสุด
-  if (!presenceBound){
-    presenceBound = true;
-    const kick = ()=> heartbeatSite();
-    ['visibilitychange','focus','pageshow','online','resume'].forEach(ev=>{
-      window.addEventListener(ev, kick, { passive:true });
-    });
-  }
+}
+function bindPresenceWakeEvents(){
+  if (presenceBound) return; presenceBound = true;
+  const kick = ()=>{ heartbeatSite(); };
+  ['visibilitychange','focus','pageshow','online','resume'].forEach(ev=>{
+    window.addEventListener(ev, kick, { passive:true });
+  });
 }
 async function heartbeatSite(){
   const vId = getViewerId();
@@ -561,7 +561,9 @@ async function heartbeatSite(){
     } else if (DEBUG_PRESENCE) {
       console.warn('[presence] no count in response', js);
     }
-  } catch { /* เงียบไว้ */ }
+  } catch (err) {
+    if (DEBUG_PRESENCE) console.warn('[presence] fetch failed', err);
+  }
 }
 
 /* ------------------------ Player status / Utils ------------------------ */
