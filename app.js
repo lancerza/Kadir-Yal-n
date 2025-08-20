@@ -23,8 +23,8 @@ try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGG
 
 /* ===== Site-wide Presence (Concurrent Users on the whole website) ===== */
 // กำหนดค่าเหล่านี้ "ก่อน" โหลดไฟล์นี้ได้ เช่นใน <script> บนหน้า HTML
-// window.PRESENCE_URL = 'https://presence-counter.don147ok.workers.dev';
-// window.PRESENCE_SITE_KEY = 'site:YOURDOMAIN.COM';
+window.PRESENCE_URL = 'https://presence-counter.don147ok.workers.dev';
+window.PRESENCE_SITE_KEY = 'https://lancerza.github.io/tv-online/';
 // window.DEBUG_PRESENCE = true;
 
 const PRESENCE_URL = (window.PRESENCE_URL || ''); // แนะนำตั้งจากหน้า HTML
