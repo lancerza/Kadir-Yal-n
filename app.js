@@ -1,9 +1,8 @@
-/* ========================= app.js (CLOUDFLARE PRESENCE + HIDDEN HISTATS) =========================
-   - #live-viewers .n แสดง "จำนวนผู้ชมพร้อมกัน" ต่อช่อง ผ่าน Cloudflare Worker (PRESENCE_URL)
-   - Histats ถูกฝังแบบซ่อน เพื่อเก็บสถิติรวมของเว็บ แต่ไม่ใช้ค่านั้นมาอัปเดตตัวเลข live-viewers
-   - บังคับ autoplay (autostart:'viewable', mute:true + playAttemptFailed)
-   - ปุ่มรีเฟรช + ล้าง cache + เคลียร์อัตโนมัติทุก 6 ชม.
-   - now-playing ใต้ VDO, tabs, grid, auto-backup channel ครบ
+/* ========================= app.js (SITE-WIDE ONLINE COUNTER) =========================
+   - #live-viewers .n แสดง "จำนวนผู้ใช้ออนไลน์ทั้งเว็บไซต์" (Site-wide)
+   - ใช้ Cloudflare Worker (PRESENCE_URL) เป็นตัวนับ
+   - Histats ถูกฝังแบบซ่อนเพื่อ analytics รวม (ไม่ใช้กับเลข live)
+   - ฟีเจอร์เดิมครบ: tabs, grid, JW Player + auto-backup, refresh, cache clear, now-playing
 ================================================================================================== */
 
 const CH_URL   = 'channels.json';
@@ -22,18 +21,19 @@ let didInitialReveal = false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ===== Presence (Concurrent Viewers via Cloudflare Worker) ===== */
-const PRESENCE_URL = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
-const VIEWER_TTL_S = 120;         // TTL (เผื่อจอพัก)
-const PING_INTERVAL_S = 25;       // ping คงสภาพผู้ชม
-const COUNT_REFRESH_MS = 5000;     // รีเฟรชตัวเลขถี่ ๆ
-const PRESENCE_SWITCH_DELAY_MS = 4000; // หน่วงตอนสลับช่อง (ครั้งแรกไม่หน่วง)
+/* ===== Site-wide Presence (Concurrent Users on the whole website) ===== */
+const PRESENCE_URL = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev'); // เปลี่ยนเป็นของคุณ
+const VIEWER_TTL_S = 120;        // อายุสถานะ (เผื่อจอพัก)
+const PING_INTERVAL_S = 25;      // ping คงสภาพผู้ใช้
+const COUNT_REFRESH_MS = 5000;   // รีเฟรชตัวเลขถี่ ๆ
+
+// กำหนด "กุญแจไซต์" สำหรับรวมคนออนไลน์ทั้งเว็บ (แก้ได้ตามต้องการ)
+const SITE_KEY = (window.PRESENCE_SITE_KEY)
+  || (`site:${location.hostname}`); // รวมทั้งโดเมนเดียวกัน
 
 let presenceTimer = null;
 let countTimer = null;
-let presenceSwitchTimer = null;
-let presenceFirstStart = true;
-let currentPresenceKey = null;
+let presenceStarted = false;
 let presenceBound = false;
 const VIEWER_ID_KEY = 'viewer_id';
 
@@ -47,7 +47,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   mountClock();
   mountNowBarUnderPlayer();     // now-playing ใต้ VDO
   mountLiveViewersUnderClock(); // live-pill ใต้เวลา
-  mountHistatsHidden();         // ฝัง Histats แบบซ่อน (สำหรับ analytics รวม)
+  mountHistatsHidden();         // Histats แบบซ่อน (analytics รวม)
+
+  // เริ่มนับ "คนออนไลน์ทั้งเว็บ"
+  startSitePresence();
 
   try { await loadData(); }
   catch (e){ console.error('โหลดข้อมูลไม่สำเร็จ:', e); window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ'); }
@@ -58,8 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
-
-  bindPresenceWakeEvents();
 });
 
 /* ------------------------ Load ------------------------ */
@@ -344,7 +345,7 @@ function playByIndex(i, opt={scroll:true, noAutoBackup:false}){
   tryPlayJW(ch, srcList, 0, onFailAll);
 
   window.__setNowPlaying?.(ch.name || '');
-  startPresence(ch.id || ch.name || `ch-${i}`);   // เริ่มนับผู้ชม (Cloudflare)
+  // (นับคนออนไลน์ทั้งเว็บอยู่แล้ว ไม่ต้องทำอะไรเพิ่ม)
   highlight(i);
 
   if (opt.scroll ?? true) scrollToPlayer();
@@ -373,7 +374,7 @@ function tryPlayJW(ch, list, idx, onFailAll){
   });
 
   player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
-  player.on('buffer', ()=> showPlayerStatus('กำลังบัฟเฟอร์…'));
+  player.on('buffer', ()=> showPlayerStatus('กำลังกั%u0E1Aเฟอร์…'));
   player.on('play',   ()=> showPlayerStatus(''));
   player.on('firstFrame', ()=> showPlayerStatus(''));
   player.on('setupError', e => { console.warn('setupError:', e); showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…'); tryPlayJW(ch, list, idx+1, onFailAll); });
@@ -424,7 +425,6 @@ function tryBackupSequence(cands){
   window.__setNowPlaying?.(name);
   currentIndex = idx;
   highlight(idx);
-  startPresence(next.id || name || `ch-${idx}`); // เริ่มนับบนสำรองด้วย
   scrollToPlayer();
   showMobileToast(`สำรอง: ${name}`);
 
@@ -458,7 +458,7 @@ function normalizeNameForMatch(s){
   s = s.replace(/[^a-z0-9ก-๙]+/g,''); return s.trim();
 }
 
-/* ------------------------ Presence Impl ------------------------ */
+/* ------------------------ Site-wide Presence Impl ------------------------ */
 function getViewerId(){
   try{
     let id = localStorage.getItem(VIEWER_ID_KEY);
@@ -470,57 +470,64 @@ function getViewerId(){
     return id;
   }catch{ return Math.random().toString(36).slice(2,10); }
 }
-function stopPresence(){
-  if (presenceTimer){ clearInterval(presenceTimer); presenceTimer = null; }
-  if (countTimer){ clearInterval(countTimer); countTimer = null; }
-  if (presenceSwitchTimer){ clearTimeout(presenceSwitchTimer); presenceSwitchTimer = null; }
+function startSitePresence(){
+  if (presenceStarted) return;
+  presenceStarted = true;
+
+  // ping แรก เพื่อให้ได้ตัวเลขทันที
+  heartbeatSite();
+
+  // ping คงสภาพผู้ใช้ (ไม่ถี่มาก)
+  presenceTimer = setInterval(()=>{
+    if (!document.hidden) heartbeatSite();
+  }, PING_INTERVAL_S * 1000);
+
+  // รีเฟรชตัวเลขถี่ ๆ ให้ UI อัปเดตไว
+  countTimer = setInterval(()=>{
+    if (!document.hidden) heartbeatSite();
+  }, COUNT_REFRESH_MS);
+
+  // wake events → ดึงล่าสุด
+  if (!presenceBound){
+    presenceBound = true;
+    const kick = ()=> heartbeatSite();
+    ['visibilitychange','focus','pageshow','online','resume'].forEach(ev=>{
+      window.addEventListener(ev, kick, { passive:true });
+    });
+  }
 }
-function startPresence(key){
-  currentPresenceKey = key;
-  stopPresence();
-
-  const delay = presenceFirstStart ? 0 : PRESENCE_SWITCH_DELAY_MS;
-  presenceFirstStart = false;
-
-  presenceSwitchTimer = setTimeout(()=>{
-    // ping แรก (จะได้ตัวเลขทันที)
-    heartbeat(key);
-
-    // ping คงสภาพผู้ชม (ไม่ถี่มาก)
-    presenceTimer = setInterval(()=>{
-      if (!document.hidden) heartbeat(key);
-    }, PING_INTERVAL_S * 1000);
-
-    // รีเฟรชตัวเลขถี่ ๆ ให้ UI อัปเดตไว (ใช้ endpoint เดิม)
-    countTimer = setInterval(()=>{
-      if (!document.hidden) heartbeat(key);
-    }, COUNT_REFRESH_MS);
-  }, delay);
-}
-async function heartbeat(key){
+async function heartbeatSite(){
   const vId = getViewerId();
 
-  const u = new URL(PRESENCE_URL);
-  u.searchParams.set('ch', key);
-  u.searchParams.set('v', vId);
-  u.searchParams.set('ttl', VIEWER_TTL_S);
-  u.searchParams.set('_t', Date.now());          // กันแคช
-
   try{
-    const res = await fetch(u.toString(), {
+    const base = new URL(PRESENCE_URL);
+    base.pathname = base.pathname.replace(/\/?$/, '/hb'); // กันพลาดถ้าไม่ได้ใส่ /hb
+    base.searchParams.set('ch', SITE_KEY);
+    base.searchParams.set('v', vId);
+    base.searchParams.set('ttl', VIEWER_TTL_S);
+    base.searchParams.set('_t', Date.now()); // กัน cache
+
+    const res = await fetch(base.toString(), {
+      method: 'GET',
+      mode: 'cors',
       cache: 'no-store',
+      credentials: 'omit',
       headers: { 'cache-control': 'no-cache' }
     });
-    const js  = await res.json().catch(()=> ({}));
-    if (typeof js.count === 'number') updateLiveViewers(js.count);
-  }catch{ /* เงียบไว้ */ }
-}
-function bindPresenceWakeEvents(){
-  if (presenceBound) return; presenceBound = true;
-  const kick = ()=>{ if (currentPresenceKey) heartbeat(currentPresenceKey); };
-  ['visibilitychange','focus','pageshow','online','resume'].forEach(ev=>{
-    window.addEventListener(ev, kick, { passive:true });
-  });
+
+    if (!res.ok) {
+      // แสดง 0 เฉพาะตอน fail ก็ได้ แต่ขอเงียบไว้
+      return;
+    }
+
+    let js = null;
+    try { js = await res.json(); } catch {}
+
+    const raw = js && (js.count ?? js.c ?? js.n);
+    const n   = (typeof raw === 'string') ? parseInt(raw, 10) : raw;
+
+    if (typeof n === 'number' && Number.isFinite(n)) updateLiveViewers(n);
+  } catch { /* เงียบไว้ */ }
 }
 
 /* ------------------------ Player status / Utils ------------------------ */
