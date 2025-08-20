@@ -22,14 +22,19 @@ let didInitialReveal = false;
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ===== Site-wide Presence (Concurrent Users on the whole website) ===== */
-const PRESENCE_URL = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev'); // เปลี่ยนเป็นของคุณ
+// กำหนดค่าเหล่านี้ "ก่อน" โหลดไฟล์นี้ได้ เช่นใน <script> บนหน้า HTML
+// window.PRESENCE_URL = 'https://presence-counter.don147ok.workers.dev';
+// window.PRESENCE_SITE_KEY = 'site:YOURDOMAIN.COM';
+// window.DEBUG_PRESENCE = true;
+
+const PRESENCE_URL = (window.PRESENCE_URL || ''); // แนะนำตั้งจากหน้า HTML
 const VIEWER_TTL_S = 120;        // อายุสถานะ (เผื่อจอพัก)
 const PING_INTERVAL_S = 25;      // ping คงสภาพผู้ใช้
 const COUNT_REFRESH_MS = 5000;   // รีเฟรชตัวเลขถี่ ๆ
+const DEBUG_PRESENCE = !!window.DEBUG_PRESENCE;
 
-// กำหนด "กุญแจไซต์" สำหรับรวมคนออนไลน์ทั้งเว็บ (แก้ได้ตามต้องการ)
-const SITE_KEY = (window.PRESENCE_SITE_KEY)
-  || (`site:${location.hostname}`); // รวมทั้งโดเมนเดียวกัน
+// กุญแจรวมทั้งเว็บ (ตั้งคงที่ทุกหน้า)
+const SITE_KEY = (window.PRESENCE_SITE_KEY) || (`site:${location.hostname}`);
 
 let presenceTimer = null;
 let countTimer = null;
@@ -374,7 +379,7 @@ function tryPlayJW(ch, list, idx, onFailAll){
   });
 
   player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
-  player.on('buffer', ()=> showPlayerStatus('กำลังกั%u0E1Aเฟอร์…'));
+  player.on('buffer', ()=> showPlayerStatus('กำลังบัฟเฟอร์…'));
   player.on('play',   ()=> showPlayerStatus(''));
   player.on('firstFrame', ()=> showPlayerStatus(''));
   player.on('setupError', e => { console.warn('setupError:', e); showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…'); tryPlayJW(ch, list, idx+1, onFailAll); });
@@ -474,6 +479,12 @@ function startSitePresence(){
   if (presenceStarted) return;
   presenceStarted = true;
 
+  if (!PRESENCE_URL) {
+    if (DEBUG_PRESENCE) console.warn('[presence] PRESENCE_URL is empty. Set window.PRESENCE_URL before app.js');
+    updateLiveViewers(0);
+    return;
+  }
+
   // ping แรก เพื่อให้ได้ตัวเลขทันที
   heartbeatSite();
 
@@ -499,34 +510,57 @@ function startSitePresence(){
 async function heartbeatSite(){
   const vId = getViewerId();
 
-  try{
-    const base = new URL(PRESENCE_URL);
-    base.pathname = base.pathname.replace(/\/?$/, '/hb'); // กันพลาดถ้าไม่ได้ใส่ /hb
-    base.searchParams.set('ch', SITE_KEY);
-    base.searchParams.set('v', vId);
-    base.searchParams.set('ttl', VIEWER_TTL_S);
-    base.searchParams.set('_t', Date.now()); // กัน cache
+  const mkUrl = () => {
+    const u = new URL(PRESENCE_URL);
+    u.pathname = u.pathname.replace(/\/?$/, '/hb'); // บังคับมี /hb
+    u.searchParams.set('ch', SITE_KEY);
+    u.searchParams.set('v', vId);
+    u.searchParams.set('ttl', VIEWER_TTL_S);
+    u.searchParams.set('_t', Date.now()); // กัน cache
+    return u;
+  };
 
-    const res = await fetch(base.toString(), {
-      method: 'GET',
-      mode: 'cors',
-      cache: 'no-store',
-      credentials: 'omit',
-      headers: { 'cache-control': 'no-cache' }
-    });
+  const reqOpt = { mode:'cors', cache:'no-store', credentials:'omit', headers:{ 'cache-control':'no-cache' } };
+
+  try{
+    // ลองแบบ GET ก่อน
+    let u = mkUrl();
+    if (DEBUG_PRESENCE) console.log('[presence] GET', u.toString());
+    let res = await fetch(u.toString(), { ...reqOpt, method:'GET' });
+
+    // ถ้า endpoint ปฏิเสธ GET ให้ลอง POST
+    if (!res.ok && (res.status === 404 || res.status === 405)) {
+      u = mkUrl();
+      if (DEBUG_PRESENCE) console.log('[presence] fallback POST', u.origin + u.pathname);
+      const body = JSON.stringify({ ch: SITE_KEY, v: vId, ttl: VIEWER_TTL_S });
+      res = await fetch(u.origin + u.pathname, {
+        ...reqOpt,
+        method:'POST',
+        headers:{...reqOpt.headers,'content-type':'application/json'},
+        body
+      });
+    }
 
     if (!res.ok) {
-      // แสดง 0 เฉพาะตอน fail ก็ได้ แต่ขอเงียบไว้
+      if (DEBUG_PRESENCE) console.warn('[presence] HTTP', res.status, await res.text().catch(()=>'')); 
       return;
     }
 
     let js = null;
-    try { js = await res.json(); } catch {}
+    try { js = await res.json(); } catch(e){
+      if (DEBUG_PRESENCE) console.warn('[presence] invalid json', e);
+      return;
+    }
 
     const raw = js && (js.count ?? js.c ?? js.n);
     const n   = (typeof raw === 'string') ? parseInt(raw, 10) : raw;
 
-    if (typeof n === 'number' && Number.isFinite(n)) updateLiveViewers(n);
+    if (typeof n === 'number' && Number.isFinite(n)) {
+      updateLiveViewers(n);
+      if (DEBUG_PRESENCE) console.log('[presence] count =', n);
+    } else if (DEBUG_PRESENCE) {
+      console.warn('[presence] no count in response', js);
+    }
   } catch { /* เงียบไว้ */ }
 }
 
