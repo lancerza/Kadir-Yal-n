@@ -1,12 +1,12 @@
 /* ========================= app.js =========================
-   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
-   - Now bar ใต้ VDO: now-playing (กึ่งกลาง)
-   - Live viewers: ใต้ clock + smoothing แบบ easing + clamp
-   - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
-   - JW Player: กัน listener สะสม + session token กัน fallback ค้าง + auto fallback
-   - Offline banner + auto-retry, Wake Lock กันจอดับ (มือถือ)
-   - UI: แท็บ/กริด/ริปเปิล/รีเฟรช + ล้าง cache อัตโนมัติ
-   - UX: โฟกัสกลับไทล์ที่เล่นอยู่หลัง render + ซ่อนแท็บว่าง
+   - Presence counter (mobile friendly) + smoothing viewers
+   - Now bar ใต้ VDO, live-viewers ใต้ clock
+   - JW Player: remove() ก่อน setup, session token กัน fallback ค้าง,
+     auto-fallback ไปช่องสำรองถ้าแหล่งล้มเหลวทั้งหมด
+   - Offline banner + auto-retry, Wake Lock
+   - Tabs/grids, ซ่อนแท็บว่าง, โฟกัสกลับไทล์ที่เล่นอยู่หลัง render
+   - Refresh + auto-clear cache
+   - Hardening: fetch timeout + loadData timeout + onerror overlay
 =========================================================== */
 
 const CH_URL   = 'channels.json';
@@ -25,7 +25,7 @@ let didInitialReveal= false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ===== Presence (Concurrent Viewers) ===== */
+/* ===== Presence ===== */
 const PRESENCE_URL     = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
 const VIEWER_TTL_S     = 120;
 const PING_INTERVAL_S  = 25;
@@ -35,10 +35,10 @@ let currentPresenceKey = null;
 let lastPingAt         = 0;
 let presenceBound      = false;
 
-/* Grid re-render เมื่อคอลัมน์เปลี่ยนจริง */
+/* Grid cols cache */
 let __lastGridCols = null;
 
-/* JW session token — กัน fallback ค้างเวลาสลับเร็ว ๆ */
+/* JW session token กัน fallback ค้าง */
 let __playToken = 0;
 let __lastPlayArgs = { ch: null, list: null };
 
@@ -48,51 +48,74 @@ let __wakeLock = null;
 /* ---------- Boot ---------- */
 document.addEventListener('DOMContentLoaded', async () => {
   window.scrollTo({ top: 0, behavior: 'auto' });
-
   showPlayerStatus('กำลังโหลด…');
 
   mountRefreshButton();
   scheduleAutoClear();
 
   mountClock();
-  mountNowBarUnderPlayer();     // now-playing ใต้ VDO (กึ่งกลาง)
-  mountLiveViewersUnderClock(); // live-viewers ใต้ clock ใน header
-  mountHistatsHidden();         // Histats แบบซ่อน
-  mountOfflineBanner();         // แถบแจ้งเน็ตหลุด
+  mountNowBarUnderPlayer();
+  mountLiveViewersUnderClock();
+  mountHistatsHidden();
+  mountOfflineBanner();
+  bindNetworkRetry();
 
-  bindNetworkRetry();           // offline/online handler
+  // Global error to overlay
+  window.addEventListener('error', e => {
+    showPlayerStatus('สคริปต์ผิดพลาด: ' + (e?.message || 'ไม่ทราบสาเหตุ'));
+  });
+  window.addEventListener('unhandledrejection', e => {
+    const msg = (e?.reason && (e.reason.message || e.reason.toString())) || 'ไม่ทราบสาเหตุ';
+    showPlayerStatus('โหลดข้อมูลไม่สำเร็จ: ' + msg);
+  });
 
   try {
-    await loadData();
+    await withTimeout(loadData(), 8000); // ถ้าค้างเกิน 8s ให้ไปต่อ
   } catch (e) {
-    console.error('โหลดข้อมูลไม่สำเร็จ:', e);
+    console.error('loadData timeout/error:', e);
     window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
   }
 
   buildTabs();
   autoplayFirst();
 
+  // ถ้าหมวดว่าง/ไม่มีช่องเลย ให้แจ้งชัดเจน
+  if (!channels.length) showPlayerStatus('ไม่พบช่องสำหรับเล่น');
+
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 
-  // realtime grid re-render เฉพาะเมื่อ "จำนวนคอลัมน์" เปลี่ยน
   addEventListener('resize', debounce(rerenderOnResize, 120));
   addEventListener('orientationchange', rerenderOnResize);
 });
 
-/* ---------- Fetch data (fresh) ---------- */
+/* ---------- Helpers: timeout ---------- */
+function withTimeout(promise, ms){
+  return new Promise((resolve, reject)=>{
+    const t = setTimeout(()=> reject(new Error('Timeout '+ms+'ms')), ms);
+    promise.then(v=>{ clearTimeout(t); resolve(v); }, e=>{ clearTimeout(t); reject(e); });
+  });
+}
+
+/* ---------- Fetch (fresh) ---------- */
 async function fetchJSONFresh(url){
   const u = new URL(url, location.href);
   u.searchParams.set('_t', String(Date.now()));
-  const res = await fetch(u.toString(), { cache:'no-store' });
-  if (!res.ok) throw new Error('Fetch failed: ' + url + ' (' + res.status + ')');
-  return res.json();
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), 8000); // 8s
+  try{
+    const res = await fetch(u.toString(), { cache:'no-store', signal: ctrl.signal });
+    if (!res.ok) throw new Error('Fetch failed: ' + url + ' (' + res.status + ')');
+    return res.json();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 async function loadData(){
   const [catRes, chRes] = await Promise.all([
     fetchJSONFresh(CAT_URL).catch(()=>null),
-    fetchJSONFresh(CH_URL)
+    fetchJSONFresh(CH_URL).catch(()=>null)
   ]);
 
   categories = catRes || {
@@ -105,9 +128,8 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ---------- Autoplay + optional scroll ---------- */
+/* ---------- Autoplay ---------- */
 function autoplayFirst(){
-  // เลือกแท็บแรกที่มีช่องจริง
   const order = (categories?.order || []);
   const firstCatWithItems = order.find(c => channels.some(ch => getCategory(ch) === c));
   const cat = firstCatWithItems || categories?.default || 'IPTV';
@@ -119,8 +141,7 @@ function autoplayFirst(){
     setActiveTab(cat);
     playByIndex(idx, { scroll:false });
     if (SCROLL_CARD_ON_LOAD) scheduleRevealActiveCard();
-    // โฟกัสไทล์ที่เล่นอยู่ทันที
-    setTimeout(focusActiveTile, 0);
+    setTimeout(focusActiveTile, 0); // โฟกัสทันที
   } else {
     showPlayerStatus('ไม่พบช่องสำหรับเล่น');
   }
@@ -138,16 +159,15 @@ function revealActiveCardIntoView(){
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
-/* ---------- Now bar ใต้ VDO ---------- */
+/* ---------- Now bar ---------- */
 function mountNowBarUnderPlayer(){
   const player = document.getElementById('player') || document.body;
 
-  // inject minimal fallback styles (เผื่อไม่มี styles.css)
   if (!document.getElementById('now-bar-styles')) {
     const css = `
 #now-bar.now-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0 14px;}
 #now-playing{font-weight:700;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:inherit;opacity:.95;text-align:center;}
-    `.trim();
+`.trim();
     const s = document.createElement('style');
     s.id = 'now-bar-styles';
     s.textContent = css;
@@ -162,7 +182,6 @@ function mountNowBarUnderPlayer(){
     player.insertAdjacentElement?.('afterend', bar);
   }
 
-  // now-playing (กึ่งกลาง)
   let now = document.getElementById('now-playing');
   if (!now) {
     now = document.createElement('div');
@@ -172,14 +191,13 @@ function mountNowBarUnderPlayer(){
   }
   if (now.parentElement !== bar) bar.appendChild(now);
 
-  // setter
   window.__setNowPlaying = (name='')=>{
     now.textContent = name || '';
     now.title = name || '';
   };
 }
 
-/* ---------- Live viewers ใต้ clock + smoothing ---------- */
+/* ---------- Live viewers + smoothing ---------- */
 function mountLiveViewersUnderClock(){
   const header = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   const clock  = document.getElementById('clock');
@@ -193,7 +211,6 @@ function mountLiveViewersUnderClock(){
   if (clock) clock.insertAdjacentElement('afterend', pill);
   else header.appendChild(pill);
 }
-// smoothing: exp easing + clamp per second
 const VIEWERS_TAU_MS = 450;
 const VIEWERS_MAX_STEP_PER_SEC = 60;
 let _viewDisp = 0, _viewTarget = 0, _viewRAF = null, _viewLast = 0;
@@ -231,7 +248,7 @@ function _viewersTick(now){
   }
 }
 
-/* ---------- Header: Clock ---------- */
+/* ---------- Clock ---------- */
 function mountClock(){
   const el = document.getElementById('clock'); if (!el) return;
   const tick = () => {
@@ -251,7 +268,6 @@ function buildTabs(){
   const root = document.getElementById('tabs'); if(!root) return;
   root.innerHTML = '';
 
-  // นับจำนวนต่อหมวด ซ่อนแท็บว่าง
   const counts = {};
   channels.forEach(ch => {
     const c = getCategory(ch);
@@ -273,7 +289,6 @@ function buildTabs(){
   });
   wireTabs(root);
 
-  // ถ้าหมวดปัจจุบันว่าง/ถูกซ่อน ให้สลับไปหมวดแรกที่มีของ
   if (!counts[currentFilter]) {
     const first = root.querySelector('.tab')?.dataset.filter;
     if (first) currentFilter = first;
@@ -284,6 +299,7 @@ function wireTabs(root){
     const b = e.target.closest('.tab'); if(!b) return;
     setActiveTab(b.dataset.filter);
   });
+  // ปล่อยให้เลื่อนด้วยปุ่มลูกศรได้ แต่ไม่ได้บังคับผู้ใช้กด Enter เพื่อเล่น
   root.addEventListener('keydown', e=>{
     if(e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
     const all = Array.from(root.querySelectorAll('.tab'));
@@ -307,7 +323,6 @@ function setActiveTab(name){
   setTimeout(()=>{
     grid.classList.remove('switch-out');
     render({withEnter:true});
-    // โฟกัสกลับไทล์ที่เล่นอยู่ในหมวดนี้
     setTimeout(focusActiveTile, 0);
   }, SWITCH_OUT_MS);
 }
@@ -413,8 +428,6 @@ function render(opt={withEnter:false}){
   }
 
   highlight(currentIndex);
-
-  // เก็บจำนวนคอลัมน์ล่าสุดไว้ เปรียบเทียบตอน resize
   __lastGridCols = computeGridCols(grid);
 }
 function computeGridCols(container){
@@ -434,7 +447,7 @@ function rerenderOnResize(){
   }
 }
 
-/* ---------- Player (JW) + Status ---------- */
+/* ---------- Player (JW) ---------- */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -448,7 +461,6 @@ function playByIndex(i, opt={scroll:true}){
 
   showPlayerStatus(`กำลังเตรียมเล่น: ${ch.name || ''}`);
 
-  // session token ใหม่ทุกครั้งที่เริ่มเล่น
   const token = ++__playToken;
   tryPlayJW(ch, srcList, 0, token);
 
@@ -471,10 +483,9 @@ function buildSources(ch){
   return [{ src:s, type:t, drm }];
 }
 function tryPlayJW(ch, list, idx, token){
-  if (token !== __playToken) return; // ยกเลิกงานเก่า
+  if (token !== __playToken) return;
 
   if (idx >= list.length) {
-    // ทุกแหล่งในช่องนี้ล้มเหลว -> หา "ช่องสำรอง" อัตโนมัติ
     const alt = findBackupChannel(ch);
     if (alt) {
       showPlayerStatus('แหล่งหลักล้มเหลว → สลับไปช่องสำรอง…');
@@ -486,7 +497,6 @@ function tryPlayJW(ch, list, idx, token){
     return; 
   }
 
-  // กัน event/listener สะสมจากอินสแตนซ์ก่อนหน้า
   try { jwplayer('player').remove(); } catch {}
 
   const s = list[idx];
@@ -494,7 +504,7 @@ function tryPlayJW(ch, list, idx, token){
   showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${list.length}…`);
 
   const playerEl = document.getElementById('player');
-  playerEl.classList.remove('ready');   // ให้ ambient glow แสดงระหว่างรอ
+  playerEl.classList.remove('ready');
 
   const player = jwplayer('player').setup({
     playlist: [{ image: ch.poster || ch.logo || undefined, sources: [jwSrc] }],
@@ -556,13 +566,9 @@ function mountOfflineBanner(){
 }
 function bindNetworkRetry(){
   const banner = ()=>document.getElementById('offline-banner');
-
-  addEventListener('offline', ()=>{
-    banner()?.classList.add('on');
-  });
+  addEventListener('offline', ()=>{ banner()?.classList.add('on'); });
   addEventListener('online', ()=>{
     banner()?.classList.remove('on');
-    // ลองเล่นใหม่จากต้นของช่องล่าสุด
     if (__lastPlayArgs.ch && __lastPlayArgs.list) {
       const token = ++__playToken;
       tryPlayJW(__lastPlayArgs.ch, __lastPlayArgs.list, 0, token);
@@ -586,7 +592,7 @@ async function enableWakeLock(){
   }catch{}
 }
 
-/* ---------- Presence (heartbeat) ---------- */
+/* ---------- Presence ---------- */
 function getViewerId(){
   try{
     let id = localStorage.getItem(VIEWER_ID_KEY);
@@ -685,7 +691,7 @@ function highlight(globalIndex){
     const sel = idx === globalIndex;
     el.classList.toggle('active', sel);
     el.setAttribute('aria-pressed', sel ? 'true':'false');
-    el.tabIndex = sel ? 0 : -1; // โฟกัสได้เฉพาะไทล์ที่เล่นอยู่
+    el.tabIndex = sel ? 0 : -1;
   });
 }
 function focusActiveTile(){
@@ -731,7 +737,7 @@ function findBackupChannel(ch){
   return channels.find(o => o!==ch && isBackupChannel(o) && normalizeName(o.name)===base);
 }
 
-/* ---------- Histats (ซ่อนแต่ยังนับ) ---------- */
+/* ---------- Histats (ซ่อน) ---------- */
 function mountHistatsHidden(){
   let holder = document.getElementById('histats_counter');
   if (!holder) {
@@ -812,7 +818,7 @@ function mountRefreshButton(){
       updateBtnW();
 
       await clearAppCache();
-      await loadData();
+      await withTimeout(loadData(), 8000).catch(()=>{});
       buildTabs();
       autoplayFirst();
 
