@@ -1,12 +1,16 @@
 /* ========================= app.js =========================
-   - Presence counter (mobile friendly) + smoothing viewers
-   - Now bar ใต้ VDO, live-viewers ใต้ clock
-   - JW Player: remove() ก่อน setup, session token กัน fallback ค้าง,
-     auto-fallback ไปช่องสำรองถ้าแหล่งล้มเหลวทั้งหมด
-   - Offline banner + auto-retry, Wake Lock
-   - Tabs/grids, ซ่อนแท็บว่าง, โฟกัสกลับไทล์ที่เล่นอยู่หลัง render
-   - Refresh + auto-clear cache
-   - Hardening: fetch timeout + loadData timeout + onerror overlay
+   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
+   - Now bar ใต้ VDO + Live viewers ใต้ clock
+   - Histats: นับแต่ซ่อน
+   - JW Player: safe setup + auto fallback + status overlay
+   - Play session token: กัน fallback ค้างเวลาสลับช่องเร็วๆ
+   - Viewers smoothing: easing + clamp
+   - UI: แท็บ/กริด/ริปเปิล/รีเฟรช + ล้าง cache อัตโนมัติ
+   - Grid: render ใหม่เฉพาะเมื่อจำนวนคอลัมน์เปลี่ยน
+   - Focus: โฟกัสไทล์ที่เล่นอยู่หลัง render (ไม่รองรับกดคีย์บอร์ดเล่น)
+   - Auto-hide tabs ที่ว่าง
+   - Offline banner + auto retry
+   - Wake Lock กันจอดับบนมือถือ
 =========================================================== */
 
 const CH_URL   = 'channels.json';
@@ -25,7 +29,7 @@ let didInitialReveal= false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ===== Presence ===== */
+/* ===== Presence (Concurrent Viewers) ===== */
 const PRESENCE_URL     = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
 const VIEWER_TTL_S     = 120;
 const PING_INTERVAL_S  = 25;
@@ -35,20 +39,98 @@ let currentPresenceKey = null;
 let lastPingAt         = 0;
 let presenceBound      = false;
 
-/* Grid cols cache */
+/* ===== Smoothing viewers (easing) ===== */
+let __viewerDisplay = 0;
+let __viewerTarget  = 0;
+let __viewerAnimRAF = 0;
+let __viewerAnimT0  = 0;
+const VIEWER_EASE_MS = 480;
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+function setLiveViewersSmooth(n){
+  n = Math.max(0, Math.floor(n||0));          // clamp >= 0
+  const el = document.querySelector('#live-viewers .n');
+  if (!el) return;
+  // cancel prev anim
+  if (__viewerAnimRAF) cancelAnimationFrame(__viewerAnimRAF);
+  __viewerDisplay = Number(el.textContent||0) || 0;
+  __viewerTarget = n;
+  if (__viewerDisplay === __viewerTarget){ el.textContent = String(n); return; }
+  __viewerAnimT0 = performance.now();
+  const step = (t)=>{
+    const p = Math.min(1, (t-__viewerAnimT0)/VIEWER_EASE_MS);
+    const v = Math.round(__viewerDisplay + ( __viewerTarget-__viewerDisplay ) * easeOutCubic(p));
+    el.textContent = String(v);
+    if (p<1) __viewerAnimRAF = requestAnimationFrame(step);
+    else __viewerAnimRAF = 0;
+  };
+  __viewerAnimRAF = requestAnimationFrame(step);
+}
+
+/* --- สำหรับ grid re-render เมื่อคอลัมน์เปลี่ยนจริง --- */
 let __lastGridCols = null;
 
-/* JW session token กัน fallback ค้าง */
+/* --- Play session token กัน fallback ค้าง --- */
 let __playToken = 0;
-let __lastPlayArgs = { ch: null, list: null };
 
-/* Wake Lock */
-let __wakeLock = null;
+/* --- Wake Lock --- */
+let wakeLock = null;
+async function requestWakeLock(){
+  try{
+    if ('wakeLock' in navigator && !wakeLock){
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener?.('release', ()=>{ wakeLock=null; });
+    }
+  }catch{}
+}
+function releaseWakeLock(){
+  try{ wakeLock?.release?.(); }catch{} finally{ wakeLock=null; }
+}
 
-/* ---------- Boot ---------- */
+/* --- Offline banner + auto retry --- */
+let offlineTimer = null;
+function mountOfflineBanner(){
+  if (document.getElementById('offline-banner')) return;
+  const b = document.createElement('div');
+  b.id = 'offline-banner';
+  b.setAttribute('role','status');
+  b.style.cssText = `
+    position:fixed;left:50%;top:10px;transform:translateX(-50%);
+    background:#111827;color:#fff;border:1px solid rgba(255,255,255,.18);
+    padding:6px 10px;border-radius:10px;z-index:9999;display:none;
+    box-shadow:0 8px 18px rgba(0,0,0,.35);
+    font-weight:800;letter-spacing:.2px;font-size:12px;
+  `;
+  b.textContent = 'ออฟไลน์ — กำลังรอเชื่อมต่อกลับ…';
+  document.body.appendChild(b);
+}
+function showOfflineBanner(on){
+  const b = document.getElementById('offline-banner'); if(!b) return;
+  b.style.display = on ? 'block':'none';
+}
+function bindOfflineHandlers(){
+  addEventListener('offline', ()=>{
+    showOfflineBanner(true);
+    showPlayerStatus('ออฟไลน์…');
+    releaseWakeLock();
+    // คอยเช็คกลับมาออนไลน์แล้วค่อยรีลอง
+    if (offlineTimer) clearInterval(offlineTimer);
+    offlineTimer = setInterval(()=>{
+      if (navigator.onLine){
+        clearInterval(offlineTimer); offlineTimer=null;
+        showOfflineBanner(false);
+        if (currentIndex>=0) playByIndex(currentIndex,{scroll:false}); // auto retry
+      }
+    }, 1500);
+  });
+  addEventListener('online', ()=>{
+    showOfflineBanner(false);
+    if (currentIndex>=0) playByIndex(currentIndex,{scroll:false});
+  });
+}
+
+/* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
   window.scrollTo({ top: 0, behavior: 'auto' });
-  showPlayerStatus('กำลังโหลด…');
 
   mountRefreshButton();
   scheduleAutoClear();
@@ -58,64 +140,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   mountLiveViewersUnderClock();
   mountHistatsHidden();
   mountOfflineBanner();
-  bindNetworkRetry();
-
-  // Global error to overlay
-  window.addEventListener('error', e => {
-    showPlayerStatus('สคริปต์ผิดพลาด: ' + (e?.message || 'ไม่ทราบสาเหตุ'));
-  });
-  window.addEventListener('unhandledrejection', e => {
-    const msg = (e?.reason && (e.reason.message || e.reason.toString())) || 'ไม่ทราบสาเหตุ';
-    showPlayerStatus('โหลดข้อมูลไม่สำเร็จ: ' + msg);
-  });
+  bindOfflineHandlers();
 
   try {
-    await withTimeout(loadData(), 8000); // ถ้าค้างเกิน 8s ให้ไปต่อ
+    await loadData();
   } catch (e) {
-    console.error('loadData timeout/error:', e);
+    console.error('โหลดข้อมูลไม่สำเร็จ:', e);
     window.__setNowPlaying?.('โหลดข้อมูลไม่สำเร็จ');
   }
 
   buildTabs();
-  autoplayFirst();
-
-  // ถ้าหมวดว่าง/ไม่มีช่องเลย ให้แจ้งชัดเจน
-  if (!channels.length) showPlayerStatus('ไม่พบช่องสำหรับเล่น');
+  autoplayFirst();          // จะตั้งแท็บ + เล่นอันแรก + โฟกัสไทล์
 
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
 
+  // realtime grid re-render เฉพาะเมื่อ "จำนวนคอลัมน์" เปลี่ยน
   addEventListener('resize', debounce(rerenderOnResize, 120));
   addEventListener('orientationchange', rerenderOnResize);
+
+  // ปิด WakeLock เมื่อสลับแอป/หน้า
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.visibilityState === 'visible'){
+      if (currentIndex>=0) requestWakeLock();
+    } else releaseWakeLock();
+  });
 });
 
-/* ---------- Helpers: timeout ---------- */
-function withTimeout(promise, ms){
-  return new Promise((resolve, reject)=>{
-    const t = setTimeout(()=> reject(new Error('Timeout '+ms+'ms')), ms);
-    promise.then(v=>{ clearTimeout(t); resolve(v); }, e=>{ clearTimeout(t); reject(e); });
-  });
-}
-
-/* ---------- Fetch (fresh) ---------- */
+/* ------------------------ Load (fresh fetch) ------------------------ */
 async function fetchJSONFresh(url){
   const u = new URL(url, location.href);
   u.searchParams.set('_t', String(Date.now()));
-  const ctrl = new AbortController();
-  const timer = setTimeout(()=>ctrl.abort(), 8000); // 8s
-  try{
-    const res = await fetch(u.toString(), { cache:'no-store', signal: ctrl.signal });
-    if (!res.ok) throw new Error('Fetch failed: ' + url + ' (' + res.status + ')');
-    return res.json();
-  } finally {
-    clearTimeout(timer);
-  }
+  const res = await fetch(u.toString(), { cache:'no-store' });
+  if (!res.ok) throw new Error('Fetch failed: ' + url + ' (' + res.status + ')');
+  return res.json();
 }
 async function loadData(){
   const [catRes, chRes] = await Promise.all([
     fetchJSONFresh(CAT_URL).catch(()=>null),
-    fetchJSONFresh(CH_URL).catch(()=>null)
+    fetchJSONFresh(CH_URL)
   ]);
 
   categories = catRes || {
@@ -128,20 +192,25 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ---------- Autoplay ---------- */
+/* ------------------------ Autoplay + optional scroll ------------------------ */
 function autoplayFirst(){
   const order = (categories?.order || []);
-  const firstCatWithItems = order.find(c => channels.some(ch => getCategory(ch) === c));
-  const cat = firstCatWithItems || categories?.default || 'IPTV';
+  let idx = -1;
+  let cat = order[0] || categories?.default || 'IPTV';
 
-  let idx = channels.findIndex(ch => getCategory(ch) === cat);
-  if (idx < 0 && channels.length) idx = 0;
+  for (const c of order) {
+    idx = channels.findIndex(ch => getCategory(ch) === c);
+    if (idx >= 0) { cat = c; break; }
+  }
+  if (idx < 0 && channels.length) {
+    idx = 0;
+    cat = getCategory(channels[0]) || cat;
+  }
 
   if (idx >= 0) {
     setActiveTab(cat);
     playByIndex(idx, { scroll:false });
     if (SCROLL_CARD_ON_LOAD) scheduleRevealActiveCard();
-    setTimeout(focusActiveTile, 0); // โฟกัสทันที
   } else {
     showPlayerStatus('ไม่พบช่องสำหรับเล่น');
   }
@@ -159,7 +228,7 @@ function revealActiveCardIntoView(){
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
-/* ---------- Now bar ---------- */
+/* ------------------------ Now bar ใต้ VDO ------------------------ */
 function mountNowBarUnderPlayer(){
   const player = document.getElementById('player') || document.body;
 
@@ -167,7 +236,7 @@ function mountNowBarUnderPlayer(){
     const css = `
 #now-bar.now-bar{display:flex;align-items:center;justify-content:center;gap:12px;margin:10px 0 14px;}
 #now-playing{font-weight:700;font-size:14px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;color:inherit;opacity:.95;text-align:center;}
-`.trim();
+    `.trim();
     const s = document.createElement('style');
     s.id = 'now-bar-styles';
     s.textContent = css;
@@ -197,7 +266,7 @@ function mountNowBarUnderPlayer(){
   };
 }
 
-/* ---------- Live viewers + smoothing ---------- */
+/* ------------------------ Live viewers ใต้ clock ------------------------ */
 function mountLiveViewersUnderClock(){
   const header = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   const clock  = document.getElementById('clock');
@@ -211,44 +280,8 @@ function mountLiveViewersUnderClock(){
   if (clock) clock.insertAdjacentElement('afterend', pill);
   else header.appendChild(pill);
 }
-const VIEWERS_TAU_MS = 450;
-const VIEWERS_MAX_STEP_PER_SEC = 60;
-let _viewDisp = 0, _viewTarget = 0, _viewRAF = null, _viewLast = 0;
-function updateLiveViewersSmooth(n){
-  const val = Math.max(0, Number(n)||0);
-  _viewTarget = val;
-  if (!_viewRAF) {
-    _viewLast = performance.now();
-    _viewRAF = requestAnimationFrame(_viewersTick);
-  }
-}
-function _viewersTick(now){
-  const el = document.querySelector('#live-viewers .n');
-  const dt = Math.max(16, now - _viewLast);
-  _viewLast = now;
 
-  const k = 1 - Math.exp(-dt / VIEWERS_TAU_MS);
-  let step = (_viewTarget - _viewDisp) * k;
-  const max = VIEWERS_MAX_STEP_PER_SEC * (dt/1000);
-  if (Math.abs(step) > max) step = Math.sign(step)*max;
-
-  _viewDisp += step;
-  if (el) el.textContent = String(Math.round(_viewDisp));
-
-  if (Math.abs(_viewTarget - _viewDisp) < 0.4) {
-    _viewDisp = _viewTarget;
-    if (el) el.textContent = String(Math.round(_viewDisp));
-  }
-
-  if (Math.round(_viewDisp) !== Math.round(_viewTarget)) {
-    _viewRAF = requestAnimationFrame(_viewersTick);
-  } else {
-    cancelAnimationFrame(_viewRAF);
-    _viewRAF = null;
-  }
-}
-
-/* ---------- Clock ---------- */
+/* ------------------------ Header: Clock ------------------------ */
 function mountClock(){
   const el = document.getElementById('clock'); if (!el) return;
   const tick = () => {
@@ -263,19 +296,21 @@ function mountClock(){
   setInterval(tick, 1000);
 }
 
-/* ---------- Tabs ---------- */
+/* ------------------------ Tabs ------------------------ */
 function buildTabs(){
   const root = document.getElementById('tabs'); if(!root) return;
   root.innerHTML = '';
 
+  // นับจำนวนช่องต่อหมวด และซ่อนหมวดว่าง
   const counts = {};
+  (categories?.order || []).forEach(name => counts[name]=0);
   channels.forEach(ch => {
     const c = getCategory(ch);
-    counts[c] = (counts[c]||0)+1;
+    if (c in counts) counts[c]++; else counts[c]=1;
   });
 
   (categories?.order || []).forEach(name=>{
-    if (!counts[name]) return; // ซ่อนหมวดว่าง
+    if (!counts[name]) return; // auto-hide ว่าง
     const btn = document.createElement('button');
     btn.className = 'tab';
     btn.dataset.filter = name;
@@ -288,18 +323,13 @@ function buildTabs(){
     root.appendChild(btn);
   });
   wireTabs(root);
-
-  if (!counts[currentFilter]) {
-    const first = root.querySelector('.tab')?.dataset.filter;
-    if (first) currentFilter = first;
-  }
 }
 function wireTabs(root){
   root.addEventListener('click', e=>{
     const b = e.target.closest('.tab'); if(!b) return;
     setActiveTab(b.dataset.filter);
   });
-  // ปล่อยให้เลื่อนด้วยปุ่มลูกศรได้ แต่ไม่ได้บังคับผู้ใช้กด Enter เพื่อเล่น
+  // คง navigation ซ้าย/ขวาบนแท็บ (ไทล์ไม่รองรับคีย์กดเล่นแล้ว)
   root.addEventListener('keydown', e=>{
     if(e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
     const all = Array.from(root.querySelectorAll('.tab'));
@@ -323,7 +353,6 @@ function setActiveTab(name){
   setTimeout(()=>{
     grid.classList.remove('switch-out');
     render({withEnter:true});
-    setTimeout(focusActiveTile, 0);
   }, SWITCH_OUT_MS);
 }
 function centerTabsIfPossible(){
@@ -331,7 +360,7 @@ function centerTabsIfPossible(){
   el.classList.toggle('tabs--center', el.scrollWidth <= el.clientWidth + 1);
 }
 
-/* ---------- Category logic ---------- */
+/* ------------------------ Category logic ------------------------ */
 function getCategory(ch){
   if (ch.category) return ch.category;
 
@@ -366,19 +395,15 @@ function useWideLogo(ch){
   const rule = (categories?.rules||[]).find(r=>r.category===cat && r.useWideLogo);
   return !!rule;
 }
-function isBackupChannel(ch){
-  return !!(ch.backup || ch.isBackup ||
-    (Array.isArray(ch.tags) && ch.tags.some(t=>/สำรอง|backup|mirror|alt/i.test(String(t)))));
-}
 
-/* ---------- Render grid ---------- */
+/* ------------------------ Render grid ------------------------ */
 function ensureGrid(){
   const grid = document.getElementById('channel-list');
   if (!grid.classList.contains('grid')) grid.classList.add('grid');
   return grid;
 }
 function render(opt={withEnter:false}){
-  const grid = ensureGrid(); 
+  const grid = ensureGrid();
   grid.innerHTML='';
 
   const list = channels.filter(c => getCategory(c) === currentFilter);
@@ -390,13 +415,15 @@ function render(opt={withEnter:false}){
     btn.dataset.category = getCategory(ch);
     btn.dataset.globalIndex = String(channels.indexOf(ch));
     if (useWideLogo(ch)) btn.dataset.wide = 'true';
-    if (isBackupChannel(ch)) btn.dataset.backup = 'true';
     btn.title = ch.name || 'ช่อง';
-    btn.tabIndex = -1; // ไม่รับการกดคีย์บอร์ดจากผู้ใช้
+    btn.tabIndex = -1; // ไม่รองรับกดคีย์เล่น แต่ให้ JS โฟกัสได้
+
+    // badge holder (สำหรับแสดง "สำรอง")
+    const badge = `<span class="src-badge" aria-hidden="true" hidden>สำรอง</span>`;
 
     btn.innerHTML = `
       <div class="ch-card">
-        ${isBackupChannel(ch) ? `<span class="badge" aria-label="ช่องสำรอง">สำรอง</span>` : ``}
+        ${badge}
         <div class="logo-wrap">
           <img class="logo" loading="lazy" decoding="async"
                src="${escapeHtml(ch.logo || '')}" alt="${escapeHtml(ch.name||'โลโก้ช่อง')}">
@@ -428,7 +455,14 @@ function render(opt={withEnter:false}){
   }
 
   highlight(currentIndex);
+  focusActiveTile();   // โฟกัสไทล์ที่เล่นอยู่
+
+  // เก็บจำนวนคอลัมน์ล่าสุดไว้ เปรียบเทียบตอน resize
   __lastGridCols = computeGridCols(grid);
+}
+function focusActiveTile(){
+  const active = document.querySelector('.channel.active');
+  if (active) active.focus({ preventScroll:true });
 }
 function computeGridCols(container){
   const cs = getComputedStyle(document.documentElement);
@@ -438,16 +472,15 @@ function computeGridCols(container){
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
 function rerenderOnResize(){
-  const grid = document.getElementById('channel-list'); 
+  const grid = document.getElementById('channel-list');
   if (!grid) return;
   const cols = computeGridCols(grid);
   if (cols !== __lastGridCols){
     render({withEnter:false});
-    setTimeout(focusActiveTile, 0);
   }
 }
 
-/* ---------- Player (JW) ---------- */
+/* ------------------------ Player (JW) + Status ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -457,17 +490,14 @@ function playByIndex(i, opt={scroll:true}){
   currentIndex = i;
 
   const srcList = buildSources(ch);
-  __lastPlayArgs = { ch, list: srcList };
-
   showPlayerStatus(`กำลังเตรียมเล่น: ${ch.name || ''}`);
-
-  const token = ++__playToken;
+  const token = ++__playToken;     // new play session
   tryPlayJW(ch, srcList, 0, token);
 
   window.__setNowPlaying?.(ch.name || '');
-  startPresence(ch.id || ch.name || `ch-${i}`);
+  startPresence(ch.id || ch.name || `ch-${i}`);   // เริ่มนับคนดูของช่องนี้
   highlight(i);
-  setTimeout(focusActiveTile, 0);
+  focusActiveTile();
 
   if (opt.scroll ?? true) scrollToPlayer();
   showMobileToast(ch.name || '');
@@ -483,28 +513,22 @@ function buildSources(ch){
   return [{ src:s, type:t, drm }];
 }
 function tryPlayJW(ch, list, idx, token){
+  // session cancelled?
   if (token !== __playToken) return;
 
   if (idx >= list.length) {
-    const alt = findBackupChannel(ch);
-    if (alt) {
-      showPlayerStatus('แหล่งหลักล้มเหลว → สลับไปช่องสำรอง…');
-      playByChannel(alt);
-      return;
-    }
     showPlayerStatus('เล่นไม่ได้ทุกแหล่ง');
     console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name);
-    return; 
+    setBackupBadge(false); // เอาป้ายออก
+    return;
   }
 
+  // กัน event/listener สะสมจากอินสแตนซ์ก่อนหน้า
   try { jwplayer('player').remove(); } catch {}
 
   const s = list[idx];
   const jwSrc = makeJwSource(s, ch);
   showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${list.length}…`);
-
-  const playerEl = document.getElementById('player');
-  playerEl.classList.remove('ready');
 
   const player = jwplayer('player').setup({
     playlist: [{ image: ch.poster || ch.logo || undefined, sources: [jwSrc] }],
@@ -518,23 +542,39 @@ function tryPlayJW(ch, list, idx, token){
     playbackRateControls:true
   });
 
-  player.once('playAttemptFailed', ()=>{ if (token!==__playToken) return; player.setMute(true); player.play(true); });
-  player.on('buffer', ()=>{ if (token!==__playToken) return; showPlayerStatus('กำลังบัฟเฟอร์…'); });
-  player.on('play',   ()=>{ if (token!==__playToken) return; showPlayerStatus(''); playerEl.classList.add('ready'); enableWakeLock(); });
-  player.on('firstFrame', ()=>{ if (token!==__playToken) return; showPlayerStatus(''); playerEl.classList.add('ready'); });
+  // เมื่อเริ่มเล่นจริงให้ซ่อนสถานะ + ตั้ง WakeLock + แสดง badge ถ้าเป็นสำรอง
+  player.on('firstFrame', ()=>{
+    if (token !== __playToken) return;   // cancel if session changed
+    showPlayerStatus('');
+    requestWakeLock();
+    setBackupBadge(idx>0);               // idx>0 คือแหล่งสำรอง
+  });
+  player.on('play', ()=> showPlayerStatus(''));
+  player.on('buffer', ()=> showPlayerStatus('กำลังบัฟเฟอร์…'));
 
+  player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
+
+  // ถ้าตั้งค่า player ล้มเหลว → ลองสำรอง (auto)
   player.on('setupError', e => {
-    if (token!==__playToken) return;
+    if (token !== __playToken) return;
     console.warn('setupError:', e);
     showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…');
     tryPlayJW(ch, list, idx+1, token);
   });
+  // ถ้าเล่นไม่ได้ → ลองสำรอง (auto)
   player.on('error', e => {
-    if (token!==__playToken) return;
+    if (token !== __playToken) return;
     console.warn('playError:', e);
     showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
     tryPlayJW(ch, list, idx+1, token);
   });
+}
+function setBackupBadge(on){
+  // แสดงป้าย "สำรอง" ที่มุมขวาบนของไทล์ที่ active
+  const btn = document.querySelector('.channel.active .src-badge') ||
+              document.querySelector('.channel[aria-pressed="true"] .src-badge');
+  if (!btn) return;
+  btn.hidden = !on;
 }
 function makeJwSource(s, ch){
   const file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
@@ -554,45 +594,32 @@ function wrapWithProxyIfNeeded(url, ch){
   }
   return url;
 }
-
-/* ---------- Offline banner + auto-retry ---------- */
-function mountOfflineBanner(){
-  if (document.getElementById('offline-banner')) return;
-  const el = document.createElement('div');
-  el.id = 'offline-banner';
-  el.setAttribute('aria-live','polite');
-  el.innerHTML = `<span class="dot"></span><span class="txt">ออฟไลน์: กำลังพยายามเชื่อมต่อใหม่…</span>`;
-  document.body.appendChild(el);
+function showMobileToast(text){
+  if (!isMobile()) return;
+  let t = document.getElementById('mini-toast');
+  if (!t){
+    t = document.createElement('div');
+    t.id = 'mini-toast';
+    t.style.cssText = `
+      position:absolute; left:50%; top:10px; transform:translateX(-50%);
+      background:rgba(0,0,0,.65); color:#fff; padding:6px 10px; border-radius:8px;
+      font-size:13px; font-weight:600; z-index:9; pointer-events:none; opacity:0; transition:opacity .18s ease`;
+    const parent = document.getElementById('player');
+    parent.style.position = parent.style.position || 'relative';
+    parent.appendChild(t);
+  }
+  t.textContent = text;
+  requestAnimationFrame(()=>{ t.style.opacity = '1'; });
+  setTimeout(()=>{ t.style.opacity = '0'; }, 1500);
 }
-function bindNetworkRetry(){
-  const banner = ()=>document.getElementById('offline-banner');
-  addEventListener('offline', ()=>{ banner()?.classList.add('on'); });
-  addEventListener('online', ()=>{
-    banner()?.classList.remove('on');
-    if (__lastPlayArgs.ch && __lastPlayArgs.list) {
-      const token = ++__playToken;
-      tryPlayJW(__lastPlayArgs.ch, __lastPlayArgs.list, 0, token);
-    }
-    presenceTick(true);
-  });
-}
-
-/* ---------- Wake Lock ---------- */
-async function enableWakeLock(){
-  try{
-    if (!('wakeLock' in navigator)) return;
-    if (__wakeLock) return;
-    __wakeLock = await navigator.wakeLock.request('screen');
-    __wakeLock.addEventListener?.('release', ()=>{ __wakeLock=null; });
-    document.addEventListener('visibilitychange', async ()=>{
-      if (document.visibilityState === 'visible' && !__wakeLock) {
-        try{ __wakeLock = await navigator.wakeLock.request('screen'); }catch{}
-      }
-    });
-  }catch{}
+function isMobile(){ return /iPhone|iPad|Android/i.test(navigator.userAgent) }
+function scrollToPlayer(){
+  const el = document.getElementById('player');
+  const y = el.getBoundingClientRect().top + window.pageYOffset - headerOffset() - 8;
+  window.scrollTo({ top:y, behavior:'smooth' });
 }
 
-/* ---------- Presence ---------- */
+/* ------------------------ Presence (heartbeat) ------------------------ */
 function getViewerId(){
   try{
     let id = localStorage.getItem(VIEWER_ID_KEY);
@@ -607,7 +634,7 @@ async function presenceDoFetch(){
     const r = await fetch(url, { cache:'no-store', keepalive:true });
     if (!r.ok) throw 0;
     const data = await r.json().catch(()=> ({}));
-    if (typeof data.count === 'number') updateLiveViewersSmooth(data.count);
+    if (typeof data.count === 'number') setLiveViewersSmooth(data.count);
   }catch{}
 }
 function presenceDoBeacon(){
@@ -658,7 +685,7 @@ function startPresence(channelKey){
   bindPresenceEventsOnce();
 }
 
-/* ---------- Player status overlay ---------- */
+/* ------------------------ Player status overlay ------------------------ */
 function showPlayerStatus(text){
   const parent = document.getElementById('player');
   if (!parent) return;
@@ -678,7 +705,7 @@ function showPlayerStatus(text){
   box.style.display = text ? 'block' : 'none';
 }
 
-/* ---------- Utilities ---------- */
+/* ------------------------ Utilities ------------------------ */
 function headerOffset(){
   const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
   const num = parseFloat(v);
@@ -688,18 +715,13 @@ function headerOffset(){
 function highlight(globalIndex){
   document.querySelectorAll('.channel').forEach(el=>{
     const idx = Number(el.dataset.globalIndex);
-    const sel = idx === globalIndex;
-    el.classList.toggle('active', sel);
-    el.setAttribute('aria-pressed', sel ? 'true':'false');
-    el.tabIndex = sel ? 0 : -1;
+    el.classList.toggle('active', idx === globalIndex);
+    el.setAttribute('aria-pressed', idx === globalIndex ? 'true':'false');
+    // ซ่อนป้ายสำรองสำหรับไทล์อื่น
+    if (idx !== globalIndex){
+      const b = el.querySelector('.src-badge'); if (b) b.hidden = true;
+    }
   });
-}
-function focusActiveTile(){
-  const sel = document.querySelector(`.channel[data-global-index="${currentIndex}"]`);
-  if (sel) {
-    sel.focus({ preventScroll: false });
-    sel.scrollIntoView({ block:'nearest', inline:'nearest' });
-  }
 }
 function ripple(event, container){
   if(!container) return;
@@ -724,20 +746,28 @@ function escapeHtml(s){
 function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
 function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
 
-function normalizeName(name){
-  return String(name||'').toLowerCase()
-    .replace(/[\(\)\[\]\{\}]/g,'')
-    .replace(/สำรอง|backup|mirror|alt/gi,'')
-    .replace(/\s+/g,' ').trim();
-}
-function findBackupChannel(ch){
-  const baseId = ch.altOf || ch.mainOf || ch.masterOf;
-  if (baseId) return channels.find(x => x.id===baseId || x.altOf===baseId || x.masterOf===baseId);
-  const base = normalizeName(ch.name);
-  return channels.find(o => o!==ch && isBackupChannel(o) && normalizeName(o.name)===base);
+/* ------------------------ Icons (แท็บ) ------------------------ */
+function getIconSVG(n){
+  const c='currentColor';
+  switch(n){
+    case 'IPTV':
+      return `<svg viewBox="0 0 24 24" fill="${c}" aria-hidden="true"><path d="M4 20h16v-2H4v2zm5-4h6v-2H9v2zm-3-4h12V8H6v4zm4-9 2 2 2-2 1.4 1.4L12 6.8 8.6 4.4 10 3z"/></svg>`;
+    case 'เด็ก':
+      return `<svg viewBox="0 0 24 24" fill="${c}" aria-hidden="true"><path d="M12 2a5 5 0 0 1 5 5c0 3.9-3.6 7-5 7s-5-3.1-5-7a5 5 0 0 1 5-5zm1 14c2 3 1 4-1 6h-1l1-3-2 1 2-4h1z"/></svg>`;
+    case 'บันเทิง':
+      return `<svg viewBox="0 0 24 24" fill="${c}" aria-hidden="true"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.6L12 18.7 6.2 21l1.1-6.6-4.7-4.6 6.5-.9L12 3z"/></svg>`;
+    case 'กีฬา':
+      return `<svg viewBox="0 0 24 24" fill="${c}" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.9 12.1A8 8 0 0 1 5.1 7.1 8 8 0 0 1 12 4z"/></svg>`;
+    case 'สารคดี':
+      return `<svg viewBox="0 0 24 24" fill="${c}" aria-hidden="true"><path d="M4 5a3 3 0 0 1 3-3h6v18H7a3 3 0 0 0-3 3V5zm10-3h3a3 3 0 0 1 3 3v18a3 3 0 0 0-3-3h-3V2z"/></svg>`;
+    case 'หนัง':
+      return `<svg viewBox="0 0 24 24" fill="${c}" aria-hidden="true"><path d="M21 10v7a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7h18zM4.7 4.1l1.7 3.1h4.2L8.9 4.1h3.8l1.7 3.1h4.2L16.8 4.1H19a2 2 0 0 1 2 2v2z"/></svg>`;
+    default:
+      return `<svg viewBox="0 0 24 24" fill="${c}" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>`;
+  }
 }
 
-/* ---------- Histats (ซ่อน) ---------- */
+/* ------------------------ Histats (ซ่อนแต่ยังนับ) ------------------------ */
 function mountHistatsHidden(){
   let holder = document.getElementById('histats_counter');
   if (!holder) {
@@ -778,7 +808,7 @@ function mountHistatsHidden(){
   obs.observe(document.documentElement, { childList:true, subtree:true });
 }
 
-/* ---------- Refresh + Auto clear ---------- */
+/* ------------------------ Refresh + Auto clear ------------------------ */
 function mountRefreshButton(){
   const wrap = document.querySelector('.h-wrap') || document.querySelector('header');
   if (!wrap || document.getElementById('refresh-btn')) return;
@@ -818,7 +848,7 @@ function mountRefreshButton(){
       updateBtnW();
 
       await clearAppCache();
-      await withTimeout(loadData(), 8000).catch(()=>{});
+      await loadData();
       buildTabs();
       autoplayFirst();
 
