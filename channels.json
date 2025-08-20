@@ -521,6 +521,34 @@
     "src": "https://keela2.com/stream/10/index.m3u8?token=mvFWafOIir5JDlQN",
     "type": "hls",
     "category": "กีฬา" 
+    },
+  {
+    "name": "JSport1",
+    "logo": "https://i.postimg.cc/DwMwLZvq/IMG-3201.png",
+    "src": "https://mt01.utako.moe/js1/index.m3u8",
+    "type": "hls",
+    "category": "กีฬา" 
+     },
+  {
+    "name": "JSport2",
+    "logo": "https://i.postimg.cc/YChprH6j/IMG-3202.png",
+    "src": "https://mt01.utako.moe/js2/index.m3u8",
+    "type": "hls",
+    "category": "กีฬา"  
+    },
+  {
+    "name": "JSport3",
+    "logo": "https://i.postimg.cc/dVkYM9Fy/IMG-3203.png",
+    "src": "https://mt01.utako.moe/js3/index.m3u8",
+    "type": "hls",
+    "category": "กีฬา"  
+    },
+  {
+    "name": "JSport4",
+    "logo": "https://i.postimg.cc/jd1phJfd/IMG-3204.png",
+    "src": "https://mt01.utako.moe/js4/index.m3u8",
+    "type": "hls",
+    "category": "กีฬา"  
   }
   ]
 }
