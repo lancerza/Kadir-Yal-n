@@ -6,6 +6,7 @@
    - Tabs + Grid + Channel cards
    - Now bar ใต้วิดีโอ (now-playing กึ่งกลาง)
    - Responsive + A11y + Reduced motion + Safe-area
+   - ปรับ: ตัด inset stroke บน hover/active เพื่อลดกรอบซ้อน
 ====================================================================== */
 
 /* ---------- Root tokens ---------- */
@@ -311,29 +312,29 @@ header{
   display:grid; grid-template-rows:1fr auto; gap:6px; place-items:center; overflow:hidden;
   transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
 }
+/* ตัด inset stroke ออก (แก้กรอบหลายชั้น) */
 .channel:hover .ch-card{
   transform:translateY(-1px);
   border-color:rgba(255,255,255,.7);
-  box-shadow:0 0 0 1px rgba(255,255,255,.55) inset, 0 0 10px rgba(255,255,255,.22);
+  box-shadow:0 0 10px rgba(255,255,255,.22);
 }
 .channel:active .ch-card{ transform:scale(.985) }
 
-/* Focus ring สำหรับคีย์บอร์ด */
+/* Focus ring สำหรับคีย์บอร์ด/โฟกัสอัตโนมัติ */
 .channel:focus-visible .ch-card{
   outline: 2px solid #8ab4ff;
   outline-offset: 2px;
-  box-shadow: 0 0 0 2px rgba(138,180,255,.35) inset, 0 0 10px rgba(138,180,255,.25);
+  box-shadow: 0 0 10px rgba(138,180,255,.35);
 }
 
 /* ==== Channel selected (เล่นอยู่) ==== */
+/* ตัด inset ออก เหลือเงาวงเดียว */
 .channel.active .ch-card,
 .channel[aria-selected="true"] .ch-card,
 .channel[data-selected="true"] .ch-card{
   transform: translateY(-1px);
   border-color: rgba(255,255,255,.85);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.6) inset,
-    0 0 12px rgba(255,255,255,.25);
+  box-shadow: 0 0 12px rgba(255,255,255,.25);
 }
 .channel[aria-selected="true"]::after,
 .channel[data-selected="true"]::after{ opacity:.95; animation:neonPulse 2.4s ease-in-out infinite }
@@ -347,6 +348,16 @@ header{
   filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));
 }
 .channel[data-wide="true"] .logo{ max-height:var(--logo-wide-h) }
+
+/* ป้าย "สำรอง" มุมขวาบน */
+.badge-alt{
+  position:absolute; top:6px; right:6px;
+  padding:2px 6px; border-radius:8px;
+  font-size:10px; font-weight:800; letter-spacing:.2px;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow:0 2px 6px rgba(0,0,0,.35);
+}
 
 /* ชื่อช่อง: 2 บรรทัด + ellipsis */
 .name{
@@ -365,7 +376,7 @@ header{
   overflow: hidden;
   text-overflow: ellipsis;
 
-  min-height: calc(2 * 1.18em); /* ให้ตรงกับ line-height */
+  min-height: calc(2 * 1.18em);
 }
 
 /* Ripple */
@@ -424,6 +435,5 @@ header{
   :root{ --tabW: 84px; --tabH: 66px; --tabBadge: 32px; --tab-font: 12.8px; --hs-size:44px; --hs-scale:1.05 }
 }
 @media (min-width: 1280px){
-  /* histats ถูกซ่อนอยู่แล้ว ตรงนี้คง scale ไว้เผื่อ */
   #histats_counter{ transform:translateY(-50%) scale(var(--hs-scale)) }
 }
