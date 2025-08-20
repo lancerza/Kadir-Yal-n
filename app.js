@@ -1,9 +1,11 @@
 /* ========================= app.js =========================
    - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
    - Now bar ใต้ VDO: now-playing (กึ่งกลาง)
-   - Live viewers: ย้ายไปอยู่ใต้เวลา (clock) ใน header + smooth easing
+   - Live viewers: ย้ายไปอยู่ใต้เวลา (clock) ใน header + smooth number
    - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
-   - JW Player: remove อินสแตนซ์เก่าก่อน setup + fallback ด้วย session token
+   - JW Player: เล่นแบบปลอดภัย + สถานะ overlay + remove() ก่อน setup
+   - Fallback guard: play session token กัน try-loop ค้างเมื่อเปลี่ยนช่องเร็ว
+   - Auto-backup: ช่องหลักเล่นไม่ได้ → ลองช่องสำรองอัตโนมัติ (one-hop)
    - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
 =========================================================== */
 
@@ -21,16 +23,9 @@ let currentFilter   = '';
 let currentIndex    = -1;
 let didInitialReveal= false;
 
-// ===== คุม fallback ค้าง + live-viewers smooth =====
-let playSession = 0;   // token ของการเล่นปัจจุบัน
-let __lvCurrent = 0;   // ค่าที่แสดงอยู่
-let __lvAnimRAF = 0;   // requestAnimationFrame id
-
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ===== Presence (Concurrent Viewers) — Mobile friendly =====
-   ตั้งค่าได้ด้วย <script>window.PRESENCE_URL='https://.../hb'</script> ก่อนโหลดไฟล์นี้
-*/
+/* ===== Presence (Concurrent Viewers) ===== */
 const PRESENCE_URL     = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
 const VIEWER_TTL_S     = 120; // ยืด TTL เผื่อมือถือโดนพัก
 const PING_INTERVAL_S  = 25;  // ส่ง heartbeat ประมาณทุก 25 วิ
@@ -40,8 +35,36 @@ let currentPresenceKey = null;
 let lastPingAt         = 0;
 let presenceBound      = false;
 
+/* ===== Smooth live-viewer number ===== */
+let liveViewersDisplay = 0;
+let liveViewersAnimRaf = null;
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+function animateLiveViewers(from, to, duration=360){
+  const el = document.querySelector('#live-viewers .n');
+  if (!el) { liveViewersDisplay = to; return; }
+  if (from === to){ el.textContent = String(to); liveViewersDisplay = to; return; }
+  if (liveViewersAnimRaf) cancelAnimationFrame(liveViewersAnimRaf);
+  const start = performance.now();
+  function step(now){
+    const t = Math.min(1, (now - start) / duration);
+    const v = Math.round(from + (to - from) * easeOutCubic(t));
+    if (el.textContent !== String(v)) el.textContent = String(v);
+    if (t < 1) liveViewersAnimRaf = requestAnimationFrame(step);
+    else liveViewersAnimRaf = null, liveViewersDisplay = to;
+  }
+  liveViewersAnimRaf = requestAnimationFrame(step);
+}
+function updateLiveViewers(n){
+  const target = (typeof n==='number' && isFinite(n) && n>=0) ? n : 0;
+  animateLiveViewers(liveViewersDisplay, target);
+}
+
 /* --- สำหรับ grid re-render เมื่อคอลัมน์เปลี่ยนจริง --- */
 let __lastGridCols = null;
+
+/* --- Play session token กัน fallback ค้าง --- */
+let playToken = 0;
+const backupTriedForIds = new Set();
 
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
@@ -185,29 +208,9 @@ function mountLiveViewersUnderClock(){
     pill = document.createElement('span');
     pill.id = 'live-viewers';
     pill.innerHTML = `<span class="dot" aria-hidden="true"></span><span class="label">ออนไลน์</span><span class="n">0</span>`;
-    pill.setAttribute('role','status');
-    pill.setAttribute('aria-live','polite');
   }
   if (clock) clock.insertAdjacentElement('afterend', pill);
   else header.appendChild(pill);
-}
-// Smooth easing (ease-out cubic ~ 360ms)
-function updateLiveViewers(n){
-  const el = document.querySelector('#live-viewers .n'); if (!el) return;
-  const target = Math.max(0, Math.floor(Number.isFinite(n) ? n : 0));
-  const start  = __lvCurrent;
-  const startAt= performance.now();
-  const dur    = 360;
-
-  cancelAnimationFrame(__lvAnimRAF);
-  function raf(t){
-    const k = Math.min(1, (t - startAt) / dur);
-    const eased = 1 - Math.pow(1 - k, 3);
-    const val = Math.round(start + (target - start) * eased);
-    if (val !== __lvCurrent){ __lvCurrent = val; el.textContent = String(val); }
-    if (k < 1) __lvAnimRAF = requestAnimationFrame(raf);
-  }
-  __lvAnimRAF = requestAnimationFrame(raf);
 }
 
 /* ------------------------ Header: Clock ------------------------ */
@@ -234,8 +237,6 @@ function buildTabs(){
     btn.className = 'tab';
     btn.dataset.filter = name;
     btn.setAttribute('aria-selected','false');
-    btn.setAttribute('role','tab');
-    btn.setAttribute('aria-controls','channel-list');
     btn.innerHTML = `
       <span class="tab-card">
         <span class="tab-icon">${getIconSVG(name)}</span>
@@ -269,10 +270,12 @@ function setActiveTab(name){
   });
 
   const grid = ensureGrid();
+  grid.setAttribute('aria-busy','true');   // announce busy to AT
   grid.classList.add('switch-out');
   setTimeout(()=>{
     grid.classList.remove('switch-out');
     render({withEnter:true});
+    grid.removeAttribute('aria-busy');
   }, SWITCH_OUT_MS);
 }
 function centerTabsIfPossible(){
@@ -316,6 +319,45 @@ function useWideLogo(ch){
   return !!rule;
 }
 
+/* Backup helpers */
+function isBackup(ch){
+  if (!ch) return false;
+  if (ch.backup === true || ch.isBackup === true) return true;
+  if (Array.isArray(ch.tags) && ch.tags.some(t=>/backup|สำรอง/i.test(String(t)))) return true;
+  if (typeof ch.name === 'string' && /backup|สำรอง/i.test(ch.name)) return true;
+  return false;
+}
+function baseName(name=''){
+  return String(name)
+    .replace(/\(.*?สำรอง.*?\)|\(.*?backup.*?\)/gi,'')
+    .replace(/สำรอง[\s\d•-]*/gi,'')
+    .replace(/backup[\s\d•-]*/gi,'')
+    .trim();
+}
+function findBackupForChannel(ch){
+  // 1) explicit linking
+  if (Array.isArray(ch.backups)) {
+    for (const ref of ch.backups) {
+      const c = channels.find(x=>x.id===ref || x.name===ref);
+      if (c) return c;
+    }
+  }
+  if (ch.backupId) {
+    const c = channels.find(x=>x.id===ch.backupId);
+    if (c) return c;
+  }
+  // 2) group field
+  if (ch.group) {
+    const candidates = channels.filter(x=>x.group===ch.group && isBackup(x));
+    if (candidates.length) return candidates[0];
+  }
+  // 3) name heuristic
+  const b = baseName(ch.name||'');
+  const candidates = channels.filter(x=> isBackup(x) && baseName(x.name||'') === b);
+  if (candidates.length) return candidates[0];
+  return null;
+}
+
 /* ------------------------ Render grid ------------------------ */
 function ensureGrid(){
   const grid = document.getElementById('channel-list');
@@ -338,9 +380,11 @@ function render(opt={withEnter:false}){
     btn.title = ch.name || 'ช่อง';
     btn.tabIndex = 0; // เล่นด้วยคีย์บอร์ดได้
 
+    const badge = isBackup(ch) ? `<span class="badge backup">สำรอง</span>` : '';
+
     btn.innerHTML = `
       <div class="ch-card">
-        ${isBackupChannel(ch) ? '<span class="badge backup" title="ช่องสำรอง">สำรอง</span>' : ''}
+        ${badge}
         <div class="logo-wrap">
           <img class="logo" loading="lazy" decoding="async"
                src="${escapeHtml(ch.logo || '')}" alt="${escapeHtml(ch.name||'โลโก้ช่อง')}">
@@ -405,19 +449,23 @@ function playByIndex(i, opt={scroll:true}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
 
+  // bump token & reset backup hop guard if starting from a non-backup
+  const token = ++playToken;
+  if (!isBackup(ch)) backupTriedForIds.delete(ch.id);
+
   const srcList = buildSources(ch);
-  showPlayerStatus(`กำลังเตรียมเล่น: ${ch.name || ''}`);
+  const np = ch.name || '';
+  showPlayerStatus(`กำลังเตรียมเล่น: ${np}`);
+  window.__setNowPlaying?.(np);
+  document.title = (np ? `${np} · Flow TV` : 'Flow TV');
 
-  const session = ++playSession; // เริ่ม session ใหม่ (กัน fallback ค้าง)
-  tryPlayJW(ch, srcList, 0, session);
+  tryPlayJW(ch, srcList, 0, token, { allowBackup: true });
 
-  window.__setNowPlaying?.(ch.name || '');
-  startPresence(ch.id || ch.name || `ch-${i}`);   // เริ่มนับคนดูของช่องนี้
+  startPresence(ch.id || ch.name || `ch-${i}`); // เริ่มนับคนดูของช่องนี้
   highlight(i);
 
   if (opt.scroll ?? true) scrollToPlayer();
-  showMobileToast(ch.name || '');
-  document.title = (ch.name ? `${ch.name} · Flow TV` : 'Flow TV');
+  showMobileToast(np);
 }
 function buildSources(ch){
   if (Array.isArray(ch.sources) && ch.sources.length){
@@ -428,13 +476,25 @@ function buildSources(ch){
   const drm = ch.drm || (ch.keyId && ch.key ? {clearkey:{keyId:ch.keyId, key:ch.key}} : undefined);
   return [{ src:s, type:t, drm }];
 }
-function tryPlayJW(ch, list, idx, session){
-  if (session !== playSession) return; // เปลี่ยนช่องไปแล้ว ยุติทันที
+function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
+  if (token !== playToken) return; // มีการเล่นใหม่แล้ว ให้ยกเลิกงานเก่า
 
-  if (idx >= list.length) { 
-    // ทุกแหล่งใน "ช่องนี้" เล่นไม่ได้ → ลองสลับไป "ช่องสำรอง"
-    autoSwitchToBackupChannel(ch, session);
-    return; 
+  if (idx >= list.length) {
+    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง');
+    console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name);
+
+    // Auto-backup: one-hop จากช่องหลัก → สำรอง
+    if (opt.allowBackup && !isBackup(ch) && !backupTriedForIds.has(ch.id)) {
+      const backup = findBackupForChannel(ch);
+      if (backup) {
+        backupTriedForIds.add(ch.id);
+        showPlayerStatus('เล่นช่องสำรอง…');
+        const j = channels.indexOf(backup);
+        if (j >= 0) playByIndex(j, { scroll:false });
+        return;
+      }
+    }
+    return;
   }
 
   // กัน event/listener สะสมจากอินสแตนซ์ก่อนหน้า
@@ -456,36 +516,31 @@ function tryPlayJW(ch, list, idx, session){
     playbackRateControls:true
   });
 
-  player.once('playAttemptFailed', ()=>{ player.setMute(true); player.play(true); });
-  player.on('buffer', ()=> showPlayerStatus('กำลังบัฟเฟอร์…'));
-  player.on('play',   ()=> showPlayerStatus(''));
-  player.on('firstFrame', ()=> showPlayerStatus(''));
+  // Events (เช็ค token ทุกครั้ง กัน callback ลากคิว)
+  player.once('playAttemptFailed', ()=>{
+    if (token !== playToken) return;
+    player.setMute(true); player.play(true);
+  });
+  player.on('buffer', ()=>{
+    if (token !== playToken) return;
+    showPlayerStatus('กำลังบัฟเฟอร์…');
+  });
+  player.on('play', ()=>{ if (token === playToken) showPlayerStatus(''); });
+  player.on('firstFrame', ()=>{ if (token === playToken) showPlayerStatus(''); });
+
   player.on('setupError', e => {
-    if (session !== playSession) return;
+    if (token !== playToken) return;
     console.warn('setupError:', e);
     showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…');
-    tryPlayJW(ch, list, idx+1, session);
+    tryPlayJW(ch, list, idx+1, token, opt);
   });
   player.on('error', e => {
-    if (session !== playSession) return;
+    if (token !== playToken) return;
     console.warn('playError:', e);
     showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
-    tryPlayJW(ch, list, idx+1, session);
+    tryPlayJW(ch, list, idx+1, token, opt);
   });
 }
-// สลับไป "ช่องสำรอง" อัตโนมัติ เมื่อช่องหลักล้มเหลวหมดทุกแหล่ง
-function autoSwitchToBackupChannel(ch, session){
-  if (session !== playSession) return;
-  const candidates = findBackupCandidates(ch);
-  if (candidates.length){
-    showPlayerStatus('สลับไปช่องสำรอง…');
-    playByIndex(candidates[0], { scroll:false });
-  } else {
-    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง และไม่พบช่องสำรอง');
-    console.warn('No backup channel found for', ch?.name);
-  }
-}
-
 function makeJwSource(s, ch){
   const file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
   const type = (s.type || detectType(file)).toLowerCase();
@@ -801,57 +856,4 @@ function scheduleAutoClear(){
     localStorage.setItem(AUTO_CLEAR_KEY, String(Date.now()));
     setTimeout(tick, SIX_HR_MS);
   }, delay);
-}
-
-/* ------------------------ Backup helpers ------------------------ */
-function isBackupChannel(ch){
-  if (!ch) return false;
-  if (ch.backup === true || ch.isBackup === true) return true;
-  const tags = (ch.tags || []).map(t=>String(t).toLowerCase());
-  if (tags.includes('backup') || tags.includes('สำรอง') || tags.includes('mirror') || tags.includes('alt')) return true;
-  const name = String(ch.name||'').toLowerCase();
-  if (/(สำรอง|backup|mirror|alt)\b/.test(name)) return true;
-  return false;
-}
-function normalizeBaseName(name){
-  return String(name||'')
-    .toLowerCase()
-    .replace(/\((?:.*?)\)/g, '')               // วงเล็บ
-    .replace(/\b(สำรอง|backup|mirror|alt)\b\s*\d*/g,'') // คำบอกสำรอง
-    .replace(/\s{2,}/g,' ')
-    .trim();
-}
-function extractBackupNumber(name){
-  const m = /(สำรอง|backup|mirror|alt)\s*(\d+)/i.exec(String(name||''));
-  return m ? parseInt(m[2],10) : null;
-}
-function findBackupCandidates(ch){
-  const outIdxs = [];
-  const seen = new Set();
-
-  // 1) explicit fields
-  const explicitIds = [];
-  if (Array.isArray(ch.backupIds)) explicitIds.push(...ch.backupIds);
-  ['backupId','fallbackId','altId','mirrorId'].forEach(k => { if (ch[k]) explicitIds.push(ch[k]); });
-  explicitIds.forEach(id=>{
-    const idx = channels.findIndex(x => String(x.id)===String(id));
-    if (idx>=0 && !seen.has(idx)) { seen.add(idx); outIdxs.push(idx); }
-  });
-
-  // 2) heuristic ตามชื่อฐานเดียวกัน
-  const base = normalizeBaseName(ch.name||'');
-  const cands = channels
-    .map((c,idx)=>({c,idx}))
-    .filter(o=> o.c!==ch && normalizeBaseName(o.c.name||'')===base);
-
-  cands.sort((a,b)=>{
-    const ab=isBackupChannel(a.c)?1:0, bb=isBackupChannel(b.c)?1:0;
-    if (ab!==bb) return bb-ab;                     // ช่องที่ถูกมาร์กสำรองมาก่อน
-    const an=extractBackupNumber(a.c.name), bn=extractBackupNumber(b.c.name);
-    if (an!==bn) return (an||99)-(bn||99);         // สำรอง 1 มาก่อน 2 3 ...
-    return a.idx-b.idx;
-  });
-  cands.forEach(o=>{ if(!seen.has(o.idx)) { seen.add(o.idx); outIdxs.push(o.idx); } });
-
-  return outIdxs;
 }
