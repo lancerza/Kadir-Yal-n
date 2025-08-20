@@ -35,6 +35,9 @@ let currentPresenceKey = null;
 let lastPingAt         = 0;
 let presenceBound      = false;
 
+/* --- สำหรับ grid re-render เมื่อคอลัมน์เปลี่ยนจริง --- */
+let __lastGridCols = null;
+
 /* ------------------------ Boot ------------------------ */
 document.addEventListener('DOMContentLoaded', async () => {
   window.scrollTo({ top: 0, behavior: 'auto' });
@@ -43,9 +46,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   scheduleAutoClear();
 
   mountClock();
-  mountNowBarUnderPlayer();   // now-playing ใต้ VDO (กึ่งกลาง)
+  mountNowBarUnderPlayer();     // now-playing ใต้ VDO (กึ่งกลาง)
   mountLiveViewersUnderClock(); // live-viewers ใต้ clock ใน header
-  mountHistatsHidden();       // Histats แบบซ่อน
+  mountHistatsHidden();         // Histats แบบซ่อน
 
   try {
     await loadData();
@@ -60,6 +63,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   centerTabsIfPossible();
   addEventListener('resize', debounce(centerTabsIfPossible,150));
   addEventListener('load', centerTabsIfPossible);
+
+  // ✅ realtime grid re-render เฉพาะเมื่อ "จำนวนคอลัมน์" เปลี่ยน
+  addEventListener('resize', debounce(rerenderOnResize, 120));
+  addEventListener('orientationchange', rerenderOnResize);
 });
 
 /* ------------------------ Load (fresh fetch) ------------------------ */
@@ -293,7 +300,8 @@ function ensureGrid(){
   return grid;
 }
 function render(opt={withEnter:false}){
-  const grid = ensureGrid(); grid.innerHTML='';
+  const grid = ensureGrid(); 
+  grid.innerHTML='';
 
   const list = channels.filter(c => getCategory(c) === currentFilter);
   const cols = computeGridCols(grid);
@@ -305,6 +313,7 @@ function render(opt={withEnter:false}){
     btn.dataset.globalIndex = String(channels.indexOf(ch));
     if (useWideLogo(ch)) btn.dataset.wide = 'true';
     btn.title = ch.name || 'ช่อง';
+    btn.tabIndex = 0; // เล่นด้วยคีย์บอร์ดได้
 
     btn.innerHTML = `
       <div class="ch-card">
@@ -319,6 +328,9 @@ function render(opt={withEnter:false}){
       ripple(e, btn.querySelector('.ch-card'));
       playByChannel(ch);
       scrollToPlayer();
+    });
+    btn.addEventListener('keydown', e=>{
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); }
     });
 
     const row = Math.floor(i / Math.max(cols,1));
@@ -339,6 +351,9 @@ function render(opt={withEnter:false}){
   }
 
   highlight(currentIndex);
+
+  // ✅ เก็บจำนวนคอลัมน์ล่าสุดไว้ เปรียบเทียบตอน resize
+  __lastGridCols = computeGridCols(grid);
 }
 function computeGridCols(container){
   const cs = getComputedStyle(document.documentElement);
@@ -346,6 +361,15 @@ function computeGridCols(container){
   const gap   = parseFloat(cs.getPropertyValue('--tile-g')) || 10;
   const fullW = container.clientWidth;
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
+}
+// ✅ เรียกใช้เมื่อ resize/orientationchange: re-render เฉพาะเมื่อจำนวนคอลัมน์เปลี่ยน
+function rerenderOnResize(){
+  const grid = document.getElementById('channel-list'); 
+  if (!grid) return;
+  const cols = computeGridCols(grid);
+  if (cols !== __lastGridCols){
+    render({withEnter:false});
+  }
 }
 
 /* ------------------------ Player (JW) + Status ------------------------ */
@@ -367,6 +391,7 @@ function playByIndex(i, opt={scroll:true}){
 
   if (opt.scroll ?? true) scrollToPlayer();
   showMobileToast(ch.name || '');
+  document.title = (ch.name ? `${ch.name} · Flow TV` : 'Flow TV');
 }
 function buildSources(ch){
   if (Array.isArray(ch.sources) && ch.sources.length){
@@ -378,9 +403,16 @@ function buildSources(ch){
   return [{ src:s, type:t, drm }];
 }
 function tryPlayJW(ch, list, idx){
-  if (idx >= list.length) { showPlayerStatus('เล่นไม่ได้ทุกแหล่ง'); console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); return; }
-  const s = list[idx];
+  if (idx >= list.length) { 
+    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง'); 
+    console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name); 
+    return; 
+  }
 
+  // ✅ กัน event/listener สะสมจากอินสแตนซ์ก่อนหน้า
+  try { jwplayer('player').remove(); } catch {}
+
+  const s = list[idx];
   const jwSrc = makeJwSource(s, ch);
   showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${list.length}…`);
 
