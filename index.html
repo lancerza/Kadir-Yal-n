@@ -10,10 +10,6 @@
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="color-scheme" content="dark light">
 
-  <!-- iOS PWA status bar (optional) -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
 
   <!-- Fonts (Thai clean) -->
@@ -26,13 +22,10 @@
 
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- JW Player (defer, loaded before app.js to keep order) -->
+  <!-- JW Player (defer, but before app.js to keep order) -->
   <script defer src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
 </head>
 <body>
-  <!-- Skip link for keyboard users -->
-  <a href="#channel-list" class="skip-link">ข้ามไปยังรายการช่อง</a>
-
   <header>
     <div class="h-wrap" role="banner">
       <div id="clock" class="clock" aria-live="polite" aria-label="วันเวลา"></div>
@@ -48,12 +41,12 @@
     <section class="grid" id="channel-list" role="region" aria-label="รายการช่อง" aria-live="polite"></section>
   </main>
 
-  <!-- Optional: ตั้งค่าก่อนโหลด app.js 
+  <!-- ตั้งค่าก่อนโหลด app.js ตามต้องการ
        window.PRESENCE_URL = 'https://your-worker.workers.dev/hb';
-       window.PROXY_BASE = 'https://your-proxy.workers.dev';
+       window.PROXY_BASE   = 'https://your-proxy.workers.dev';
   -->
   <script>
-    window.PROXY_BASE = window.PROXY_BASE || '';
+    window.PROXY_BASE  = window.PROXY_BASE  || '';
     // window.PRESENCE_URL = window.PRESENCE_URL || '';
   </script>
 
@@ -67,7 +60,6 @@
     }
     window.addEventListener('load', setHeaderOffset, { once:true });
     window.addEventListener('resize', setHeaderOffset);
-    window.addEventListener('orientationchange', setHeaderOffset);
   </script>
 
   <noscript>
