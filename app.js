@@ -1,13 +1,14 @@
-/* ========================= app.js =========================
-   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
+/* ========================= app.js (FULL, patched) =========================
+   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (มือถือรองรับเต็ม)
    - Now bar ใต้ VDO: now-playing (กึ่งกลาง)
-   - Live viewers: ย้ายไปอยู่ใต้เวลา (clock) ใน header + smooth number
+   - Live viewers: ใต้เวลา (clock) ใน header + smooth number
    - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
    - JW Player: เล่นแบบปลอดภัย + สถานะ overlay + remove() ก่อน setup
+   - เฉพาะหมวด "หนัง" ให้เล่นด้วย Hls.js (พร้อม destroy/cleanup)
    - Fallback guard: play session token กัน try-loop ค้างเมื่อเปลี่ยนช่องเร็ว
    - Auto-backup: ช่องหลักเล่นไม่ได้ → ลองช่องสำรองอัตโนมัติ (one-hop)
    - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
-=========================================================== */
+=========================================================================== */
 
 const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
@@ -440,16 +441,17 @@ function rerenderOnResize(){
   }
 }
 
-/* ------------------------ Player (JW) + Status ------------------------ */
+/* ------------------------ Player select (JW vs HLS) ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
 }
+
+/* PATCH: เฉพาะหมวด "หนัง" ใช้ Hls.js, อื่นๆ ใช้ JW */
 function playByIndex(i, opt={scroll:true}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
 
-  // bump token & reset backup hop guard if starting from a non-backup
   const token = ++playToken;
   if (!isBackup(ch)) backupTriedForIds.delete(ch.id);
 
@@ -459,7 +461,12 @@ function playByIndex(i, opt={scroll:true}){
   window.__setNowPlaying?.(np);
   document.title = (np ? `${np} · Flow TV` : 'Flow TV');
 
-  tryPlayJW(ch, srcList, 0, token, { allowBackup: true });
+  const isMovie = (getCategory(ch) === 'หนัง');
+  if (isMovie){
+    tryPlayHLS(ch, srcList, 0, token, { allowBackup: true });
+  }else{
+    tryPlayJW(ch, srcList, 0, token, { allowBackup: true });
+  }
 
   startPresence(ch.id || ch.name || `ch-${i}`); // เริ่มนับคนดูของช่องนี้
   highlight(i);
@@ -467,6 +474,7 @@ function playByIndex(i, opt={scroll:true}){
   if (opt.scroll ?? true) scrollToPlayer();
   showMobileToast(np);
 }
+
 function buildSources(ch){
   if (Array.isArray(ch.sources) && ch.sources.length){
     return [...ch.sources].sort((a,b)=>(a.priority||99)-(b.priority||99));
@@ -476,8 +484,13 @@ function buildSources(ch){
   const drm = ch.drm || (ch.keyId && ch.key ? {clearkey:{keyId:ch.keyId, key:ch.key}} : undefined);
   return [{ src:s, type:t, drm }];
 }
+
+/* ------------------------ Player (JW) + Status ------------------------ */
 function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
   if (token !== playToken) return; // มีการเล่นใหม่แล้ว ให้ยกเลิกงานเก่า
+
+  // NEW: ปิด Hls.js ถ้ามี ก่อนใช้ JW (กัน overlap/เสียงค้าง)
+  destroyHls();
 
   if (idx >= list.length) {
     showPlayerStatus('เล่นไม่ได้ทุกแหล่ง');
@@ -541,11 +554,13 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
     tryPlayJW(ch, list, idx+1, token, opt);
   });
 }
+
 function makeJwSource(s, ch){
   const file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
   const type = (s.type || detectType(file)).toLowerCase();
   const out = { file, type };
   if (type==='dash' && s.drm?.clearkey?.keyId && s.drm?.clearkey?.key){
+    // หมายเหตุ: JW ไม่รองรับ ClearKey จริง ๆ แต่คงไว้เพื่อความเข้ากันได้กับข้อมูลที่มี
     out.drm = { clearkey: { keyId: s.drm.clearkey.keyId, key: s.drm.clearkey.key } };
   }
   return out;
@@ -582,6 +597,104 @@ function scrollToPlayer(){
   const el = document.getElementById('player');
   const y = el.getBoundingClientRect().top + window.pageYOffset - headerOffset() - 8;
   window.scrollTo({ top:y, behavior:'smooth' });
+}
+
+/* ------------------------ Hls.js engine (เฉพาะหมวด "หนัง") ------------------------ */
+let __hls = null;
+
+function ensureHlsVideo(){
+  const host = document.getElementById('player');
+  if (!host) throw new Error('#player not found');
+  let v = host.querySelector('video#hls-video');
+  if (!v){
+    // เคลียร์ container ที่อาจเหลือจาก JW
+    host.innerHTML = '';
+    v = document.createElement('video');
+    v.id = 'hls-video';
+    v.playsInline = true;
+    v.muted = true;         // ช่วยให้ autoplay ผ่านนโยบายเบราว์เซอร์
+    v.autoplay = true;
+    v.controls = true;
+    v.style.cssText = 'width:100%;height:auto;background:#000;border-radius:8px;display:block;';
+    host.appendChild(v);
+  }
+  return v;
+}
+
+function destroyHls(){
+  try { if (__hls){ __hls.destroy(); __hls = null; } } catch {}
+  const v = document.getElementById('hls-video');
+  if (v) {
+    try { v.pause(); } catch {}
+    v.removeAttribute('src');
+    v.load?.();
+  }
+}
+
+function tryPlayHLS(ch, list, idx, token, opt={allowBackup:true}){
+  if (token !== playToken) return;
+
+  const hlsList = list
+    .map(s=>({ ...s, t:(s.type||detectType(s.src||s.file)).toLowerCase() }))
+    .filter(s=> s.t==='hls' || /\.m3u8(\?|$)/i.test(String(s.src||s.file||'')));
+
+  if (idx >= hlsList.length){
+    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง (HLS)');
+    console.warn('ทุกแหล่ง (HLS) เล่นไม่สำเร็จ:', ch?.name);
+    // one-hop backup
+    if (opt.allowBackup && !isBackup(ch) && !backupTriedForIds.has(ch.id)) {
+      const backup = findBackupForChannel(ch);
+      if (backup) {
+        backupTriedForIds.add(ch.id);
+        const j = channels.indexOf(backup);
+        if (j>=0) playByIndex(j, {scroll:false});
+      }
+    }
+    return;
+  }
+
+  // ปิด JW ก่อนเสมอ
+  try { jwplayer('player').remove(); } catch {}
+  destroyHls();
+
+  const s = hlsList[idx];
+  const src = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
+  showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${hlsList.length}…`);
+
+  const video = ensureHlsVideo();
+
+  if (window.Hls && Hls.isSupported()){
+    __hls = new Hls({ liveSyncDurationCount: 3, liveMaxLatencyDurationCount: 10 });
+    __hls.loadSource(src);
+    __hls.attachMedia(video);
+
+    __hls.on(Hls.Events.MANIFEST_PARSED, ()=>{
+      if (token===playToken){
+        showPlayerStatus('');
+        video.play().catch(()=>{});
+      }
+    });
+    __hls.on(Hls.Events.ERROR, (_, data)=>{
+      if (token !== playToken) return;
+      if (data.fatal){
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR){ __hls.startLoad(); }
+        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR){ __hls.recoverMediaError(); }
+        else {
+          destroyHls();
+          showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
+          tryPlayHLS(ch, hlsList, idx+1, token, opt);
+        }
+      }
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari (native HLS)
+    video.src = src;
+    video.oncanplay = ()=>{ if (token===playToken) showPlayerStatus(''); };
+    video.onerror   = ()=>{ if (token===playToken) { showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…'); tryPlayHLS(ch, hlsList, idx+1, token, opt); } };
+    video.play().catch(()=>{});
+  } else {
+    showPlayerStatus('เบราว์เซอร์นี้ไม่รองรับ HLS');
+  }
 }
 
 /* ------------------------ Presence (heartbeat) — mobile friendly ------------------------ */
