@@ -1,17 +1,16 @@
-/* ========================= app.js (FULL, movies use Hls.js first) =========================
+/* ========================= app.js (FULL — หมวด "หนัง" ใช้ Hls.js/.m3u8 เท่านั้น) =========================
    - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (มือถือรองรับเต็ม)
    - Now bar ใต้ VDO: now-playing (กึ่งกลาง)
    - Live viewers: ใต้เวลา (clock) ใน header + smooth number
    - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
    - Player selection:
-        * เฉพาะหมวด "หนัง" → ใช้ Hls.js ก่อน
-        * ถ้าไม่มี HLS หรือ HLS ล้มเหลวทั้งหมด → ตกกลับ JW/DASH อัตโนมัติ
-        * หมวดอื่น → ใช้ JW Player ตามปกติ
+        * หมวด "หนัง" → ใช้ Hls.js เท่านั้น (เฉพาะลิงก์ .m3u8) ไม่มี JW fallback
+        * หมวดอื่น → ใช้ JW Player ตามปกติ (HLS/DASH)
    - Cleanup: destroy Hls.js ก่อนตั้งค่า JW กันเสียง/หน่วยความจำค้าง
    - Fallback guard: play session token กัน try-loop ค้างเมื่อเปลี่ยนช่องเร็ว
    - Auto-backup: ช่องหลักเล่นไม่ได้ → ลองช่องสำรองอัตโนมัติ (one-hop)
    - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
-=========================================================================================== */
+============================================================================================================ */
 
 const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
@@ -27,6 +26,7 @@ let currentFilter   = '';
 let currentIndex    = -1;
 let didInitialReveal= false;
 
+// ใส่ key ของคุณเองได้ตามต้องการ
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
 /* ===== Presence (Concurrent Viewers) ===== */
@@ -334,7 +334,7 @@ function isBackup(ch){
 function baseName(name=''){
   return String(name)
     .replace(/\(.*?สำรอง.*?\)|\(.*?backup.*?\)/gi,'')
-    .replace(/สำรอง[\ส\d•-]*/gi,'')
+    .replace(/สำรอง[\s\d•-]*/gi,'')
     .replace(/backup[\s\d•-]*/gi,'')
     .trim();
 }
@@ -447,7 +447,7 @@ function playByChannel(ch){
   if (i >= 0) playByIndex(i);
 }
 
-/* PATCH: เฉพาะหมวด "หนัง" ใช้ Hls.js ก่อน, อื่น ๆ ใช้ JW */
+/* หมวด "หนัง" → ใช้ Hls.js เท่านั้น (.m3u8), หมวดอื่น → JW */
 function playByIndex(i, opt={scroll:true}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
@@ -463,7 +463,7 @@ function playByIndex(i, opt={scroll:true}){
 
   const isMovie = (getCategory(ch) === 'หนัง');
   if (isMovie){
-    tryPlayHLS(ch, srcList, 0, token, { allowBackup: true });
+    tryPlayHLS_ONLY(ch, srcList, 0, token);           // << ใช้ Hls.js เท่านั้น
   }else{
     tryPlayJW(ch, srcList, 0, token, { allowBackup: true });
   }
@@ -595,7 +595,7 @@ function scrollToPlayer(){
   window.scrollTo({ top:y, behavior:'smooth' });
 }
 
-/* ------------------------ Hls.js engine (สำหรับหมวด "หนัง" + fallback JW/DASH) ------------------------ */
+/* ------------------------ Hls.js engine (เฉพาะหมวด "หนัง" — .m3u8 เท่านั้น) ------------------------ */
 let __hls = null;
 
 function ensureHlsVideo(){
@@ -603,19 +603,21 @@ function ensureHlsVideo(){
   if (!host) throw new Error('#player not found');
   let v = host.querySelector('video#hls-video');
   if (!v){
-    host.innerHTML = ''; // ล้าง container เดิม (เช่น JW)
+    // เคลียร์ container ที่อาจเหลือจาก JW
+    try { jwplayer('player').remove(); } catch {}
+    host.innerHTML = '';
     v = document.createElement('video');
     v.id = 'hls-video';
     v.playsInline = true;
-    v.muted = true;         // autoplay-friendly
+    v.muted = true;               // ช่วยให้ autoplay ผ่านนโยบายเบราว์เซอร์
     v.autoplay = true;
     v.controls = true;
+    v.crossOrigin = 'anonymous';  // เผื่อ CORS
     v.style.cssText = 'width:100%;height:auto;background:#000;border-radius:8px;display:block;';
     host.appendChild(v);
   }
   return v;
 }
-
 function destroyHls(){
   try { if (__hls){ __hls.destroy(); __hls = null; } } catch {}
   const v = document.getElementById('hls-video');
@@ -626,50 +628,42 @@ function destroyHls(){
   }
 }
 
-function tryPlayHLS(ch, list, idx, token, opt={allowBackup:true}){
+/* Hls.js only (.m3u8) + ลองแหล่ง HLS ถัดไป / one-hop backup */
+function tryPlayHLS_ONLY(ch, list, idx, token){
   if (token !== playToken) return;
 
-  // แบ่งแหล่งเป็น HLS/DASH
-  const norm = list.map(s=>({
-    ...s,
-    t: (s.type || detectType(s.src||s.file)).toLowerCase(),
-    u: (s.src || s.file || '')
-  }));
-  const hlsList  = norm.filter(s => s.t==='hls'  || /\.m3u8(\?|$)/i.test(s.u));
-  const dashList = norm.filter(s => s.t==='dash' || /\.mpd(\?|$)/i.test(s.u));
+  // กรองเฉพาะลิงก์ HLS/.m3u8 เท่านั้น
+  const hlsList = list
+    .map(s => ({ ...s, u: (s.src || s.file || '') }))
+    .filter(s => /\.m3u8(\?|$)/i.test(s.u) || (String(s.type||'').toLowerCase()==='hls'));
 
-  // ไม่มี HLS เลย → ตกไป JW/DASH
   if (hlsList.length === 0){
-    console.warn('[movie] ไม่มี HLS ในช่องนี้ → fallback JW/DASH');
-    tryPlayJW(ch, list, 0, token, opt);
+    showPlayerStatus('ช่องนี้ไม่มีลิงก์ .m3u8');
+    // one-hop backup ไปช่องสำรอง (เฉพาะ HLS เท่านั้น)
+    const backup = (!isBackup(ch) ? findBackupForChannel(ch) : null);
+    if (backup) {
+      backupTriedForIds.add(ch.id);
+      const j = channels.indexOf(backup);
+      if (j>=0) playByIndex(j, {scroll:false});
+    }
     return;
   }
-
   if (idx >= hlsList.length){
-    console.warn('[movie] ทุกแหล่ง (HLS) ล้มเหลว:', ch?.name);
-    // ถ้ามี DASH ให้ลองผ่าน JW/DASH หนึ่งรอบ
-    if (dashList.length){
-      showPlayerStatus('HLS ไม่สำเร็จ → ลองแบบ DASH…');
-      tryPlayJW(ch, list, 0, token, opt);
-      return;
-    }
-    // one-hop backup
-    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง (HLS)');
-    if (opt.allowBackup && !isBackup(ch) && !backupTriedForIds.has(ch.id)) {
-      const backup = findBackupForChannel(ch);
-      if (backup) { backupTriedForIds.add(ch.id); const j = channels.indexOf(backup); if (j>=0) playByIndex(j, {scroll:false}); }
+    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง (.m3u8)');
+    const backup = (!isBackup(ch) ? findBackupForChannel(ch) : null);
+    if (backup) {
+      backupTriedForIds.add(ch.id);
+      const j = channels.indexOf(backup);
+      if (j>=0) playByIndex(j, {scroll:false});
     }
     return;
   }
 
-  // ปิด JW + HLS เก่าก่อน
-  try { jwplayer('player').remove(); } catch {}
-  destroyHls();
-
+  destroyHls(); // ปิดของเดิมก่อน
   const s   = hlsList[idx];
-  const src = wrapWithProxyIfNeeded(s.u, ch);
-  showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${hlsList.length}…`);
+  const src = wrapWithProxyIfNeeded(s.u, ch);   // รองรับ proxy/referrer ถ้าตั้งไว้ในช่อง
 
+  showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${hlsList.length}…`);
   const video = ensureHlsVideo();
 
   if (window.Hls && Hls.isSupported()){
@@ -682,36 +676,24 @@ function tryPlayHLS(ch, list, idx, token, opt={allowBackup:true}){
     __hls.loadSource(src);
     __hls.attachMedia(video);
 
-    __hls.on(Hls.Events.MANIFEST_PARSED, ()=>{
+    __hls.on(Hls.Events.MANIFEST_PARSED, () => {
       if (token===playToken){ showPlayerStatus(''); video.play().catch(()=>{}); }
     });
-
-    __hls.on(Hls.Events.ERROR, (_, data)=>{
+    __hls.on(Hls.Events.ERROR, (_, data) => {
       if (token !== playToken) return;
-
       console.warn('[HLS error]', data?.type, data?.details, data);
-
       if (data.fatal){
-        if (data.type === Hls.ErrorTypes.NETWORK_ERROR){ __hls.startLoad(); return; }
-        if (data.type === Hls.ErrorTypes.MEDIA_ERROR){ __hls.recoverMediaError(); return; }
-
-        // fatal อื่น → ลอง HLS ถัดไป
+        // ลองลิงก์ HLS ถัดไปเท่านั้น (ไม่มี JW fallback)
         destroyHls();
         showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
-        tryPlayHLS(ch, hlsList, idx+1, token, opt);
-      } else {
-        if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
-            data.details === Hls.ErrorDetails.MANIFEST_PARSING_ERROR ||
-            data.details === Hls.ErrorDetails.KEY_SYSTEM_NO_KEYS) {
-          console.warn('[hint] อาจเป็น CORS/ลิงก์หมดอายุ/DRM');
-        }
+        tryPlayHLS_ONLY(ch, hlsList, idx+1, token);
       }
     });
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     // Safari (native HLS)
     video.src = src;
-    video.oncanplay = ()=>{ if (token===playToken) showPlayerStatus(''); };
-    video.onerror   = ()=>{ if (token===playToken) { showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…'); tryPlayHLS(ch, hlsList, idx+1, token, opt); } };
+    video.oncanplay = () => { if (token===playToken) showPlayerStatus(''); };
+    video.onerror   = () => { if (token===playToken) { showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…'); tryPlayHLS_ONLY(ch, hlsList, idx+1, token); } };
     video.play().catch(()=>{});
   } else {
     showPlayerStatus('เบราว์เซอร์นี้ไม่รองรับ HLS');
