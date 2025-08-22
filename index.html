@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>FLOW TV</title>
+  <meta name="description" content="FLOW TV – ดูรายการทีวีออนไลน์แบบลื่นไหล พร้อมจัดหมวดหมู่ช่องและตัวเล่นที่ใช้งานง่าย" />
+
+  <!-- Theming for mobile bars -->
+  <meta name="theme-color" content="#0b0c0e" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff"  media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+
+  <!-- Modern PWA meta -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/tv-online/manifest.webmanifest">
+
+  <!-- iOS PWA (ยังคงไว้เพื่อรองรับรุ่นเก่า) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FLOW TV">
+  <link rel="apple-touch-icon" href="/tv-online/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/tv-online/icons/icon-512.png">
+
+  <!-- Favicon (1x1 โปร่งใส ป้องกัน 404) -->
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
+
+  <!-- Fonts (Thai) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Preconnect JW CDN for faster player load -->
+  <link rel="preconnect" href="https://ssl.p.jwpcdn.com" crossorigin>
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- JW Player (โหลดก่อน app.js เพื่อให้พร้อมใช้งาน) -->
+  <script defer src="https://ssl.p.jwpcdn.com/player/v/8.30.0/jwplayer.js"></script>
+</head>
+<body>
+  <!-- Skip link for keyboard users -->
+  <a href="#channel-list" class="skip-link">ข้ามไปยังรายการช่อง</a>
+
+  <header>
+    <div class="h-wrap" role="banner">
+      <div id="clock" class="clock" aria-live="polite" aria-label="วันเวลา"></div>
+      <!-- ปุ่ม refresh จะถูกใส่โดย app.js -->
+    </div>
+  </header>
+
+  <main class="app" role="main">
+    <section id="player" aria-label="ตัวเล่นวิดีโอ"></section>
+
+    <nav id="tabs" class="tabs" role="tablist" aria-label="กรองช่อง"></nav>
+
+    <section class="grid" id="channel-list" role="region" aria-label="รายการช่อง" aria-live="polite"></section>
+  </main>
+
+  <!-- ตั้งค่าก่อนโหลด app.js (ปรับเองได้) 
+       window.PRESENCE_URL = 'https://your-worker.workers.dev/hb';
+       window.PROXY_BASE   = 'https://your-proxy.workers.dev';
+  -->
+  <script>
+    window.PROXY_BASE = window.PROXY_BASE || '';
+    // window.PRESENCE_URL = window.PRESENCE_URL || '';
+  </script>
+
+  <script defer src="app.js"></script>
+
+  <!-- sync CSS var ของความสูง header เพื่อการเลื่อนนุ่มนวล -->
+  <script>
+    function setHeaderOffset(){
+      const h = document.querySelector('header')?.offsetHeight || 72;
+      document.documentElement.style.setProperty('--header-offset', (h + 4) + 'px');
+    }
+    window.addEventListener('load', setHeaderOffset, { once:true });
+    window.addEventListener('resize', setHeaderOffset);
+    window.addEventListener('orientationchange', setHeaderOffset);
+  </script>
+
+  <noscript>
+    <p style="color:#fff; text-align:center; padding:1rem">
+      จำเป็นต้องเปิดใช้งาน JavaScript เพื่อใช้งาน FLOW TV
+    </p>
+  </noscript>
+</body>
+</html>
