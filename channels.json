@@ -402,13 +402,47 @@
       "type": "hls",
       "category": "กีฬา"
     },
-
     {
       "name": "TRUE Golf Channel",
       "category": "กีฬา",
       "logo": "https://cms.dmpcdn.com/livetv/2021/10/25/9bc0de00-3565-11ec-a098-9b134fb8338e_webp_320.png",
       "src": "https://github.com/BONDiptv/m3u8/raw/refs/heads/main/trueGOLF.m3u8",
       "type": "hls"
+    },
+    {
+      "name": "SONY TEN 1 HD",
+      "category": "กีฬา",
+      "logo": "https://www.sonypicturesnetworks.com/images/logos/SONY_SportsTen1_HD_Logo_CLR.png",
+      "src": "https://tataplay.slivcdn.com//hls/live/2011747/TEN1HD/master.m3u8",
+      "type": "hls"
+    },
+    {
+      "name": "SONY TEN 2 HD",
+      "category": "กีฬา",
+      "logo": "https://sonypicturesnetworks.com/images/logos/SONY_SportsTen2_HD_Logo_CLR.png",
+      "src": "https://tataplay.slivcdn.com/hls/live/2020434/TEN2HD/master.m3u8",
+      "type": "hls"
+    },
+    {
+      "name": "SONY TEN 3 HD",
+      "category": "กีฬา",
+      "logo": "https://sonypicturesnetworks.com/images/logos/SONY_SportsTen3_HD_Logo_CLR.png",
+      "src": "https://tataplay.slivcdn.com/hls/live/2020591/TEN3HD/master.m3u8",
+      "type": "hls"
+    },
+    {
+      "name": "SONY TEN 4 HD",
+      "category": "กีฬา",
+      "logo": "https://www.sonypicturesnetworks.com/images/logos/SONY_SportsTen4_HD_Logo_CLR.png",
+      "src": "https://tataplay.slivcdn.com/hls/live/2020589/ten4hd/master.m3u8",
+      "type": "hls"
+    },
+    {
+      "name": "SONY TEN 5 HD",
+      "category": "กีฬา",
+      "logo": "https://dtat2ks7dludr.cloudfront.net/spnsportsindia/channel_logos/SONY_SportsTen5_HD.png",
+      "src": "https://tataplay.slivcdn.com/hls/live/2020593/SONYSIXHD/master.m3u8",
+      "type": "hls"      
     },
 
     { "name": "AnHonestLife (2025) ชีวิตซื่อ", "category": "หนัง", "logo": "https://www.037hdd-movie.com/wp-content/uploads/2025/08/An-Honest-Life-2025.jpg", "src": "https://master.streamhls.com/hlsr2/46cabdb7b096b7bfc651293e8a682fbd/master.m3u8", "type": "hls" },
