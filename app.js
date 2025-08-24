@@ -1,9 +1,9 @@
-/* ========================= app.js (FULL) =========================
-   - หมวด "หนัง" เล่น .m3u8 ด้วย Hls.js โดยตรง (ไม่ใช้ JW / ไม่ fallback DASH)
-   - หมวดอื่นใช้ JW Player ตามปกติ
+/* ========================= app.js (FULL - JW for Movies) =========================
+   - หมวด "หนัง": เล่น .m3u8 ด้วย JW Player โดยตรง (บังคับ type=hls)
+   - หมวดอื่น: ใช้ JW Player ตามปกติ (ปล่อยให้รองรับ auto/hls/dash ตาม type)
    - Presence counter / Now bar / Live viewers / Histats
-   - Auto-backup one-hop, play-token guard, UI ripple + refresh + auto-clear cache
-=================================================================== */
+   - Auto-backup (หนึ่งครั้ง), play-token guard, UI ripple + refresh + auto-clear cache
+=================================================================================== */
 
 const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
@@ -322,7 +322,7 @@ function isBackup(ch){
 function baseName(name=''){
   return String(name)
     .replace(/\(.*?สำรอง.*?\)|\(.*?backup.*?\)/gi,'')
-    .replace(/สำรอง[\ส\d•-]*/gi,'')
+    .replace(/สำรอง[\s\d•-]*/gi,'')
     .replace(/backup[\s\d•-]*/gi,'')
     .trim();
 }
@@ -432,7 +432,7 @@ function playByChannel(ch){
   if (i >= 0) playByIndex(i);
 }
 
-/* หมวด "หนัง" → Hls.js โดยตรง (.m3u8) / หมวดอื่น → JW Player */
+/* หมวด "หนัง" → JW (เฉพาะ .m3u8) / หมวดอื่น → JW ปกติ */
 function playByIndex(i, opt={scroll:true}){
   const ch = channels[i]; if(!ch) return;
   currentIndex = i;
@@ -448,9 +448,9 @@ function playByIndex(i, opt={scroll:true}){
 
   const isMovie = (getCategory(ch) === 'หนัง');
   if (isMovie){
-    tryPlayHLS_ONLY(ch, srcList, 0, token);      // <<< ใช้ Hls.js เท่านั้น
+    tryPlayJW_M3U8_ONLY(ch, srcList, 0, token, { allowBackup: true });  // <<< JW-only HLS
   } else {
-    tryPlayJW(ch, srcList, 0, token, { allowBackup: true });
+    tryPlayJW(ch, srcList, 0, token, { allowBackup: true });            // <<< JW ปกติ
   }
 
   startPresence(ch.id || ch.name || `ch-${i}`);
@@ -473,7 +473,7 @@ function buildSources(ch){
 function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
   if (token !== playToken) return;
 
-  destroyHls(); // ปิด Hls.js ก่อนใช้ JW
+  destroyHlsArtifacts(); // เผื่อมี video เดิม (จากเวอร์ชันเก่า)
 
   if (idx >= list.length) {
     showPlayerStatus('เล่นไม่ได้ทุกแหล่ง');
@@ -520,7 +520,7 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
 
   player.on('setupError', () => {
     if (token !== playToken) return;
-    showPlayerStatus('ตั้งค่า player ล้มเหลว → ลองสำรอง…');
+    showPlayerStatus('ตั้งค่าแหล่งนี้ล้มเหลว → ลองสำรอง…');
     tryPlayJW(ch, list, idx+1, token, opt);
   });
   player.on('error', () => {
@@ -530,6 +530,85 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
   });
 }
 
+/* ------------------------ JW Player Path (หมวด "หนัง" เฉพาะ .m3u8) ------------------------ */
+function tryPlayJW_M3U8_ONLY(ch, list, idx, token, opt={allowBackup:true}){
+  if (token !== playToken) return;
+
+  destroyHlsArtifacts(); // เผื่อมี video เดิม (จากเวอร์ชันเก่า)
+
+  const hlsList = list
+    .map(s => ({ ...s, u: (s.src || s.file || '') }))
+    .filter(s => /\.m3u8(\?|$)/i.test(s.u) || String(s.type||'').toLowerCase()==='hls');
+
+  if (hlsList.length === 0){
+    showPlayerStatus('ช่องนี้ไม่มีลิงก์ .m3u8');
+    if (opt.allowBackup && !isBackup(ch) && !backupTriedForIds.has(ch.id)) {
+      const backup = findBackupForChannel(ch);
+      if (backup) {
+        backupTriedForIds.add(ch.id);
+        const j = channels.indexOf(backup);
+        if (j >= 0) playByIndex(j, { scroll:false });
+      }
+    }
+    return;
+  }
+  if (idx >= hlsList.length){
+    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง (.m3u8)');
+    if (opt.allowBackup && !isBackup(ch) && !backupTriedForIds.has(ch.id)) {
+      const backup = findBackupForChannel(ch);
+      if (backup) {
+        backupTriedForIds.add(ch.id);
+        const j = channels.indexOf(backup);
+        if (j >= 0) playByIndex(j, { scroll:false });
+      }
+    }
+    return;
+  }
+
+  try { jwplayer('player').remove(); } catch {}
+
+  const s   = hlsList[idx];
+  const url = wrapWithProxyIfNeeded(s.u, ch);
+  const jwSrc = { file: url, type: 'hls' }; // บังคับให้ JW เล่นเป็น HLS เสมอ
+
+  showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${hlsList.length}…`);
+
+  const player = jwplayer('player').setup({
+    playlist: [{ image: ch.poster || ch.logo || undefined, sources: [jwSrc] }],
+    width:'100%',
+    aspectratio:'16:9',
+    autostart: 'viewable',
+    mute: true,
+    preload:'metadata',
+    displaytitle:false,
+    displaydescription:false,
+    playbackRateControls:true
+  });
+
+  player.once('playAttemptFailed', ()=>{
+    if (token !== playToken) return;
+    player.setMute(true); player.play(true);
+  });
+  player.on('buffer', ()=>{
+    if (token !== playToken) return;
+    showPlayerStatus('กำลังบัฟเฟอร์…');
+  });
+  player.on('play', ()=>{ if (token === playToken) showPlayerStatus(''); });
+  player.on('firstFrame', ()=>{ if (token === playToken) showPlayerStatus(''); });
+
+  player.on('setupError', () => {
+    if (token !== playToken) return;
+    showPlayerStatus('ตั้งค่าแหล่งนี้ล้มเหลว → ลองสำรอง…');
+    tryPlayJW_M3U8_ONLY(ch, hlsList, idx+1, token, opt);
+  });
+  player.on('error', () => {
+    if (token !== playToken) return;
+    showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
+    tryPlayJW_M3U8_ONLY(ch, hlsList, idx+1, token, opt);
+  });
+}
+
+/* ------------------------ Shared helpers ------------------------ */
 function makeJwSource(s, ch){
   const file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
   const type = (s.type || detectType(file)).toLowerCase();
@@ -547,6 +626,11 @@ function wrapWithProxyIfNeeded(url, ch){
     return `${window.PROXY_BASE}/p/${b64}`;
   }
   return url;
+}
+function destroyHlsArtifacts(){
+  // ล้าง video #hls-video ถ้าเคยมีจากเวอร์ชันก่อน ๆ (กันชนกับ JW)
+  const v = document.getElementById('hls-video');
+  if (v){ try{ v.pause(); }catch{} v.remove(); }
 }
 function showMobileToast(text){
   if (!isMobile()) return;
@@ -571,94 +655,6 @@ function scrollToPlayer(){
   const el = document.getElementById('player');
   const y = el.getBoundingClientRect().top + window.pageYOffset - headerOffset() - 8;
   window.scrollTo({ top:y, behavior:'smooth' });
-}
-
-/* ------------------------ Hls.js Path (เฉพาะหมวด "หนัง") ------------------------ */
-let __hls = null;
-
-function ensureHlsVideo(){
-  const host = document.getElementById('player');
-  if (!host) throw new Error('#player not found');
-  try { jwplayer('player').remove(); } catch {}
-
-  let v = host.querySelector('video#hls-video');
-  if (!v){
-    host.innerHTML = '';
-    v = document.createElement('video');
-    v.id = 'hls-video';
-    v.playsInline = true;
-    v.muted = true;
-    v.autoplay = true;
-    v.controls = true;
-    v.crossOrigin = 'anonymous';
-    v.style.cssText = 'width:100%;height:auto;background:#000;border-radius:8px;display:block;';
-    host.appendChild(v);
-  }
-  return v;
-}
-function destroyHls(){
-  try { if (__hls){ __hls.destroy(); __hls = null; } } catch {}
-  const v = document.getElementById('hls-video');
-  if (v) { try{ v.pause(); }catch{}; v.removeAttribute('src'); v.load?.(); }
-}
-
-/* ใช้เฉพาะ .m3u8; ถ้าพัง → ลองรายการถัดไป; ถ้าหมด → hop ไปช่องสำรอง (ครั้งเดียว) */
-function tryPlayHLS_ONLY(ch, list, idx, token){
-  if (token !== playToken) return;
-
-  const hlsList = list
-    .map(s => ({ ...s, u: (s.src || s.file || '') }))
-    .filter(s => /\.m3u8(\?|$)/i.test(s.u) || String(s.type||'').toLowerCase()==='hls');
-
-  if (hlsList.length === 0){
-    showPlayerStatus('ช่องนี้ไม่มีลิงก์ .m3u8');
-    const backup = (!isBackup(ch) ? findBackupForChannel(ch) : null);
-    if (backup){ const j = channels.indexOf(backup); if (j>=0) playByIndex(j, {scroll:false}); }
-    return;
-  }
-  if (idx >= hlsList.length){
-    showPlayerStatus('เล่นไม่ได้ทุกแหล่ง (.m3u8)');
-    const backup = (!isBackup(ch) ? findBackupForChannel(ch) : null);
-    if (backup){ const j = channels.indexOf(backup); if (j>=0) playByIndex(j, {scroll:false}); }
-    return;
-  }
-
-  destroyHls();
-  const s   = hlsList[idx];
-  const src = wrapWithProxyIfNeeded(s.u, ch);
-
-  showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${hlsList.length}…`);
-  const video = ensureHlsVideo();
-
-  if (window.Hls && Hls.isSupported()){
-    __hls = new Hls({
-      lowLatencyMode: false,
-      liveSyncDurationCount: 3,
-      liveMaxLatencyDurationCount: 10,
-      enableWorker: true
-    });
-    __hls.loadSource(src);
-    __hls.attachMedia(video);
-
-    __hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      if (token===playToken){ showPlayerStatus(''); video.play().catch(()=>{}); }
-    });
-    __hls.on(Hls.Events.ERROR, (_, data) => {
-      if (token !== playToken) return;
-      if (data?.fatal){
-        destroyHls();
-        showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…');
-        tryPlayHLS_ONLY(ch, hlsList, idx+1, token);
-      }
-    });
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = src;
-    video.oncanplay = () => { if (token===playToken) showPlayerStatus(''); };
-    video.onerror   = () => { if (token===playToken){ showPlayerStatus('เล่นแหล่งนี้ไม่ได้ → ลองสำรอง…'); tryPlayHLS_ONLY(ch, hlsList, idx+1, token); } };
-    video.play().catch(()=>{});
-  } else {
-    showPlayerStatus('เบราว์เซอร์นี้ไม่รองรับ HLS');
-  }
 }
 
 /* ------------------------ Presence (heartbeat) ------------------------ */
