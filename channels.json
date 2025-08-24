@@ -284,11 +284,59 @@
     },
     {
       "name": "Viva Cinema",
-      "logo": "https://static.wikia.nocookie.net/tvfanon6528/images/2/2f/Viva_Cinema_%282021-.n.v.%29.png/revision/latest?cb=20210804092616",
+      "logo": "https://static.wikia.nocookie.net/logopedia/images/8/8c/VivaCinemaLogo.png/revision/latest/scale-to-width-down/250?cb=20211206092842",
       "src": "https://qp-pldt-live-grp-06-prod.akamaized.net/out/u/viva_sd.mpd",
       "type": "dash",
       "category": "หนัง",
       "drm": { "clearkey": { "keyId": "07aa813bf2c147748046edd930f7736e", "key": "3bd6688b8b44e96201e753224adfc8fb" } }    
+    },
+    {
+      "name": "Tagalized Movie Channel",
+      "logo": "https://static.wikia.nocookie.net/logopedia/images/8/8c/VivaCinemaLogo.png/revision/latest/scale-to-width-down/250?cb=20211206092842",
+      "src": "https://qp-pldt-live-grp-07-prod.akamaized.net/out/u/cg_tagalogmovie.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "96701d297d1241e492d41c397631d857", "key": "ca2931211c1a261f082a3a2c4fd9f91b" } }    
+    },
+    {
+      "name": "Originals",
+      "logo": "https://www.mncvision.id/userfiles/image/channel/channel_7.png",
+      "src": "https://fta3-cdn-flr.visionplus.id/out/v1/e992e986a88346c18a5dcc4fbcdae6b9/index.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "33333f38930949b1af65b3361ad80d1d", "key": "b159847f9af0500738b01e91cf023e30" } }     
+    },
+    {
+      "name": "Cineedge",
+      "logo": "https://www.mncvision.id/userfiles/image/channel/channel_8.png",
+      "src": "https://fta4-cdn-flr.visionplus.id/out/v1/47c895ca72544fcfa4221c499b555a10/index.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "c7b3852d9c84418f942923e41c31e633", "key": "ddb99755e0bebd98c92c7eab974bf161" } }    
+    },
+    {
+      "name": "Superrix",
+      "logo": "https://www.mncvision.id/userfiles/image/channel/channel_10.png",
+      "src": "https://fta2-cdn-flr.visionplus.id/out/v1/782400332c96440598260730a864bc6f/index.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "1dc30f49888c4652897d9c998aa2cac1", "key": "8ccb6857157c1a01c5a47eb853f51aa2" } }    
+    },
+    {
+      "name": "Uniques",
+      "logo": "https://www.mncvision.id/userfiles/image/channel/channel_6.png",
+      "src": "https://fta3-cdn-flr.visionplus.id/out/v1/bde0a6d8d3fd4d77ae5093ad2e6699dc/index.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "5a6668f3a5d64338bce13307e5c570be", "key": "d0c76237c5ee38e7a420e9c83323023e" } }    
+    },
+    {
+      "name": "Buddy star",
+      "logo": "https://www.mncvision.id/userfiles/image/channel/channel_9.png",
+      "src": "https://fta1-cdn-flr.visionplus.id/out/v1/c70975aaa68d47f2a38799e6730a7816/index.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "2bfc3e059a9f4176b835a15c9a0c0dac", "key": "265c00f7fd825ad3e092b56081953b60" } }    
     },
 
     {
