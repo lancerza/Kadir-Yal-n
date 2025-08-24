@@ -430,15 +430,15 @@
       }
     },
     {
-         "name": "TRUEID 1",
-      "logo": "https://i.ibb.co/pjG2vG0h/trueid1.png",
-      "src": "https://github.com/BONDiptv/m3u8/raw/refs/heads/main/trueGOLF.m3u8",
+         "name": "SSC 1",
+      "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3EGGuHqr6f2GBksRUQVUBRy_CPxppFX_KGA&usqp",
+      "src": https://ssc-1-enc.edgenextcdn.net/out/v1/c696e4819b55414388a1a487e8a45ca1/index.mpd",
       "type": "dash",
       "category": "กีฬา",
       "drm": {
         "clearkey": {
-          "keyId": "e46b07f9049b58b99ffc24a6bc2d813b",
-          "key": "6cbd92a4efad354681576eb76c29b9bb"       
+          "keyId": "",
+          "key": ""       
         }
       }
     },
