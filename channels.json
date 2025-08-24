@@ -339,7 +339,7 @@
       }
     },
     {
-      "name": "ช่อง 103",
+      "name": "HBO",
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/R_0148.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/103/103.mpd",
       "type": "dash",
@@ -352,7 +352,7 @@
       }
     },
     {
-      "name": "ช่อง 104",
+      "name": "HBO Signature",
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0149.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/104/104.mpd",
       "type": "dash",
@@ -365,7 +365,7 @@
       }
     },
     {
-      "name": "ช่อง 105",
+      "name": "HBO Hit",
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0151.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/105/105.mpd",
       "type": "dash",
@@ -378,7 +378,7 @@
       }
     },
     {
-      "name": "ช่อง 106",
+      "name": "HBO Family",
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0150.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/106/106.mpd",
       "type": "dash",
@@ -391,7 +391,7 @@
       }
     },
     {
-      "name": "ช่อง 107",
+      "name": "Cinemax",
       "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0147.png",
       "src": "https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/107/107.mpd",
       "type": "dash",
@@ -404,7 +404,7 @@
       }
     },
     {
-      "name": "AFF WOMEN 2025",
+      "name": "SHOPEE CUP",
       "logo": "https://raw.githubusercontent.com/Tonisupendi/Toni/refs/heads/main/20250814_193726.png",
       "src": "https://tglmp04.akamaized.net/out/v1/400fc0702dee453bb33ebcc29466e58a/manifest.mpd",
       "type": "dash",
@@ -417,7 +417,7 @@
       }
     },
     {
-      "name": "AFF WOMEN 2025 V2",
+      "name": "AFF WOMEN 2025 LIVE 2",
       "logo": "https://raw.githubusercontent.com/Tonisupendi/Toni/refs/heads/main/20250814_193726.png",
       "src": "https://tglmp02.akamaized.net/out/v1/cc0fc82e76cb4e0093e81695284af443/manifest.mpd",
       "type": "dash",
@@ -426,6 +426,19 @@
         "clearkey": {
           "keyId": "d418f733ed224f9bb9c2b1589db22a20",
           "key": "6ed6fe26daa4b926810869ff60254ebb"
+           }
+      }
+    },
+    {
+         "name": "AFF WOMEN 2025 LIVE 3",
+      "logo": "https://iili.io/FPsTWVn.md.jpg",
+      "src": "https://d3b0v7fggu5zwm.cloudfront.net/out/v1/d2c68a3dfb644808b416bd90dcc92d5f/index.mpd",
+      "type": "dash",
+      "category": "กีฬา",
+      "drm": {
+        "clearkey": {
+          "keyId": "911e72adf36946afbdbb4f80782a8394",
+          "key": "08aec548a851ba64b7172ae7f05cb91c"       
         }
       }
     },
