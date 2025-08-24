@@ -258,6 +258,38 @@
       "category": "หนัง",
       "drm": { "clearkey": { "keyId": "bee1066160c0424696d9bf99ca0645e3", "key": "f5b72bf3b89b9848de5616f37de040b7" } }    
     },
+    {
+      "name": "TAP Movies",
+      "logo": "https://static.wikia.nocookie.net/logopedia/images/1/1e/TAP_Movies_logo.png",
+      "src": "https://qp-pldt-live-grp-06-prod.akamaized.net/out/u/cg_tapmovies_hd1.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "71cbdf02b595468bb77398222e1ade09", "key": "c3f2aa420b8908ab8761571c01899460" } }    
+    },
+    {
+      "name": "Cinema One Global",
+      "logo": "https://upload.wikimedia.org/wikipedia/en/thumb/6/6d/Cinema_One_2013_logo.svg/800px-Cinema_One_2013_logo.svg.png",
+      "src": "https://d9rpesrrg1bdi.cloudfront.net/out/v1/93b9db7b231d45f28f64f29b86dc6c65/index.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "58d0e56991194043b8fb82feb4db7276", "key": "d68f41b59649676788889e19fb10d22c" } }    
+    },
+    {
+      "name": "PBO",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Pinoy_Box_Office_logo.svg/1200px-Pinoy_Box_Office_logo.svg.png",
+      "src": "https://qp-pldt-live-grp-04-prod.akamaized.net/out/u/pbo_sd.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "dcbdaaa6662d4188bdf97f9f0ca5e830", "key": "31e752b441bd2972f2b98a4b1bc1c7a1" } }    
+    },
+    {
+      "name": "Viva Cinema",
+      "logo": "https://static.wikia.nocookie.net/tvfanon6528/images/2/2f/Viva_Cinema_%282021-.n.v.%29.png/revision/latest?cb=20210804092616",
+      "src": "https://qp-pldt-live-grp-06-prod.akamaized.net/out/u/viva_sd.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "07aa813bf2c147748046edd930f7736e", "key": "3bd6688b8b44e96201e753224adfc8fb" } }    
+    },
 
     {
       "name": "SHOPEE CUP",
