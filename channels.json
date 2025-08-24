@@ -497,11 +497,11 @@
       "category": "กีฬา"
     },
     {
+      "id": "beINSPORTS1-สำรอง",
       "name": "beIN SPORTS 1",
       "logo": "https://img2.pic.in.th/pic/bg1.webp",
       "src": "https://keela2.com/stream/8/index.m3u8?token=mvFWafOIir5JDlQN",
       "type": "hls",
-      "badge": "สำรอง",
       "category": "กีฬา"
     },
     {
