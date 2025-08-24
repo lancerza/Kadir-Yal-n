@@ -1,5 +1,4 @@
-[
-  {
+{
     "channels": [
       {
         "name": "ช่อง 5 HD (TV5HD)",
@@ -651,4 +650,3 @@
     "url": "https://master.streamhls.com/hlsr2/ce9cb1e9cb902b698e2330c7510bb0de/master.m3u8",
     "logo": "https://img2.pic.in.th/pic/Superman-2025.jpg"
   }
-]
