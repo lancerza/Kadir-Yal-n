@@ -430,15 +430,15 @@
       }
     },
     {
-         "name": "AFF WOMEN 2025 LIVE 3",
-      "logo": "https://iili.io/FPsTWVn.md.jpg",
-      "src": "https://d3b0v7fggu5zwm.cloudfront.net/out/v1/d2c68a3dfb644808b416bd90dcc92d5f/index.mpd",
+         "name": "ASTRO PREMIER LEAGUE 1",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Astro_Premier_League_1_%282024%29.png",
+      "src": "https://icecream.jasoncreak8.workers.dev/http://linearjitp-playback.astro.com.my/dash-wv/linear/601/default_ott.mpd",
       "type": "dash",
       "category": "กีฬา",
       "drm": {
         "clearkey": {
-          "keyId": "d418f733ed224f9bb9c2b1589db22a20",
-          "key": "6ed6fe26daa4b926810869ff60254ebb"       
+          "keyId": "f749ab71f227999bfb098f73359aac10",
+          "key": "4f15413f7e4767b50c48e19b7f9a2fcc"       
         }
       }
     },
