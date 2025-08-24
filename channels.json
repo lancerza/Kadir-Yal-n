@@ -355,12 +355,12 @@
     "drm": { "clearkey": { "keyId": "0d9539db24004da9ac36ea49a09e255c", "key": "30304533b5008ad7f33c25f225506bc0" } }
   },
   {
-    "name": "Superrix",
-    "logo": "https://www.mncvision.id/userfiles/image/channel/channel_10.png",
-    "src": "https://fta2-cdn-flr.visionplus.id/out/v1/782400332c96440598260730a864bc6f/index.mpd",
+    "name": "MONO29 Music Station",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//Mono29Music_new.png",
+    "src": "https://49-231-34-101-rewriter.ais-vidnt.com/ais/play/anevia/live/eds/V0193/DASH/V0193.mpd?playbackUrlPrefix=https%3A%2F%2Ftr.play-rbcdn.ais.co.th%3A8438%2F&originBasicUrl=http%3A%2F%2Fpl-origin.ais-vidnt.com%2Fais%2Fplay%2Fanevia&tt=5eb0311f71a936448e85e29696705cb5&chunkHttps=true&tmid=V0048&tpbk=wTyJGdjXpnHzYEYa&rrt=1755432802&tmod=rfk&rsid=b5ffbffc-ade4-4fa4-b158-68f5f9ea5ad5&tuid=y0ngRp8wwo03emcFQkGq3YebuVrdgXRHHWRKX%2FvFZhNZUUi85%2BT09Wa01ddbk1LAK9QTLYxWNqIVgz3ZzybbJRY9TcqKK0xen7ulLJP9984AU%3D&cdn=redfox-https&tdid=31903fcff2fbf0e7430c5503db0itahl&origin=anevia&tfa=f0-fc&tttl=1755519194",
     "type": "dash",
-    "category": "หนัง",
-    "drm": { "clearkey": { "keyId": "1dc30f49888c4652897d9c998aa2cac1", "key": "8ccb6857157c1a01c5a47eb853f51aa2" } }
+    "category": "บันเทิง",
+    "drm": { "clearkey": { "keyId": "2355ee65664e0b7fc02e7d389e1d2658", "key": "a935ccb1065ffe214823aae414f8b257" } }
     },
 
     {
