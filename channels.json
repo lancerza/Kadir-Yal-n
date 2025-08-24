@@ -1,3 +1,4 @@
+[
 {
   "channels": [
     {
@@ -328,15 +329,54 @@
       "src": "https://fta3-cdn-flr.visionplus.id/out/v1/bde0a6d8d3fd4d77ae5093ad2e6699dc/index.mpd",
       "type": "dash",
       "category": "หนัง",
-      "drm": { "clearkey": { "keyId": "5a6668f3a5d64338bce13307e5c570be", "key": "d0c76237c5ee38e7a420e9c83323023e" } }    
+      "drm": { "clearkey": { "keyId": "5a6668f3a5d64338bce13307e5c570be", "key": "d0c76237c5ee38e7a420e9c83323023e" } }},    
+  {
+    "name": "Galaxy",
+    "logo": "https://github.com/Qingtvnew/test/raw/main/galaxy.png",
+    "category": "หนัง",
+    "type": "dash",
+    "proxy": true,
+    "referrer": "https://www.visionplus.id/",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+    "drm": {
+      "clearkey": {
+        "keyId": "cfbae59795044563b5b9b4927a79a76e",
+        "key": "ce57c9490bd772b390d78b9fedaf8d36"
+      }
     },
-    {
-      "name": "Buddy star",
-      "logo": "https://www.mncvision.id/userfiles/image/channel/channel_9.png",
-      "src": "https://fta1-cdn-flr.visionplus.id/out/v1/c70975aaa68d47f2a38799e6730a7816/index.mpd",
-      "type": "dash",
-      "category": "หนัง",
-      "drm": { "clearkey": { "keyId": "2bfc3e059a9f4176b835a15c9a0c0dac", "key": "265c00f7fd825ad3e092b56081953b60" } }    
+    "src": "https://d2xz2v5wuvgur6.cloudfront.net/out/v1/751a0982779f4edd904205eb351e220d/index.mpd"
+  },
+  {
+    "name": "Galaxy Premium",
+    "logo": "https://github.com/Qingtvnew/test/raw/main/galaxy-premium.png",
+    "category": "หนัง",
+    "type": "dash",
+    "proxy": true,
+    "referrer": "https://www.visionplus.id/",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+    "drm": {
+      "clearkey": {
+        "keyId": "0d9539db24004da9ac36ea49a09e255c",
+        "key": "30304533b5008ad7f33c25f225506bc0"
+      }
+    },
+    "src": "https://d84q7nw4qf3j3.cloudfront.net/out/v1/45c0752c6b6b4397b80243ac9fed96fd/index.mpd"
+  },
+  {
+    "name": "Citra Bioskop",
+    "logo": "https://thumbor.prod.vidiocdn.com/AC-3tXEL_aNdU-jHErZHxSrazrk=/filters:quality(70)/vidio-web-prod-livestreaming/uploads/livestreaming/image/6684/citra-bioskop-2be866.jpg",
+    "category": "หนัง",
+    "type": "dash",
+    "proxy": true,
+    "ua": "ExoPlayerDemo/2.15.1 (Linux; Android 13) ExoPlayerLib/2.15.1",
+    "drm": {
+      "clearkey": {
+        "keyId": "94788bc937054090b216dc101e5fa5dc",
+        "key": "297c97962ff8d9e99f1da178ea0083ec"
+      }
+    },
+    "src": "https://atemecdnbalancer-voe.sysln.id/live/eds/CitraBioskopHD/mpd/CitraBioskopHD.mpd"
+  }]    
     },
 
     {
@@ -544,5 +584,6 @@
     { "name": "เดอะ โปรซิคิวเตอร์ (2024)", "category": "หนัง", "logo": "https://img2.pic.in.th/pic/The-Prosecutor-2024.jpg", "src": "https://master.streamhls.com/hlsr2/9c09ed969eade5056e44d5a754f77857/master.m3u8", "type": "hls" },
     { "name": "Beast in River (2023) อสูรแม่น้ำ", "category": "หนัง", "logo": "https://img5.pic.in.th/file/secure-sv1/Beast.jpg", "src": "https://master.streamhls.com/hlsr2/bee63997a649f4bffb4ef97f7177191b/master.m3u8", "type": "hls" },
     { "name": "Superman (2025)", "category": "หนัง", "logo": "https://img2.pic.in.th/pic/Superman-2025.jpg", "src": "https://master.streamhls.com/hlsr2/ce9cb1e9cb902b698e2330c7510bb0de/master.m3u8", "type": "hls" }
-  ]
-}
+  
+]
+
