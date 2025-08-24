@@ -250,6 +250,14 @@
       "category": "หนัง",
       "drm": { "clearkey": { "keyId": "f48caba466394e93b50780f21798787a", "key": "9a074a10db4342e7937076b3e52f6029" } }
     },
+    {
+      "name": "Tap Action Flix",
+      "logo": "https://static.wikia.nocookie.net/russel/images/b/b3/TAP_Action_Flix_Logo_2021.png",
+      "src": "https://qp-pldt-live-grp-06-prod.akamaized.net/out/u/cg_tapactionflix_hd1.mpd",
+      "type": "dash",
+      "category": "หนัง",
+      "drm": { "clearkey": { "keyId": "bee1066160c0424696d9bf99ca0645e3", "key": "f5b72bf3b89b9848de5616f37de040b7" } }    
+    },
 
     {
       "name": "SHOPEE CUP",
