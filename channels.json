@@ -1,4 +1,3 @@
-[
 {
   "channels": [
     {
@@ -329,7 +328,7 @@
       "src": "https://fta3-cdn-flr.visionplus.id/out/v1/bde0a6d8d3fd4d77ae5093ad2e6699dc/index.mpd",
       "type": "dash",
       "category": "หนัง",
-      "drm": { "clearkey": { "keyId": "5a6668f3a5d64338bce13307e5c570be", "key": "d0c76237c5ee38e7a420e9c83323023e" } }}]    
+      "drm": { "clearkey": { "keyId": "5a6668f3a5d64338bce13307e5c570be", "key": "d0c76237c5ee38e7a420e9c83323023e" } }    
     },
     {
     "name": "Citra Bioskop",
@@ -362,7 +361,6 @@
     "type": "dash",
     "category": "หนัง",
     "drm": { "clearkey": { "keyId": "1dc30f49888c4652897d9c998aa2cac1", "key": "8ccb6857157c1a01c5a47eb853f51aa2" } }
-    
     },
 
     {
@@ -570,7 +568,5 @@
     { "name": "เดอะ โปรซิคิวเตอร์ (2024)", "category": "หนัง", "logo": "https://img2.pic.in.th/pic/The-Prosecutor-2024.jpg", "src": "https://master.streamhls.com/hlsr2/9c09ed969eade5056e44d5a754f77857/master.m3u8", "type": "hls" },
     { "name": "Beast in River (2023) อสูรแม่น้ำ", "category": "หนัง", "logo": "https://img5.pic.in.th/file/secure-sv1/Beast.jpg", "src": "https://master.streamhls.com/hlsr2/bee63997a649f4bffb4ef97f7177191b/master.m3u8", "type": "hls" },
     { "name": "Superman (2025)", "category": "หนัง", "logo": "https://img2.pic.in.th/pic/Superman-2025.jpg", "src": "https://master.streamhls.com/hlsr2/ce9cb1e9cb902b698e2330c7510bb0de/master.m3u8", "type": "hls" }
-  
-
-
-]
+  ]
+}
