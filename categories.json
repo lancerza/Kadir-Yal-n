@@ -1,0 +1,81 @@
+{
+  "order": [
+    "IPTV",
+    "บันเทิง",
+    "กีฬา",
+    "สารคดี",
+    "เด็ก",
+    "หนัง"
+  ],
+  "default": "IPTV",
+  "rules": [
+    {
+      "category": "หนัง",
+      "include": [
+        "hbo",
+        "cinemax",
+        "mono29plus",
+        "/mono\\s?29(plus)?/",
+        "/109/",
+        "/10[3-7]/"
+      ],
+      "useWideLogo": true
+    },
+    {
+      "category": "กีฬา",
+      "include": [
+        "sport",
+        "กีฬา",
+        "/t\\s?sports/",
+        "/pptv\\s?hd\\s?36/"
+      ]
+    },
+    {
+      "category": "สารคดี",
+      "include": [
+        "สารคดี",
+        "discovery",
+        "animal",
+        "history",
+        "documentary",
+        "/nat.?geo/"
+      ]
+    },
+    {
+      "category": "เด็ก",
+      "include": [
+        "เด็ก",
+        "kids",
+        "cartoon",
+        "anime",
+        "toon",
+        "nick",
+        "boomerang",
+        "baby",
+        "/nick\\s?jr/",
+        "/cartoon\\s?network/",
+        "/disney/",
+        "/cartoonito/",
+        "/\\bcn\\b/"
+      ]
+    },
+    {
+      "category": "บันเทิง",
+      "include": [
+        "/workpoint/",
+        "/one\\s?31/",
+        "/amarin/",
+        "/gmm\\s?25/",
+        "/true\\s?4u/"
+      ]
+    },
+    {
+      "category": "IPTV",
+      "include": [
+        "iptv",
+        "news",
+        "/live\\s?news/"
+      ]
+    }
+  ]
+}
