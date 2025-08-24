@@ -7,11 +7,15 @@
    - Fallback guard: play session token กัน try-loop ค้างเมื่อเปลี่ยนช่องเร็ว
    - Auto-backup: ช่องหลักเล่นไม่ได้ → ลองช่องสำรองอัตโนมัติ (one-hop)
    - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
+   - Proxy: auto สำหรับ HTTP m3u8 บนหน้า HTTPS + ส่ง UA/Referrer รายช่อง
 =========================================================== */
 
 const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
 const TIMEZONE = 'Asia/Bangkok';
+
+// เผื่อไม่ได้กำหนดในหน้า HTML
+window.PROXY_BASE = window.PROXY_BASE || 'https://kadir-yal-n.don147ok.workers.dev';
 
 const SWITCH_OUT_MS       = 140;
 const STAGGER_STEP_MS     = 22;
@@ -298,7 +302,7 @@ function getCategory(ch){
   }
 
   const hay = `${ch.name||''} ${ch.logo||''} ${JSON.stringify(ch.tags||[])}`.toLowerCase();
-  const src0 = String((ch.sources?.[0]?.src) || ch.src || ch.file || '').toLowerCase();
+  const src0 = String((ch.sources?.[0]?.src) || ch.src || ch.url || ch.file || '').toLowerCase();
   for (const r of (categories?.rules || [])) {
     const ok = (r.include||[]).some(pat=>{
       try {
@@ -365,7 +369,7 @@ function ensureGrid(){
   return grid;
 }
 function render(opt={withEnter:false}){
-  const grid = ensureGrid(); 
+  const grid = ensureGrid();
   grid.innerHTML='';
 
   const list = channels.filter(c => getCategory(c) === currentFilter);
@@ -420,7 +424,6 @@ function render(opt={withEnter:false}){
 
   highlight(currentIndex);
 
-  // เก็บจำนวนคอลัมน์ล่าสุดไว้ เปรียบเทียบตอน resize
   __lastGridCols = computeGridCols(grid);
 }
 function computeGridCols(container){
@@ -432,7 +435,7 @@ function computeGridCols(container){
 }
 // เรียกใช้เมื่อ resize/orientationchange: re-render เฉพาะเมื่อจำนวนคอลัมน์เปลี่ยน
 function rerenderOnResize(){
-  const grid = document.getElementById('channel-list'); 
+  const grid = document.getElementById('channel-list');
   if (!grid) return;
   const cols = computeGridCols(grid);
   if (cols !== __lastGridCols){
@@ -471,7 +474,8 @@ function buildSources(ch){
   if (Array.isArray(ch.sources) && ch.sources.length){
     return [...ch.sources].sort((a,b)=>(a.priority||99)-(b.priority||99));
   }
-  const s = ch.src || ch.file;
+  // รองรับ 'url' ด้วย
+  const s = ch.src || ch.url || ch.file;
   const t = ch.type || detectType(s);
   const drm = ch.drm || (ch.keyId && ch.key ? {clearkey:{keyId:ch.keyId, key:ch.key}} : undefined);
   return [{ src:s, type:t, drm }];
@@ -513,7 +517,8 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
     preload:'metadata',
     displaytitle:false,
     displaydescription:false,
-    playbackRateControls:true
+    playbackRateControls:true,
+    primary: 'html5'
   });
 
   // Events (เช็ค token ทุกครั้ง กัน callback ลากคิว)
@@ -542,18 +547,36 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
   });
 }
 function makeJwSource(s, ch){
-  const file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
-  const type = (s.type || detectType(file)).toLowerCase();
+  let file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
+  let type = (s.type || detectType(file)).toLowerCase();
+
+  // บังคับ HLS สำหรับหมวด "หนัง" ที่เป็น m3u8 (เล่นด้วย JW ตรง ๆ)
+  if (getCategory(ch) === 'หนัง' && /\.m3u8(\?|$)/i.test(file)) {
+    type = 'hls';
+  }
+
   const out = { file, type };
   if (type==='dash' && s.drm?.clearkey?.keyId && s.drm?.clearkey?.key){
     out.drm = { clearkey: { keyId: s.drm.clearkey.keyId, key: s.drm.clearkey.key } };
   }
   return out;
 }
-function detectType(u){ u=(u||'').split('?')[0].toLowerCase(); if(u.endsWith('.m3u8'))return'hls'; if(u.endsWith('.mpd'))return'dash'; return'auto'; }
+function detectType(u){
+  u=(u||'').split('?')[0].toLowerCase();
+  if(u.endsWith('.m3u8')) return 'hls';
+  if(u.endsWith('.mpd'))  return 'dash';
+  return 'auto';
+}
 function wrapWithProxyIfNeeded(url, ch){
-  if (window.PROXY_BASE && (ch.proxy || false)) {
-    const payload = { src:url, referrer: ch.referrer||'', ua: ch.ua||'', headers: ch.headers||{} };
+  const needsHttps = location.protocol === 'https:' && /^http:\/\//i.test(url);
+  // ใช้ proxy ถ้า: 1) ระบุ ch.proxy = true หรือ 2) เป็น http บนหน้า https
+  if (window.PROXY_BASE && (ch?.proxy || needsHttps)) {
+    const payload = {
+      src: url,
+      referrer: ch?.referrer || '',
+      ua: ch?.ua || '',
+      headers: ch?.headers || {}
+    };
     const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
     return `${window.PROXY_BASE}/p/${b64}`;
   }
