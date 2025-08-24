@@ -1,21 +1,19 @@
 /* ========================= app.js =========================
-   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (รองรับมือถือเต็มรูปแบบ)
-   - Now bar ใต้ VDO: now-playing (กึ่งกลาง)
-   - Live viewers: ย้ายไปอยู่ใต้เวลา (clock) ใน header + smooth number
-   - Histats: นับแต่ซ่อนไว้ ไม่โชว์บนหน้า
-   - JW Player: เล่นแบบปลอดภัย + สถานะ overlay + remove() ก่อน setup
-   - Fallback guard: play session token กัน try-loop ค้างเมื่อเปลี่ยนช่องเร็ว
-   - Auto-backup: ช่องหลักเล่นไม่ได้ → ลองช่องสำรองอัตโนมัติ (one-hop)
-   - UI: แท็บ/กริด/ริปเปิล/ปุ่มรีเฟรช + ล้าง cache อัตโนมัติ
-   - Proxy: auto สำหรับ HTTP m3u8 บนหน้า HTTPS + ส่ง UA/Referrer รายช่อง
+   - Presence counter per-channel (mobile friendly)
+   - Now-playing bar (center under video)
+   - Live viewers pill under clock
+   - Hidden Histats counter
+   - JW Player safe play + status overlay + remove() before setup
+   - Play-session token guard (avoid stuck loop)
+   - Auto-backup: main → backup (one-hop)
+   - UI: tabs/grid/ripple/refresh + auto cache clear
+   - Movies only: play .m3u8 directly with JW Player (no external Hls.js)
+   - Auto-proxy http:// or ch.proxy=true via window.PROXY_BASE (/p/<b64url>)
 =========================================================== */
 
 const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
 const TIMEZONE = 'Asia/Bangkok';
-
-// เผื่อไม่ได้กำหนดในหน้า HTML
-window.PROXY_BASE = window.PROXY_BASE || 'https://kadir-yal-n.don147ok.workers.dev';
 
 const SWITCH_OUT_MS       = 140;
 const STAGGER_STEP_MS     = 22;
@@ -121,8 +119,13 @@ async function loadData(){
     rules: []
   };
 
+  // normalize + id
   channels = Array.isArray(chRes) ? chRes : (chRes?.channels || []);
-  channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
+  channels.forEach((c,i)=>{
+    // รองรับกรณีใช้ "url" แทน "src"
+    if (!c.src && c.url) c.src = c.url;
+    if(!c.id) c.id = genIdFrom(c, i);
+  });
 }
 
 /* ------------------------ Autoplay + optional scroll ------------------------ */
@@ -302,7 +305,7 @@ function getCategory(ch){
   }
 
   const hay = `${ch.name||''} ${ch.logo||''} ${JSON.stringify(ch.tags||[])}`.toLowerCase();
-  const src0 = String((ch.sources?.[0]?.src) || ch.src || ch.url || ch.file || '').toLowerCase();
+  const src0 = String((ch.sources?.[0]?.src) || ch.src || ch.file || '').toLowerCase();
   for (const r of (categories?.rules || [])) {
     const ok = (r.include||[]).some(pat=>{
       try {
@@ -369,7 +372,7 @@ function ensureGrid(){
   return grid;
 }
 function render(opt={withEnter:false}){
-  const grid = ensureGrid();
+  const grid = ensureGrid(); 
   grid.innerHTML='';
 
   const list = channels.filter(c => getCategory(c) === currentFilter);
@@ -424,6 +427,7 @@ function render(opt={withEnter:false}){
 
   highlight(currentIndex);
 
+  // เก็บจำนวนคอลัมน์ล่าสุดไว้ เปรียบเทียบตอน resize
   __lastGridCols = computeGridCols(grid);
 }
 function computeGridCols(container){
@@ -435,7 +439,7 @@ function computeGridCols(container){
 }
 // เรียกใช้เมื่อ resize/orientationchange: re-render เฉพาะเมื่อจำนวนคอลัมน์เปลี่ยน
 function rerenderOnResize(){
-  const grid = document.getElementById('channel-list');
+  const grid = document.getElementById('channel-list'); 
   if (!grid) return;
   const cols = computeGridCols(grid);
   if (cols !== __lastGridCols){
@@ -471,14 +475,19 @@ function playByIndex(i, opt={scroll:true}){
   showMobileToast(np);
 }
 function buildSources(ch){
+  // ถ้ากำหนด sources มาให้แล้ว ใช้ตามลำดับ priority
   if (Array.isArray(ch.sources) && ch.sources.length){
-    return [...ch.sources].sort((a,b)=>(a.priority||99)-(b.priority||99));
+    return [...ch.sources].map(s => {
+      // รองรับ url ใน items
+      if (!s.src && s.url) s.src = s.url;
+      return s;
+    }).sort((a,b)=>(a.priority||99)-(b.priority||99));
   }
-  // รองรับ 'url' ด้วย
-  const s = ch.src || ch.url || ch.file;
-  const t = ch.type || detectType(s);
+  // เดี่ยว ๆ
+  const raw = ch.src || ch.file || ch.url || '';
+  const t = (ch.type || detectType(raw));
   const drm = ch.drm || (ch.keyId && ch.key ? {clearkey:{keyId:ch.keyId, key:ch.key}} : undefined);
-  return [{ src:s, type:t, drm }];
+  return [{ src: raw, type: t, drm }];
 }
 function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
   if (token !== playToken) return; // มีการเล่นใหม่แล้ว ให้ยกเลิกงานเก่า
@@ -517,8 +526,7 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
     preload:'metadata',
     displaytitle:false,
     displaydescription:false,
-    playbackRateControls:true,
-    primary: 'html5'
+    playbackRateControls:true
   });
 
   // Events (เช็ค token ทุกครั้ง กัน callback ลากคิว)
@@ -547,41 +555,48 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
   });
 }
 function makeJwSource(s, ch){
-  let file = wrapWithProxyIfNeeded(s.src || s.file || '', ch);
+  // เฉพาะหมวดหนัง: ถ้าเป็น .m3u8 ให้เล่นด้วย JW โดยตรง (type=hls)
+  const cat = getCategory(ch);
+  let file = wrapWithProxyIfNeeded(s.src || s.file || s.url || '', ch);
   let type = (s.type || detectType(file)).toLowerCase();
 
-  // บังคับ HLS สำหรับหมวด "หนัง" ที่เป็น m3u8 (เล่นด้วย JW ตรง ๆ)
-  if (getCategory(ch) === 'หนัง' && /\.m3u8(\?|$)/i.test(file)) {
-    type = 'hls';
+  if (cat === 'หนัง') {
+    // บังคับให้ .m3u8 เล่นด้วย JW HLS
+    if (isM3U8(file)) type = 'hls';
   }
 
   const out = { file, type };
   if (type==='dash' && s.drm?.clearkey?.keyId && s.drm?.clearkey?.key){
     out.drm = { clearkey: { keyId: s.drm.clearkey.keyId, key: s.drm.clearkey.key } };
+  } else if (type==='dash' && ch?.drm?.clearkey?.keyId && ch?.drm?.clearkey?.key){
+    out.drm = { clearkey: { keyId: ch.drm.clearkey.keyId, key: ch.drm.clearkey.key } };
   }
   return out;
 }
+function isM3U8(u){ return /\.m3u8(\?|$)/i.test((u||'').split('#')[0]); }
 function detectType(u){
   u=(u||'').split('?')[0].toLowerCase();
-  if(u.endsWith('.m3u8')) return 'hls';
-  if(u.endsWith('.mpd'))  return 'dash';
-  return 'auto';
+  if(u.endsWith('.m3u8'))return'hls';
+  if(u.endsWith('.mpd')) return'dash';
+  return'auto';
+}
+
+/* ---- Proxy wrapper (auto for http:// or ch.proxy=true) ---- */
+function b64url(s){
+  return btoa(unescape(encodeURIComponent(s)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
 function wrapWithProxyIfNeeded(url, ch){
-  const needsHttps = location.protocol === 'https:' && /^http:\/\//i.test(url);
-  // ใช้ proxy ถ้า: 1) ระบุ ch.proxy = true หรือ 2) เป็น http บนหน้า https
-  if (window.PROXY_BASE && (ch?.proxy || needsHttps)) {
-    const payload = {
-      src: url,
-      referrer: ch?.referrer || '',
-      ua: ch?.ua || '',
-      headers: ch?.headers || {}
-    };
-    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-    return `${window.PROXY_BASE}/p/${b64}`;
+  if (!url) return url;
+  const isHttp = /^http:\/\//i.test(url);
+  if (window.PROXY_BASE && (isHttp || (ch && ch.proxy))) {
+    const payload = { src:url, referrer: ch?.referrer||'', ua: ch?.ua||'', headers: ch?.headers||{} };
+    return `${window.PROXY_BASE}/p/${b64url(JSON.stringify(payload))}`;
   }
   return url;
 }
+
+/* ------------------------ Utilities ------------------------ */
 function showMobileToast(text){
   if (!isMobile()) return;
   let t = document.getElementById('mini-toast');
@@ -693,7 +708,7 @@ function showPlayerStatus(text){
   box.style.display = text ? 'block' : 'none';
 }
 
-/* ------------------------ Utilities ------------------------ */
+/* ------------------------ Misc utils ------------------------ */
 function headerOffset(){
   const v = getComputedStyle(document.documentElement).getPropertyValue('--header-offset');
   const num = parseFloat(v);
@@ -728,7 +743,10 @@ function escapeHtml(s){
   }[c]));
 }
 function debounce(fn,wait=150){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
-function genIdFrom(ch,i){ return (ch.name?.toString().trim() || `ch-${i}`).toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i }
+function genIdFrom(ch,i){
+  return (ch.name?.toString().trim() || `ch-${i}`)
+    .toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'') + '-' + i
+}
 
 /* ------------------------ Icons ------------------------ */
 function getIconSVG(n){
