@@ -430,14 +430,15 @@
       }
     },
     {
-      "name": "SSC 1 (DASH)",
-      "logo": "https://example.com/logo-ssc1.png",
+      "name": "SKY SPORTS LIVE 1",
+      "logo": "https://i.ibb.co.com/wZG3fvmr/Skysportslive.png",
+      "src": "https://aka-live1-ott.izzigo.tv/1/out/u/dash/SKY-LIVE-EVENT-1-HD/manifest.mpd",
       "type": "dash",
       "category": "กีฬา",
-      "sources": [
-        {
-          "src": "https://ssc-1-enc.edgenextcdn.net/out/v1/c696e4819b55414388a1a487e8a45ca1/index.mpd",
-          "type": "dash"
+      "drm": {
+        "clearkey": {
+          "keyId": "a3636a51227fa338cdddf5892d8a621c",
+          "key": "1444ee3c4d08bf39454b914f797968eb"
         }
       ]
     },
