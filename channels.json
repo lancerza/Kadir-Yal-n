@@ -536,11 +536,14 @@
       "category": "กีฬา"
     },
     {
-      "name": "TRUE Golf",
-      "category": "กีฬา",
-      "logo": "https://cms.dmpcdn.com/livetv/2021/10/25/9bc0de00-3565-11ec-a098-9b134fb8338e_webp_320.png",
-      "src": "http://31.220.3.103:2095/play/live.php?mac=00:1A:79:E7:32:0C&stream=186579&extension=m3u8",
-      "type": "hls"
+  "name": "Monamax1",
+  "logo": "https://cms.dmpcdn.com/livetv/2021/10/25/9bc0de00-3565-11ec-a098-9b134fb8338e_webp_320.png",    
+  "category": "กีฬา",
+  "type": "hls",
+  "proxy": true,
+  "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+  "referrer": "https://example.com/",
+  "src": "http://31.220.3.103:2095/play/live.php?mac=00:1A:79:E7:32:0C&stream=186579&extension=m3u8"
     },
     {
       "name": "SONY TEN 1 HD",
