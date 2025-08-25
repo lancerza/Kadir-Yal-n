@@ -11,7 +11,7 @@ const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
 const TIMEZONE = 'Asia/Bangkok';
 
-// ---- Proxy Worker base (กำหนดในหน้า HTML: window.PROXY_BASE='https://xxx.workers.dev')
+ window.PROXY_BASE = 'https://kadir-yal-n.don147ok.workers.dev';
 const PROXY_PATH = '/p';
 
 const SWITCH_OUT_MS       = 140;
