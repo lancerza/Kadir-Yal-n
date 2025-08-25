@@ -537,10 +537,11 @@
     },
     {
   "name": "TRUE Golf",
-  "logo": "https://example.com/truegolf.png",
-  "category": "กีฬา",
+  "logo": "https://.../true-golf.png",
+  "src": "http://31.220.3.103:2095/play/live.php?mac=00:1A:79:E7:32:0C&stream=186579&extension=m3u8",
   "type": "hls",
-  "src": "http://31.220.3.103:2095/play/live.php?mac=00:1A:79:E7:32:0C&stream=186579&extension=m3u8"
+  "category": "กีฬา",
+  "proxy": true
     },
     {
       "name": "SONY TEN 1 HD",
