@@ -572,11 +572,12 @@
       "type": "hls"
     },
     {
-      "name": "SONY TEN 5 HD",
-      "category": "กีฬา",
-      "logo": "https://dtat2ks7dludr.cloudfront.net/spnsportsindia/channel_logos/SONY_SportsTen5_HD.png",
-      "src": "https://tataplay.slivcdn.com/hls/live/2020593/SONYSIXHD/master.m3u8",
-      "type": "hls"      
+  "name": "MAX 1 (GitHub · proxy)",
+  "logo": "https://i.imgur.com/ZfC8Y7S.png",
+  "type": "hls",
+  "category": "หนัง",
+  "proxy": true,
+  "src": "https://raw.githubusercontent.com/tummeng21/m3u8/refs/heads/main/max1.m3u8"  
     },
 
     { "name": "Monomax1", "category": "หนัง", "logo": "https://www.24hd-movie.com/wp-content/uploads/2025/04/Figth-Break-Sphere-4-2025-สัประยุทธ์ทะลุฟ้า-4-187x269.png", "src": "https://raw.githubusercontent.com/tummeng21/m3u8/refs/heads/main/max1.m3u8", "type": "hls" },
