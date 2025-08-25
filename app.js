@@ -1,9 +1,9 @@
 /* ========================= app.js =========================
-   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (มือถือโอเค)
-   - Now bar ใต้ VDO + Live viewers ใต้ clock
-   - JW Player: remove() ก่อน setup + ClearKey (DASH) + Hls.js tuning
-   - Auto-backup: แหล่งหลักล้มเหลว → ข้ามไปสำรองอัตโนมัติ (one-hop)
-   - Proxy helper: กัน Mixed-Content (HTTP) + optional referrer/ua/headers
+   - Presence: นับ "คนดูพร้อมกันตอนนี้"
+   - Now bar + Live viewers
+   - JW Player: remove() ก่อน setup + Hls.js tuning (หมวด "หนัง")
+   - DASH ClearKey + Auto-backup (one-hop)
+   - Proxy helper: กัน Mixed-Content (HTTP) + referrer/ua/headers
    - UI: Tabs/Grid/Ripple/Refresh + Auto clear cache
 =========================================================== */
 
@@ -11,9 +11,8 @@ const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
 const TIMEZONE = 'Asia/Bangkok';
 
-// ===== Optional: กำหนดที่หน้า HTML แทนก็ได้ =====
-// window.PROXY_BASE = 'https://<your-worker>.workers.dev'; // ไม่ต้องมี /p ข้างหลัง (โค้ดนี้เติมให้)
-const PROXY_PATH = '/p'; // path ที่ Worker รับ (ตามโค้ดตัวอย่าง Worker)
+// ---- Proxy Worker base (กำหนดในหน้า HTML: window.PROXY_BASE='https://xxx.workers.dev')
+const PROXY_PATH = '/p';
 
 const SWITCH_OUT_MS       = 140;
 const STAGGER_STEP_MS     = 22;
@@ -27,7 +26,7 @@ let didInitialReveal= false;
 
 try { jwplayer.key = jwplayer.key || 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo'; } catch {}
 
-/* ===== Presence (Concurrent Viewers) ===== */
+/* ===== Presence ===== */
 const PRESENCE_URL     = (window.PRESENCE_URL || 'https://presence-counter.don147ok.workers.dev/hb');
 const VIEWER_TTL_S     = 120;
 const PING_INTERVAL_S  = 25;
@@ -37,7 +36,7 @@ let currentPresenceKey = null;
 let lastPingAt         = 0;
 let presenceBound      = false;
 
-/* ===== Smooth live-viewer number ===== */
+/* ===== Smooth number ===== */
 let liveViewersDisplay = 0;
 let liveViewersAnimRaf = null;
 function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
@@ -61,10 +60,10 @@ function updateLiveViewers(n){
   animateLiveViewers(liveViewersDisplay, target);
 }
 
-/* --- สำหรับ grid re-render เมื่อคอลัมน์เปลี่ยนจริง --- */
+/* --- grid re-render guard --- */
 let __lastGridCols = null;
 
-/* --- Play session token กัน fallback ค้าง --- */
+/* --- play session token --- */
 let playToken = 0;
 const backupTriedForIds = new Set();
 
@@ -98,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   addEventListener('orientationchange', rerenderOnResize);
 });
 
-/* ------------------------ Load (fresh fetch) ------------------------ */
+/* ------------------------ Load ------------------------ */
 async function fetchJSONFresh(url){
   const u = new URL(url, location.href);
   u.searchParams.set('_t', String(Date.now()));
@@ -122,7 +121,7 @@ async function loadData(){
   channels.forEach((c,i)=>{ if(!c.id) c.id = genIdFrom(c, i); });
 }
 
-/* ------------------------ Autoplay + optional scroll ------------------------ */
+/* ------------------------ Autoplay ------------------------ */
 function autoplayFirst(){
   const order = (categories?.order || []);
   let idx = -1;
@@ -158,7 +157,7 @@ function revealActiveCardIntoView(){
   window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
-/* ------------------------ Now bar ใต้ VDO ------------------------ */
+/* ------------------------ Now bar ------------------------ */
 function mountNowBarUnderPlayer(){
   const player = document.getElementById('player') || document.body;
 
@@ -196,7 +195,7 @@ function mountNowBarUnderPlayer(){
   };
 }
 
-/* ------------------------ Live viewers ใต้ clock ------------------------ */
+/* ------------------------ Live viewers ------------------------ */
 function mountLiveViewersUnderClock(){
   const header = document.querySelector('.h-wrap') || document.querySelector('header') || document.body;
   const clock  = document.getElementById('clock');
@@ -211,7 +210,7 @@ function mountLiveViewersUnderClock(){
   else header.appendChild(pill);
 }
 
-/* ------------------------ Header: Clock ------------------------ */
+/* ------------------------ Clock ------------------------ */
 function mountClock(){
   const el = document.getElementById('clock'); if (!el) return;
   const tick = () => {
@@ -432,7 +431,7 @@ function rerenderOnResize(){
   }
 }
 
-/* ------------------------ Player (JW) + Status ------------------------ */
+/* ------------------------ Player (JW) ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -463,7 +462,6 @@ function pickPrimaryUrlLike(obj){
 }
 function buildSources(ch){
   if (Array.isArray(ch.sources) && ch.sources.length){
-    // เรียงตาม priority
     return [...ch.sources].sort((a,b)=>(a.priority||99)-(b.priority||99))
       .map(s => ({ ...s, type: (s.type || detectType(pickPrimaryUrlLike(s))) }));
   }
@@ -511,21 +509,20 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
     displaytitle:false,
     displaydescription:false,
     playbackRateControls:true,
-    // จูน Hls.js (โดยเฉพาะหมวด "หนัง" ที่เป็น .m3u8 บ่อย)
     hlsjsConfig: (isHls ? {
       maxBufferLength: 30,
       maxBufferHole: 0.5,
       backBufferLength: 60,
       lowLatencyMode: false,
-      abrEwmaDefaultEstimate: 5000000,
+      abrEwmaDefaultEstimate: 5_000_000,
       abrBandWidthFactor: 0.9
     } : undefined),
     capLevelToPlayerSize: true
   });
 
-  // กรอง warning 339000 ที่ไม่ร้ายแรง
+  // กรอง warning ที่เจอบ่อย
   player.on('warning', (e)=>{
-    if (e?.code === 339000) return; // เงียบ
+    if (e?.code === 339000 || e?.code === 332012) return;
     console.warn('JW warning', e);
   });
 
@@ -573,9 +570,7 @@ function detectType(u){
   return'auto';
 }
 
-/* --- Proxy helper ---
-   ใช้เมื่อลิงก์เป็น http:// (เพจ https) หรือ channel ตั้งค่า proxy:true
-   รองรับ ch.referrer, ch.ua, ch.headers หรือที่กำหนดในแหล่งสัญญาณ (s.referrer ฯลฯ) */
+/* --- Proxy helper (Mixed-Content + headers) --- */
 function wrapWithProxyIfNeeded(url, ch, s){
   if (!url) return url;
   const needMixedFix = (location.protocol === 'https:' && /^http:\/\//i.test(url));
@@ -589,7 +584,6 @@ function wrapWithProxyIfNeeded(url, ch, s){
       headers: s?.headers ?? ch?.headers ?? {}
     };
     const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-    // Worker path เช่น https://xxx.workers.dev/p/<b64>
     return `${base}${PROXY_PATH}/${b64}`;
   }
   return url;
@@ -620,7 +614,7 @@ function scrollToPlayer(){
   window.scrollTo({ top:y, behavior:'smooth' });
 }
 
-/* ------------------------ Presence (heartbeat) ------------------------ */
+/* ------------------------ Presence ------------------------ */
 function getViewerId(){
   try{
     let id = localStorage.getItem(VIEWER_ID_KEY);
@@ -763,7 +757,7 @@ function getIconSVG(n){
   }
 }
 
-/* ------------------------ Histats (ซ่อนแต่ยังนับ) ------------------------ */
+/* ------------------------ Histats (ซ่อน) ------------------------ */
 function mountHistatsHidden(){
   let holder = document.getElementById('histats_counter');
   if (!holder) {
