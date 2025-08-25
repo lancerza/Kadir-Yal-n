@@ -579,7 +579,7 @@
       "type": "hls"      
     },
 
-    { "name": "สัประยุทธ์ทะลุฟ้า 4(2025)", "category": "หนัง", "logo": "https://www.24hd-movie.com/wp-content/uploads/2025/04/Figth-Break-Sphere-4-2025-สัประยุทธ์ทะลุฟ้า-4-187x269.png", "src": "https://main.24playerhd.com/newplaylist/ea96737d9cf9f1f27d9bdaa8/ea96737d9cf9f1f27d9bdaa8.m3u8", "type": "hls" },
+    { "name": "Monomax1", "category": "หนัง", "logo": "https://www.24hd-movie.com/wp-content/uploads/2025/04/Figth-Break-Sphere-4-2025-สัประยุทธ์ทะลุฟ้า-4-187x269.png", "src": "https://raw.githubusercontent.com/tummeng21/m3u8/refs/heads/main/max1.m3u8", "type": "hls" },
     { "name": "พระแท้ คนเก๊ (2025)", "category": "หนัง", "logo": "https://www.037hdd-movie.com/wp-content/uploads/2025/08/The-Stone-2025.jpg", "src": "https://master.streamhls.com/hlsr2/7341740f96136f2ea13b204d01dc203d/master.m3u8", "type": "hls" },
     { "name": "28 ปีให้หลัง เชื้อเขมือบคน (2025)", "category": "หนัง", "logo": "https://www.037hdd-movie.com/wp-content/uploads/2025/06/28-Years-Later-2025.jpg", "src": "https://master.streamhls.com/hlsr2/77738fadc2abe5da7ca3aee73a6a4571/master.m3u8", "type": "hls" },
     { "name": "Locked (2025) ล็อกล่อมาตาย", "category": "หนัง", "logo": "https://www.037hdd-movie.com/wp-content/uploads/2025/07/Locked-2025.jpg", "src": "https://master.streamhls.com/hlsr2/dfe198227eca08fef985fd061f37e7fd/master.m3u8", "type": "hls" },
