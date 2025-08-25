@@ -572,12 +572,14 @@
       "type": "hls"
     },
     {
-  "name": "MAX 1 (GitHub · proxy)",
+
+  "name": "TRUE Golf (proxy)",
   "logo": "https://i.imgur.com/ZfC8Y7S.png",
   "type": "hls",
-  "category": "หนัง",
+  "category": "กีฬา",
   "proxy": true,
-  "src": "https://raw.githubusercontent.com/tummeng21/m3u8/refs/heads/main/max1.m3u8"  
+  "src": "http://31.220.3.103:2095/play/live.php?mac=00:1A:79:E7:32:0C&stream=186563&extension=m3u8"
+  
     },
 
     { "name": "Monomax1", "category": "หนัง", "logo": "https://www.24hd-movie.com/wp-content/uploads/2025/04/Figth-Break-Sphere-4-2025-สัประยุทธ์ทะลุฟ้า-4-187x269.png", "src": "https://raw.githubusercontent.com/tummeng21/m3u8/refs/heads/main/max1.m3u8", "type": "hls" },
