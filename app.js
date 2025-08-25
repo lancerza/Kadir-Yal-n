@@ -1,13 +1,19 @@
 /* ========================= app.js =========================
-   - แก้ Mixed Content: บังคับ proxy ถ้าเป็น http:// หรือกำหนด proxy:true
-   - หมวด "หนัง": เล่น .m3u8 ด้วย JW(Hls.js) โดยตรง
-   - UI: แท็บ/กริด/สถานะ/รีเฟรช + ล้าง cache อัตโนมัติ
-   - Presence counter + now-playing + live viewers pill
+   - Presence: นับ "คนดูพร้อมกันตอนนี้" ต่อช่อง (มือถือโอเค)
+   - Now bar ใต้ VDO + Live viewers ใต้ clock
+   - JW Player: remove() ก่อน setup + ClearKey (DASH) + Hls.js tuning
+   - Auto-backup: แหล่งหลักล้มเหลว → ข้ามไปสำรองอัตโนมัติ (one-hop)
+   - Proxy helper: กัน Mixed-Content (HTTP) + optional referrer/ua/headers
+   - UI: Tabs/Grid/Ripple/Refresh + Auto clear cache
 =========================================================== */
 
 const CH_URL   = 'channels.json';
 const CAT_URL  = 'categories.json';
 const TIMEZONE = 'Asia/Bangkok';
+
+// ===== Optional: กำหนดที่หน้า HTML แทนก็ได้ =====
+// window.PROXY_BASE = 'https://<your-worker>.workers.dev'; // ไม่ต้องมี /p ข้างหลัง (โค้ดนี้เติมให้)
+const PROXY_PATH = '/p'; // path ที่ Worker รับ (ตามโค้ดตัวอย่าง Worker)
 
 const SWITCH_OUT_MS       = 140;
 const STAGGER_STEP_MS     = 22;
@@ -55,10 +61,10 @@ function updateLiveViewers(n){
   animateLiveViewers(liveViewersDisplay, target);
 }
 
-/* --- grid re-render guard --- */
+/* --- สำหรับ grid re-render เมื่อคอลัมน์เปลี่ยนจริง --- */
 let __lastGridCols = null;
 
-/* --- play session token / backup guard --- */
+/* --- Play session token กัน fallback ค้าง --- */
 let playToken = 0;
 const backupTriedForIds = new Set();
 
@@ -126,15 +132,23 @@ function autoplayFirst(){
     idx = channels.findIndex(ch => getCategory(ch) === c);
     if (idx >= 0) { cat = c; break; }
   }
-  if (idx < 0 && channels.length) { idx = 0; cat = getCategory(channels[0]) || cat; }
+  if (idx < 0 && channels.length) {
+    idx = 0;
+    cat = getCategory(channels[0]) || cat;
+  }
 
   if (idx >= 0) {
     setActiveTab(cat);
     playByIndex(idx, { scroll:false });
-    if (SCROLL_CARD_ON_LOAD) setTimeout(revealActiveCardIntoView, SWITCH_OUT_MS + 220);
+    if (SCROLL_CARD_ON_LOAD) scheduleRevealActiveCard();
   } else {
     showPlayerStatus('ไม่พบช่องสำหรับเล่น');
   }
+}
+function scheduleRevealActiveCard(){
+  if (didInitialReveal) return;
+  didInitialReveal = true;
+  setTimeout(()=> revealActiveCardIntoView(), SWITCH_OUT_MS + 220);
 }
 function revealActiveCardIntoView(){
   const active = document.querySelector('.channel[aria-pressed="true"], .channel.active');
@@ -282,7 +296,7 @@ function getCategory(ch){
   }
 
   const hay = `${ch.name||''} ${ch.logo||''} ${JSON.stringify(ch.tags||[])}`.toLowerCase();
-  const src0 = String((ch.sources?.[0]?.src) || ch.src || ch.file || '').toLowerCase();
+  const src0 = String((ch.sources?.[0]?.src) || ch.src || ch.file || ch.url || '').toLowerCase();
   for (const r of (categories?.rules || [])) {
     const ok = (r.include||[]).some(pat=>{
       try {
@@ -303,7 +317,7 @@ function useWideLogo(ch){
   return !!rule;
 }
 
-/* ------------------------ Backup helpers ------------------------ */
+/* Backup helpers */
 function isBackup(ch){
   if (!ch) return false;
   if (ch.backup === true || ch.isBackup === true) return true;
@@ -346,7 +360,7 @@ function ensureGrid(){
   return grid;
 }
 function render(opt={withEnter:false}){
-  const grid = ensureGrid(); 
+  const grid = ensureGrid();
   grid.innerHTML='';
 
   const list = channels.filter(c => getCategory(c) === currentFilter);
@@ -410,7 +424,7 @@ function computeGridCols(container){
   return Math.max(1, Math.floor((fullW + gap) / (tileW + gap)));
 }
 function rerenderOnResize(){
-  const grid = document.getElementById('channel-list'); 
+  const grid = document.getElementById('channel-list');
   if (!grid) return;
   const cols = computeGridCols(grid);
   if (cols !== __lastGridCols){
@@ -418,7 +432,7 @@ function rerenderOnResize(){
   }
 }
 
-/* ------------------------ Player (JW + Hls.js for movies) ------------------------ */
+/* ------------------------ Player (JW) + Status ------------------------ */
 function playByChannel(ch){
   const i = channels.indexOf(ch);
   if (i >= 0) playByIndex(i);
@@ -442,13 +456,18 @@ function playByIndex(i, opt={scroll:true}){
   highlight(i);
 
   if (opt.scroll ?? true) scrollToPlayer();
-  if (isMobile()) showMobileToast(np);
+  showMobileToast(np);
+}
+function pickPrimaryUrlLike(obj){
+  return obj?.src || obj?.file || obj?.url || '';
 }
 function buildSources(ch){
   if (Array.isArray(ch.sources) && ch.sources.length){
-    return [...ch.sources].sort((a,b)=>(a.priority||99)-(b.priority||99));
+    // เรียงตาม priority
+    return [...ch.sources].sort((a,b)=>(a.priority||99)-(b.priority||99))
+      .map(s => ({ ...s, type: (s.type || detectType(pickPrimaryUrlLike(s))) }));
   }
-  const s = ch.src || ch.file;
+  const s = pickPrimaryUrlLike(ch);
   const t = ch.type || detectType(s);
   const drm = ch.drm || (ch.keyId && ch.key ? {clearkey:{keyId:ch.keyId, key:ch.key}} : undefined);
   return [{ src:s, type:t, drm }];
@@ -458,6 +477,8 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
 
   if (idx >= list.length) {
     showPlayerStatus('เล่นไม่ได้ทุกแหล่ง');
+    console.warn('ทุกแหล่งเล่นไม่สำเร็จ:', ch?.name);
+
     if (opt.allowBackup && !isBackup(ch) && !backupTriedForIds.has(ch.id)) {
       const backup = findBackupForChannel(ch);
       if (backup) {
@@ -477,21 +498,47 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
   const jwSrc = makeJwSource(s, ch);
   showPlayerStatus(`กำลังเปิดแหล่งที่ ${idx+1}/${list.length}…`);
 
-  const isMovie = (getCategory(ch) === 'หนัง');
+  const isMovie = getCategory(ch) === 'หนัง';
+  const isHls   = (jwSrc.type || '').toLowerCase()==='hls' || /\.m3u8(\?|$)/i.test(jwSrc.file||'');
+
   const player = jwplayer('player').setup({
     playlist: [{ image: ch.poster || ch.logo || undefined, sources: [jwSrc] }],
-    width:'100%', aspectratio:'16:9',
-    autostart:'viewable', mute:true, preload:'metadata',
-    displaytitle:false, displaydescription:false,
+    width:'100%',
+    aspectratio:'16:9',
+    autostart: 'viewable',
+    mute: true,
+    preload:'metadata',
+    displaytitle:false,
+    displaydescription:false,
     playbackRateControls:true,
-    // ใช้ Hls.js เสมอเมื่อเป็นหนัง (เพื่อให้ .m3u8 เล่นตรง ๆ)
-    hlsjsdefault: isMovie ? true : undefined
+    // จูน Hls.js (โดยเฉพาะหมวด "หนัง" ที่เป็น .m3u8 บ่อย)
+    hlsjsConfig: (isHls ? {
+      maxBufferLength: 30,
+      maxBufferHole: 0.5,
+      backBufferLength: 60,
+      lowLatencyMode: false,
+      abrEwmaDefaultEstimate: 5000000,
+      abrBandWidthFactor: 0.9
+    } : undefined),
+    capLevelToPlayerSize: true
   });
 
-  player.once('playAttemptFailed', ()=>{ if (token===playToken){ player.setMute(true); player.play(true);} });
-  player.on('buffer', ()=>{ if (token===playToken) showPlayerStatus('กำลังบัฟเฟอร์…'); });
-  player.on('play', ()=>{ if (token===playToken) showPlayerStatus(''); });
-  player.on('firstFrame', ()=>{ if (token===playToken) showPlayerStatus(''); });
+  // กรอง warning 339000 ที่ไม่ร้ายแรง
+  player.on('warning', (e)=>{
+    if (e?.code === 339000) return; // เงียบ
+    console.warn('JW warning', e);
+  });
+
+  player.once('playAttemptFailed', ()=>{
+    if (token !== playToken) return;
+    player.setMute(true); player.play(true);
+  });
+  player.on('buffer', ()=>{
+    if (token !== playToken) return;
+    showPlayerStatus('กำลังบัฟเฟอร์…');
+  });
+  player.on('play', ()=>{ if (token === playToken) showPlayerStatus(''); });
+  player.on('firstFrame', ()=>{ if (token === playToken) showPlayerStatus(''); });
 
   player.on('setupError', e => {
     if (token !== playToken) return;
@@ -507,43 +554,73 @@ function tryPlayJW(ch, list, idx, token, opt={allowBackup:true}){
   });
 }
 function makeJwSource(s, ch){
-  const raw = s.src || s.file || '';
-  const file = wrapWithProxyIfNeeded(raw, ch);
+  const raw = pickPrimaryUrlLike(s);
+  const file = wrapWithProxyIfNeeded(raw, ch, s);
   const type = (s.type || detectType(file)).toLowerCase();
   const out = { file, type };
-  if (type==='dash' && s.drm?.clearkey?.keyId && s.drm?.clearkey?.key){
-    out.drm = { clearkey: { keyId: s.drm.clearkey.keyId, key: s.drm.clearkey.key } };
+
+  // ClearKey (DASH)
+  const drmSrc = s.drm || ch.drm;
+  if (type==='dash' && drmSrc?.clearkey?.keyId && drmSrc?.clearkey?.key){
+    out.drm = { clearkey: { keyId: drmSrc.clearkey.keyId, key: drmSrc.clearkey.key } };
   }
   return out;
 }
 function detectType(u){
   u=(u||'').split('?')[0].toLowerCase();
-  if (u.endsWith('.m3u8')) return 'hls';
-  if (u.endsWith('.mpd'))  return 'dash';
-  return 'auto';
+  if(u.endsWith('.m3u8'))return'hls';
+  if(u.endsWith('.mpd')) return'dash';
+  return'auto';
 }
 
-/* -------- Proxy wrapper (แก้ Mixed Content) -------- */
-function shouldProxy(url, ch){
-  if (/^http:\/\//i.test(url)) return true;     // บังคับ proxy เมื่อเป็น http://
-  if (ch && ch.proxy === true) return true;     // หรือเปิดเองรายช่อง
-  return false;
-}
-function wrapWithProxyIfNeeded(url, ch){
-  try{
-    if (!shouldProxy(url, ch)) return url;
-    const payload = { src:url };       // ไม่บังคับ referrer/UA (ตามที่ขอ)
-    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))))
-      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-    const base = (window.PROXY_BASE || '').replace(/\/+$/,'');
-    return `${base}/p/${b64}`;
-  }catch{
-    // fallback แบบหยาบ: แปลง http -> https (บางกรณีใช้ได้)
-    return url.replace(/^http:\/\//i,'https://');
+/* --- Proxy helper ---
+   ใช้เมื่อลิงก์เป็น http:// (เพจ https) หรือ channel ตั้งค่า proxy:true
+   รองรับ ch.referrer, ch.ua, ch.headers หรือที่กำหนดในแหล่งสัญญาณ (s.referrer ฯลฯ) */
+function wrapWithProxyIfNeeded(url, ch, s){
+  if (!url) return url;
+  const needMixedFix = (location.protocol === 'https:' && /^http:\/\//i.test(url));
+  const wantProxy = !!(ch?.proxy || s?.proxy || needMixedFix);
+  const base = (window.PROXY_BASE || '').replace(/\/+$/,'');
+  if (wantProxy && base) {
+    const payload = {
+      src: url,
+      referrer: s?.referrer ?? ch?.referrer ?? '',
+      ua: s?.ua ?? ch?.ua ?? '',
+      headers: s?.headers ?? ch?.headers ?? {}
+    };
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    // Worker path เช่น https://xxx.workers.dev/p/<b64>
+    return `${base}${PROXY_PATH}/${b64}`;
   }
+  return url;
 }
 
-/* ------------------------ Presence ------------------------ */
+function showMobileToast(text){
+  if (!isMobile()) return;
+  let t = document.getElementById('mini-toast');
+  if (!t){
+    t = document.createElement('div');
+    t.id = 'mini-toast';
+    t.style.cssText = `
+      position:absolute; left:50%; top:10px; transform:translateX(-50%);
+      background:rgba(0,0,0,.65); color:#fff; padding:6px 10px; border-radius:8px;
+      font-size:13px; font-weight:600; z-index:9; pointer-events:none; opacity:0; transition:opacity .18s ease`;
+    const parent = document.getElementById('player');
+    parent.style.position = parent.style.position || 'relative';
+    parent.appendChild(t);
+  }
+  t.textContent = text;
+  requestAnimationFrame(()=>{ t.style.opacity = '1'; });
+  setTimeout(()=>{ t.style.opacity = '0'; }, 1500);
+}
+function isMobile(){ return /iPhone|iPad|Android/i.test(navigator.userAgent) }
+function scrollToPlayer(){
+  const el = document.getElementById('player');
+  const y = el.getBoundingClientRect().top + window.pageYOffset - headerOffset() - 8;
+  window.scrollTo({ top:y, behavior:'smooth' });
+}
+
+/* ------------------------ Presence (heartbeat) ------------------------ */
 function getViewerId(){
   try{
     let id = localStorage.getItem(VIEWER_ID_KEY);
@@ -572,7 +649,6 @@ function presenceDoBeacon(){
 async function presenceTick(immediate=false){
   clearTimeout(presenceTimer);
   const hidden = document.visibilityState === 'hidden' || document.hidden;
-
   if (immediate) {
     hidden ? presenceDoBeacon() : await presenceDoFetch();
     lastPingAt = Date.now();
